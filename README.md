@@ -76,8 +76,9 @@ flowchart LR
 | `plugins/harness/` | Plugin Claude Code : 10 skills, 13 agents (dont le relecteur de conformité générique), hooks `guard-git` et rappel de session |
 | `templates/` | Gabarits vendorisés : bloc `CLAUDE.md`/`AGENTS.md`, labels, formulaires, PR, lot, workflows appelants |
 | `i18n/en/` | Édition anglaise des fichiers chargés à chaque session (`language: "en"`) |
-| `.github/workflows/` | Réutilisables : `labels-sync`, `issue-hygiene`, `pr-hygiene`, `docs-security`, `security`, `flow-report`, `ai-review` ; `ci.yml` du cadre |
-| `scripts/` | `harness-sync.sh` (vendorisation), `flow-metrics.py` (tableau de bord), `compliance-plan.py` (résolution de la conformité), `check-framework.py` (cohérence), tests |
+| `.github/workflows/` | Réutilisables : `labels-sync`, `issue-hygiene`, `pr-hygiene`, `docs-security`, `security`, `flow-report`, `ai-review`, `repo-settings` ; `ci.yml` et `settings.yml` du cadre |
+| `.github/repo-settings.json` | Réglages du dépôt « as code » (description, topics, protection de `master`), appliqués au merge |
+| `scripts/` | `harness-sync.sh` (vendorisation), `repo-settings.py` (réglages), `flow-metrics.py` (tableau de bord), `compliance-plan.py` (résolution de la conformité), `check-framework.py` (cohérence), tests |
 
 ## Démarrage rapide
 

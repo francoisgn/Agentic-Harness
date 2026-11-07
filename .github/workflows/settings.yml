@@ -1,0 +1,28 @@
+name: Réglages
+
+# Réglages du dépôt du cadre « as code » (.github/repo-settings.json) : appliqués au merge, dérive contrôlée chaque
+# semaine. Workflow réutilisable : repo-settings.yml (le même que celui des projets).
+on:
+  push:
+    branches: [master]
+    paths: [.github/repo-settings.json, scripts/repo-settings.py]
+  schedule:
+    - cron: "41 5 * * 1"
+  workflow_dispatch:
+
+permissions: {}
+
+concurrency:
+  group: repo-settings
+  cancel-in-progress: false
+
+jobs:
+  settings:
+    permissions:
+      contents: read
+    uses: ./.github/workflows/repo-settings.yml
+    with:
+      apply: ${{ github.event_name != 'schedule' }}
+      script: scripts/repo-settings.py
+    secrets:
+      REPO_ADMIN_TOKEN: ${{ secrets.REPO_ADMIN_TOKEN }}

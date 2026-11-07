@@ -1,0 +1,31 @@
+{
+  "$comment": "Réglages du dépôt, appliqués au merge par le job `settings` de harness.yml (secret REPO_ADMIN_TOKEN). Fichier du projet : l'adapter, puis modifier par PR, jamais à la main dans Settings. Ajouter les contrôles requis (noms de jobs) une fois la CI stable : CI-BUDGET.md §4.",
+  "repository": {
+    "description": "<une phrase : ce que fait le projet, pour qui>",
+    "delete_branch_on_merge": true
+  },
+  "topics": [],
+  "rulesets": [
+    {
+      "name": "branche par défaut protégée",
+      "target": "branch",
+      "enforcement": "active",
+      "conditions": { "ref_name": { "include": ["~DEFAULT_BRANCH"], "exclude": [] } },
+      "bypass_actors": [{ "actor_id": 5, "actor_type": "RepositoryRole", "bypass_mode": "pull_request" }],
+      "rules": [
+        { "type": "deletion" },
+        { "type": "non_fast_forward" },
+        {
+          "type": "pull_request",
+          "parameters": {
+            "required_approving_review_count": 0,
+            "dismiss_stale_reviews_on_push": false,
+            "require_code_owner_review": false,
+            "require_last_push_approval": false,
+            "required_review_thread_resolution": true
+          }
+        }
+      ]
+    }
+  ]
+}

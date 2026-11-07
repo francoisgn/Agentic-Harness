@@ -17,7 +17,7 @@ def run(root):
 class CheckFrameworkTests(unittest.TestCase):
     def setUp(self):
         self.tmp = pathlib.Path(tempfile.mkdtemp())
-        for d in ("plugins", "docs", "templates", "scripts", "i18n"):
+        for d in ("plugins", "docs", "templates", "scripts", "i18n", ".github"):
             shutil.copytree(ROOT / d, self.tmp / d)
         for f in ("harness.manifest", "VERSION", "CHANGELOG.md"):
             shutil.copy(ROOT / f, self.tmp / f)
@@ -53,6 +53,12 @@ class CheckFrameworkTests(unittest.TestCase):
         p = self.tmp / "plugins/harness/agents/compliance-reviewer.md"
         p.write_text(p.read_text().replace("tools: Read,", "tools: Edit, Read,"))
         self.assertIn("compliance-reviewer.md", run(self.tmp).stdout)
+
+    def test_required_check_must_be_a_real_job_name(self):
+        p = self.tmp / ".github/repo-settings.json"
+        p.write_text(p.read_text().replace('"context": "Scripts, workflows, tests"', '"context": "check"'))
+        out = run(self.tmp).stdout
+        self.assertIn("« check »", out)
 
     def test_skill_without_description(self):
         p = self.tmp / "plugins/harness/skills/intent/SKILL.md"

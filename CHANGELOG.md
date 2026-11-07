@@ -24,6 +24,9 @@ Intention, TDD, FinOps, stewards, conformité, sécurité et mesure du flux.
 - **Qualité au premier passage** : le tableau de bord mesure le ratio de PR à problème (constat en revue
   adversariale, IA, conformité, CodeRabbit, humaine), agents / humains, et l'effort de correction (commits après le
   premier constat, délai jusqu'au merge) ; règle de traçabilité de chaque verdict (REVIEW-ROUNDS §Traçabilité).
+- **Réglages du dépôt « as code »** : `.github/repo-settings.json` (description, topics, rulesets) appliqué au merge
+  par `repo-settings.yml` / `repo-settings.py` (secret `REPO_ADMIN_TOKEN`), dérive contrôlée chaque semaine ; le
+  cadre s'en sert pour lui-même (`settings.yml`). Contrôles requis vérifiés contre les noms de jobs réels.
 - **Points d'extension** (ADOPTION §Remplacer ou étendre une brique) : chaque brique du cadre se garde, se remplace
   par celle de l'entreprise ou se complète.
 - **Skills** : `/intent`, `/lesson-propose`, `/status-report`, `/compliance-review` ; `/lot-start` pose l'identifiant
@@ -35,6 +38,9 @@ Intention, TDD, FinOps, stewards, conformité, sécurité et mesure du flux.
 - **Labels** : `leçon`, `tableau de bord`, `revue: aucune`, `conformité`. `.harness/config.json` : clé `compliance`.
 - **CI du cadre** : contrôle de cohérence (`check-framework.py` : skills, agents, manifeste, labels, nommage), tests
   Python, gitleaks ; Dependabot pour les actions ; formulaire d'issue « Leçon ».
+
+Action supplémentaire : créer le secret `REPO_ADMIN_TOKEN` pour que le job `settings` applique
+`.github/repo-settings.json` (sinon il avertit seulement).
 
 Correctif : la CI du cadre écoutait `main`, la branche par défaut est `master`.
 

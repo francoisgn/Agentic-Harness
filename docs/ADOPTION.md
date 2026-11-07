@@ -130,6 +130,25 @@ la première fois) :
 4. Les leçons génériques nées dans HFRnow remontent au cadre par PR sur agentic-harness ; les leçons du domaine HFR
    restent dans le projet.
 
+## Réglages du dépôt « as code »
+
+Une session cloud ne peut pas modifier les réglages d'un dépôt (LESSONS L56) ; elle modifie
+`.github/repo-settings.json` par PR, et le job `settings` de `harness.yml` (workflow réutilisable `repo-settings.yml`,
+script `.harness/scripts/repo-settings.py`) l'applique au merge :
+
+| Section | Effet |
+|---|---|
+| `repository` | Description, site, fonctions (wiki, discussions), politique de merge, suppression des branches mergées |
+| `topics` | Liste complète des topics |
+| `rulesets` | Rulesets gérés par nom (créés ou mis à jour, jamais supprimés automatiquement) : protection de la branche par défaut, contrôles requis |
+
+- **Une fois, par le propriétaire** : créer un jeton fine-grained limité au dépôt, « Administration: read and write »,
+  et l'enregistrer en secret de dépôt `REPO_ADMIN_TOKEN`. Sans lui, le job avertit et ne fait rien.
+- **Dérive** : chaque lundi le job compare le dépôt au fichier et échoue si un réglage a été changé à la main.
+- Contrôles requis : les noms doivent être des noms de jobs réels (`check-framework.py` le vérifie dans le cadre) ;
+  un nom faux bloquerait toutes les PR.
+- `--apply` absent (local) : `GH_TOKEN=… python3 .harness/scripts/repo-settings.py --repo owner/nom` affiche le plan.
+
 ## Remplacer ou étendre une brique
 
 Le cadre est un **framework** : chaque brique a un point d'extension, aucune n'est imposée.
@@ -141,6 +160,7 @@ Le cadre est un **framework** : chaque brique a un point d'extension, aucune n'e
 | Skills | `.claude/skills/<nom>/` vendorisé | Exclure et poser le sien | Skills du projet sous d'autres noms |
 | Service de revue | job `review` (`ai-review.yml`) | CodeRabbit ou autre bot : ne pas activer `review` | `.harness/review-instructions.md` |
 | Sécurité | `security.yml`, `docs-security.yml` | Outils de l'entreprise (GHAS, SonarQube, Snyk) : ne pas activer ces jobs | Inputs (`semgrep-configs`, `trivy-severity`) |
+| Réglages du dépôt | job `settings` + `.github/repo-settings.json` | Terraform / Safe-settings de l'entreprise : supprimer `settings` | Sections du fichier |
 | Tableau de bord | job `flow` | Outil de pilotage maison : supprimer `flow` | Seuils en inputs (`stall-hours`, `max-ci-runs`…) |
 | Labels | `.harness/labels.json` | Garder sa taxonomie (`apply-aliases: false`) | `.github/labels.local.json` |
 | Leçons, règles | `.harness/docs/` | — (le `CLAUDE.md` du projet l'emporte) | Leçons et règles du projet dans ses propres fichiers |

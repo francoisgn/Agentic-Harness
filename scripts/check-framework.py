@@ -70,6 +70,19 @@ def check(root):
     names = [label["name"] for label in json.loads((root / "templates/.github/labels.json").read_text(encoding="utf-8"))]
     errors += [f"labels.json : label en double « {x} »" for x in sorted({x for x in names if names.count(x) > 1})]
 
+    # Contrôles requis du ruleset = noms de jobs réels, sinon plus aucune PR ne se merge (CI-BUDGET.md §4)
+    settings = root / ".github/repo-settings.json"
+    if settings.is_file():
+        job_names = set()
+        for wf in (root / ".github/workflows").glob("*.yml"):
+            job_names |= set(re.findall(r"^    name:\s*(.+?)\s*$", wf.read_text(encoding="utf-8"), re.M))
+        for ruleset in json.loads(settings.read_text(encoding="utf-8")).get("rulesets", []):
+            for rule in ruleset.get("rules", []):
+                for chk in (rule.get("parameters") or {}).get("required_status_checks", []):
+                    if chk["context"] not in job_names:
+                        errors.append(f".github/repo-settings.json : contrôle requis « {chk['context']} » absent des "
+                                      f"jobs de .github/workflows ({sorted(job_names)})")
+
     orch = (root / "docs/ORCHESTRATION.md").read_text(encoding="utf-8")
     section = orch[orch.find("## 7."):]
     m = re.search(r"Contrôle : `(\^.+\$)`", section)

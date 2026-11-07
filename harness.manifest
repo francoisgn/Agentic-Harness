@@ -27,6 +27,7 @@ tree      plugins/harness/agents                      .claude/agents
 # Script du tableau de bord du flux (appelé par flow-report.yml et /status-report)
 copy      scripts/flow-metrics.py                     .harness/scripts/flow-metrics.py
 copy      scripts/compliance-plan.py                  .harness/scripts/compliance-plan.py
+copy      scripts/repo-settings.py                    .harness/scripts/repo-settings.py
 
 # Hooks vendorisés (garde-fou git, rappel de session) et leur déclaration
 copy      plugins/harness/scripts/guard-git.py        .harness/hooks/guard-git.py
@@ -40,6 +41,7 @@ block     templates/AGENTS.md.block                   AGENTS.md   cadre   templa
 # Gabarits du projet (créés une fois, puis à lui)
 seed      templates/.harness/config.json              .harness/config.json
 seed      templates/.github/labels.local.json         .github/labels.local.json
+seed      templates/.github/repo-settings.json        .github/repo-settings.json
 seed      templates/.github/pull_request_template.md  .github/pull_request_template.md
 seed      templates/.github/ISSUE_TEMPLATE/config.yml   .github/ISSUE_TEMPLATE/config.yml
 seed      templates/.github/ISSUE_TEMPLATE/feedback.yml .github/ISSUE_TEMPLATE/feedback.yml

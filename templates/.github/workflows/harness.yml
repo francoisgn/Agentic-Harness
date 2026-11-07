@@ -8,12 +8,12 @@ name: Cadre
 on:
   push:
     branches: [develop]   # ← branche par défaut du projet
-    paths: [.harness/labels.json, .github/labels.local.json]
+    paths: [.harness/labels.json, .github/labels.local.json, .github/repo-settings.json]
   issues:
     types: [opened, edited, labeled, unlabeled, reopened, closed]
   schedule:
     - cron: "17 5 * * *"   # tableau de bord quotidien
-    - cron: "47 5 * * 1"   # sécurité hebdomadaire (CVE sans commit), si le job security est activé
+    - cron: "47 5 * * 1"   # hebdomadaire : dérive des réglages, sécurité (CVE sans commit) si le job security est activé
   pull_request:
     types: [opened, edited, reopened, synchronize, ready_for_review]
   workflow_dispatch:
@@ -48,6 +48,18 @@ jobs:
       # Modèle A (develop → beta → master). Modèle B (une branche d'intégration) : laisser vide.
       flow: "beta:develop beta:hotfix/* master:beta master:hotfix/*"
       require-changelog: true
+
+  # Réglages du dépôt « as code » (.github/repo-settings.json) : appliqués au push, dérive contrôlée le lundi.
+  # Secret REPO_ADMIN_TOKEN (fine-grained, ce dépôt seul, « Administration: write ») ; absent → avertissement seulement.
+  settings:
+    if: github.event_name == 'push' || github.event_name == 'workflow_dispatch' || (github.event_name == 'schedule' && github.event.schedule == '47 5 * * 1')
+    permissions:
+      contents: read
+    uses: francoisgn/agentic-harness/.github/workflows/repo-settings.yml@v0.2.0
+    with:
+      apply: ${{ github.event_name != 'schedule' }}
+    secrets:
+      REPO_ADMIN_TOKEN: ${{ secrets.REPO_ADMIN_TOKEN }}
 
   # Tableau de bord du flux (FINOPS.md §4) : une issue « Tableau de bord du projet » mise à jour chaque jour.
   flow:
