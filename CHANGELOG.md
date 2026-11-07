@@ -21,6 +21,9 @@ Intention, TDD, FinOps, stewards, conformité, sécurité et mesure du flux.
 - **Conformité branchable** (COMPLIANCE §2) : par référentiel, agent intégré, agent de l'entreprise, ou spec seule
   (`docs/compliance/<id>.md`, gabarit fourni) appliquée par le relecteur générique ; périmètre décidé sans jeton par
   `paths` / `keywords` ; résolution et validation par `compliance-plan.py` (vendorisé, testé).
+- **Qualité au premier passage** : le tableau de bord mesure le ratio de PR à problème (constat en revue
+  adversariale, IA, conformité, CodeRabbit, humaine), agents / humains, et l'effort de correction (commits après le
+  premier constat, délai jusqu'au merge) ; règle de traçabilité de chaque verdict (REVIEW-ROUNDS §Traçabilité).
 - **Points d'extension** (ADOPTION §Remplacer ou étendre une brique) : chaque brique du cadre se garde, se remplace
   par celle de l'entreprise ou se complète.
 - **Skills** : `/intent`, `/lesson-propose`, `/status-report`, `/compliance-review` ; `/lot-start` pose l'identifiant

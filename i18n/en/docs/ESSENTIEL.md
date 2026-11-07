@@ -34,7 +34,8 @@ in an issue.
 
 ## Quality
 - **TDD**: test first, seen red for the right reason, then the code. A test **fails without the change**. Self-review against the lessons table(s), then an **adversarial review by a
-  different model** than the author. A review finding is a claim to verify; fix the class, not the instance.
+  different model** than the author, **every verdict posted on the PR**, negative ones included (first-pass quality is
+  measured). A review finding is a claim to verify; fix the class, not the instance.
 - **Persistence**: data written by a released version stays readable by every later version (new fields optional or
   defaulted, tolerant decoding, migration on read).
 - **Cloud (Linux) sessions**: code that only builds on a Mac is reviewed with compiler rigour; never claim "it builds"

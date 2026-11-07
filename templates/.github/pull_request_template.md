@@ -11,6 +11,11 @@ Closes #
 ## Vérifié
 <!-- Tests ajoutés (nom, ce qu'ils vérifient, montrés en échec sans le changement), commandes lancées, build Mac. -->
 
+## Revues
+<!-- Chaque verdict (adversarial, conformité) est posté en commentaire, le premier négatif compris
+     (REVIEW-ROUNDS.md §Traçabilité) ; ici, le résumé : relecteur, verdict, tête. -->
+-
+
 ## Points de vigilance / non testé
 <!-- Ce qui n'a pas pu être compilé ou vérifié ici (ex. app non compilable dans le conteneur Linux), à valider sur l'appareil. -->
 

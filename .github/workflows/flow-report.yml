@@ -2,7 +2,7 @@ name: Tableau de bord du flux (réutilisable)
 
 # Publie l'état du projet pour tous (non-techniciens compris) dans UNE issue épinglable, mise à jour en place :
 # avancement par jalon, goulots (`bloqué`, `à clarifier`), travaux en panne, boucles de CI ou de revue, ratio
-# agents / humains, coût CI (FINOPS.md §4, STEWARDS.md §4). Script vendorisé : .harness/scripts/flow-metrics.py.
+# agents / humains, qualité au premier passage (PR à problème, effort de correction), coût CI (FINOPS.md §4, STEWARDS.md §4). Script vendorisé : .harness/scripts/flow-metrics.py.
 # Coût : un job Linux de moins d'une minute par passage ; l'appeler sur `schedule` (quotidien) et à la main.
 on:
   workflow_call:
@@ -25,6 +25,10 @@ on:
       max-review-rounds:
         type: number
         default: 3
+      max-problem-ratio:
+        description: "% de PR à problème (constat en revue) au-delà duquel le tableau passe 🟠"
+        type: number
+        default: 50
       fail-on-red:
         description: Faire échouer le job si le tableau est 🔴 (alerte par e-mail d'échec de workflow)
         type: boolean
@@ -55,9 +59,10 @@ jobs:
           STALL: ${{ inputs.stall-hours }}
           MAX_CI: ${{ inputs.max-ci-runs }}
           MAX_REV: ${{ inputs.max-review-rounds }}
+          MAX_PB: ${{ inputs.max-problem-ratio }}
         run: |
           python3 "$SCRIPT" --repo "$GITHUB_REPOSITORY" --json-out report.json --stall-hours "$STALL" \
-            --max-ci-runs "$MAX_CI" --max-review-rounds "$MAX_REV" >report.md
+            --max-ci-runs "$MAX_CI" --max-review-rounds "$MAX_REV" --max-problem-ratio "$MAX_PB" >report.md
           printf '\n---\n_Généré par le workflow « %s » (agentic-harness)._\n' "$GITHUB_WORKFLOW" >>report.md
           cat report.md >>"$GITHUB_STEP_SUMMARY"
 

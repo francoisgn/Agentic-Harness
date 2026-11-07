@@ -84,7 +84,12 @@ Le tableau de bord (`flow-report.yml`, script `flow-metrics.py`) calcule chaque 
 | Délai médian ouverture → merge | tendance | Fluidité | Comparer semaine à semaine |
 | PR mergées agents / humains | tendance | Volume agentique | Calibrer CI et revue (CI-BUDGET §5) |
 | Minutes facturées, taux d'échec CI | tendance | Surconsommation | Une hausse sans hausse du volume = dérive |
+| **PR à problème** (≥ 1 constat en revue : adversariale, IA, conformité, CodeRabbit, humain), agents / humains | > 50 % dès 3 PR | Qualité initiale insuffisante | Resserrer `/lessons-check`, la spec (intention), ou monter le label `modèle:` |
+| Effort de correction : commits après le 1er constat, délai 1er constat → merge | tendance | Coût de la seconde passe | Comparer par source et par niveau de modèle |
+| PR mergées sans verdict tracé | tout | Mesure aveugle | Appliquer REVIEW-ROUNDS §Traçabilité |
 
-Statut global : 🔴 une boucle ou une issue P1 en panne ; 🟠 une panne ou un goulot ; 🟢 sinon. Ce que le script ne
+Statut global : 🔴 une boucle ou une issue P1 en panne ; 🟠 une panne, un goulot ou trop de PR à problème ; 🟢 sinon.
+Le ratio de PR à problème sert aussi au routage (§2 règle 3) : un niveau de modèle dont les PR reviennent souvent avec
+des constats est sous-affecté pour ce type de tâche. Ce que le script ne
 voit pas (jetons consommés par session) se relève à la main dans la console du fournisseur et se reporte dans le
 compte rendu hebdomadaire de l'orchestrateur.

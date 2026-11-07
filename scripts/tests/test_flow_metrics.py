@@ -166,7 +166,101 @@ class CollectTests(unittest.TestCase):
         self.assertTrue(open_calls and all("since=" not in c for c in open_calls), calls)
         self.assertTrue(any(c.startswith("repos/o/r/milestones") for c in calls), calls)
         closed = [c for c in calls if c.startswith("repos/o/r/issues") and "state=closed" in c]
-        self.assertTrue(closed and all("since=" in c for c in closed), calls)  # sinon pagination de tout l'historique
+        self.assertTrue(closed and all("since=" in c for c in closed), calls)
+
+    def test_merged_prs_get_reviews_comments_and_commits(self):
+        calls = []
+
+        def fake(path):
+            calls.append(path)
+            if path.startswith("repos/o/r/pulls?"):
+                return [{"number": 7, "state": "closed", "merged_at": "2026-11-06T00:00:00Z",
+                         "updated_at": "2026-11-06T00:00:00Z"}]
+            return []
+        original = fm._gh
+        fm._gh = fake
+        try:
+            data = fm.collect("o/r", 14)
+        finally:
+            fm._gh = original
+        self.assertTrue(any("pulls/7/reviews" in c for c in calls))
+        self.assertTrue(any("issues/7/comments" in c for c in calls))
+        self.assertTrue(any("pulls/7/commits" in c for c in calls))
+        self.assertEqual(data["pulls"][0]["reviews"], [])  # sinon pagination de tout l'historique
+
+
+def review(login, state, body="", at="2026-11-05T02:00:00Z"):
+    return {"user": {"login": login}, "state": state, "body": body, "submitted_at": at}
+
+
+def comment(login, body, at="2026-11-05T02:00:00Z"):
+    return {"user": {"login": login}, "body": body, "created_at": at}
+
+
+def commit(at):
+    return {"commit": {"committer": {"date": at}}}
+
+
+ADV_KO = "**Revue adversariale (fable) : CHANGEMENTS DEMANDÉS** — tête abc"
+ADV_OK = "**Revue adversariale (fable) : APPROUVÉ** — tête def"
+
+
+class ReviewEventTests(unittest.TestCase):
+    def test_sources_and_verdicts(self):
+        p = pull(1, state="closed", merged="2026-11-06T00:00:00Z")
+        p["reviews"] = [review("coderabbitai[bot]", "COMMENTED", "**Actionable comments posted: 3**"),
+                        review("coderabbitai[bot]", "COMMENTED", "**Actionable comments posted: 0**"),
+                        review("francoisgn", "CHANGES_REQUESTED", "non"),
+                        review("francoisgn", "APPROVED", "")]
+        p["comments"] = [comment("claude", ADV_KO), comment("claude", ADV_OK),
+                         comment("github-actions[bot]", "**Revue conformité RGPD (opus) : ÉCARTS** — tête x"),
+                         comment("github-actions[bot]", "**Revue IA (sonnet) : APPROUVÉ** — tête y"),
+                         comment("x", "merci")]
+        got = [(e["source"], e["problem"]) for e in fm.review_events(p)]
+        self.assertEqual(got, [("coderabbit", True), ("coderabbit", False), ("humain", True), ("humain", False),
+                               ("adversariale", True), ("adversariale", False), ("conformité", True), ("ia", False)])
+
+
+class QualityTests(unittest.TestCase):
+    def merged(self, n, ref, events_comments=(), reviews=(), commits=()):
+        p = pull(n, ref=ref, state="closed", created="2026-11-05T00:00:00Z", merged="2026-11-06T00:00:00Z")
+        p["comments"], p["reviews"], p["commits"] = list(events_comments), list(reviews), list(commits)
+        return p
+
+    def test_problem_ratio_first_pass_and_fix_effort(self):
+        pulls = [
+            self.merged(1, "claude/a", [comment("c", ADV_KO, "2026-11-05T02:00:00Z"), comment("c", ADV_OK, "2026-11-05T08:00:00Z")],
+                        commits=[commit("2026-11-05T01:00:00Z"), commit("2026-11-05T04:00:00Z"), commit("2026-11-05T06:00:00Z")]),
+            self.merged(2, "claude/b", [comment("c", ADV_OK)],
+                        reviews=[review("coderabbitai[bot]", "COMMENTED", "Actionable comments posted: 2", "2026-11-05T03:00:00Z")],
+                        commits=[commit("2026-11-05T01:00:00Z"), commit("2026-11-05T05:00:00Z")]),
+            self.merged(3, "claude/c", [comment("c", ADV_OK)]),
+            self.merged(4, "feature/x", reviews=[review("francoisgn", "APPROVED")]),
+        ]
+        q = fm.analyse({"issues": [], "pulls": pulls, "runs": []}, now=fm.parse_time(NOW))["quality"]
+        self.assertEqual(q["reviewed"], 4)
+        self.assertEqual(q["problem"], 2)
+        self.assertEqual(q["problem_ratio"], 50)
+        self.assertEqual(q["by_source"], {"adversariale": 1, "coderabbit": 1})
+        self.assertEqual(q["agent"], {"reviewed": 3, "problem": 2})
+        self.assertEqual(q["human"], {"reviewed": 1, "problem": 0})
+        self.assertEqual(q["fix_commits_mean"], 1.5)       # PR 1 : 2 commits après 02:00 ; PR 2 : 1 après 03:00
+        self.assertEqual(q["fix_hours_median"], 21.5)      # 1er constat → merge : 22 h et 21 h
+
+    def test_pr_without_any_traced_review_is_counted_apart(self):
+        q = fm.analyse({"issues": [], "pulls": [self.merged(1, "claude/a")], "runs": []}, now=fm.parse_time(NOW))["quality"]
+        self.assertEqual((q["reviewed"], q["untraced"]), (0, 1))
+
+    def test_high_problem_ratio_is_amber(self):
+        pulls = [self.merged(n, "claude/a", [comment("c", ADV_KO)]) for n in range(3)]
+        r = fm.analyse({"issues": [], "pulls": pulls, "runs": []}, now=fm.parse_time(NOW), max_problem_ratio=50)
+        self.assertEqual(r["status"], "🟠")
+
+    def test_markdown_has_quality_section(self):
+        pulls = [self.merged(1, "claude/a", [comment("c", ADV_KO)])]
+        md = fm.render_markdown(fm.analyse({"issues": [], "pulls": pulls, "runs": []}, now=fm.parse_time(NOW)), "o/r")
+        self.assertIn("## Qualité au premier passage", md)
+        self.assertIn("100 %", md)
 
 
 class RenderTests(unittest.TestCase):

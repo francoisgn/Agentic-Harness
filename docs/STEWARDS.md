@@ -58,6 +58,7 @@ Livré cette semaine : <3 à 5 puces orientées utilisateur, avec liens>
 Prochaine étape : <3 puces>
 Blocages et décisions attendues : <qui doit décider quoi, avant quand>
 Risques : 🔴/🟠 <risque> → <mesure>
+Qualité : <x> % de PR avec constat en revue (agents <a> %, humains <h> %), <n> commits de correction en moyenne
 Coût : <minutes CI, tendance jetons> (FINOPS)
 ```
 

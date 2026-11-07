@@ -37,7 +37,8 @@ conflit se signale dans une issue.
 - **TDD** : le test d'abord, vu rouge pour la bonne raison, puis le code ; toute logique testable va dans le moteur ;
   un test **échoue sans le changement**.
 - Avant la PR : auto-relecture contre **LESSONS.md**, puis **revue adversariale par un autre modèle** que l'auteur
-  (ORCHESTRATION.md). Un constat de revue est une affirmation à vérifier ; on corrige la classe, pas l'instance
+  (ORCHESTRATION.md), **chaque verdict posté sur la PR**, même négatif (qualité au premier passage mesurée,
+  REVIEW-ROUNDS.md §Traçabilité). Un constat de revue est une affirmation à vérifier ; on corrige la classe, pas l'instance
   (REVIEW-ROUNDS.md).
 - **Persistance** : une sauvegarde écrite par une version publiée reste lisible par toutes les suivantes (champ
   nouveau optionnel ou par défaut, décodage tolérant, migration à la lecture ; CONVENTIONS.md).

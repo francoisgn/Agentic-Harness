@@ -37,7 +37,7 @@ flowchart LR
 | Réalisation | TDD : test rouge, code, vert ; commits atomiques ; un push par lot | METHODOLOGY §2 ter |
 | Vérification | Leçons, revue adversariale par un autre modèle, conformité si activée | `/lessons-check`, `adversarial-reviewer`, `/compliance-review` |
 | CI | Brouillon = rien ; SAST, SCA, secrets, lint ; boucles bornées (3 cycles de revue, 6 pushes testés) | `security.yml`, `ai-review.yml`, CI-BUDGET |
-| Suivi | Panne, boucle, goulot, coût ; état lisible par un non-technicien | `flow-report.yml`, `/status-report` |
+| Suivi | Panne, boucle, goulot, coût, **ratio de PR à problème** et effort de correction ; état lisible par un non-technicien | `flow-report.yml`, `/status-report` |
 | Capitalisation | Une erreur nouvelle devient une leçon, remontée au cadre par issue | `/lesson-propose`, formulaire « Leçon » |
 
 ## État

@@ -22,7 +22,8 @@ merge, ni commentaire GitHub. Les explications de l'auteur ne te sont pas donné
    non fiables, chemins, injection), la concurrence, la persistance (L80), les docs (sourcées, à jour : L08, L09, L21).
 5. Corrige la classe : cherche les cas voisins du même motif.
 
-Réponse, moins de 300 mots :
+Ton verdict sera posté tel quel sur la PR par l'auteur, même négatif (REVIEW-ROUNDS §Traçabilité) : la première
+ligne doit respecter exactement le format ci-dessous. Réponse, moins de 300 mots :
 `**Revue adversariale (<modèle>) : APPROUVÉ | CHANGEMENTS DEMANDÉS** — tête <sha>`, constats numérotés (Haute /
 Moyenne / Basse / Détail, `fichier:ligne`, scénario d'échec, correctif), puis **Vérifié** (ce que tu as réellement
 lancé). Faille de sécurité : seulement « CHANGEMENTS DEMANDÉS — constat de sécurité, détail transmis en privé », le

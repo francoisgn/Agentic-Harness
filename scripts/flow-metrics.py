@@ -15,6 +15,7 @@ import argparse
 import calendar
 import json
 import math
+import re
 import statistics
 import subprocess
 import sys
@@ -24,6 +25,77 @@ AGENT_PREFIXES = ("claude/",)
 LABEL_CLAIMED = "pris en charge"
 BOTTLENECK_LABELS = ("bloqué", "à clarifier")
 P1_PREFIX = "P1"
+
+
+VERDICT_RE = re.compile(r"\*\*Revue (adversariale|IA|conformité)[^*\n]*?:\s*"
+                        r"(APPROUVÉ|CHANGEMENTS DEMANDÉS|CONFORME|ÉCARTS|HORS PÉRIMÈTRE)")
+VERDICT_SOURCE = {"adversariale": "adversariale", "IA": "ia", "conformité": "conformité"}
+ACTIONABLE_RE = re.compile(r"Actionable comments posted:\s*(\d+)")
+MIN_QUALITY_SAMPLE = 3
+
+
+def review_events(pull):
+    """Verdicts tracés sur une PR, dans l'ordre (revues GitHub, puis commentaires) : [{source, problem, at}].
+
+    Sources : verdicts du cadre (« **Revue adversariale|IA|conformité (…) : VERDICT** », REVIEW-ROUNDS.md §Traçabilité),
+    CodeRabbit (« Actionable comments posted: N »), humains (APPROVED / CHANGES_REQUESTED). Le reste est ignoré.
+    """
+    events = []
+    items = [(rv.get("body") or "", rv.get("state"), (rv.get("user") or {}).get("login", ""), rv.get("submitted_at"))
+             for rv in pull.get("reviews", [])]
+    items += [(c.get("body") or "", None, (c.get("user") or {}).get("login", ""), c.get("created_at"))
+              for c in pull.get("comments", [])]
+    for body, state, login, at in items:
+        m = VERDICT_RE.search(body)
+        if m:
+            if m.group(2) != "HORS PÉRIMÈTRE":
+                events.append({"source": VERDICT_SOURCE[m.group(1)], "at": at,
+                               "problem": m.group(2) in ("CHANGEMENTS DEMANDÉS", "ÉCARTS")})
+            continue
+        if login.startswith("coderabbitai"):
+            n = ACTIONABLE_RE.search(body)
+            if n:
+                events.append({"source": "coderabbit", "at": at, "problem": int(n.group(1)) > 0})
+            elif state == "CHANGES_REQUESTED":
+                events.append({"source": "coderabbit", "at": at, "problem": True})
+        elif state in ("APPROVED", "CHANGES_REQUESTED"):
+            events.append({"source": "bot" if login.endswith("[bot]") else "humain", "at": at,
+                           "problem": state == "CHANGES_REQUESTED"})
+    return events
+
+
+def quality(merged):
+    """Qualité au premier passage et effort de correction sur les PR mergées (FINOPS.md §4)."""
+    q = {"reviewed": 0, "problem": 0, "untraced": 0, "by_source": {},
+         "agent": {"reviewed": 0, "problem": 0}, "human": {"reviewed": 0, "problem": 0}}
+    fix_commits, fix_hours = [], []
+    for p in merged:
+        events = review_events(p)
+        if not events:
+            q["untraced"] += 1
+            continue
+        side = q["agent"] if p["head"]["ref"].startswith(AGENT_PREFIXES) else q["human"]
+        q["reviewed"] += 1
+        side["reviewed"] += 1
+        problems = [e for e in events if e["problem"]]
+        if not problems:
+            continue
+        q["problem"] += 1
+        side["problem"] += 1
+        for src in sorted({e["source"] for e in problems}):
+            q["by_source"][src] = q["by_source"].get(src, 0) + 1
+        dated = [parse_time(e["at"]) for e in problems if e.get("at")]
+        if not dated:
+            continue
+        first = min(dated)
+        commits = [c["commit"]["committer"]["date"] for c in p.get("commits", [])]
+        fix_commits.append(sum(1 for d in commits if parse_time(d) > first))
+        fix_hours.append(_hours(parse_time(p["merged_at"]) - first))
+    q["by_source"] = dict(sorted(q["by_source"].items()))
+    q["problem_ratio"] = round(100 * q["problem"] / q["reviewed"]) if q["reviewed"] else None
+    q["fix_commits_mean"] = round(sum(fix_commits) / len(fix_commits), 1) if fix_commits else None
+    q["fix_hours_median"] = round(statistics.median(fix_hours), 1) if fix_hours else None
+    return q
 
 
 def parse_time(value):
@@ -43,7 +115,8 @@ def _hours(seconds):
     return seconds / 3600
 
 
-def analyse(data, now, stall_hours=24, draft_stall_hours=120, max_ci_runs=6, max_review_rounds=3, window_days=14):
+def analyse(data, now, stall_hours=24, draft_stall_hours=120, max_ci_runs=6, max_review_rounds=3, window_days=14,
+            max_problem_ratio=50):
     """Calcule le rapport à partir de {"issues", "pulls", "runs"} (formes de l'API REST GitHub)."""
     issues = [i for i in data.get("issues", []) if "pull_request" not in i]
     pulls = data.get("pulls", [])
@@ -124,9 +197,13 @@ def analyse(data, now, stall_hours=24, draft_stall_hours=120, max_ci_runs=6, max
         for lb in _labels(i):
             by_type[lb] = by_type.get(lb, 0) + 1
 
+    q = quality(merged)
+    high_problem = (q["problem_ratio"] is not None and q["reviewed"] >= MIN_QUALITY_SAMPLE
+                    and q["problem_ratio"] > max_problem_ratio)
+
     if any(s["p1"] for s in stalled) or loops:
         status = "🔴"
-    elif stalled or bottlenecks:
+    elif stalled or bottlenecks or high_problem:
         status = "🟠"
     else:
         status = "🟢"
@@ -144,12 +221,14 @@ def analyse(data, now, stall_hours=24, draft_stall_hours=120, max_ci_runs=6, max
         "bottleneck_items": bottleneck_items,
         "merged": {"total": len(merged), "agent": len(agent), "human": len(merged) - len(agent),
                    "median_lead_hours": round(statistics.median(leads), 1) if leads else None},
+        "quality": q,
         "ci": {"runs": len(runs),
                # Chaque job est arrondi à la minute (CI-BUDGET.md §1) : sans le détail des jobs, borne basse par passage.
                "billed_minutes_min": sum(max(1, math.ceil(d)) for d in durations),
                "failure_rate": round(100 * len(failures) / len(finished)) if finished else 0},
         "thresholds": {"stall_hours": stall_hours, "draft_stall_hours": draft_stall_hours,
-                       "max_ci_runs": max_ci_runs, "max_review_rounds": max_review_rounds, "window_days": window_days},
+                       "max_ci_runs": max_ci_runs, "max_review_rounds": max_review_rounds, "window_days": window_days,
+                       "max_problem_ratio": max_problem_ratio},
     }
 
 
@@ -197,12 +276,33 @@ def render_markdown(r, repo):
         out += [f"| #{lp['number']} | {_cell(lp['title'])} | {lp['kind']} | {lp['count']} |" for lp in r["loops"]]
     else:
         out.append("- Rien.")
+    q = r["quality"]
+    out += ["", "## Qualité au premier passage", ""]
+    if q["reviewed"]:
+        def ratio(side):
+            return f"{round(100 * side['problem'] / side['reviewed'])} % ({side['problem']}/{side['reviewed']})" \
+                if side["reviewed"] else "—"
+        out += ["| Indicateur | Valeur |", "|---|---|",
+                f"| PR à problème (au moins un constat en revue) | {q['problem_ratio']} % ({q['problem']}/{q['reviewed']}) |",
+                f"| … écrites par des agents / des humains | {ratio(q['agent'])} / {ratio(q['human'])} |",
+                "| Constats par source (PR concernées) | "
+                + (", ".join(f"{k} {v}" for k, v in q["by_source"].items()) or "—") + " |",
+                f"| Effort de correction : commits après le 1er constat (moyenne) | "
+                f"{'—' if q['fix_commits_mean'] is None else q['fix_commits_mean']} |",
+                f"| Délai 1er constat → merge (médiane) | "
+                f"{'—' if q['fix_hours_median'] is None else str(q['fix_hours_median']) + ' h'} |"]
+    else:
+        out.append("- Aucune PR mergée avec une revue tracée sur la période.")
+    if q["untraced"]:
+        out.append(f"\n🟠 {q['untraced']} PR mergée(s) sans aucun verdict tracé : la mesure les ignore "
+                   "(REVIEW-ROUNDS.md §Traçabilité).")
     if r["labels"]:
         out += ["", "## Issues ouvertes par label", "", "| Label | Nombre |", "|---|---|"]
         out += [f"| {_cell(k)} | {v} |" for k, v in r["labels"].items()]
     t = r["thresholds"]
     out += ["", f"_Seuils : inactivité {t['stall_hours']} h (brouillon {t['draft_stall_hours']} h), "
-                f"boucle CI > {t['max_ci_runs']} pushes testés, boucle de revue > {t['max_review_rounds']} revues. "
+                f"boucle CI > {t['max_ci_runs']} pushes testés, boucle de revue > {t['max_review_rounds']} revues, "
+                f"PR à problème > {t['max_problem_ratio']} % (dès {MIN_QUALITY_SAMPLE} PR relues). "
                 "Lecture : FINOPS.md §4 du cadre agentic-harness._", ""]
     return "\n".join(out)
 
@@ -228,6 +328,11 @@ def collect(repo, window_days):
     for p in pulls:
         if p["state"] == "open":
             p["review_count"] = len(_gh(f"repos/{repo}/pulls/{p['number']}/reviews?per_page=100"))
+        elif p.get("merged_at") and p["merged_at"] >= since:
+            # Qualité au premier passage : verdicts (revues, commentaires) et commits de correction
+            p["reviews"] = _gh(f"repos/{repo}/pulls/{p['number']}/reviews?per_page=100")
+            p["comments"] = _gh(f"repos/{repo}/issues/{p['number']}/comments?per_page=100")
+            p["commits"] = _gh(f"repos/{repo}/pulls/{p['number']}/commits?per_page=100")
     runs = _gh(f"repos/{repo}/actions/runs?per_page=100&created=>={since[:10]}")
     return {"issues": issues, "pulls": pulls, "runs": runs, "milestones": milestones}
 
@@ -245,6 +350,7 @@ def main(argv=None):
     ap.add_argument("--max-ci-runs", type=int, default=6)
     ap.add_argument("--max-review-rounds", type=int, default=3)
     ap.add_argument("--window-days", type=int, default=14)
+    ap.add_argument("--max-problem-ratio", type=int, default=50, help="%% de PR à problème au-delà duquel le statut passe 🟠")
     a = ap.parse_args(argv)
     if a.input:
         with open(a.input, encoding="utf-8") as f:
@@ -252,7 +358,8 @@ def main(argv=None):
     else:
         data = collect(a.repo, a.window_days)
     now = parse_time(a.now) if a.now else time.time()
-    report = analyse(data, now, a.stall_hours, a.draft_stall_hours, a.max_ci_runs, a.max_review_rounds, a.window_days)
+    report = analyse(data, now, a.stall_hours, a.draft_stall_hours, a.max_ci_runs, a.max_review_rounds, a.window_days,
+                     a.max_problem_ratio)
     if a.json_out:
         with open(a.json_out, "w", encoding="utf-8") as f:
             json.dump(report, f, ensure_ascii=False, indent=2)

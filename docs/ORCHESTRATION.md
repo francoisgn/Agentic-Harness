@@ -58,6 +58,8 @@ Avant de passer la PR « Ready for review » :
   > correctif), puis une courte liste **Vérifié**. Une faille de sécurité : seulement « CHANGEMENTS DEMANDÉS — constat
   > de sécurité, détail transmis en privé ».
 
+- **poster chaque verdict sur la PR**, le premier négatif compris ([REVIEW-ROUNDS](REVIEW-ROUNDS.md) §Traçabilité) :
+  c'est ce qui mesure la qualité au premier passage ;
 - corriger chaque constat Haute et Moyenne en **un** commit, faire revérifier cette tête par le même relecteur, jusqu'à
   APPROUVÉ. Les constats de bots suivent [REVIEW-ROUNDS](REVIEW-ROUNDS.md).
 
