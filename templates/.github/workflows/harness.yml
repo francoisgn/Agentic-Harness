@@ -11,6 +11,9 @@ on:
     paths: [.harness/labels.json, .github/labels.local.json]
   issues:
     types: [opened, edited, labeled, unlabeled, reopened, closed]
+  schedule:
+    - cron: "17 5 * * *"   # tableau de bord quotidien
+    - cron: "47 5 * * 1"   # sécurité hebdomadaire (CVE sans commit), si le job security est activé
   pull_request:
     types: [opened, edited, reopened, synchronize, ready_for_review]
   workflow_dispatch:
@@ -23,7 +26,7 @@ jobs:
     permissions:
       contents: read
       issues: write
-    uses: francoisgn/agentic-harness/.github/workflows/labels-sync.yml@v0.1.0
+    uses: francoisgn/agentic-harness/.github/workflows/labels-sync.yml@v0.2.0
     with:
       apply-aliases: false   # true pour renommer d'anciens labels (ex. `priority: high` → `P1 🔴`)
 
@@ -32,7 +35,7 @@ jobs:
     permissions:
       contents: read
       issues: write
-    uses: francoisgn/agentic-harness/.github/workflows/issue-hygiene.yml@v0.1.0
+    uses: francoisgn/agentic-harness/.github/workflows/issue-hygiene.yml@v0.2.0
 
   pr:
     if: github.event_name == 'pull_request'
@@ -40,15 +43,48 @@ jobs:
       contents: read
       issues: write
       pull-requests: read
-    uses: francoisgn/agentic-harness/.github/workflows/pr-hygiene.yml@v0.1.0
+    uses: francoisgn/agentic-harness/.github/workflows/pr-hygiene.yml@v0.2.0
     with:
       # Modèle A (develop → beta → master). Modèle B (une branche d'intégration) : laisser vide.
       flow: "beta:develop beta:hotfix/* master:beta master:hotfix/*"
       require-changelog: true
 
-  # Socle docs + sécurité, si le projet ne l'a pas déjà (sinon supprimer ce job : on ne paie pas deux fois).
-  # security:
+  # Tableau de bord du flux (FINOPS.md §4) : une issue « Tableau de bord du projet » mise à jour chaque jour.
+  flow:
+    if: (github.event_name == 'schedule' && github.event.schedule == '17 5 * * *') || github.event_name == 'workflow_dispatch'
+    permissions:
+      contents: read
+      issues: write
+      pull-requests: read
+      actions: read
+    uses: francoisgn/agentic-harness/.github/workflows/flow-report.yml@v0.2.0
+
+  # Socle docs + sécurité, si le projet ne l'a pas déjà (sinon supprimer ces jobs : on ne paie pas deux fois).
+  # docs:
   #   if: github.event_name == 'pull_request'
   #   permissions:
   #     contents: read
-  #   uses: francoisgn/agentic-harness/.github/workflows/docs-security.yml@v0.1.0
+  #   uses: francoisgn/agentic-harness/.github/workflows/docs-security.yml@v0.2.0
+  #   with:
+  #     gitleaks: false   # déjà dans le job security
+  # security:   # SAST (Semgrep) + SCA (Trivy) + secrets (gitleaks), CI-BUDGET.md §3
+  #   if: github.event_name == 'pull_request' || (github.event_name == 'schedule' && github.event.schedule == '47 5 * * 1')
+  #   permissions:
+  #     contents: read
+  #   uses: francoisgn/agentic-harness/.github/workflows/security.yml@v0.2.0
+  #   with:
+  #     semgrep-configs: "p/default p/secrets p/github-actions"   # + p/swift, p/python…
+
+  # Service de revue IA (REVIEW-SERVICE.md) : secret ANTHROPIC_API_KEY ou CLAUDE_CODE_OAUTH_TOKEN ; jamais requis.
+  # review:
+  #   if: github.event_name == 'pull_request' && github.event.action != 'edited'
+  #   permissions:
+  #     contents: read
+  #     pull-requests: write
+  #     issues: read
+  #     id-token: write
+  #   uses: francoisgn/agentic-harness/.github/workflows/ai-review.yml@v0.2.0
+  #   secrets:
+  #     ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+  #   with:
+  #     model: claude-sonnet-5-5

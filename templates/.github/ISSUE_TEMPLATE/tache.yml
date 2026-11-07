@@ -21,6 +21,11 @@ body:
     validations:
       required: true
   - type: textarea
+    id: erreurs
+    attributes:
+      label: Comportements d'erreur et définition de fini
+      description: "Cas d'échec attendus ; ce qui doit être vrai pour fermer (tests, docs, revue, conformité)."
+  - type: textarea
     id: dependances
     attributes:
       label: Dépend de

@@ -3,5 +3,6 @@
   "exclude": [],
   "protected_branches": ["main", "master", "develop", "beta"],
   "integration_branch": "develop",
-  "branch_model": "A"
+  "branch_model": "A",
+  "compliance": []
 }

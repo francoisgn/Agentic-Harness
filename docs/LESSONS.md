@@ -5,6 +5,11 @@ chaque cycle de revue, comparer les constats au tableau ([REVIEW-ROUNDS](REVIEW-
 l'auto-relecture l'a manqué, resserrer cette étape ; nouveau genre = nouvelle ligne, proposée au cadre par PR si elle
 vaut ailleurs, sinon gardée dans les leçons du projet.
 
+**Incrémenter** (skill `/lesson-propose`) : une leçon valable au-delà d'un projet remonte au cadre par une **issue
+« Leçon »** sur `francoisgn/agentic-harness` (formulaire dédié, label `leçon`) : portée, leçon en une phrase
+vérifiable, source à un SHA, contre-exemple. Le steward du cadre la fusionne dans ce tableau par PR (numéro suivant,
+MINEUR au CHANGELOG) ; les projets la reçoivent à la synchro suivante.
+
 **Portée** : `général` (tout projet) · `swift` · `ios` · `linux-cloud` (sessions dans un conteneur Linux) · `ci` · `docs`.
 Un projet sans Swift ignore `swift` et `ios`. Les leçons de domaine (protocole d'un site, règle financière) restent dans
 le projet.

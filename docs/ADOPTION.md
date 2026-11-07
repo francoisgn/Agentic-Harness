@@ -1,5 +1,7 @@
 # Adopter le cadre dans un projet, le mettre à jour
 
+Usage quotidien une fois adopté, avec l'exemple SwiftHFR : [UTILISATION](UTILISATION.md).
+
 Pourquoi ce mécanisme (vendorisation + plugin + workflows réutilisables) et ses limites : [ADR 0001](adr/0001-mecanisme-de-distribution.md).
 
 ## Ce que le projet reçoit
@@ -9,7 +11,9 @@ Pourquoi ce mécanisme (vendorisation + plugin + workflows réutilisables) et se
 | `.harness/docs/*.md` | copie | Cadre : remplacé à chaque synchro (modification locale détectée et refusée) |
 | `.harness/labels.json` | copie | Cadre : taxonomie canonique |
 | `.harness/hooks/guard-git.py`, `session-start.sh` | copie | Cadre |
-| `.claude/skills/<skill>/SKILL.md` | copie | Cadre (`/lot-start`, `/lot-finish`, `/review-round`, `/feedback-triage`, `/lessons-check`, `/harness-update`) |
+| `.claude/skills/<skill>/SKILL.md` | copie | Cadre (`/intent`, `/lot-start`, `/lot-finish`, `/review-round`, `/feedback-triage`, `/lessons-check`, `/lesson-propose`, `/compliance-review`, `/status-report`, `/harness-update`) |
+| `.claude/agents/*.md` | copie | Cadre : `adversarial-reviewer`, `issue-steward`, `doc-steward`, `flow-monitor`, `compliance-*` (exclure les référentiels inutiles) |
+| `.harness/scripts/flow-metrics.py` | copie | Cadre : tableau de bord du flux (`flow-report.yml`, `/status-report`) |
 | `.claude/settings.json` | fusion | Projet ; le cadre n'**ajoute** que ses deux hooks s'ils manquent |
 | `CLAUDE.md`, `AGENTS.md` | bloc balisé | Projet, sauf le bloc `<!-- harness:begin cadre -->…<!-- harness:end cadre -->` |
 | `.harness/config.json`, `.github/labels.local.json`, gabarits d'issue et de PR, `docs/lots/TEMPLATE.md`, `.markdownlint-cli2.jsonc`, `.github/workflows/harness.yml`, `.github/workflows/harness-sync.yml` | seed | Projet : créés s'ils manquent, jamais réécrits (sauf les références `@vX.Y.Z` de `harness.yml`) |
@@ -26,7 +30,7 @@ Prérequis : `bash`, `git`, `python3` ; accès en lecture à `francoisgn/agentic
    ```
 2. **Récupérer le cadre** à un tag, à côté du projet :
    ```bash
-   git clone --depth 1 --branch v0.1.0 https://github.com/francoisgn/agentic-harness.git ../agentic-harness
+   git clone --depth 1 --branch v0.2.0 https://github.com/francoisgn/agentic-harness.git ../agentic-harness
    ```
 3. **Voir avant d'écrire**, puis appliquer :
    ```bash
@@ -43,8 +47,9 @@ Prérequis : `bash`, `git`, `python3` ; accès en lecture à `francoisgn/agentic
    - `.github/labels.local.json` : les labels propres au projet (ex. `onglet: …`, `calcul`, `réglementaire`), au même
      format que `.harness/labels.json` (`axis` facultatif, utile pour l'hygiène des issues). Retirer l'ancien fichier de
      labels et son workflow s'il fait doublon avec le job `labels` de `harness.yml`.
-   - `.github/workflows/harness.yml` : branche de `push`, `flow` (modèle A ou vide), job `security` à activer seulement
-     si le projet n'a pas déjà l'équivalent. Supprimer les workflows qu'il remplace (ex. `branch-flow.yml`).
+   - `.github/workflows/harness.yml` : branche de `push`, `flow` (modèle A ou vide), jobs `docs`, `security` et `review`
+     à activer seulement si le projet n'a pas déjà l'équivalent ; le job `flow` (tableau de bord) est actif d'office.
+   - `.harness/config.json` → `compliance` : référentiels dont les relecteurs sont lancés ([COMPLIANCE](COMPLIANCE.md)). Supprimer les workflows qu'il remplace (ex. `branch-flow.yml`).
 5. **Vérifier** : `../agentic-harness/scripts/harness-sync.sh --target . --check` sort en 0 ; `git diff --stat` ne
    montre que l'attendu ; lancer une session Claude et constater le message « Cadre agentic-harness » au démarrage.
 6. **Commit unique**, puis PR en brouillon :
@@ -73,7 +78,7 @@ l'ignore), ajouter à `.claude/settings.json` :
 ```json
 {
   "extraKnownMarketplaces": {
-    "agentic-harness": { "source": { "source": "github", "repo": "francoisgn/agentic-harness", "ref": "v0.1.0" } }
+    "agentic-harness": { "source": { "source": "github", "repo": "francoisgn/agentic-harness", "ref": "v0.2.0" } }
   },
   "enabledPlugins": { "harness@agentic-harness": true }
 }

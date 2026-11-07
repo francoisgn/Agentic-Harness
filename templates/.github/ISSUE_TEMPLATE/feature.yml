@@ -6,7 +6,7 @@ body:
     id: resume
     attributes:
       label: Résumé
-      description: "Une user story (« En tant que …, je veux …, pour … ») ou deux lignes de synthèse."
+      description: "User story : « En tant que <qui>, je veux que <X> fasse <Y>, pour <bénéfice> » (METHODOLOGY.md §2 bis)."
     validations:
       required: true
   - type: textarea
@@ -20,6 +20,21 @@ body:
     id: proposition
     attributes:
       label: Proposition et critères d'acceptation
+      description: "Étant donné … / Quand … / Alors … : un critère = un test, écrit avant le code."
+    validations:
+      required: true
+  - type: textarea
+    id: erreurs
+    attributes:
+      label: Comportements d'erreur
+      description: "Entrée invalide, panne externe, limite → résultat attendu (message, état conservé). « Aucun » se justifie."
+    validations:
+      required: true
+  - type: textarea
+    id: fini
+    attributes:
+      label: Définition de fini
+      description: "Tests verts (vus rouges d'abord), docs à jour, revue par un autre modèle, conformité si concernée, validation sur l'appareil."
   - type: textarea
     id: sources
     attributes:
