@@ -51,7 +51,7 @@ def pull_request_job_names(text):
         if not lines:
             return set()
         indent = min(len(ln) - len(ln.lstrip()) for ln in lines)
-        if not any(len(ln) - len(ln.lstrip()) == indent and re.match(r"\s*pull_request:", ln) for ln in lines):
+        if not any(len(ln) - len(ln.lstrip()) == indent and re.match(r"""\s*['"]?pull_request['"]?:""", ln) for ln in lines):
             return set()
     jobs = text[text.find("\njobs:"):]
     names = set()

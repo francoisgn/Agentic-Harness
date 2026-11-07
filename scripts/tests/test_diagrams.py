@@ -49,7 +49,7 @@ class RenderTests(unittest.TestCase):
         self.assertTrue(any("au moins deux points" in e for e in rd.invalid(bad and [bad])))
 
     def test_malformed_arrow_points_are_reported(self):
-        for pts in ([[0, 0], [100]], [[0, 0], ["a", 1]], [[0, 0], 5]):
+        for pts in ([[0, 0], [100]], [[0, 0], ["a", 1]], [[0, 0], 5], 5, "ab"):
             self.assertTrue(rd.invalid([dict(ARROW, points=pts)]), pts)
 
     def test_overflow_is_reported(self):

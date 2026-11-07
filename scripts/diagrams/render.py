@@ -130,7 +130,7 @@ def invalid(source):
         if e.get("type") != "arrow":
             continue
         pts = e.get("points") or []
-        if len(pts) < 2:
+        if not isinstance(pts, list) or len(pts) < 2:
             issues.append(f"{e.get('id')} : une flèche demande au moins deux points")
         elif not all(isinstance(p, (list, tuple)) and len(p) == 2
                      and all(isinstance(c, (int, float)) and not isinstance(c, bool) for c in p) for p in pts):

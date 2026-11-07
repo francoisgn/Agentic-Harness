@@ -100,6 +100,8 @@ class CheckFrameworkTests(unittest.TestCase):
         self.assertEqual(cf.pull_request_job_names(nested + job), set())
         direct = "on:\n  workflow_dispatch:\n    inputs:\n      x:\n        type: string\n  pull_request:\n"
         self.assertEqual(cf.pull_request_job_names(direct + job), {"Tests"})
+        for key in ("'pull_request':", '"pull_request":'):
+            self.assertEqual(cf.pull_request_job_names("on:\n  " + key + "\n" + job), {"Tests"}, key)
 
     def test_skill_without_description(self):
         p = self.tmp / "plugins/harness/skills/intent/SKILL.md"
