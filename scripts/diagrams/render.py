@@ -236,6 +236,9 @@ def main():
     names = a.names or sorted(p.stem for p in DIR.glob("*.json"))
     problems = []
     for name in names:
+        if not (DIR / f"{name}.json").is_file():
+            problems.append(f"{name} : source docs/diagrams/{name}.json introuvable")
+            continue
         source = json.loads((DIR / f"{name}.json").read_text(encoding="utf-8"))
         problems += [f"{name} : {o}" for o in overflows(source)]
         outputs = {DIR / f"{name}.svg": render_svg(source), DIR / f"{name}.excalidraw": to_scene(source)}

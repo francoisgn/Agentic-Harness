@@ -30,6 +30,20 @@ class RenderTests(unittest.TestCase):
         box = next(e for e in scene["elements"] if e["id"] == "b")
         self.assertEqual((label["containerId"], box["boundElements"]), ("b", [{"type": "text", "id": "b-label"}]))
 
+    def test_committed_scenes_are_up_to_date(self):
+        for src in sorted((ROOT / "docs/diagrams").glob("*.json")):
+            source = json.loads(src.read_text(encoding="utf-8"))
+            self.assertEqual(src.with_suffix(".excalidraw").read_text(encoding="utf-8"), rd.to_scene(source), src.name)
+
+    def test_unknown_name_is_reported_without_traceback(self):
+        import subprocess
+        import sys
+        r = subprocess.run([sys.executable, str(ROOT / "scripts/diagrams/render.py"), "--check", "absent"],
+                           capture_output=True, text=True)
+        self.assertEqual(r.returncode, 1)
+        self.assertNotIn("Traceback", r.stderr)
+        self.assertIn("absent", r.stdout)
+
     def test_overflow_is_reported(self):
         long = dict(BOX, label={"text": "un texte bien trop long pour cette boîte", "fontSize": 20})
         self.assertTrue(rd.overflows([long]))

@@ -45,7 +45,7 @@ un client iOS).
 | Votre agent | Ce qu'il reçoit |
 |---|---|
 | **Claude Code** (adaptateur fourni) | Bloc `CLAUDE.md`, skills (`/intent`, `/lot-start`, `/review-round`…), agents (`adversarial-reviewer`, stewards, conformité), hooks garde-fous ; ou le plugin : `claude plugin marketplace add francoisgn/agentic-harness && claude plugin install harness@agentic-harness` |
-| **Codex, Cursor, Gemini CLI, Copilot, Aider…** | Bloc `AGENTS.md` qui pointe vers les règles (`.harness/docs/ESSENTIEL.md`) ; méthode, labels, gabarits, CI et tableau de bord identiques |
+| **Autres agents** (Codex, Cursor, Copilot, Gemini CLI, Aider…) | Bloc `AGENTS.md` ([format ouvert](https://agents.md)) qui pointe vers les règles (`.harness/docs/ESSENTIEL.md`) ; lu nativement ou à activer selon l'outil ([ADOPTION](docs/ADOPTION.md) §Brancher votre agent) ; méthode, labels, gabarits, CI et tableau de bord identiques |
 | **Équipe humaine** | Les mêmes issues, labels, PR, CI et tableau de bord ; rapport d'état lisible par un non-technicien |
 
 ## État

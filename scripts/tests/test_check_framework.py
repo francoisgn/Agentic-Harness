@@ -67,6 +67,15 @@ class CheckFrameworkTests(unittest.TestCase):
             p.write_text(original.replace('"context": "Scripts, workflows, tests"', f'"context": "{name}"'))
             self.assertIn(f"« {name} »", run(self.tmp).stdout, name)
 
+    def test_pull_request_trigger_in_flow_and_scalar_forms(self):
+        spec = __import__("importlib.util").util.spec_from_file_location("cf", CHECK)
+        cf = __import__("importlib.util").util.module_from_spec(spec)
+        spec.loader.exec_module(cf)
+        job = "jobs:\n  a:\n    name: Tests\n    runs-on: x\n"
+        for on in ("on: [push, pull_request]\n", "on: pull_request\n", "on:\n  pull_request:\n"):
+            self.assertEqual(cf.pull_request_job_names(on + job), {"Tests"}, on)
+        self.assertEqual(cf.pull_request_job_names("on: [pull_request_target]\n" + job), set())
+
     def test_skill_without_description(self):
         p = self.tmp / "plugins/harness/skills/intent/SKILL.md"
         p.write_text(p.read_text().replace("description:", "desc:", 1))

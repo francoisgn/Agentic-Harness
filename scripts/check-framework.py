@@ -36,9 +36,14 @@ def frontmatter(path):
 def pull_request_job_names(text):
     """Noms de checks qu'un workflow publie sur une PR : workflow déclenché par `pull_request` (pas `_target`),
     jobs directs seulement (le check d'un job réutilisable s'appelle `appelant / appelé`)."""
-    on_block = re.search(r"^on:\s*\n((?:[ \t]+.*\n|\s*\n)*)", text, re.M)
-    if not on_block or not re.search(r"^\s+pull_request:", on_block.group(1), re.M):
-        return set()
+    inline = re.search(r"^on:[ \t]*(\S.*)$", text, re.M)  # `on: pull_request` ou `on: [push, pull_request]`
+    if inline:
+        if not re.search(r"(?<![\w-])pull_request(?![\w-])", inline.group(1)):
+            return set()
+    else:
+        on_block = re.search(r"^on:\s*\n((?:[ \t]+.*\n|\s*\n)*)", text, re.M)
+        if not on_block or not re.search(r"^\s+pull_request:", on_block.group(1), re.M):
+            return set()
     jobs = text[text.find("\njobs:"):]
     names = set()
     for block in re.split(r"\n  (?=[A-Za-z0-9_-]+:\s*\n)", jobs)[1:]:

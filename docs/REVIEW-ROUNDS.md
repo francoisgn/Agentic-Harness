@@ -43,7 +43,8 @@ c'est la jauge de la qualité initiale et du coût de la seconde passe ([FINOPS]
 que si **tous** les verdicts sont visibles sur la PR, surtout le premier négatif :
 - l'auteur poste **chaque** verdict de revue adversariale et de conformité en commentaire de la PR, mot pour mot, y
   compris `CHANGEMENTS DEMANDÉS` / `ÉCARTS` (jamais seulement le dernier `APPROUVÉ`) ; la première ligne reste au
-  format `**Revue adversariale (<modèle>) : <VERDICT>** — tête <sha>` (le tableau de bord la lit) ;
+  format `**Revue adversariale (<modèle>) : <VERDICT>** — tête <sha>` (le tableau de bord la lit en début de ligne,
+  éventuellement en puce `- ` ; une citation `>` ou une ligne de tableau ne compte pas) ;
 - une revue faite avant l'ouverture de la PR se poste dès l'ouverture, dans l'ordre ;
 - un constat de sécurité se trace sans détail (« CHANGEMENTS DEMANDÉS — constat de sécurité, détail transmis en
   privé ») : il compte, il ne fuit pas ;

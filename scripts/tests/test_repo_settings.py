@@ -60,6 +60,18 @@ class PlanTests(unittest.TestCase):
             self.assertEqual([a["op"] for a in rs.plan(desired, {"repository": {}, "topics": [], "rulesets": [cur]})],
                              ["update-ruleset"])
 
+    def test_bypass_added_by_hand_is_a_drift_when_file_declares_none(self):
+        desired = {"rulesets": [{"name": "p", "bypass_actors": [], "rules": [{"type": "deletion"}]}]}
+        hand = {"id": 9, "name": "p", "rules": [{"type": "deletion"}],
+                "bypass_actors": [{"actor_id": 5, "actor_type": "RepositoryRole", "bypass_mode": "always"}]}
+        self.assertEqual([a["op"] for a in rs.plan(desired, {"repository": {}, "topics": [], "rulesets": [hand]})],
+                         ["update-ruleset"])
+
+    def test_shipped_settings_declare_no_bypass(self):
+        for p in (ROOT / ".github/repo-settings.json", ROOT / "templates/.github/repo-settings.json"):
+            for ruleset in json.loads(p.read_text(encoding="utf-8"))["rulesets"]:
+                self.assertEqual(ruleset.get("bypass_actors"), [], p)
+
     def test_unmanaged_rulesets_are_never_deleted(self):
         current = {"repository": {}, "topics": [], "rulesets": [dict(RULESET, id=7, name="à la main")]}
         self.assertEqual(rs.plan({"rulesets": []}, current), [])

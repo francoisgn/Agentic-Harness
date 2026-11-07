@@ -232,6 +232,13 @@ class VerdictParsingTests(unittest.TestCase):
                          [("conformité", False), ("conformité", True)])
 
 
+class BulletVerdictTests(unittest.TestCase):
+    def test_verdict_as_list_item_counts(self):
+        p = pull(1)
+        p["comments"] = [comment("c", "- " + ADV_KO), comment("c", "* " + ADV_OK)]
+        self.assertEqual([e["problem"] for e in fm.review_events(p)], [True, False])
+
+
 class QualityTests(unittest.TestCase):
     def merged(self, n, ref, events_comments=(), reviews=(), commits=()):
         p = pull(n, ref=ref, state="closed", created="2026-11-05T00:00:00Z", merged="2026-11-06T00:00:00Z")

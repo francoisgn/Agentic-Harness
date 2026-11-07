@@ -130,6 +130,24 @@ la première fois) :
 4. Les leçons génériques nées dans HFRnow remontent au cadre par PR sur agentic-harness ; les leçons du domaine HFR
    restent dans le projet.
 
+## Brancher votre agent de code
+
+Le cadre écrit ses règles une fois (`.harness/docs/`) et les expose par deux fichiers d'entrée : `CLAUDE.md` (bloc
+balisé) et `AGENTS.md` (bloc balisé, [format ouvert](https://agents.md)). Selon l'outil :
+
+| Agent | Comment il charge les règles | État |
+|---|---|---|
+| Claude Code | `CLAUDE.md` (import de `ESSENTIEL.md`), skills, agents et hooks vendorisés ; plugin en local | Adaptateur fourni, testé |
+| Codex CLI, Cursor, GitHub Copilot (agent) | `AGENTS.md` à la racine, présenté comme lu nativement par ces outils | 🟠 à vérifier dans la doc de l'outil et la version utilisée |
+| Gemini CLI | Lit `GEMINI.md` par défaut ; pointer le fichier de contexte vers `AGENTS.md` dans `.gemini/settings.json` | 🟠 réglage à confirmer dans la doc de Gemini CLI |
+| Aider | Charger `AGENTS.md` comme fichier de conventions (`read: AGENTS.md` dans `.aider.conf.yml`) | 🟠 à confirmer dans la doc d'Aider |
+| Autre | Lui faire lire `AGENTS.md`, ou y copier un renvoi vers `.harness/docs/ESSENTIEL.md` | — |
+
+Sources consultées le 2026-11-07 : site du format [agents.md](https://agents.md) et articles secondaires (pas la doc
+officielle de chaque outil) ; d'où l'état 🟠 tant qu'un projet ne l'a pas vérifié. Les skills, agents et hooks sont
+propres à Claude Code ; pour un autre agent, la méthode, les labels, les gabarits, la CI et le tableau de bord
+s'appliquent tels quels, et les skills se lisent comme des procédures (`.claude/skills/<nom>/SKILL.md`).
+
 ## Réglages du dépôt « as code »
 
 Une session cloud ne peut pas modifier les réglages d'un dépôt (LESSONS L56) ; elle modifie

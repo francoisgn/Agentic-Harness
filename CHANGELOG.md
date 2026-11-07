@@ -9,7 +9,7 @@ Intention, TDD, FinOps, stewards, conformité, sécurité et mesure du flux.
 
 - **Ouvert à tous** : plus aucune référence nominative au créateur (rôles : mainteneur, opérateur ; auteur du plugin
   « agentic-harness contributors ») ; le cadre vaut pour tout agent de code (Claude Code, Codex CLI, Cursor, Gemini CLI,
-  Copilot, Aider…), Claude Code restant l'adaptateur fourni (plugin, hooks, `.claude/`) ; pied de commentaire nommant
+  Copilot, Aider… ; chargement par `AGENTS.md`, natif ou à activer selon l'outil : ADOPTION §Brancher votre agent), Claude Code restant l'adaptateur fourni (plugin, hooks, `.claude/`) ; pied de commentaire nommant
   l'agent ; niveaux de modèles par fournisseur (ORCHESTRATION §2).
 - **Méthode** : intention obligatoire des issues (user story, comportements d'erreur, critères Étant donné / Quand /
   Alors, définition de fini : METHODOLOGY §2 bis) et TDD (§2 ter) ; formulaires d'issue enrichis ; ESSENTIEL (fr, en).

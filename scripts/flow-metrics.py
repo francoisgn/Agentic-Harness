@@ -49,7 +49,7 @@ def review_events(pull):
         # Verdicts en début de ligne seulement : une citation (`>`) ou une ligne de tableau (`|`) ne compte pas ;
         # un corps peut en porter plusieurs (consolidation de /compliance-review).
         verdicts = [m for line in body.splitlines() if not line.lstrip().startswith((">", "|"))
-                    for m in [VERDICT_RE.match(line.strip())] if m]
+                    for m in [VERDICT_RE.match(re.sub(r"^[-*]\s+", "", line.strip()))] if m]
         if verdicts:
             events += [{"source": VERDICT_SOURCE[m.group(1)], "at": at,
                         "problem": m.group(2) in ("CHANGEMENTS DEMANDÉS", "ÉCARTS")}
