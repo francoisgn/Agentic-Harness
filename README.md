@@ -111,12 +111,12 @@ En local avant de pousser : `python3 scripts/check-framework.py && python3 -m un
 'test_*.py' && scripts/tests/test-harness-sync.sh`.
 
 ## Versions
-- Semver, tags `vX.Y.Z` sur `main` ; [CHANGELOG](CHANGELOG.md) à chaque version ; `VERSION` et
+- Semver, tags `vX.Y.Z` sur `master` ; [CHANGELOG](CHANGELOG.md) à chaque version ; `VERSION` et
   `plugins/harness/.claude-plugin/plugin.json` avancent ensemble (contrôlé par la CI).
 - MAJEUR : un projet doit agir ; MINEUR : ajout (doc, skill, agent, leçon, workflow) ; CORRECTIF : correction. Avant
   1.0.0, un MINEUR peut casser : le CHANGELOG le dit (section « Action »).
 
 ## Contribuer
 Même méthode que les projets : une issue (avec son intention), une branche `claude/<sujet>`, une PR brouillon vers
-`main`, la CI verte. Une leçon née dans un projet : formulaire « Leçon » (numéros `L..` stables). Release : PR
+`master`, la CI verte. Une leçon née dans un projet : formulaire « Leçon » (numéros `L..` stables). Release : PR
 « Version : passe en X.Y.Z » (VERSION + plugin.json + CHANGELOG), puis tag `vX.Y.Z` par François.

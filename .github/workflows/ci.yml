@@ -6,7 +6,7 @@ name: CI
 # Rien sur un brouillon ; une PR de docs ne coûte qu'une minute.
 on:
   push:
-    branches: [main]
+    branches: [master]
   pull_request:
     types: [opened, synchronize, reopened, ready_for_review]
   workflow_dispatch:

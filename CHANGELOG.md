@@ -36,6 +36,8 @@ Intention, TDD, FinOps, stewards, conformité, sécurité et mesure du flux.
 - **CI du cadre** : contrôle de cohérence (`check-framework.py` : skills, agents, manifeste, labels, nommage), tests
   Python, gitleaks ; Dependabot pour les actions ; formulaire d'issue « Leçon ».
 
+Correctif : la CI du cadre écoutait `main`, la branche par défaut est `master`.
+
 Action : `/harness-update` vers v0.2.0. Dans `harness.yml` (fichier du projet, non réécrit) : ajouter le
 déclencheur `schedule` et le job `flow` (voir le gabarit), activer au besoin `security` et `review`. Renseigner
 `compliance` dans `.harness/config.json` et exclure les agents de conformité inutiles.
