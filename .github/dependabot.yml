@@ -1,0 +1,12 @@
+# Actions épinglées par SHA (CI-BUDGET.md §3) : Dependabot les met à jour, groupées, une PR par semaine.
+version: 2
+updates:
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    groups:
+      actions:
+        patterns: ["*"]
+    commit-message:
+      prefix: "CI"
