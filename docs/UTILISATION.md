@@ -28,7 +28,7 @@ flowchart TD
 | 2. Régler | `.harness/config.json` : branches, langue, exclusions, `compliance` (agent du cadre, agent de l'entreprise ou spec) | Règles et relecteurs adaptés au projet ; toute brique remplaçable ([ADOPTION](ADOPTION.md) §Remplacer) |
 | 3. Labels | `.github/labels.local.json` + job `labels` de `harness.yml` | Taxonomie commune + labels du projet |
 | 4. CI | `harness.yml` : jobs `flow`, `security`, `review` à activer | Tableau de bord, SAST/SCA/secrets, revue IA |
-| 5. Secrets | `ANTHROPIC_API_KEY` (revue IA) ; rien d'autre en dur ([CI-BUDGET](CI-BUDGET.md) §3) | — |
+| 5. Secrets | `ANTHROPIC_API_KEY` (revue IA), `REPO_ADMIN_TOKEN` (réglages du dépôt), en secrets GitHub ; rien en dur ([CI-BUDGET](CI-BUDGET.md) §3) | — |
 | 6. Jalons | Milestones GitHub (« Jalon 1 : … », échéance) | Avancement lisible dans le tableau de bord |
 
 ## 3. Au quotidien

@@ -36,8 +36,9 @@ Le cadre fournit des agents, il ne les impose pas. Chaque entreprise choisit, r�
 | **Spec seule** | L'entreprise veut juste décrire ses exigences (référentiel absent du catalogue, ou politique interne) | `{"id": "dora", "spec": "docs/compliance/dora.md"}` | Le relecteur générique `compliance-reviewer`, qui applique la spec et rien d'autre |
 
 Options communes à chaque entrée :
-- `"paths"` (globs) et `"keywords"` (mots cherchés dans les lignes ajoutées ou retirées du diff) : le périmètre se
-  décide **sans lancer d'agent** (aucun jeton dépensé pour un diff hors périmètre) ; sans eux, l'agent en juge ;
+- `"paths"` (globs : `*` et `?` restent dans un dossier, `**/` couvre zéro ou plusieurs dossiers, `src/**` tout le
+  dessous) et `"keywords"` (mots entiers, sans casse, cherchés dans les lignes ajoutées ou retirées du diff, hors
+  en-têtes de fichier) : le périmètre se décide **sans lancer d'agent** (aucun jeton dépensé pour un diff hors périmètre) ; sans eux, l'agent en juge ;
 - `"confirme"` : qui tranche (DPO, RSSI, QSA) ; `"enabled": false` : désactive sans supprimer.
 
 Exemple complet :
@@ -59,7 +60,7 @@ Exemple complet :
 - **Spec** : gabarit `docs/compliance/TEMPLATE.md` (créé à l'adoption, appartient au projet) : en-tête `id`,
   `référentiel`, `confirme`, puis « Quand intervenir », « Ce que je vérifie », « Preuves attendues », « Sources ».
   Le relecteur générique ne cite que ce que la spec cite ; une lacune de la spec est signalée, pas inventée.
-- **Agent de l'entreprise** : un fichier d'agent Claude Code (en-tête `name`, `description`, `tools`, `model`) dans
+- **Agent de l'entreprise** : un fichier d'agent (adaptateur Claude Code : en-tête `name`, `description`, `tools`, `model`) dans
   le dépôt ; le cadre ne le synchronise jamais. Garder le format de réponse du §3 pour que les verdicts se
   consolident ; le mettre en lecture seule.
 - Un label `conformité: <id>` sur une issue force la revue correspondante, même hors périmètre. Ces labels sont

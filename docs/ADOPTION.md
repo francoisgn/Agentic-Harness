@@ -145,8 +145,11 @@ script `.harness/scripts/repo-settings.py`) l'applique au merge :
 - **Une fois, par le propriétaire** : créer un jeton fine-grained limité au dépôt, « Administration: read and write »,
   et l'enregistrer en secret de dépôt `REPO_ADMIN_TOKEN`. Sans lui, le job avertit et ne fait rien.
 - **Dérive** : chaque lundi le job compare le dépôt au fichier et échoue si un réglage a été changé à la main.
-- Contrôles requis : les noms doivent être des noms de jobs réels (`check-framework.py` le vérifie dans le cadre) ;
-  un nom faux bloquerait toutes les PR.
+- Contrôles requis : un nom de job direct d'un workflow déclenché par `pull_request` (le check d'un job de workflow
+  réutilisable s'appelle `appelant / appelé`). Un nom faux bloquerait toutes les PR : `check-framework.py` le vérifie
+  pour le cadre, pas pour le gabarit d'un projet (à vérifier à la main avant d'en ajouter).
+- Aucun contournement (`bypass_actors`) n'est déclaré : en urgence, un admin désactive le ruleset dans Settings, puis
+  le remet par le fichier.
 - `--apply` absent (local) : `GH_TOKEN=… python3 .harness/scripts/repo-settings.py --repo owner/nom` affiche le plan.
 
 ## Remplacer ou étendre une brique

@@ -1,6 +1,6 @@
 # 0001 — Distribuer le cadre : vendorisation versionnée + plugin + workflows réutilisables
 
-**Statut :** Accepté — 2026-11-07 (François)
+**Statut :** Accepté — 2026-11-07 (le mainteneur)
 
 ## Contexte
 - Les règles de travail agentique sont nées dans deux dépôts (HFRnow, ios-app_credit-immo) et y divergent. On veut une
@@ -15,7 +15,7 @@
 - Une session cloud n'a accès GitHub qu'aux dépôts qui lui sont attachés ; un workflow Actions n'accède à un autre dépôt
   privé qu'avec un jeton dédié.
 - Les fichiers sous `.github/workflows/` ne peuvent pas être poussés avec le `GITHUB_TOKEN` d'Actions.
-- HFRnow vit sur `ezzz/HFRnow` (pas un dépôt de François) et ses docs sont en anglais.
+- HFRnow vit sur `ezzz/HFRnow` (pas un dépôt du mainteneur) et ses docs sont en anglais.
 
 ## Options
 1. **Sous-module git** : versionné, mais lourd pour les agents (init, détaché), invisible en cloud si non initialisé,

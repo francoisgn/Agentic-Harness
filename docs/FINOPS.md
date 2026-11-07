@@ -62,7 +62,7 @@ Règles :
   une contrainte d'ordonnancement : on livre dès que c'est prêt, on priorise (sécurité, P1, chemin critique) quand il
   se raréfie.
 - **Quota atteint (jetons ou minutes)** : l'orchestrateur écrit l'état sur chaque issue en cours (« Passation : … »),
-  programme sa reprise à l'heure de remise à zéro (`send_later` ou tâche planifiée, jamais une boucle d'attente) et
+  programme sa reprise à l'heure de remise à zéro (ex. Claude Code : `send_later` ; ou tâche planifiée, jamais une boucle d'attente) et
   s'arrête proprement. À la reprise : relire l'état du dépôt (L18, L19), pas sa mémoire.
 - **Minutes de CI épuisées** : contrôles locaux avant chaque merge (`local-check.sh` qui dit « INCOMPLET » s'il manque
   un outil), CI-BUDGET §2.

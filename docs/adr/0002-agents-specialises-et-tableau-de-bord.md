@@ -1,6 +1,6 @@
 # 0002 — Agents spécialisés vendorisés, service de revue et tableau de bord du flux
 
-**Statut :** Proposé — 2026-11-07 (François décide)
+**Statut :** Proposé — 2026-11-07 (le mainteneur décide)
 
 ## Contexte
 Le volume de commits agentiques dépasse de loin celui d'un humain ; les cycles de revue et de CI deviennent le coût
