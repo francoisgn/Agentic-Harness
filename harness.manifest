@@ -21,6 +21,12 @@ copy      templates/.github/labels.json               .harness/labels.json
 # Skills : copiés dans le dépôt pour fonctionner aussi en session cloud (qui ne charge pas les plugins du dépôt)
 tree      plugins/harness/skills                      .claude/skills
 
+# Sous-agents (relecteur adversarial, stewards, conformité) : .claude/agents/ fonctionne en cloud comme en local
+tree      plugins/harness/agents                      .claude/agents
+
+# Script du tableau de bord du flux (appelé par flow-report.yml et /status-report)
+copy      scripts/flow-metrics.py                     .harness/scripts/flow-metrics.py
+
 # Hooks vendorisés (garde-fou git, rappel de session) et leur déclaration
 copy      plugins/harness/scripts/guard-git.py        .harness/hooks/guard-git.py
 copy      plugins/harness/scripts/session-start.sh    .harness/hooks/session-start.sh

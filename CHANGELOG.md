@@ -3,6 +3,34 @@
 Format : une section par version (semver), du plus récent au plus ancien. « Action » = ce qu'un projet consommateur doit
 faire en passant à cette version.
 
+## 0.2.0 — 2026-11-07
+
+Intention, TDD, FinOps, stewards, conformité, sécurité et mesure du flux.
+
+- **Méthode** : intention obligatoire des issues (user story, comportements d'erreur, critères Étant donné / Quand /
+  Alors, définition de fini : METHODOLOGY §2 bis) et TDD (§2 ter) ; formulaires d'issue enrichis ; ESSENTIEL (fr, en).
+- **Docs** : FINOPS (orchestrateur SPOC seul agent long, contexte dans le dépôt, routage des modèles, quotas et
+  reprise, boucles bornées, signaux de dérive), STEWARDS (rôles d'entretien, rapport non technique), REVIEW-SERVICE
+  (service de revue maison), COMPLIANCE (relecteurs de conformité), UTILISATION (guide pas à pas, exemple SwiftHFR),
+  ADR 0002 ; CI-BUDGET §3 (secrets et variables) et §5 (volume agentique) ; ORCHESTRATION §7 (**nommage des agents**
+  `<projet>.<orchestrateur>.<rôle>.<cible>`, vérifié en CI) ; LESSONS : remontée des leçons par issue.
+- **Agents** (vendorisés en `.claude/agents/`) : `adversarial-reviewer`, `issue-steward`, `doc-steward`,
+  `flow-monitor`, `compliance-gdpr`, `-eu-ai-act`, `-nis2`, `-iso27001`, `-soc2`, `-tisax`, `-pci` (DSS, PIN, P2PE),
+  `-hds`. Les identifiants d'exigence non vérifiés sur le texte officiel sont marqués « (à vérifier) ».
+- **Skills** : `/intent`, `/lesson-propose`, `/status-report`, `/compliance-review` ; `/lot-start` pose l'identifiant
+  d'agent.
+- **Workflows réutilisables** : `security.yml` (Semgrep CE, Trivy, gitleaks), `flow-report.yml` (issue « Tableau de
+  bord du projet »), `ai-review.yml` (revue IA, claude-code-action épinglée, jamais requise).
+- **Script** `flow-metrics.py` (vendorisé en `.harness/scripts/`) : jalons, goulots, travaux en panne, boucles de CI
+  et de revue, ratio agents / humains, délai de merge, minutes de CI ; tests unitaires.
+- **Labels** : `leçon`, `tableau de bord`, `revue: aucune`, `conformité`. `.harness/config.json` : clé `compliance`.
+- **CI du cadre** : contrôle de cohérence (`check-framework.py` : skills, agents, manifeste, labels, nommage), tests
+  Python, gitleaks ; Dependabot pour les actions ; formulaire d'issue « Leçon ».
+
+Action : `/harness-update` vers v0.2.0. Dans `harness.yml` (fichier du projet, non réécrit) : ajouter le
+déclencheur `schedule` et le job `flow` (voir le gabarit), activer au besoin `security` et `review`. Renseigner
+`compliance` dans `.harness/config.json` et exclure les agents de conformité inutiles.
+
 ## 0.1.0 — 2026-11-07
 
 Première version, distillée de HFRnow (`dev-swift`) et ios-app_credit-immo (`develop`).

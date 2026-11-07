@@ -1,13 +1,13 @@
 {
   "name": "harness",
   "displayName": "Agentic Harness",
-  "version": "0.1.0",
-  "description": "Cadre commun de développement agentique : boucle issue → lot → PR, cycles de revue, tableau des leçons, garde-fous git et rappel de session.",
+  "version": "0.2.0",
+  "description": "Cadre commun de développement agentique : intention et TDD, boucle issue → lot → PR, revue adversariale, relecteurs de conformité, stewards, tableau de bord du flux, FinOps, garde-fous git.",
   "author": {
     "name": "François Guillon",
     "url": "https://github.com/francoisgn"
   },
   "homepage": "https://github.com/francoisgn/agentic-harness",
   "repository": "https://github.com/francoisgn/agentic-harness",
-  "keywords": ["workflow", "issues", "review", "orchestration", "ci-budget"]
+  "keywords": ["workflow", "issues", "review", "orchestration", "ci-budget", "compliance", "finops", "tdd"]
 }
