@@ -1,7 +1,9 @@
 name: Réglages
 
 # Réglages du dépôt du cadre « as code » (.github/repo-settings.json) : appliqués au merge, dérive contrôlée chaque
-# semaine. Workflow réutilisable : repo-settings.yml (le même que celui des projets).
+# semaine. Même logique que le workflow réutilisable repo-settings.yml des projets, en job direct ici (le cadre lance
+# son propre script ; un appel local `uses: ./…` est signalé par zizmor, audit self-repository).
+# Secret REPO_ADMIN_TOKEN : jeton fine-grained limité à ce dépôt, « Administration: read and write ». Absent → avertissement.
 on:
   push:
     branches: [master]
@@ -18,11 +20,28 @@ concurrency:
 
 jobs:
   settings:
+    name: Réglages du dépôt
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
     permissions:
       contents: read
-    uses: ./.github/workflows/repo-settings.yml
-    with:
-      apply: ${{ github.event_name != 'schedule' }}
-      script: scripts/repo-settings.py
-    secrets:
-      REPO_ADMIN_TOKEN: ${{ secrets.REPO_ADMIN_TOKEN }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Appliquer ou contrôler
+        env:
+          GH_TOKEN: ${{ secrets.REPO_ADMIN_TOKEN }}
+          EVENT: ${{ github.event_name }}
+        run: |
+          if [ -z "$GH_TOKEN" ]; then
+            echo "::warning::Secret REPO_ADMIN_TOKEN absent : réglages non appliqués (docs/ADOPTION.md §Réglages du dépôt)"
+            exit 0
+          fi
+          if [ "$EVENT" = "schedule" ]; then
+            python3 scripts/repo-settings.py --repo "$GITHUB_REPOSITORY" \
+              || { echo "::error::Dérive : un réglage a été changé hors du fichier (voir le plan ci-dessus)"; exit 1; }
+          else
+            python3 scripts/repo-settings.py --repo "$GITHUB_REPOSITORY" --apply
+          fi
