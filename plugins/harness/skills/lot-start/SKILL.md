@@ -25,6 +25,7 @@ Règles de référence : `.harness/docs/METHODOLOGY.md` §2 (sinon `${CLAUDE_PLU
 4. **Prise en charge** : sur chaque issue, un commentaire :
    ```
    Pris en charge — branche `claude/<lot>`
+   Agent : <projet>.<orchestrateur|solo>.lot.<cible> (<modèle>)
    - <plan en 3 à 5 puces : quoi, où, comment c'est testé>
 
    ---
@@ -35,4 +36,6 @@ Règles de référence : `.harness/docs/METHODOLOGY.md` §2 (sinon `${CLAUDE_PLU
    parallèle : `git worktree add ../<projet>-<lot> -b claude/<lot> origin/<intégration>`).
 6. **Spec** : un lot a sa spec `docs/lots/LOT-XXX-*.md` (gabarit `docs/lots/TEMPLATE.md`) ; un bug ou une tâche
    s'appuie sur l'issue. Relever les leçons de `LESSONS.md` qui s'appliquent (portée du projet) et les garder en tête.
-7. Rendre compte en 5 lignes : issues prises, branche, plan, risques, ce qui sera à valider sur Mac.
+7. Identifiant d'agent (`.harness/docs/ORCHESTRATION.md` §7) : celui donné par l'orchestrateur, sinon
+   `<projet>.solo.lot.<cible>` ; le reprendre dans les commits (trailer `Agent:`) et la PR.
+8. Rendre compte en 5 lignes : issues prises, branche, plan, risques, ce qui sera à valider sur Mac.
