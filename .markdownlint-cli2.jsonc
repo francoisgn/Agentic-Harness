@@ -1,0 +1,9 @@
+// Seulement les règles qui attrapent une vraie casse du rendu (tableaux cassés, ancres mortes) : LESSONS L07.
+{
+  "config": {
+    "default": false,
+    "MD051": true,
+    "MD056": true
+  },
+  "globs": ["**/*.md", "!**/.build/**", "!**/node_modules/**", "!plugins/harness/docs/**"]
+}

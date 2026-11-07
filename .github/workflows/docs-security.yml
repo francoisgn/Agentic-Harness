@@ -1,0 +1,57 @@
+name: Docs et sécurité (réutilisable)
+
+# Socle gratuit, sans compte tiers (CI-BUDGET.md §Sécurité), en UN job : markdownlint (tableaux et ancres),
+# gitleaks (historique), zizmor et actionlint (workflows). Chaque outil tourne même si le précédent échoue : un
+# seul passage donne tous les constats. Rien ne tourne sur un brouillon.
+# Désactiver ce que le projet couvre déjà ailleurs (inputs), pour ne pas payer deux fois.
+on:
+  workflow_call:
+    inputs:
+      markdownlint:
+        type: boolean
+        default: true
+      gitleaks:
+        type: boolean
+        default: true
+      zizmor:
+        type: boolean
+        default: true
+      actionlint:
+        type: boolean
+        default: true
+
+permissions:
+  contents: read
+
+jobs:
+  scan:
+    name: Docs · gitleaks · workflows
+    if: github.event.pull_request.draft != true
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          fetch-depth: 0   # gitleaks lit tout l'historique
+
+      - name: Markdown · tableaux et ancres (markdownlint, règles de .markdownlint-cli2.jsonc)
+        if: ${{ !cancelled() && inputs.markdownlint }}
+        run: npx --yes markdownlint-cli2@0.18.1
+
+      - name: Secrets · gitleaks (historique)
+        if: ${{ !cancelled() && inputs.gitleaks }}
+        run: |
+          if [ "$GITHUB_EVENT_NAME" = "pull_request" ]; then LOG_OPTS=HEAD; else LOG_OPTS=--all; fi
+          docker run --rm -v "$PWD":/repo ghcr.io/gitleaks/gitleaks:v8.30.1 \
+            git /repo --log-opts="$LOG_OPTS" --redact --no-banner --exit-code 1
+
+      - name: Workflows · zizmor
+        if: ${{ !cancelled() && inputs.zizmor }}
+        run: pipx run zizmor==1.31.1 --offline --min-severity low .github/workflows
+
+      - name: Workflows · actionlint (+ shellcheck des run:)
+        if: ${{ !cancelled() && inputs.actionlint }}
+        run: docker run --rm -v "$PWD":/repo -w /repo rhysd/actionlint:1.7.7 -color
