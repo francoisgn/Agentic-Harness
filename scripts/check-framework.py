@@ -14,6 +14,7 @@ import pathlib
 import re
 import sys
 
+GENERIC_REVIEWER = "compliance-reviewer"
 MODELS = {"haiku", "sonnet", "opus", "fable", "inherit"}
 COMPLIANCE_SECTIONS = ("## Rôle et limites", "## Quand intervenir", "## Ce que je vérifie", "## Preuves attendues",
                        "## Format de réponse", "## Sources")
@@ -54,7 +55,8 @@ def check(root):
         if meta.get("model") not in MODELS:
             errors.append(f"{rel} : `model` doit être l'un de {sorted(MODELS)}")
         if agent.stem.startswith("compliance-"):
-            errors += [f"{rel} : section « {s} » manquante" for s in COMPLIANCE_SECTIONS if s not in body]
+            if agent.stem != GENERIC_REVIEWER:  # le générique tient ses sections de la spec du projet
+                errors += [f"{rel} : section « {s} » manquante" for s in COMPLIANCE_SECTIONS if s not in body]
             if "Edit" in meta.get("tools", "") or "Write" in meta.get("tools", ""):
                 errors.append(f"{rel} : un relecteur de conformité reste en lecture seule (ni Edit ni Write)")
 

@@ -49,6 +49,11 @@ class CheckFrameworkTests(unittest.TestCase):
         p.write_text(p.read_text().replace("## Sources", "## Liens"))
         self.assertIn("Sources", run(self.tmp).stdout)
 
+    def test_generic_reviewer_must_stay_read_only(self):
+        p = self.tmp / "plugins/harness/agents/compliance-reviewer.md"
+        p.write_text(p.read_text().replace("tools: Read,", "tools: Edit, Read,"))
+        self.assertIn("compliance-reviewer.md", run(self.tmp).stdout)
+
     def test_skill_without_description(self):
         p = self.tmp / "plugins/harness/skills/intent/SKILL.md"
         p.write_text(p.read_text().replace("description:", "desc:", 1))

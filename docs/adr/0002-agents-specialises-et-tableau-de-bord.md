@@ -25,7 +25,7 @@ Option 2 :
 - convention de nommage des agents `<projet>.<orchestrateur>.<rôle>.<cible>` (ORCHESTRATION.md §7), vérifiée en CI ;
 - service de revue `ai-review.yml` (claude-code-action épinglée), jamais contrôle requis ;
 - pipeline `security.yml` (Semgrep, Trivy, gitleaks) ; tableau de bord `flow-metrics.py` + `flow-report.yml` ;
-- boucles bornées : 3 cycles de revue, 6 passages de CI par PR (FINOPS.md §3).
+- boucles bornées : 3 cycles de revue, 6 pushes testés par la CI par PR (FINOPS.md §3).
 
 ## Conséquences
 - Plus facile : ajouter un référentiel = un fichier d'agent + une ligne de catalogue ; rapport d'état automatique.

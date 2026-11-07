@@ -36,7 +36,7 @@ flowchart LR
 | Prise | Issue prête, prise en charge visible, agent nommé `<projet>.<orc>.<rôle>.<cible>` | `/lot-start`, `issue-steward` |
 | Réalisation | TDD : test rouge, code, vert ; commits atomiques ; un push par lot | METHODOLOGY §2 ter |
 | Vérification | Leçons, revue adversariale par un autre modèle, conformité si activée | `/lessons-check`, `adversarial-reviewer`, `/compliance-review` |
-| CI | Brouillon = rien ; SAST, SCA, secrets, lint ; boucles bornées (3 revues, 6 passages) | `security.yml`, `ai-review.yml`, CI-BUDGET |
+| CI | Brouillon = rien ; SAST, SCA, secrets, lint ; boucles bornées (3 cycles de revue, 6 pushes testés) | `security.yml`, `ai-review.yml`, CI-BUDGET |
 | Suivi | Panne, boucle, goulot, coût ; état lisible par un non-technicien | `flow-report.yml`, `/status-report` |
 | Capitalisation | Une erreur nouvelle devient une leçon, remontée au cadre par issue | `/lesson-propose`, formulaire « Leçon » |
 
@@ -49,7 +49,9 @@ flowchart LR
 | Intention, TDD, FinOps, stewards, nommage des agents | 🟢 nouveau en 0.2.0 | METHODOLOGY, FINOPS, STEWARDS, ORCHESTRATION §7 |
 | Tableau de bord du flux | 🟢 nouveau, testé hors ligne ; 🟠 premier passage réel à observer | `flow-metrics.py`, `flow-report.yml` |
 | Pipeline sécurité, revue IA | 🟠 nouveau, à valider sur un premier projet | `security.yml`, `ai-review.yml` |
-| Relecteurs de conformité | 🟠 fondation : identifiants « (à vérifier) » à confirmer sur les textes officiels | `plugins/harness/agents/compliance-*.md` |
+| Conformité branchable : agent du cadre, agent de l'entreprise ou spec seule | 🟢 résolution testée (`compliance-plan.py`) | COMPLIANCE §2 |
+| Agents de conformité intégrés | 🟠 fondation : identifiants « (à vérifier) » à confirmer sur les textes officiels | `plugins/harness/agents/compliance-*.md` |
+| Points d'extension : chaque brique se garde, se remplace ou se complète | 🟢 | ADOPTION §Remplacer ou étendre |
 
 ## Contenu
 
@@ -71,11 +73,11 @@ flowchart LR
 | [`docs/MAC-HANDOFF.md`](docs/MAC-HANDOFF.md) | Cloud Linux et Mac : partage des rôles, reprise |
 | [`docs/ADOPTION.md`](docs/ADOPTION.md) | Adopter, régler, mettre à jour, retirer |
 | [`docs/adr/`](docs/adr/README.md) | Décisions du cadre (0001 distribution, 0002 agents et tableau de bord) |
-| `plugins/harness/` | Plugin Claude Code : 10 skills, 12 agents, hooks `guard-git` et rappel de session |
+| `plugins/harness/` | Plugin Claude Code : 10 skills, 13 agents (dont le relecteur de conformité générique), hooks `guard-git` et rappel de session |
 | `templates/` | Gabarits vendorisés : bloc `CLAUDE.md`/`AGENTS.md`, labels, formulaires, PR, lot, workflows appelants |
 | `i18n/en/` | Édition anglaise des fichiers chargés à chaque session (`language: "en"`) |
 | `.github/workflows/` | Réutilisables : `labels-sync`, `issue-hygiene`, `pr-hygiene`, `docs-security`, `security`, `flow-report`, `ai-review` ; `ci.yml` du cadre |
-| `scripts/` | `harness-sync.sh` (vendorisation), `flow-metrics.py` (tableau de bord), `check-framework.py` (cohérence), tests |
+| `scripts/` | `harness-sync.sh` (vendorisation), `flow-metrics.py` (tableau de bord), `compliance-plan.py` (résolution de la conformité), `check-framework.py` (cohérence), tests |
 
 ## Démarrage rapide
 

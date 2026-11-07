@@ -25,7 +25,8 @@ grep -q '@.harness/docs/ESSENTIEL.md' "$T/CLAUDE.md" || fail "import d'ESSENTIEL
 [ -f "$T/.harness/docs/LESSONS.md" ] && [ -f "$T/.claude/skills/lot-start/SKILL.md" ] || fail "docs ou skills absents"
 [ -x "$T/.harness/hooks/guard-git.py" ] || fail "hook non exécutable"
 [ -f "$T/.claude/agents/adversarial-reviewer.md" ] && [ -f "$T/.claude/agents/compliance-gdpr.md" ] || fail "agents absents"
-[ -f "$T/.harness/scripts/flow-metrics.py" ] || fail "script du tableau de bord absent"
+[ -f "$T/.harness/scripts/flow-metrics.py" ] && [ -f "$T/.harness/scripts/compliance-plan.py" ] || fail "scripts absents"
+[ -f "$T/docs/compliance/TEMPLATE.md" ] && [ -f "$T/.claude/agents/compliance-reviewer.md" ] || fail "gabarit de spec ou relecteur générique absent"
 jq -e '.permissions.allow[0] == "Bash(swift test:*)" and (.hooks.PreToolUse | length) == 1' "$T/.claude/settings.json" >/dev/null \
   || fail "fusion de settings.json"
 PIN="$(git -C "$ROOT" rev-parse HEAD 2>/dev/null) # v$(cat "$ROOT/VERSION")"

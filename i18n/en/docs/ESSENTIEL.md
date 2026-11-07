@@ -43,6 +43,6 @@ in an issue.
 - **Naming**: every agent carries an id `<project>.<orchestrator>.<role>.<target>` reused in its titles, tags,
   comments (`Agent : …`) and commits (ORCHESTRATION.md §7).
 - **FinOps**: right model for the task (the stronger one reviews), delegate early, context lives in the repo; loops
-  capped at 3 review rounds and 6 CI runs per PR (FINOPS.md).
+  capped at 3 review rounds and 6 CI-tested pushes per PR (FINOPS.md).
 - **CI budget**: draft until done, one push per lot, no trial pushes.
 - Before saying "done", "already fixed" or "duplicate": re-check the current state (head SHA, latest comments).

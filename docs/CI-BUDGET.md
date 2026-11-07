@@ -99,4 +99,4 @@ La CI doit coûter par **lot prêt**, pas par commit :
 - détection de changements et `paths-ignore` : une PR de docs ne lance pas le build ; la sécurité lourde (SAST, SCA)
   tourne sur les PR prêtes, la branche d'intégration et chaque semaine, pas sur chaque push ;
 - revue automatique une fois par tête prête ([REVIEW-SERVICE](REVIEW-SERVICE.md) §3) ;
-- au-delà de 6 passages de CI sur une PR, la boucle s'arrête ([FINOPS](FINOPS.md) §3).
+- au-delà de 6 pushes testés par la CI sur une PR, la boucle s'arrête ([FINOPS](FINOPS.md) §3).

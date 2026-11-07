@@ -67,7 +67,7 @@ Règles :
 - **Minutes de CI épuisées** : contrôles locaux avant chaque merge (`local-check.sh` qui dit « INCOMPLET » s'il manque
   un outil), CI-BUDGET §2.
 - **Boucles bornées** (d'après la boucle de réparation d'OpenHarness, [`autopilot/service.py`](https://github.com/HKUDS/OpenHarness/blob/main/src/openharness/autopilot/service.py), `repair max_rounds`, lu le 2026-11-07) :
-  au plus **3 cycles de revue** et **6 passages de CI** par PR ; au-delà, l'orchestrateur arrête l'auteur, écrit le
+  au plus **3 cycles de revue** et **6 pushes testés par la CI** par PR ; au-delà, l'orchestrateur arrête l'auteur, écrit le
   diagnostic sur l'issue et réaffecte (modèle au-dessus, spec à clarifier, ou humain).
 
 ## 4. Surveiller les dérives

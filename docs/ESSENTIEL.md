@@ -47,7 +47,7 @@ conflit se signale dans une issue.
 - **Nommage** : tout agent porte un identifiant `<projet>.<orchestrateur>.<rôle>.<cible>` repris dans ses titres,
   tags, commentaires (`Agent : …`) et commits (ORCHESTRATION.md §7).
 - **FinOps** : le bon modèle pour la tâche (le plus fort relit), déléguer tôt, le contexte vit dans le dépôt ; boucles
-  bornées à 3 revues et 6 passages de CI par PR (FINOPS.md).
+  bornées à 3 cycles de revue et 6 pushes testés par la CI par PR (FINOPS.md).
 - **Budget CI** : brouillon tant que ce n'est pas fini, un push par lot, pas de push d'essai (CI-BUDGET.md).
 - Avant d'annoncer « fait », « déjà corrigé » ou « doublon » : relire l'état actuel (tête de branche, derniers
   commentaires, issue ouverte ou fermée).

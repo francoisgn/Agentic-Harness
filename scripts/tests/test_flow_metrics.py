@@ -165,6 +165,8 @@ class CollectTests(unittest.TestCase):
         open_calls = [c for c in calls if c.startswith("repos/o/r/issues") and "state=open" in c]
         self.assertTrue(open_calls and all("since=" not in c for c in open_calls), calls)
         self.assertTrue(any(c.startswith("repos/o/r/milestones") for c in calls), calls)
+        closed = [c for c in calls if c.startswith("repos/o/r/issues") and "state=closed" in c]
+        self.assertTrue(closed and all("since=" in c for c in closed), calls)  # sinon pagination de tout l'historique
 
 
 class RenderTests(unittest.TestCase):

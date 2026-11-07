@@ -130,6 +130,24 @@ la première fois) :
 4. Les leçons génériques nées dans HFRnow remontent au cadre par PR sur agentic-harness ; les leçons du domaine HFR
    restent dans le projet.
 
+## Remplacer ou étendre une brique
+
+Le cadre est un **framework** : chaque brique a un point d'extension, aucune n'est imposée.
+
+| Brique | Garder celle du cadre | La remplacer par celle de l'entreprise | La compléter |
+|---|---|---|---|
+| Relecteurs de conformité | `compliance: ["gdpr"]` | `{"id": …, "agent": "<son agent>"}` | `{"id": …, "spec": "docs/compliance/<id>.md"}` ([COMPLIANCE](COMPLIANCE.md) §2) |
+| Relecteur adversarial, stewards | `.claude/agents/<nom>.md` vendorisé | Exclure le fichier (`exclude`) et poser le sien sous le même nom | Un agent du projet sous un autre nom |
+| Skills | `.claude/skills/<nom>/` vendorisé | Exclure et poser le sien | Skills du projet sous d'autres noms |
+| Service de revue | job `review` (`ai-review.yml`) | CodeRabbit ou autre bot : ne pas activer `review` | `.harness/review-instructions.md` |
+| Sécurité | `security.yml`, `docs-security.yml` | Outils de l'entreprise (GHAS, SonarQube, Snyk) : ne pas activer ces jobs | Inputs (`semgrep-configs`, `trivy-severity`) |
+| Tableau de bord | job `flow` | Outil de pilotage maison : supprimer `flow` | Seuils en inputs (`stall-hours`, `max-ci-runs`…) |
+| Labels | `.harness/labels.json` | Garder sa taxonomie (`apply-aliases: false`) | `.github/labels.local.json` |
+| Leçons, règles | `.harness/docs/` | — (le `CLAUDE.md` du projet l'emporte) | Leçons et règles du projet dans ses propres fichiers |
+
+Règle : on **n'édite jamais** une copie vendorisée (la synchro la refuse) ; on exclut et on remplace, ou on ajoute à
+côté. Un remplacement utile à tous remonte au cadre par PR.
+
 ## Adoption partielle
 - **Règles seulement** : exclure `.github/*` et `docs/lots/*`.
 - **Workflows et labels seulement** : ne pas lancer la synchro ; appeler les workflows réutilisables depuis le

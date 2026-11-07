@@ -16,7 +16,13 @@ Intention, TDD, FinOps, stewards, conformité, sécurité et mesure du flux.
   `<projet>.<orchestrateur>.<rôle>.<cible>`, vérifié en CI) ; LESSONS : remontée des leçons par issue.
 - **Agents** (vendorisés en `.claude/agents/`) : `adversarial-reviewer`, `issue-steward`, `doc-steward`,
   `flow-monitor`, `compliance-gdpr`, `-eu-ai-act`, `-nis2`, `-iso27001`, `-soc2`, `-tisax`, `-pci` (DSS, PIN, P2PE),
-  `-hds`. Les identifiants d'exigence non vérifiés sur le texte officiel sont marqués « (à vérifier) ».
+  `-hds`, et le relecteur générique `compliance-reviewer`. Les identifiants d'exigence non vérifiés sur le texte
+  officiel sont marqués « (à vérifier) ».
+- **Conformité branchable** (COMPLIANCE §2) : par référentiel, agent intégré, agent de l'entreprise, ou spec seule
+  (`docs/compliance/<id>.md`, gabarit fourni) appliquée par le relecteur générique ; périmètre décidé sans jeton par
+  `paths` / `keywords` ; résolution et validation par `compliance-plan.py` (vendorisé, testé).
+- **Points d'extension** (ADOPTION §Remplacer ou étendre une brique) : chaque brique du cadre se garde, se remplace
+  par celle de l'entreprise ou se complète.
 - **Skills** : `/intent`, `/lesson-propose`, `/status-report`, `/compliance-review` ; `/lot-start` pose l'identifiant
   d'agent.
 - **Workflows réutilisables** : `security.yml` (Semgrep CE, Trivy, gitleaks), `flow-report.yml` (issue « Tableau de
