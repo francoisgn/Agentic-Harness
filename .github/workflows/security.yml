@@ -49,6 +49,8 @@ jobs:
           persist-credentials: false
           fetch-depth: 0   # gitleaks lit l'historique
 
+      # Règles du registre nommées (`p/…`) : utilisables sans métriques ; `--config auto` les exigerait (à confirmer au
+      # premier passage réel, sinon passer à --metrics=auto).
       - name: SAST · Semgrep CE
         if: ${{ !cancelled() && inputs.semgrep }}
         env:

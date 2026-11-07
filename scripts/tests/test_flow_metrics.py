@@ -50,12 +50,15 @@ def pull(n, ref="claude/lot-1", draft=False, updated="2026-11-07T10:00:00Z", sta
     }
 
 
-def run(branch, conclusion="failure", created="2026-11-06T10:00:00Z", minutes=3):
+def run(branch, conclusion="failure", created="2026-11-06T10:00:00Z", minutes=3, sha="s1", event="pull_request",
+        workflow=1):
     start = fm.parse_time(created)
     return {
         "head_branch": branch,
+        "head_sha": sha,
+        "workflow_id": workflow,
         "conclusion": conclusion,
-        "event": "pull_request",
+        "event": event,
         "created_at": created,
         "run_started_at": created,
         "updated_at": fm.format_time(start + minutes * 60),
@@ -90,10 +93,31 @@ class AnalyseTests(unittest.TestCase):
         self.assertEqual([s["number"] for s in r["stalled"]], [11])
 
     def test_ci_loop_detected_per_open_pr_branch(self):
-        runs = [run("claude/lot-1") for _ in range(7)] + [run("claude/autre") for _ in range(7)]
+        runs = [run("claude/lot-1", sha=f"a{k}") for k in range(7)] + [run("claude/autre", sha=f"b{k}") for k in range(7)]
         r = self.analyse(pulls=[pull(10)], runs=runs, max_ci_runs=6)
         self.assertEqual([(lp["number"], lp["kind"]) for lp in r["loops"]], [(10, "ci")])
         self.assertEqual(r["status"], "🔴")
+
+    def test_ci_loop_counts_pushes_not_workflows(self):
+        # 4 workflows par push, 2 pushes : 2 passages, pas une boucle (constat de revue n° 1)
+        runs = [run("claude/lot-1", sha=f"a{k}", workflow=w) for k in range(2) for w in range(4)]
+        self.assertEqual(self.analyse(pulls=[pull(10)], runs=runs, max_ci_runs=6)["loops"], [])
+
+    def test_ci_loop_ignores_push_and_schedule_runs_of_promotion_branch(self):
+        runs = [run("develop", sha=f"d{k}", event=e) for k in range(8) for e in ("push", "schedule")]
+        self.assertEqual(self.analyse(pulls=[pull(20, ref="develop")], runs=runs, max_ci_runs=6)["loops"], [])
+
+    def test_failure_rate_ignores_cancelled_and_skipped(self):
+        runs = [run("x", conclusion="failure"), run("x", conclusion="cancelled"), run("x", conclusion="cancelled"),
+                run("x", conclusion="skipped"), run("x", conclusion="success")]
+        self.assertEqual(self.analyse(runs=runs)["ci"]["failure_rate"], 50)
+
+    def test_milestones_from_api_take_precedence(self):
+        data_ms = [{"title": "Jalon 1", "open_issues": 1, "closed_issues": 9, "due_on": "2026-12-01T00:00:00Z"}]
+        r = fm.analyse({"issues": [issue(1, milestone="Jalon 1")], "pulls": [], "runs": [], "milestones": data_ms},
+                       now=fm.parse_time(NOW))
+        self.assertEqual(r["milestones"], [{"title": "Jalon 1", "closed": 9, "total": 10, "percent": 90,
+                                            "due_on": "2026-12-01"}])
 
     def test_review_round_loop(self):
         r = self.analyse(pulls=[pull(10, reviews=5)], max_review_rounds=3)
@@ -123,6 +147,24 @@ class AnalyseTests(unittest.TestCase):
         self.assertEqual(r["ci"]["runs"], 2)
         self.assertEqual(r["ci"]["billed_minutes_min"], 4)
         self.assertEqual(r["ci"]["failure_rate"], 0)
+
+
+class CollectTests(unittest.TestCase):
+    def test_open_issues_are_fetched_without_since(self):
+        calls = []
+
+        def fake(path):
+            calls.append(path)
+            return []
+        original = fm._gh
+        fm._gh = fake
+        try:
+            fm.collect("o/r", 14)
+        finally:
+            fm._gh = original
+        open_calls = [c for c in calls if c.startswith("repos/o/r/issues") and "state=open" in c]
+        self.assertTrue(open_calls and all("since=" not in c for c in open_calls), calls)
+        self.assertTrue(any(c.startswith("repos/o/r/milestones") for c in calls), calls)
 
 
 class RenderTests(unittest.TestCase):

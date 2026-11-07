@@ -12,7 +12,7 @@ tâche au modèle adapté et la fait relire par un modèle plus fort.
 Né de deux projets réels : **HFRnow / SwiftHFR** (client iOS, branche `dev-swift` : orchestration multi-sessions,
 revues adversariales, 57 leçons) et **ios-app_credit-immo** (simulateur de crédit : workflow piloté par les issues,
 labels modèle/taille, budget CI, reprise sur Mac). Ce qui est propre à leur domaine est resté chez eux ; le reste est
-ici, généralisé. Inspirations externes citées : OpenHarness (HKUDS, MIT) pour la boucle de réparation bornée et le
+ici, généralisé. Inspirations externes citées : [OpenHarness](https://github.com/HKUDS/OpenHarness) (HKUDS, MIT) pour la boucle de réparation bornée et le
 tableau de bord (ADR 0002).
 
 ## Comment ça marche

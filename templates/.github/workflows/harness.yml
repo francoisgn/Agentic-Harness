@@ -61,14 +61,14 @@ jobs:
 
   # Socle docs + sécurité, si le projet ne l'a pas déjà (sinon supprimer ces jobs : on ne paie pas deux fois).
   # docs:
-  #   if: github.event_name == 'pull_request'
+  #   if: github.event_name == 'pull_request' && github.event.action != 'edited'
   #   permissions:
   #     contents: read
   #   uses: francoisgn/agentic-harness/.github/workflows/docs-security.yml@v0.2.0
   #   with:
   #     gitleaks: false   # déjà dans le job security
   # security:   # SAST (Semgrep) + SCA (Trivy) + secrets (gitleaks), CI-BUDGET.md §3
-  #   if: github.event_name == 'pull_request' || (github.event_name == 'schedule' && github.event.schedule == '47 5 * * 1')
+  #   if: (github.event_name == 'pull_request' && github.event.action != 'edited') || (github.event_name == 'schedule' && github.event.schedule == '47 5 * * 1')
   #   permissions:
   #     contents: read
   #   uses: francoisgn/agentic-harness/.github/workflows/security.yml@v0.2.0

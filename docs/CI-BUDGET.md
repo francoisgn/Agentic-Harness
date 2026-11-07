@@ -66,7 +66,8 @@ Hygiène des workflows (vérifiée par zizmor et par la revue) :
 - pre-commit : dépôts de hooks figés par SHA (Dependabot ne lit pas ce fichier : mise à jour à la main) ; aucun hook de
   reformatage (les données de test restent à l'octet près).
 
-Pipeline complet en un appel : `security.yml` (Semgrep CE, Trivy `fs`, gitleaks, en un job) ; `docs-security.yml`
+Pipeline complet en un appel : `security.yml` (Semgrep CE, Trivy `fs`, gitleaks, en un job ; règles Semgrep par défaut
+`p/default p/secrets p/github-actions`, ajouter celles du langage, ex. `p/swift`) ; `docs-security.yml`
 pour les docs et les workflows. Appeler l'un et l'autre sans doubler gitleaks (input `gitleaks: false` sur l'un).
 
 ### Secrets et variables : rien en dur

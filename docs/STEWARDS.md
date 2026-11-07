@@ -10,7 +10,7 @@ planifié, fait une passe, rend compte, et s'arrête ([FINOPS](FINOPS.md) §1). 
 | Orchestrateur (SPOC) | session principale | solide | toujours | issues, commentaires, sessions enfants |
 | Issue steward | `issue-steward` | rapide | nouvelle issue, chaque jour, avant une vague de lots | labels, commentaires de tri ; **propose** fusions et fermetures |
 | Doc steward | `doc-steward` | solide | après un merge qui touche le comportement, chaque semaine | une PR de docs (brouillon) |
-| Flow monitor | `flow-monitor` + `flow-report.yml` | rapide | chaque jour | l'issue « Tableau de bord » |
+| Flow monitor | `flow-monitor` (lecture seule) ; `flow-report.yml` écrit l'issue | rapide | chaque jour | rien (le workflow tient l'issue « Tableau de bord ») |
 | Relecteur adversarial | `adversarial-reviewer` | ≥ auteur, autre modèle | avant « Ready for review » | rien (lecture seule) |
 | Service de revue | `ai-review.yml` | solide / frontière | chaque PR prête | une revue de PR ([REVIEW-SERVICE](REVIEW-SERVICE.md)) |
 | Relecteurs conformité | `compliance-*` | frontière | diff dans leur périmètre | rien ([COMPLIANCE](COMPLIANCE.md)) |

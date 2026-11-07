@@ -66,7 +66,7 @@ Règles :
   s'arrête proprement. À la reprise : relire l'état du dépôt (L18, L19), pas sa mémoire.
 - **Minutes de CI épuisées** : contrôles locaux avant chaque merge (`local-check.sh` qui dit « INCOMPLET » s'il manque
   un outil), CI-BUDGET §2.
-- **Boucles bornées** (d'après la boucle de réparation d'OpenHarness, `autopilot/service.py`, `repair max_rounds`) :
+- **Boucles bornées** (d'après la boucle de réparation d'OpenHarness, [`autopilot/service.py`](https://github.com/HKUDS/OpenHarness/blob/main/src/openharness/autopilot/service.py), `repair max_rounds`, lu le 2026-11-07) :
   au plus **3 cycles de revue** et **6 passages de CI** par PR ; au-delà, l'orchestrateur arrête l'auteur, écrit le
   diagnostic sur l'issue et réaffecte (modèle au-dessus, spec à clarifier, ou humain).
 
@@ -78,7 +78,7 @@ Le tableau de bord (`flow-report.yml`, script `flow-metrics.py`) calcule chaque 
 |---|---|---|---|
 | Issue `pris en charge` sans activité | 24 h | Session morte ou bloquée en silence | Watchdog : arrêter, noter l'état, rendre l'issue |
 | PR prête sans activité / brouillon | 24 h / 120 h | Revue ou auteur en panne | Relancer le bon acteur |
-| Passages de CI sur la branche d'une PR | > 6 | Boucle de push d'essai | Arrêt, diagnostic local, un seul push |
+| Pushes testés par la CI sur une PR (SHA distincts) | > 6 | Boucle de push d'essai | Arrêt, diagnostic local, un seul push |
 | Revues sur une PR | > 3 | Boucle de revue (correctifs à l'instance, pas à la classe) | Contre-vérification, REVIEW-ROUNDS §3 |
 | `bloqué`, `à clarifier` | tout | Goulot externe ou décision produit | Remonter à l'opérateur, avec la question exacte |
 | Délai médian ouverture → merge | tendance | Fluidité | Comparer semaine à semaine |

@@ -63,12 +63,15 @@ def analyse(data, now, stall_hours=24, draft_stall_hours=120, max_ci_runs=6, max
             stalled.append({"kind": "PR", "number": p["number"], "title": p["title"], "idle_hours": round(idle),
                             "p1": False, "url": p.get("html_url")})
 
-    runs_by_branch = {}
+    # Un passage de CI = un push testé sur la PR : SHA distincts des runs `pull_request` de sa branche. Ni le nombre de
+    # workflows par push, ni les runs push/schedule d'une branche de promotion (develop) ne comptent.
+    pushes_by_branch = {}
     for r in runs:
-        runs_by_branch.setdefault(r.get("head_branch"), []).append(r)
+        if r.get("event") == "pull_request":
+            pushes_by_branch.setdefault(r.get("head_branch"), set()).add(r.get("head_sha"))
     loops = []
     for p in open_pulls:
-        n_runs = len(runs_by_branch.get(p["head"]["ref"], []))
+        n_runs = len(pushes_by_branch.get(p["head"]["ref"], ()))
         if n_runs > max_ci_runs:
             loops.append({"kind": "ci", "number": p["number"], "title": p["title"], "count": n_runs,
                           "url": p.get("html_url")})
@@ -86,13 +89,21 @@ def analyse(data, now, stall_hours=24, draft_stall_hours=120, max_ci_runs=6, max
             bottlenecks[label] = numbers
 
     milestones = {}
-    for i in issues:
+    for i in ([] if data.get("milestones") else issues):
         if i.get("milestone"):
             m = milestones.setdefault(i["milestone"]["title"], {"closed": 0, "total": 0})
             m["total"] += 1
             m["closed"] += i["state"] == "closed"
     milestone_list = [{"title": t, "closed": m["closed"], "total": m["total"],
                        "percent": round(100 * m["closed"] / m["total"])} for t, m in sorted(milestones.items())]
+    if data.get("milestones"):  # source exacte : compteurs de l'API, issues anciennes comprises
+        milestone_list = []
+        for m in sorted(data["milestones"], key=lambda m: m["title"]):
+            total = m["open_issues"] + m["closed_issues"]
+            if total:
+                milestone_list.append({"title": m["title"], "closed": m["closed_issues"], "total": total,
+                                       "percent": round(100 * m["closed_issues"] / total),
+                                       "due_on": (m.get("due_on") or "")[:10] or None})
 
     window_start = now - window_days * 86400
     merged = [p for p in pulls if p.get("merged_at") and parse_time(p["merged_at"]) >= window_start]
@@ -104,7 +115,8 @@ def analyse(data, now, stall_hours=24, draft_stall_hours=120, max_ci_runs=6, max
         start = r.get("run_started_at") or r.get("created_at")
         if start and r.get("updated_at"):
             durations.append(max(0.0, (parse_time(r["updated_at"]) - parse_time(start)) / 60))
-    finished = [r for r in runs if r.get("conclusion")]
+    # Annulés (cancel-in-progress) et sautés (brouillon) ne disent rien de la qualité : hors du dénominateur.
+    finished = [r for r in runs if r.get("conclusion") in ("success", "failure")]
     failures = [r for r in finished if r["conclusion"] == "failure"]
 
     by_type = {}
@@ -160,10 +172,11 @@ def render_markdown(r, repo):
            f"| Passages de CI (minutes facturées, borne basse) | {r['ci']['runs']} ({r['ci']['billed_minutes_min']} min) |",
            f"| Taux d'échec CI | {r['ci']['failure_rate']} % |", ""]
     if r["milestones"]:
-        out += ["## Jalons", "", "| Jalon | Avancement | Fermées / total |", "|---|---|---|"]
+        out += ["## Jalons", "", "| Jalon | Avancement | Fermées / total | Échéance |", "|---|---|---|---|"]
         for m in r["milestones"]:
             bar = "█" * (m["percent"] // 10) + "░" * (10 - m["percent"] // 10)
-            out.append(f"| {_cell(m['title'])} | `{bar}` {m['percent']} % | {m['closed']} / {m['total']} |")
+            out.append(f"| {_cell(m['title'])} | `{bar}` {m['percent']} % | {m['closed']} / {m['total']} | "
+                       f"{m.get('due_on') or '—'} |")
         out.append("")
     out += ["## Goulots", ""]
     if r["bottleneck_items"]:
@@ -189,7 +202,7 @@ def render_markdown(r, repo):
         out += [f"| {_cell(k)} | {v} |" for k, v in r["labels"].items()]
     t = r["thresholds"]
     out += ["", f"_Seuils : inactivité {t['stall_hours']} h (brouillon {t['draft_stall_hours']} h), "
-                f"boucle CI > {t['max_ci_runs']} passages, boucle de revue > {t['max_review_rounds']} revues. "
+                f"boucle CI > {t['max_ci_runs']} pushes testés, boucle de revue > {t['max_review_rounds']} revues. "
                 "Lecture : FINOPS.md §4 du cadre agentic-harness._", ""]
     return "\n".join(out)
 
@@ -205,14 +218,18 @@ def _gh(path):
 
 def collect(repo, window_days):
     since = format_time(time.time() - max(window_days, 30) * 86400)
-    issues = _gh(f"repos/{repo}/issues?state=all&per_page=100&since={since}")
+    # Ouvertes : toutes, sans `since` (une prise en charge inactive depuis longtemps est la panne la plus grave) ;
+    # fermées : la fenêtre seulement. Jalons : compteurs de l'API, exacts quelle que soit l'ancienneté des issues.
+    issues = _gh(f"repos/{repo}/issues?state=open&per_page=100")
+    issues += _gh(f"repos/{repo}/issues?state=closed&per_page=100&since={since}")
+    milestones = _gh(f"repos/{repo}/milestones?state=open&per_page=100")
     pulls = _gh(f"repos/{repo}/pulls?state=all&per_page=100&sort=updated&direction=desc")
     pulls = [p for p in pulls if p["state"] == "open" or (p.get("updated_at") or "") >= since]
     for p in pulls:
         if p["state"] == "open":
             p["review_count"] = len(_gh(f"repos/{repo}/pulls/{p['number']}/reviews?per_page=100"))
     runs = _gh(f"repos/{repo}/actions/runs?per_page=100&created=>={since[:10]}")
-    return {"issues": issues, "pulls": pulls, "runs": runs}
+    return {"issues": issues, "pulls": pulls, "runs": runs, "milestones": milestones}
 
 
 def main(argv=None):

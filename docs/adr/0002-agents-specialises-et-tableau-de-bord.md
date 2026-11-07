@@ -8,7 +8,7 @@ principal (CI-BUDGET.md §5). Les projets ont besoin de relecteurs de conformit�
 TISAX, PCI, HDS) lancés seulement quand le diff les concerne, de rôles d'entretien (issues, docs, flux) et d'un état
 lisible par des non-techniciens. Le cadre 0.1.0 décrivait la revue adversariale en prose, sans agent réutilisable, et
 n'avait aucune mesure du flux. OpenHarness (HKUDS, MIT) montre une machine d'états de tâches persistée dans le dépôt,
-une boucle de réparation bornée et un tableau de bord exporté (`src/openharness/autopilot/service.py`).
+une boucle de réparation bornée et un tableau de bord exporté ([`src/openharness/autopilot/service.py`](https://github.com/HKUDS/OpenHarness/blob/main/src/openharness/autopilot/service.py), branche `main` lue le 2026-11-07, dernier commit du 2026-06-04).
 
 ## Options
 1. **Prose seulement** : chaque projet écrit ses prompts. Gratuit, mais divergent et non testable.

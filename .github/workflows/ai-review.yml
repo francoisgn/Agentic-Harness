@@ -32,10 +32,6 @@ on:
 permissions:
   contents: read
 
-concurrency:
-  group: ai-review-${{ github.event.pull_request.number }}
-  cancel-in-progress: true
-
 jobs:
   review:
     name: Revue IA
@@ -46,6 +42,9 @@ jobs:
       && github.event.pull_request.head.repo.full_name == github.repository
     runs-on: ubuntu-latest
     timeout-minutes: 20
+    concurrency:
+      group: ai-review-${{ github.event.pull_request.number }}
+      cancel-in-progress: true
     permissions:
       contents: read
       pull-requests: write
@@ -68,7 +67,9 @@ jobs:
             echo "Tu es le service de revue du cadre agentic-harness sur la PR #$PR, tête $HEAD_SHA, base $BASE_REF."
             echo "Lecture seule sur le code : ni commit, ni push, ni merge. Tu postes UNE revue de PR, rien d'autre."
             echo "Lis : CLAUDE.md, .harness/docs/ESSENTIEL.md, .harness/docs/LESSONS.md, la spec liée (Closes/Refs)."
-            echo "Relis git diff origin/$BASE_REF...HEAD. Pour chaque risque réel : scénario d'échec concret, fichier:ligne,"
+            echo "Revue incrémentale : si tu as déjà posté une revue sur cette PR (gh pr view $PR --json reviews), relis"
+            echo "seulement git diff <sha de ta dernière revue>...HEAD, et vérifie si tes constats précédents sont traités."
+            echo "Sinon, relis git diff origin/$BASE_REF...HEAD. Pour chaque risque réel : scénario d'échec concret, fichier:ligne,"
             echo "correctif proportionné. Sévérités : Haute / Moyenne / Basse / Détail. Pas de constat de style qu'un"
             echo "linter attrape ; pas de constat sans chemin d'exécution ; regrouper les cas d'une même classe."
             echo "Vérifie aussi : tests qui échoueraient sans le changement (LESSONS L01), secrets en dur, données"
