@@ -24,11 +24,15 @@ grep -q 'Règle du projet à garder.' "$T/CLAUDE.md" || fail "texte du projet pe
 grep -q '@.harness/docs/ESSENTIEL.md' "$T/CLAUDE.md" || fail "import d'ESSENTIEL absent"
 [ -f "$T/.harness/docs/LESSONS.md" ] && [ -f "$T/.claude/skills/lot-start/SKILL.md" ] || fail "docs ou skills absents"
 [ -x "$T/.harness/hooks/guard-git.py" ] || fail "hook non exécutable"
+[ -f "$T/.claude/agents/adversarial-reviewer.md" ] && [ -f "$T/.claude/agents/compliance-gdpr.md" ] || fail "agents absents"
+[ -f "$T/.harness/scripts/flow-metrics.py" ] && [ -f "$T/.harness/scripts/compliance-plan.py" ] \
+  && [ -f "$T/.harness/scripts/repo-settings.py" ] && [ -f "$T/.github/repo-settings.json" ] || fail "scripts ou réglages absents"
+[ -f "$T/docs/compliance/TEMPLATE.md" ] && [ -f "$T/.claude/agents/compliance-reviewer.md" ] || fail "gabarit de spec ou relecteur générique absent"
 jq -e '.permissions.allow[0] == "Bash(swift test:*)" and (.hooks.PreToolUse | length) == 1' "$T/.claude/settings.json" >/dev/null \
   || fail "fusion de settings.json"
 PIN="$(git -C "$ROOT" rev-parse HEAD 2>/dev/null) # v$(cat "$ROOT/VERSION")"
 if [ -n "$(git -C "$ROOT" status --porcelain 2>/dev/null)" ] || ! git -C "$ROOT" rev-parse HEAD >/dev/null 2>&1; then PIN="v$(cat "$ROOT/VERSION")"; fi
-[ "$(grep -c "agentic-harness/.github/workflows/.*@$PIN\$" "$T/.github/workflows/harness.yml")" = 4 ] || fail "refbump ($PIN)"
+[ "$(grep -c "agentic-harness/.github/workflows/.*@$PIN\$" "$T/.github/workflows/harness.yml")" = 8 ] || fail "refbump ($PIN)"
 ok "première synchro : bloc, docs, skills, hooks, fusion JSON, refbump"
 
 [ "$(run)" = 0 ] && grep -q 'À jour' "$WORK/out" || fail "deuxième synchro non idempotente : $(cat "$WORK/out")"

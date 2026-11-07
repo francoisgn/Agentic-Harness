@@ -21,6 +21,14 @@ copy      templates/.github/labels.json               .harness/labels.json
 # Skills : copiés dans le dépôt pour fonctionner aussi en session cloud (qui ne charge pas les plugins du dépôt)
 tree      plugins/harness/skills                      .claude/skills
 
+# Sous-agents (relecteur adversarial, stewards, conformité) : .claude/agents/ fonctionne en cloud comme en local
+tree      plugins/harness/agents                      .claude/agents
+
+# Script du tableau de bord du flux (appelé par flow-report.yml et /status-report)
+copy      scripts/flow-metrics.py                     .harness/scripts/flow-metrics.py
+copy      scripts/compliance-plan.py                  .harness/scripts/compliance-plan.py
+copy      scripts/repo-settings.py                    .harness/scripts/repo-settings.py
+
 # Hooks vendorisés (garde-fou git, rappel de session) et leur déclaration
 copy      plugins/harness/scripts/guard-git.py        .harness/hooks/guard-git.py
 copy      plugins/harness/scripts/session-start.sh    .harness/hooks/session-start.sh
@@ -33,6 +41,7 @@ block     templates/AGENTS.md.block                   AGENTS.md   cadre   templa
 # Gabarits du projet (créés une fois, puis à lui)
 seed      templates/.harness/config.json              .harness/config.json
 seed      templates/.github/labels.local.json         .github/labels.local.json
+seed      templates/.github/repo-settings.json        .github/repo-settings.json
 seed      templates/.github/pull_request_template.md  .github/pull_request_template.md
 seed      templates/.github/ISSUE_TEMPLATE/config.yml   .github/ISSUE_TEMPLATE/config.yml
 seed      templates/.github/ISSUE_TEMPLATE/feedback.yml .github/ISSUE_TEMPLATE/feedback.yml
@@ -40,6 +49,7 @@ seed      templates/.github/ISSUE_TEMPLATE/bug.yml      .github/ISSUE_TEMPLATE/b
 seed      templates/.github/ISSUE_TEMPLATE/feature.yml  .github/ISSUE_TEMPLATE/feature.yml
 seed      templates/.github/ISSUE_TEMPLATE/tache.yml    .github/ISSUE_TEMPLATE/tache.yml
 seed      templates/docs/lots/TEMPLATE.md             docs/lots/TEMPLATE.md
+seed      templates/docs/compliance/TEMPLATE.md       docs/compliance/TEMPLATE.md
 seed      templates/.markdownlint-cli2.jsonc          .markdownlint-cli2.jsonc
 seed      templates/.github/workflows/harness.yml       .github/workflows/harness.yml
 seed      templates/.github/workflows/harness-sync.yml  .github/workflows/harness-sync.yml

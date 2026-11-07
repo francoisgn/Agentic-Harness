@@ -1,10 +1,12 @@
 name: CI
 
-# CI du cadre lui-même, en un job Linux (budget : CI-BUDGET.md) : scripts, workflows, JSON, cohérence des versions,
-# tests de harness-sync.sh, markdown. Rien sur un brouillon.
+# CI du cadre lui-même, en UN job Linux (budget : CI-BUDGET.md §2, §5) : cohérence du cadre (skills, agents,
+# manifeste, labels, nommage), tests (harness-sync.sh, hooks, flow-metrics, contrôles), scripts, workflows, JSON et
+# versions, markdown, secrets. Chaque étape tourne même si la précédente échoue : un passage donne tous les constats.
+# Rien sur un brouillon ; une PR de docs ne coûte qu'une minute.
 on:
   push:
-    branches: [main]
+    branches: [master]
   pull_request:
     types: [opened, synchronize, reopened, ready_for_review]
   workflow_dispatch:
@@ -26,6 +28,19 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
+          fetch-depth: 0   # gitleaks lit l'historique de la PR
+
+      - name: Cohérence du cadre (skills, agents, manifeste, labels, nommage)
+        if: ${{ !cancelled() }}
+        run: python3 scripts/check-framework.py
+
+      - name: Tests Python (flow-metrics, contrôles)
+        if: ${{ !cancelled() }}
+        run: python3 -m unittest discover -s scripts/tests -p 'test_*.py' -v
+
+      - name: Schémas à jour avec leurs sources (docs/diagrams)
+        if: ${{ !cancelled() }}
+        run: python3 scripts/diagrams/render.py --check
 
       - name: ShellCheck
         if: ${{ !cancelled() }}
@@ -33,7 +48,7 @@ jobs:
 
       - name: Python (syntaxe des hooks)
         if: ${{ !cancelled() }}
-        run: python3 -m py_compile plugins/harness/scripts/guard-git.py
+        run: python3 -m py_compile plugins/harness/scripts/guard-git.py scripts/*.py scripts/diagrams/*.py
 
       - name: JSON valides et versions cohérentes
         if: ${{ !cancelled() }}
@@ -59,3 +74,12 @@ jobs:
       - name: Markdown (tableaux, ancres)
         if: ${{ !cancelled() }}
         run: npx --yes markdownlint-cli2@0.18.1
+
+      - name: Secrets · gitleaks
+        if: ${{ !cancelled() }}
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        run: |
+          if [ -n "$BASE_SHA" ]; then LOG_OPTS="$BASE_SHA..HEAD"; else LOG_OPTS=--all; fi
+          docker run --rm -v "$PWD":/repo ghcr.io/gitleaks/gitleaks:v8.30.1 \
+            git /repo --log-opts="$LOG_OPTS" --redact --no-banner --exit-code 1

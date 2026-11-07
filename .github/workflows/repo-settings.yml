@@ -1,0 +1,56 @@
+name: Réglages du dépôt (réutilisable)
+
+# Applique .github/repo-settings.json (description, topics, rulesets) avec un jeton d'administration : une session
+# cloud ne peut pas changer les réglages (LESSONS L56), elle change ce fichier par PR et la CI l'applique au merge.
+#   - `apply: true` (push sur la branche par défaut, lancement manuel) : applique les écarts ;
+#   - `apply: false` (planifié) : contrôle de dérive ; échoue si quelqu'un a changé un réglage à la main.
+# Secret REPO_ADMIN_TOKEN : jeton fine-grained limité à CE dépôt, « Administration: read and write » (+ « Metadata:
+# read »). Absent → avertissement et rien d'autre (le dépôt reste utilisable avant sa création).
+on:
+  workflow_call:
+    inputs:
+      apply:
+        type: boolean
+        default: false
+      file:
+        type: string
+        default: ".github/repo-settings.json"
+      script:
+        type: string
+        default: ".harness/scripts/repo-settings.py"
+    secrets:
+      REPO_ADMIN_TOKEN:
+        required: false
+
+permissions:
+  contents: read
+
+jobs:
+  settings:
+    name: Réglages du dépôt
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Appliquer ou contrôler
+        env:
+          GH_TOKEN: ${{ secrets.REPO_ADMIN_TOKEN }}
+          APPLY: ${{ inputs.apply }}
+          FILE: ${{ inputs.file }}
+          SCRIPT: ${{ inputs.script }}
+        run: |
+          if [ -z "$GH_TOKEN" ]; then
+            echo "::warning::Secret REPO_ADMIN_TOKEN absent : réglages non appliqués (docs/ADOPTION.md §Réglages du dépôt)"
+            exit 0
+          fi
+          if [ "$APPLY" = "true" ]; then
+            python3 "$SCRIPT" --repo "$GITHUB_REPOSITORY" --file "$FILE" --apply
+          else
+            python3 "$SCRIPT" --repo "$GITHUB_REPOSITORY" --file "$FILE" \
+              || { echo "::error::Dérive : un réglage a été changé hors du fichier (voir le plan ci-dessus)"; exit 1; }
+          fi

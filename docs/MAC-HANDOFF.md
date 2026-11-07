@@ -9,7 +9,7 @@ Sources : `CLAUDE.md` (« Conteneur Linux : moteur oui, app non », #256), `scri
 | Environnement | Peut | Ne peut pas |
 |---|---|---|
 | **Session cloud** (conteneur Linux) | Code et docs ; tests du moteur (`swift test` sur le paquet sans UI) ; lint ; scripts ; issues et PR | Compiler l'app (SwiftUI, Charts, StoreKit, UIKit), simulateur, appareil, signature, réglages du dépôt |
-| **Mac** (Claude Code CLI ou humain) | Xcode, simulateur, appareil, captures réelles, smoke tests, build signé | — (mais c'est le goulot : il ne fait que ce qui exige un Mac) |
+| **Mac** (agent de code en CLI ou humain) | Xcode, simulateur, appareil, captures réelles, smoke tests, build signé | — (mais c'est le goulot : il ne fait que ce qui exige un Mac) |
 | **CI** | Arbitre : ce qui n'est pas vert en CI n'est pas fini | — |
 
 Conséquences :

@@ -19,6 +19,7 @@ body:
     id: etapes
     attributes:
       label: Étapes pour reproduire
+      description: Elles deviennent le premier test (rouge) du correctif (METHODOLOGY.md §2 ter).
     validations:
       required: true
   - type: input

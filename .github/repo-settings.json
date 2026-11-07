@@ -1,0 +1,39 @@
+{
+  "$comment": "Réglages du dépôt du cadre, appliqués au merge par .github/workflows/settings.yml (scripts/repo-settings.py). Modifier par PR, jamais à la main dans Settings (la dérive est signalée chaque semaine).",
+  "repository": {
+    "description": "Cadre versionné pour piloter le développement agentique (Claude Code) : intention et TDD, issues → lots → PR, revues adversariales, conformité branchable, stewards, FinOps et tableau de bord du flux.",
+    "has_wiki": false,
+    "delete_branch_on_merge": true
+  },
+  "topics": ["agentic", "claude-code", "ai-agents", "devops", "code-review", "compliance", "finops", "tdd", "github-actions", "framework"],
+  "rulesets": [
+    {
+      "name": "master protégée",
+      "target": "branch",
+      "enforcement": "active",
+      "conditions": { "ref_name": { "include": ["~DEFAULT_BRANCH"], "exclude": [] } },
+      "bypass_actors": [],
+      "rules": [
+        { "type": "deletion" },
+        { "type": "non_fast_forward" },
+        {
+          "type": "pull_request",
+          "parameters": {
+            "required_approving_review_count": 0,
+            "dismiss_stale_reviews_on_push": false,
+            "require_code_owner_review": false,
+            "require_last_push_approval": false,
+            "required_review_thread_resolution": true
+          }
+        },
+        {
+          "type": "required_status_checks",
+          "parameters": {
+            "strict_required_status_checks_policy": false,
+            "required_status_checks": [{ "context": "Scripts, workflows, tests" }]
+          }
+        }
+      ]
+    }
+  ]
+}

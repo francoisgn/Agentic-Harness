@@ -1,0 +1,82 @@
+name: Sécurité du code (réutilisable)
+
+# Pipeline SAST + SCA + secrets, gratuit et sans compte tiers (CI-BUDGET.md §3), en UN job : chaque outil tourne même
+# si le précédent échoue, un passage donne tous les constats. Rien sur un brouillon (il tourne au passage « Ready »).
+#   - SAST : Semgrep CE (règles du registre, `semgrep-configs`) ;
+#   - SCA  : Trivy `fs` (dépendances déclarées, HIGH/CRITICAL, corrigeables seulement par défaut) ;
+#   - secrets en dur : gitleaks (historique de la PR, ou tout l'historique hors PR) + règles `p/secrets` de Semgrep.
+# Dépôt public : CodeQL + Dependency Review + secret scanning sont gratuits et meilleurs ; garder ce workflow pour
+# Trivy et gitleaks, couper Semgrep (`semgrep: false`) si CodeQL couvre le langage.
+# Appel hebdomadaire conseillé (`schedule` dans le harness.yml du projet) : une CVE arrive sans commit.
+on:
+  workflow_call:
+    inputs:
+      semgrep:
+        type: boolean
+        default: true
+      semgrep-configs:
+        description: Règles Semgrep séparées par des espaces (ex. « p/default p/secrets p/swift p/github-actions »)
+        type: string
+        default: "p/default p/secrets p/github-actions"
+      trivy:
+        type: boolean
+        default: true
+      trivy-severity:
+        type: string
+        default: "HIGH,CRITICAL"
+      trivy-ignore-unfixed:
+        type: boolean
+        default: true
+      gitleaks:
+        description: Mettre à false si docs-security.yml tourne déjà sur le même événement (on ne paie pas deux fois)
+        type: boolean
+        default: true
+
+permissions:
+  contents: read
+
+jobs:
+  scan:
+    name: SAST · SCA · secrets
+    if: github.event.pull_request.draft != true
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          fetch-depth: 0   # gitleaks lit l'historique
+
+      # Règles du registre nommées (`p/…`) : utilisables sans métriques ; `--config auto` les exigerait (à confirmer au
+      # premier passage réel, sinon passer à --metrics=auto).
+      - name: SAST · Semgrep CE
+        if: ${{ !cancelled() && inputs.semgrep }}
+        env:
+          CONFIGS: ${{ inputs.semgrep-configs }}
+        run: |
+          ARGS=()
+          for c in $CONFIGS; do ARGS+=(--config "$c"); done
+          docker run --rm -v "$PWD":/src -w /src semgrep/semgrep:1.122.0 \
+            semgrep scan "${ARGS[@]}" --error --metrics=off --disable-version-check
+
+      - name: SCA · Trivy (dépendances)
+        if: ${{ !cancelled() && inputs.trivy }}
+        env:
+          SEVERITY: ${{ inputs.trivy-severity }}
+          UNFIXED: ${{ inputs.trivy-ignore-unfixed }}
+        run: |
+          EXTRA=()
+          [ "$UNFIXED" = "true" ] && EXTRA+=(--ignore-unfixed)
+          docker run --rm -v "$PWD":/src aquasec/trivy:0.62.1 fs /src \
+            --scanners vuln --severity "$SEVERITY" --exit-code 1 --no-progress "${EXTRA[@]}"
+
+      - name: Secrets · gitleaks
+        if: ${{ !cancelled() && inputs.gitleaks }}
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        run: |
+          if [ "$GITHUB_EVENT_NAME" = "pull_request" ] && [ -n "$BASE_SHA" ]; then LOG_OPTS="$BASE_SHA..HEAD"; else LOG_OPTS=--all; fi
+          docker run --rm -v "$PWD":/repo ghcr.io/gitleaks/gitleaks:v8.30.1 \
+            git /repo --log-opts="$LOG_OPTS" --redact --no-banner --exit-code 1

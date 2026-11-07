@@ -66,8 +66,37 @@ Hygiène des workflows (vérifiée par zizmor et par la revue) :
 - pre-commit : dépôts de hooks figés par SHA (Dependabot ne lit pas ce fichier : mise à jour à la main) ; aucun hook de
   reformatage (les données de test restent à l'octet près).
 
+Pipeline complet en un appel : `security.yml` (Semgrep CE, Trivy `fs`, gitleaks, en un job ; règles Semgrep par défaut
+`p/default p/secrets p/github-actions`, ajouter celles du langage, ex. `p/swift`) ; `docs-security.yml`
+pour les docs et les workflows. Appeler l'un et l'autre sans doubler gitleaks (input `gitleaks: false` sur l'un).
+
+### Secrets et variables : rien en dur
+- **Aucun secret dans le dépôt**, même chiffré à la main, même en test : secrets GitHub (dépôt, environnement,
+  organisation) ou coffre ; en session cloud, les secrets réseau de l'environnement, jamais collés dans le chat.
+- **Configuration non secrète** (URL, identifiant de projet, région, nom de bucket) dans des **variables** :
+  `vars.NOM` dans les workflows, variables d'environnement ou fichier de configuration par environnement côté code ;
+  jamais une valeur d'environnement en dur dans le code.
+- Dans un workflow : secret et variable passent par `env:`, jamais interpolés dans `run:` ; un secret n'est donné
+  qu'au job qui en a besoin, et jamais sur un événement de fork.
+- Un secret commité est **compromis** : le révoquer d'abord, réécrire l'historique ensuite si besoin (gitleaks
+  l'aurait signalé : comprendre pourquoi il est passé).
+- Fichiers d'exemple (`.env.example`) avec des valeurs factices évidentes ; `.env` dans `.gitignore`.
+
 ## 4. Contrôles requis et merge
 Les contrôles requis du ruleset portent les **noms de jobs** : renommer un job oblige à mettre à jour le ruleset. Un job
 sauté (`if:` faux) compte comme réussi pour un contrôle requis : c'est ce qui permet de sauter le build iOS sans bloquer
 la PR. La CI ne juge ni l'UX, ni les hypothèses sur un système externe, ni un réglage supprimé : la spec et la revue s'en
 chargent (LESSONS L44).
+
+## 5. Volume agentique : beaucoup de commits, peu de passages
+
+Des agents produisent bien plus de commits qu'un humain (ratio suivi par le tableau de bord, [FINOPS](FINOPS.md) §4).
+La CI doit coûter par **lot prêt**, pas par commit :
+- les commits restent locaux et fins ; **un push par lot**, en brouillon (rien ne tourne) ; la CI part au passage
+  « Ready for review » ;
+- les contrôles rapides (lint, secrets, tests unitaires) tournent **en local avant le push** (pre-commit,
+  `local-check.sh`) : la CI confirme, elle ne découvre pas ;
+- détection de changements et `paths-ignore` : une PR de docs ne lance pas le build ; la sécurité lourde (SAST, SCA)
+  tourne sur les PR prêtes, la branche d'intégration et chaque semaine, pas sur chaque push ;
+- revue automatique une fois par tête prête ([REVIEW-SERVICE](REVIEW-SERVICE.md) §3) ;
+- au-delà de 6 pushes testés par la CI sur une PR, la boucle s'arrête ([FINOPS](FINOPS.md) §3).

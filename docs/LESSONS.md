@@ -5,6 +5,11 @@ chaque cycle de revue, comparer les constats au tableau ([REVIEW-ROUNDS](REVIEW-
 l'auto-relecture l'a manqué, resserrer cette étape ; nouveau genre = nouvelle ligne, proposée au cadre par PR si elle
 vaut ailleurs, sinon gardée dans les leçons du projet.
 
+**Incrémenter** (skill `/lesson-propose`) : une leçon valable au-delà d'un projet remonte au cadre par une **issue
+« Leçon »** sur `francoisgn/agentic-harness` (formulaire dédié, label `leçon`) : portée, leçon en une phrase
+vérifiable, source à un SHA, contre-exemple. Le steward du cadre la fusionne dans ce tableau par PR (numéro suivant,
+MINEUR au CHANGELOG) ; les projets la reçoivent à la synchro suivante.
+
 **Portée** : `général` (tout projet) · `swift` · `ios` · `linux-cloud` (sessions dans un conteneur Linux) · `ci` · `docs`.
 Un projet sans Swift ignore `swift` et `ios`. Les leçons de domaine (protocole d'un site, règle financière) restent dans
 le projet.
@@ -70,7 +75,7 @@ Les numéros `L..` sont stables : une leçon devenue fausse est barrée, jamais 
 | L53 | ci | Actions épinglées par SHA complet (tag en commentaire), `permissions` minimales, `persist-credentials: false`, jamais de `pull_request_target` qui extrait le code de la PR, aucun secret exposé aux forks | HFR ADR 0005 ; HFR `.coderabbit.yaml` |
 | L54 | ci | Les hooks pre-commit ne reformatent jamais les données de test (octet près) ; ShellCheck couvre tous les scripts, un constat se corrige ou se tait en ligne avec sa raison | HFR CONTRIBUTING §4 |
 | L55 | linux-cloud | Les journaux de jobs CI se lisent depuis une session cloud par l'outil MCP GitHub `get_job_logs` (`gh api …/logs` est bloqué : autre hôte) ; les annotations restent le signal le plus rapide | HFR §11 2026-10-25 |
-| L56 | linux-cloud | Une session cloud ne change pas les réglages du dépôt (403) : les réglages vivent dans un script (`configure-repo.sh`) ou un fichier de ruleset, lancé par le mainteneur | HFR §11 2026-10-24 |
+| L56 | linux-cloud | Une session cloud ne change pas les réglages du dépôt (403) : les réglages vivent dans un fichier versionné (`.github/repo-settings.json`), modifié par PR et appliqué au merge par la CI avec un jeton d'administration (ADOPTION §Réglages du dépôt) | HFR §11 2026-10-24 |
 | L57 | linux-cloud | Les apps GitHub (Claude, CodeRabbit) d'un dépôt personnel ne s'installent que par son propriétaire, quels que soient les droits du collaborateur | HFR §11 2026-10-26 |
 | L58 | linux-cloud | L'app (SwiftUI, Charts, StoreKit…) ne compile pas sous Linux : relire son code avec une rigueur de compilateur (types, `@MainActor`, `Sendable` en mode complet, exhaustivité des `switch`, API réelles de la version d'OS) ; seul le Mac ou la CI macOS tranche | CI `CLAUDE.md` (#256) |
 | L59 | linux-cloud | Installer **la même version** de la chaîne d'outils que la CI Linux (script, signature vérifiée) et lancer les tests du moteur avant tout push qui le touche | CI `install-swift-linux.sh` ; HFR `cloud-setup.sh` |
