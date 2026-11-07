@@ -38,13 +38,17 @@ jobs:
         if: ${{ !cancelled() }}
         run: python3 -m unittest discover -s scripts/tests -p 'test_*.py' -v
 
+      - name: Schémas à jour avec leurs sources (docs/diagrams)
+        if: ${{ !cancelled() }}
+        run: python3 scripts/diagrams/render.py --check
+
       - name: ShellCheck
         if: ${{ !cancelled() }}
         run: shellcheck scripts/*.sh scripts/tests/*.sh plugins/harness/scripts/*.sh
 
       - name: Python (syntaxe des hooks)
         if: ${{ !cancelled() }}
-        run: python3 -m py_compile plugins/harness/scripts/guard-git.py scripts/*.py
+        run: python3 -m py_compile plugins/harness/scripts/guard-git.py scripts/*.py scripts/diagrams/*.py
 
       - name: JSON valides et versions cohérentes
         if: ${{ !cancelled() }}

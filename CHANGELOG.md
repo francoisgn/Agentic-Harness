@@ -31,6 +31,9 @@ Intention, TDD, FinOps, stewards, conformité, sécurité et mesure du flux.
 - **Réglages du dépôt « as code »** : `.github/repo-settings.json` (description, topics, rulesets) appliqué au merge
   par `repo-settings.yml` / `repo-settings.py` (secret `REPO_ADMIN_TOKEN`), dérive contrôlée chaque semaine ; le
   cadre s'en sert pour lui-même (`settings.yml`). Contrôles requis vérifiés contre les noms de jobs réels.
+- **Schémas** : README illustré de trois schémas (mécanismes, cycle d'un changement, tirer parti du harnais), source
+  `docs/diagrams/*.json`, scène `.excalidraw` modifiable et SVG rendus par `scripts/diagrams/render.py` (contrôlés
+  en CI).
 - **Points d'extension** (ADOPTION §Remplacer ou étendre une brique) : chaque brique du cadre se garde, se remplace
   par celle de l'entreprise ou se complète.
 - **Skills** : `/intent`, `/lesson-propose`, `/status-report`, `/compliance-review` ; `/lot-start` pose l'identifiant

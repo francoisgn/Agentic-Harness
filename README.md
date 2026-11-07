@@ -1,123 +1,104 @@
 # agentic-harness
 
-> Cadre versionné pour piloter le développement agentique (Claude Code) : intention et TDD, issues → lots → PR,
-> revues adversariales, relecteurs de conformité, stewards, FinOps et tableau de bord du flux. Il s'adopte dans
-> chaque projet à une version donnée.
+> Un harnais versionné et ouvert pour développer avec des agents de code : intention et TDD, issues → lots → PR,
+> revues adversariales, conformité branchable, stewards, FinOps et tableau de bord du flux. Pour tout dépôt GitHub,
+> tout agent (Claude Code, Codex, Cursor, Gemini CLI, Copilot, Aider…) et toute équipe.
 
-**TL;DR** : un dépôt qui fournit à chaque projet de François **la même méthode, les mêmes garde-fous, les mêmes
-leçons et les mêmes contrôles GitHub**. Le projet récupère le cadre à un tag (`harness-sync.sh`) et le met à jour par
-PR. Le contexte vit dans le dépôt, pas dans l'agent. L'opérateur parle à un seul orchestrateur, qui délègue chaque
-tâche au modèle adapté et la fait relire par un modèle plus fort.
+![Les mécanismes du harnais : un opérateur, un orchestrateur, des agents jetables, un dépôt qui porte l'état, une CI et un tableau de bord qui bouclent](docs/diagrams/mecanismes.svg)
 
-Né de deux projets réels : **HFRnow / SwiftHFR** (client iOS, branche `dev-swift` : orchestration multi-sessions,
-revues adversariales, 57 leçons) et **ios-app_credit-immo** (simulateur de crédit : workflow piloté par les issues,
-labels modèle/taille, budget CI, reprise sur Mac). Ce qui est propre à leur domaine est resté chez eux ; le reste est
-ici, généralisé. Inspirations externes citées : [OpenHarness](https://github.com/HKUDS/OpenHarness) (HKUDS, MIT) pour la boucle de réparation bornée et le
-tableau de bord (ADR 0002).
+**TL;DR** : les agents écrivent vite, mais sans cadre ils dérivent (contexte perdu, revues en boucle, CI qui brûle des
+minutes, qualité inégale). Le harnais donne à chaque projet **la même méthode, les mêmes garde-fous, les mêmes leçons
+et les mêmes contrôles**, récupérés à une version donnée et mis à jour par PR. Le contexte vit dans le dépôt, pas
+dans l'agent. L'opérateur parle à un seul orchestrateur, qui délègue chaque tâche au bon niveau de modèle et la fait
+relire par un modèle plus fort. Chaque brique se garde, se remplace ou se complète.
 
-## Comment ça marche
+## Ce que ça change, concrètement
 
-```mermaid
-flowchart LR
-  OP([Opérateur]) <--> ORC["Orchestrateur<br/>(SPOC, seul agent long)"]
-  ORC --> LOT["Agents de lot<br/>TDD, modèle du label"]
-  ORC -.-> ST["Stewards jetables<br/>issues · docs · flux"]
-  LOT --> REV["Revue adversariale<br/>autre modèle, niveau ≥"]
-  LOT --> CONF["Relecteurs conformité<br/>RGPD · AI Act · NIS2 · ISO 27001<br/>SOC 2 · TISAX · PCI · HDS"]
-  LOT --> PR["PR brouillon → 1 push → Ready"]
-  PR --> CI["CI : tests · SAST · SCA · secrets<br/>+ revue IA"]
-  CI --> M["Merge"] --> TB["Tableau de bord<br/>+ rapport non technique"]
-  LOT & ST & PR & TB <--> REPO[("Dépôt : issues, PR,<br/>docs, ADR, LESSONS")]
-```
-
-| Étape | Règle | Outil |
-|---|---|---|
-| Intention | User story, comportements d'erreur, critères testables, définition de fini | `/intent`, formulaires d'issue |
-| Prise | Issue prête, prise en charge visible, agent nommé `<projet>.<orc>.<rôle>.<cible>` | `/lot-start`, `issue-steward` |
-| Réalisation | TDD : test rouge, code, vert ; commits atomiques ; un push par lot | METHODOLOGY §2 ter |
-| Vérification | Leçons, revue adversariale par un autre modèle, conformité si activée | `/lessons-check`, `adversarial-reviewer`, `/compliance-review` |
-| CI | Brouillon = rien ; SAST, SCA, secrets, lint ; boucles bornées (3 cycles de revue, 6 pushes testés) | `security.yml`, `ai-review.yml`, CI-BUDGET |
-| Suivi | Panne, boucle, goulot, coût, **ratio de PR à problème** et effort de correction ; état lisible par un non-technicien | `flow-report.yml`, `/status-report` |
-| Capitalisation | Une erreur nouvelle devient une leçon, remontée au cadre par issue | `/lesson-propose`, formulaire « Leçon » |
-
-## État
-
-| Capacité | État | Où |
-|---|---|---|
-| Méthode, conventions, leçons (82), branches, budget CI | 🟢 en service | `docs/` |
-| Vendorisation, plugin, workflows de labels et d'hygiène | 🟢 en service, testé en CI | `scripts/harness-sync.sh`, `.github/workflows/` |
-| Intention, TDD, FinOps, stewards, nommage des agents | 🟢 nouveau en 0.2.0 | METHODOLOGY, FINOPS, STEWARDS, ORCHESTRATION §7 |
-| Tableau de bord du flux | 🟢 nouveau, testé hors ligne ; 🟠 premier passage réel à observer | `flow-metrics.py`, `flow-report.yml` |
-| Pipeline sécurité, revue IA | 🟠 nouveau, à valider sur un premier projet | `security.yml`, `ai-review.yml` |
-| Conformité branchable : agent du cadre, agent de l'entreprise ou spec seule | 🟢 résolution testée (`compliance-plan.py`) | COMPLIANCE §2 |
-| Agents de conformité intégrés | 🟠 fondation : identifiants « (à vérifier) » à confirmer sur les textes officiels | `plugins/harness/agents/compliance-*.md` |
-| Points d'extension : chaque brique se garde, se remplace ou se complète | 🟢 | ADOPTION §Remplacer ou étendre |
-
-## Contenu
-
-| Chemin | Rôle |
+| Sans harnais | Avec |
 |---|---|
-| [`docs/ESSENTIEL.md`](docs/ESSENTIEL.md) | Règles chargées à chaque session (importées par le `CLAUDE.md` du projet) |
-| [`docs/UTILISATION.md`](docs/UTILISATION.md) | **Guide pas à pas** pour un projet, avec l'exemple SwiftHFR |
-| [`docs/METHODOLOGY.md`](docs/METHODOLOGY.md) | Boucle pilotée par les issues, intention, TDD, lots, parapluies, labels |
-| [`docs/CONVENTIONS.md`](docs/CONVENTIONS.md) | Commits, PR, commentaires GitHub, persistance compatible |
-| [`docs/LESSONS.md`](docs/LESSONS.md) | 82 leçons par portée, sources citées ; comment en proposer |
-| [`docs/ORCHESTRATION.md`](docs/ORCHESTRATION.md) | Sessions parallèles, sous-agents, choix du modèle, revue adversariale, **nommage des agents** |
-| [`docs/FINOPS.md`](docs/FINOPS.md) | Orchestrateur SPOC, routage des modèles, quotas et reprise, boucles bornées, dérives |
-| [`docs/STEWARDS.md`](docs/STEWARDS.md) | Rôles d'entretien (issues, docs, flux) et rapport d'état non technique |
-| [`docs/REVIEW-ROUNDS.md`](docs/REVIEW-ROUNDS.md) | Traiter un cycle de revue une fois, complètement |
-| [`docs/REVIEW-SERVICE.md`](docs/REVIEW-SERVICE.md) | Service de revue IA maison (équivalent CodeRabbit) |
-| [`docs/COMPLIANCE.md`](docs/COMPLIANCE.md) | Relecteurs de conformité : catalogue, activation, place dans la boucle |
-| [`docs/CI-BUDGET.md`](docs/CI-BUDGET.md) | Minutes, socle de sécurité, secrets et variables, volume agentique |
-| [`docs/BRANCHING-RELEASE.md`](docs/BRANCHING-RELEASE.md) | Modèles de branches, promotions, hotfix, semver |
-| [`docs/MAC-HANDOFF.md`](docs/MAC-HANDOFF.md) | Cloud Linux et Mac : partage des rôles, reprise |
-| [`docs/ADOPTION.md`](docs/ADOPTION.md) | Adopter, régler, mettre à jour, retirer |
-| [`docs/adr/`](docs/adr/README.md) | Décisions du cadre (0001 distribution, 0002 agents et tableau de bord) |
-| `plugins/harness/` | Plugin Claude Code : 10 skills, 13 agents (dont le relecteur de conformité générique), hooks `guard-git` et rappel de session |
-| `templates/` | Gabarits vendorisés : bloc `CLAUDE.md`/`AGENTS.md`, labels, formulaires, PR, lot, workflows appelants |
-| `i18n/en/` | Édition anglaise des fichiers chargés à chaque session (`language: "en"`) |
-| `.github/workflows/` | Réutilisables : `labels-sync`, `issue-hygiene`, `pr-hygiene`, `docs-security`, `security`, `flow-report`, `ai-review`, `repo-settings` ; `ci.yml` et `settings.yml` du cadre |
-| `.github/repo-settings.json` | Réglages du dépôt « as code » (description, topics, protection de `master`), appliqués au merge |
-| `scripts/` | `harness-sync.sh` (vendorisation), `repo-settings.py` (réglages), `flow-metrics.py` (tableau de bord), `compliance-plan.py` (résolution de la conformité), `check-framework.py` (cohérence), tests |
+| L'agent devine l'intention | Chaque issue porte user story, comportements d'erreur, définition de fini (`/intent`) |
+| Des tests écrits après coup, parfois verts sans le changement | TDD : test vu rouge, puis vert ; prouvé dans la PR |
+| L'auteur se relit lui-même | Revue adversariale par un autre modèle, verdicts tracés sur la PR |
+| Un push par idée, une CI par push | Brouillon, un push par lot, boucles bornées (3 cycles de revue, 6 pushes testés) |
+| Conformité oubliée ou manuelle | Relecteurs RGPD, AI Act, NIS2, ISO 27001, SOC 2, TISAX, PCI, HDS, ou les vôtres, lancés seulement si le diff les concerne |
+| « Où en est-on ? » | Tableau de bord quotidien : jalons, goulots, pannes, boucles, **ratio de PR à problème**, coût |
+| Les mêmes erreurs d'un projet à l'autre | 82 leçons sourcées, enrichies par issue « Leçon » |
 
-## Démarrage rapide
+## Le cycle d'un changement
+
+![Le cycle : intention, issue prête, lot en TDD, revues, PR prête, CI, merge, mesure, puis leçons qui reviennent à l'intention](docs/diagrams/cycle.svg)
+
+## Tirer parti du harnais dans votre projet
+
+![Six étapes : récupérer, synchroniser, régler, travailler, piloter, mettre à jour ; avec n'importe quel agent ; chaque brique remplaçable](docs/diagrams/tirer-parti.svg)
 
 ```bash
 git clone --depth 1 --branch v0.2.0 https://github.com/francoisgn/agentic-harness.git ../agentic-harness
 ../agentic-harness/scripts/harness-sync.sh --target . --dry-run   # voir avant d'écrire
 ../agentic-harness/scripts/harness-sync.sh --target .
 ```
-Puis régler `.harness/config.json` (branches, langue, exclusions, `compliance`) et `harness.yml` : [ADOPTION](docs/ADOPTION.md),
-usage quotidien : [UTILISATION](docs/UTILISATION.md). Sans adoption, en local : `claude plugin marketplace add
-francoisgn/agentic-harness && claude plugin install harness@agentic-harness`.
 
-Trois canaux, une source ([ADR 0001](docs/adr/0001-mecanisme-de-distribution.md)) : **vendorisation** (principal,
-marche en session cloud), **plugin** (sessions locales), **workflows réutilisables** appelés par un `harness.yml` fin.
+Ensuite : régler `.harness/config.json` (branches, langue, exclusions, `compliance`) et `.github/workflows/harness.yml`
+([ADOPTION](docs/ADOPTION.md)), puis travailler au quotidien ([UTILISATION](docs/UTILISATION.md), exemple complet sur
+un client iOS).
 
-## CI du cadre
-
-Un job Linux (`ci.yml`, rien sur un brouillon), chaque étape lancée même si la précédente échoue :
-
-| Contrôle | Outil |
+| Votre agent | Ce qu'il reçoit |
 |---|---|
-| Cohérence : skills, agents (modèle, sections de conformité, lecture seule), manifeste, labels, nommage | `scripts/check-framework.py` |
-| Tests : vendorisation, hooks, tableau de bord, contrôles | `test-harness-sync.sh`, `unittest` |
-| Scripts et hooks | ShellCheck, `py_compile` |
-| JSON et versions (`VERSION` = `plugin.json` = CHANGELOG) | `jq` |
-| Workflows | actionlint, zizmor |
-| Markdown (tableaux, ancres) | markdownlint |
-| Secrets | gitleaks |
+| **Claude Code** (adaptateur fourni) | Bloc `CLAUDE.md`, skills (`/intent`, `/lot-start`, `/review-round`…), agents (`adversarial-reviewer`, stewards, conformité), hooks garde-fous ; ou le plugin : `claude plugin marketplace add francoisgn/agentic-harness && claude plugin install harness@agentic-harness` |
+| **Codex, Cursor, Gemini CLI, Copilot, Aider…** | Bloc `AGENTS.md` qui pointe vers les règles (`.harness/docs/ESSENTIEL.md`) ; méthode, labels, gabarits, CI et tableau de bord identiques |
+| **Équipe humaine** | Les mêmes issues, labels, PR, CI et tableau de bord ; rapport d'état lisible par un non-technicien |
 
-En local avant de pousser : `python3 scripts/check-framework.py && python3 -m unittest discover -s scripts/tests -p
-'test_*.py' && scripts/tests/test-harness-sync.sh`.
+## État
 
-## Versions
-- Semver, tags `vX.Y.Z` sur `master` ; [CHANGELOG](CHANGELOG.md) à chaque version ; `VERSION` et
-  `plugins/harness/.claude-plugin/plugin.json` avancent ensemble (contrôlé par la CI).
-- MAJEUR : un projet doit agir ; MINEUR : ajout (doc, skill, agent, leçon, workflow) ; CORRECTIF : correction. Avant
-  1.0.0, un MINEUR peut casser : le CHANGELOG le dit (section « Action »).
+| Capacité | État | Où |
+|---|---|---|
+| Méthode, conventions, leçons, branches, budget CI | 🟢 en service | `docs/` |
+| Vendorisation, plugin, workflows de labels et d'hygiène | 🟢 en service, testés en CI | `scripts/harness-sync.sh`, `.github/workflows/` |
+| Intention, TDD, FinOps, stewards, nommage des agents | 🟢 0.2.0 | METHODOLOGY, FINOPS, STEWARDS, ORCHESTRATION §7 |
+| Tableau de bord du flux, ratio de PR à problème | 🟢 testé hors ligne ; 🟠 premier passage réel à observer | `flow-metrics.py`, `flow-report.yml` |
+| Conformité branchable (agent du cadre, de l'entreprise, ou spec seule) | 🟢 résolution testée | COMPLIANCE §2 |
+| Agents de conformité intégrés | 🟠 fondation : identifiants « (à vérifier) » à confirmer sur les textes officiels | `plugins/harness/agents/compliance-*.md` |
+| Pipeline sécurité, revue IA, réglages du dépôt « as code » | 🟠 à valider sur un premier projet | `security.yml`, `ai-review.yml`, `repo-settings.yml` |
 
-## Contribuer
-Même méthode que les projets : une issue (avec son intention), une branche `claude/<sujet>`, une PR brouillon vers
-`master`, la CI verte. Une leçon née dans un projet : formulaire « Leçon » (numéros `L..` stables). Release : PR
-« Version : passe en X.Y.Z » (VERSION + plugin.json + CHANGELOG), puis tag `vX.Y.Z` par François.
+## Contenu
+
+| Chemin | Rôle |
+|---|---|
+| [`docs/ESSENTIEL.md`](docs/ESSENTIEL.md) | Les règles chargées à chaque session |
+| [`docs/UTILISATION.md`](docs/UTILISATION.md) | **Guide pas à pas** pour un projet, avec un exemple complet |
+| [`docs/ADOPTION.md`](docs/ADOPTION.md) | Adopter, régler, remplacer une brique, mettre à jour, retirer ; réglages du dépôt « as code » |
+| [`docs/METHODOLOGY.md`](docs/METHODOLOGY.md) | Boucle pilotée par les issues, intention, TDD, lots, labels |
+| [`docs/ORCHESTRATION.md`](docs/ORCHESTRATION.md) | Orchestrateur, sous-agents, niveaux de modèle, revue adversariale, nommage des agents |
+| [`docs/FINOPS.md`](docs/FINOPS.md) | Routage des modèles, quotas et reprise, boucles bornées, signaux de dérive |
+| [`docs/STEWARDS.md`](docs/STEWARDS.md) | Rôles d'entretien (issues, docs, flux) et rapport d'état non technique |
+| [`docs/REVIEW-ROUNDS.md`](docs/REVIEW-ROUNDS.md), [`docs/REVIEW-SERVICE.md`](docs/REVIEW-SERVICE.md) | Cycles de revue, traçabilité des verdicts, service de revue IA |
+| [`docs/COMPLIANCE.md`](docs/COMPLIANCE.md) | Relecteurs de conformité : catalogue, trois modes de branchement |
+| [`docs/CI-BUDGET.md`](docs/CI-BUDGET.md) | Minutes de CI, sécurité (SAST, SCA, secrets), variables, volume agentique |
+| [`docs/LESSONS.md`](docs/LESSONS.md) | Leçons par portée, sources citées ; comment en proposer |
+| [`docs/CONVENTIONS.md`](docs/CONVENTIONS.md), [`docs/BRANCHING-RELEASE.md`](docs/BRANCHING-RELEASE.md), [`docs/MAC-HANDOFF.md`](docs/MAC-HANDOFF.md) | Commits et PR, branches et versions, partage cloud / poste local |
+| [`docs/adr/`](docs/adr/README.md) | Décisions du cadre |
+| [`docs/diagrams/`](docs/diagrams) | Schémas : source `.json`, scène `.excalidraw` (modifiable sur excalidraw.com), image `.svg` |
+| `plugins/harness/` | Adaptateur Claude Code : 10 skills, 13 agents, hooks, plugin |
+| `templates/`, `i18n/en/` | Gabarits vendorisés ; édition anglaise des fichiers chargés à chaque session |
+| `.github/workflows/` | Workflows réutilisables (labels, hygiène, sécurité, revue IA, tableau de bord, réglages) et CI du cadre |
+| `scripts/` | Synchro, tableau de bord, conformité, réglages, rendu des schémas, contrôles de cohérence, tests |
+
+## Qualité du harnais lui-même
+
+Un job de CI (`ci.yml`), chaque étape lancée même si la précédente échoue : cohérence du cadre (skills, agents,
+manifeste, labels, nommage, contrôles requis), tests (vendorisation, hooks, tableau de bord, conformité, réglages,
+schémas), ShellCheck, versions, actionlint, zizmor, markdownlint, gitleaks. En local :
+```bash
+python3 scripts/check-framework.py && python3 -m unittest discover -s scripts/tests -p 'test_*.py' \
+  && scripts/tests/test-harness-sync.sh && python3 scripts/diagrams/render.py --check
+```
+
+## Versions et contributions
+- Semver, tags `vX.Y.Z` sur `master`, [CHANGELOG](CHANGELOG.md) à chaque version (section « Action » pour les
+  projets). Avant 1.0.0, un MINEUR peut casser : le CHANGELOG le dit.
+- Contribuer : une issue avec son intention, une branche, une PR en brouillon, la CI verte, une revue par un autre
+  modèle. Une leçon née dans votre projet : formulaire « Leçon ». Un schéma : modifier `docs/diagrams/<nom>.json`,
+  lancer `scripts/diagrams/render.py`, commiter les trois fichiers.
+- Origines : distillé de deux projets réels (un client iOS de forum et un simulateur de crédit immobilier) ;
+  inspirations citées : [OpenHarness](https://github.com/HKUDS/OpenHarness) (MIT) pour la boucle de réparation bornée
+  et le tableau de bord ([ADR 0002](docs/adr/0002-agents-specialises-et-tableau-de-bord.md)).
