@@ -44,7 +44,14 @@ def pull_request_job_names(text):
             return set()
     else:
         on_block = re.search(on_key + r"[ \t]*(?:#.*)?\n((?:[ \t]+.*\n|\s*\n)*)", text, re.M)
-        if not on_block or not re.search(r"^\s+pull_request:", on_block.group(1), re.M):
+        if not on_block:
+            return set()
+        # Seules les clés enfants directes de `on` sont des événements (pas un input `pull_request` d'un dispatch)
+        lines = [ln for ln in on_block.group(1).splitlines() if ln.strip() and not ln.strip().startswith("#")]
+        if not lines:
+            return set()
+        indent = min(len(ln) - len(ln.lstrip()) for ln in lines)
+        if not any(len(ln) - len(ln.lstrip()) == indent and re.match(r"\s*pull_request:", ln) for ln in lines):
             return set()
     jobs = text[text.find("\njobs:"):]
     names = set()

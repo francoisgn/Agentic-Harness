@@ -100,8 +100,12 @@ def plan(config, root, files=(), diff=""):
             continue
         entry = {"id": raw} if isinstance(raw, str) else dict(raw)
         cid = entry.get("id")
-        if not cid or not isinstance(cid, str):
+        if not isinstance(cid, str) or not cid.strip():
             errors.append(f"entrée sans `id` texte : {raw!r}")
+            continue
+        cid = cid.strip()
+        if re.search(r"[/\\]|\.\.", cid):  # l'id entre dans un nom de fichier : ni dossier, ni remontée
+            errors.append(f"{cid!r} : `id` invalide (ni `/`, ni `\\`, ni `..`)")
             continue
         bad = [k for k in ("agent", "spec") if entry.get(k) is not None and not isinstance(entry[k], str)]
         if bad:

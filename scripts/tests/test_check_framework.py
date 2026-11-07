@@ -91,6 +91,16 @@ class CheckFrameworkTests(unittest.TestCase):
         for on in ("'on':\n  pull_request:\n", "\"on\": [pull_request]\n", "on: # déclencheurs\n  pull_request:\n"):
             self.assertEqual(cf.pull_request_job_names(on + job), {"Tests"}, on)
 
+    def test_nested_pull_request_input_is_not_a_trigger(self):
+        spec = __import__("importlib.util").util.spec_from_file_location("cf3", CHECK)
+        cf = __import__("importlib.util").util.module_from_spec(spec)
+        spec.loader.exec_module(cf)
+        job = "jobs:\n  a:\n    name: Tests\n    runs-on: x\n"
+        nested = "on: # manuel\n  workflow_dispatch:\n    inputs:\n      pull_request:\n        type: string\n"
+        self.assertEqual(cf.pull_request_job_names(nested + job), set())
+        direct = "on:\n  workflow_dispatch:\n    inputs:\n      x:\n        type: string\n  pull_request:\n"
+        self.assertEqual(cf.pull_request_job_names(direct + job), {"Tests"})
+
     def test_skill_without_description(self):
         p = self.tmp / "plugins/harness/skills/intent/SKILL.md"
         p.write_text(p.read_text().replace("description:", "desc:", 1))

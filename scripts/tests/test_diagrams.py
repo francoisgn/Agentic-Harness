@@ -48,6 +48,10 @@ class RenderTests(unittest.TestCase):
         bad = dict(ARROW, points=[[0, 0]])
         self.assertTrue(any("au moins deux points" in e for e in rd.invalid(bad and [bad])))
 
+    def test_malformed_arrow_points_are_reported(self):
+        for pts in ([[0, 0], [100]], [[0, 0], ["a", 1]], [[0, 0], 5]):
+            self.assertTrue(rd.invalid([dict(ARROW, points=pts)]), pts)
+
     def test_overflow_is_reported(self):
         long = dict(BOX, label={"text": "un texte bien trop long pour cette boîte", "fontSize": 20})
         self.assertTrue(rd.overflows([long]))

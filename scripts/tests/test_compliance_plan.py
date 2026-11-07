@@ -138,6 +138,12 @@ class PlanTests(unittest.TestCase):
         finally:
             outside.unlink()
 
+    def test_blank_or_path_like_id_is_an_error(self):
+        for cid in ("   ", "../../x", "a/b", "a\\b"):
+            self.assertTrue(self.plan([{"id": cid}])["errors"], cid)
+        self.assertTrue(self.plan([" gdpr", "gdpr "])["errors"])  # doublon une fois les espaces retirés
+        self.assertEqual(self.plan([" gdpr "])["reviewers"][0]["agent"], "compliance-gdpr")
+
     def test_duplicate_id_is_an_error(self):
         self.assertTrue(self.plan(["gdpr", {"id": "gdpr"}])["errors"])
 
