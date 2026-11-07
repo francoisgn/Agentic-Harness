@@ -1,0 +1,8 @@
+## Cadre commun : agentic-harness {{HARNESS_VERSION}}
+
+Ce bloc est géré par `scripts/harness-sync.sh` du cadre [agentic-harness](https://github.com/francoisgn/agentic-harness) : ne pas le modifier ici (une modification se propose dans le cadre). Le reste de ce fichier appartient au projet et l'emporte sur le cadre en cas de conflit, à signaler dans une issue.
+
+@.harness/docs/ESSENTIEL.md
+
+À lire selon la tâche (non chargés d'office) : méthode `.harness/docs/METHODOLOGY.md`, conventions `.harness/docs/CONVENTIONS.md`, leçons `.harness/docs/LESSONS.md` (auto-relecture avant chaque PR), revues `.harness/docs/REVIEW-ROUNDS.md`, orchestration et choix du modèle `.harness/docs/ORCHESTRATION.md`, branches et versions `.harness/docs/BRANCHING-RELEASE.md`, budget CI et sécurité `.harness/docs/CI-BUDGET.md`, reprise sur Mac `.harness/docs/MAC-HANDOFF.md`.
+Skills : `/lot-start`, `/lot-finish`, `/review-round`, `/feedback-triage`, `/lessons-check`, `/harness-update`.

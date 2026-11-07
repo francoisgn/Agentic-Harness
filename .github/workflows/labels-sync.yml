@@ -1,0 +1,82 @@
+name: Labels (réutilisable)
+
+# Synchronise les labels du dépôt appelant : taxonomie du cadre vendorisée (.harness/labels.json) + labels propres au
+# projet (.github/labels.local.json, qui l'emportent à nom égal). Crée ou met à jour, ne supprime jamais.
+# `apply-aliases` renomme un ancien label (champ `aliases` du cadre, ex. `priority: high` → `P1 🔴`) au lieu d'en créer
+# un nouveau : les issues gardent leur label. À n'activer qu'après avoir mis à jour les workflows et docs du projet qui
+# citent les anciens noms.
+# Lit les fichiers du dépôt appelant : aucun accès au dépôt du cadre n'est nécessaire à l'exécution.
+on:
+  workflow_call:
+    inputs:
+      labels-file:
+        description: Taxonomie du cadre, vendorisée par harness-sync.sh
+        type: string
+        default: .harness/labels.json
+      local-labels-file:
+        description: Labels propres au projet (facultatif)
+        type: string
+        default: .github/labels.local.json
+      apply-aliases:
+        description: Renommer les anciens labels listés dans `aliases`
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+jobs:
+  sync:
+    name: Synchroniser les labels
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+      issues: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+        env:
+          LABELS_FILE: ${{ inputs.labels-file }}
+          LOCAL_LABELS_FILE: ${{ inputs.local-labels-file }}
+          APPLY_ALIASES: ${{ inputs.apply-aliases }}
+        with:
+          script: |
+            const fs = require('fs');
+            const read = (path, required) => {
+              if (!fs.existsSync(path)) {
+                if (required) throw new Error(`${path} introuvable : lancer harness-sync.sh`);
+                return [];
+              }
+              return JSON.parse(fs.readFileSync(path, 'utf8'));
+            };
+            const byName = new Map();
+            for (const label of [...read(process.env.LABELS_FILE, true), ...read(process.env.LOCAL_LABELS_FILE, false)]) {
+              byName.set(label.name, { ...(byName.get(label.name) || {}), ...label });
+            }
+            const { owner, repo } = context.repo;
+            const exists = async (name) => {
+              try { await github.rest.issues.getLabel({ owner, repo, name }); return true; }
+              catch (error) { if (error.status === 404) return false; throw error; }
+            };
+            for (const label of byName.values()) {
+              const fields = { name: label.name, color: label.color, description: (label.description || '').slice(0, 100) };
+              if (await exists(label.name)) {
+                await github.rest.issues.updateLabel({ owner, repo, ...fields });
+                core.info(`mis à jour : ${label.name}`);
+                continue;
+              }
+              const alias = process.env.APPLY_ALIASES === 'true'
+                ? await (async () => { for (const a of label.aliases || []) if (await exists(a)) return a; return null; })()
+                : null;
+              if (alias) {
+                await github.rest.issues.updateLabel({ owner, repo, name: alias, new_name: label.name,
+                  color: fields.color, description: fields.description });
+                core.info(`renommé : ${alias} → ${label.name}`);
+              } else {
+                await github.rest.issues.createLabel({ owner, repo, ...fields });
+                core.info(`créé : ${label.name}`);
+              }
+            }

@@ -1,0 +1,34 @@
+name: Bug
+description: Quelque chose ne marche pas comme prévu
+labels: [bug]
+body:
+  - type: textarea
+    id: resume
+    attributes:
+      label: Résumé
+      description: "Première chose qu'un humain lit : une user story (« En tant que …, je veux …, pour … ») ou deux lignes."
+    validations:
+      required: true
+  - type: textarea
+    id: constat
+    attributes:
+      label: Comportement constaté et attendu
+    validations:
+      required: true
+  - type: textarea
+    id: etapes
+    attributes:
+      label: Étapes pour reproduire
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Version, commit, appareil
+  - type: dropdown
+    id: priorite
+    attributes:
+      label: Priorité
+      options: ["P1 🔴", "P2 🟠", "P3 🟢"]
+    validations:
+      required: true

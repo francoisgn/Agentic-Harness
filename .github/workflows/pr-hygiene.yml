@@ -1,0 +1,100 @@
+name: Hygiène des PR (réutilisable)
+
+# Contrôles bon marché d'une PR, en un seul job (chaque job est facturé à la minute entamée, CI-BUDGET.md) :
+#   - flux de branches : la paire base ← tête doit figurer dans `flow` (vide = pas de contrôle) ;
+#   - lien d'issue : `Closes #n` / `Refs #n` (ou `Direct-PR: <raison>`, qui pose le label `direct-pr`) ;
+#   - section « Changelog » non vide si `require-changelog`.
+# Une PR de promotion (tête dans `promotion-heads`) et les auteurs exemptés (Dependabot) ne passent que le flux.
+# Un brouillon ne passe que le flux : le reste se juge au passage « Ready for review ».
+# Le corps est lu depuis l'événement, jamais interpolé dans un shell ; le code de la PR n'est pas extrait.
+on:
+  workflow_call:
+    inputs:
+      flow:
+        description: "Paires autorisées BASE:TÊTE séparées par des espaces, `*` permis (ex. « beta:develop beta:hotfix/* master:beta master:hotfix/* »)"
+        type: string
+        default: ""
+      flow-bases:
+        description: Bases soumises au contrôle de flux (les autres sont libres), séparées par des espaces
+        type: string
+        default: "beta master main"
+      require-issue:
+        type: boolean
+        default: true
+      require-changelog:
+        type: boolean
+        default: false
+      changelog-heading:
+        type: string
+        default: "## Changelog"
+      promotion-heads:
+        type: string
+        default: "develop beta"
+      exempt-authors:
+        type: string
+        default: "dependabot[bot]"
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    name: Flux, issue, changelog
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+      issues: write   # label `direct-pr` seulement
+      pull-requests: read
+    steps:
+      - uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+        env:
+          FLOW: ${{ inputs.flow }}
+          FLOW_BASES: ${{ inputs.flow-bases }}
+          REQUIRE_ISSUE: ${{ inputs.require-issue }}
+          REQUIRE_CHANGELOG: ${{ inputs.require-changelog }}
+          CHANGELOG_HEADING: ${{ inputs.changelog-heading }}
+          PROMOTION_HEADS: ${{ inputs.promotion-heads }}
+          EXEMPT_AUTHORS: ${{ inputs.exempt-authors }}
+        with:
+          script: |
+            const pr = context.payload.pull_request;
+            if (!pr) { core.info('Pas une PR : rien à contrôler.'); return; }
+            const words = (s) => (s || '').split(/\s+/).filter(Boolean);
+            const glob = (p) => new RegExp('^' + p.replace(/[.+?^${}()|[\]\\]/g, '\\$&').replace(/\*/g, '.*') + '$');
+            const base = pr.base.ref, head = pr.head.ref;
+            const errors = [];
+
+            if (process.env.FLOW && words(process.env.FLOW_BASES).includes(base)) {
+              const ok = words(process.env.FLOW).some((pair) => {
+                const [b, h] = pair.split(':');
+                return b === base && glob(h || '').test(head);
+              });
+              if (!ok) errors.push(`flux interdit : ${head} → ${base} (autorisé : ${process.env.FLOW})`);
+            }
+
+            const exempt = words(process.env.EXEMPT_AUTHORS).includes(pr.user.login)
+              || words(process.env.PROMOTION_HEADS).includes(head);
+            if (!pr.draft && !exempt) {
+              const body = (pr.body || '').replace(/<!--[\s\S]*?-->/g, '');
+              const direct = /^Direct-PR:[ \t]*\S/im.test(body);
+              const linked = /\b(?:close[sd]?|fix(?:e[sd])?|resolve[sd]?|refs?)[ \t]+(?:[\w.-]+\/[\w.-]+)?#\d+/i.test(body);
+              if (process.env.REQUIRE_ISSUE === 'true' && !linked && !direct) {
+                errors.push('aucune issue liée : une ligne `Closes #n` par issue (ou `Refs #n`, ou `Direct-PR: <raison>`)');
+              }
+              if (direct && !pr.labels.some((l) => l.name === 'direct-pr')) {
+                await github.rest.issues.addLabels({ ...context.repo, issue_number: pr.number, labels: ['direct-pr'] })
+                  .catch((e) => core.warning(`label direct-pr non posé : ${e.message}`));
+              }
+              if (process.env.REQUIRE_CHANGELOG === 'true') {
+                const heading = process.env.CHANGELOG_HEADING.trim();
+                const at = body.split(/\r?\n/).findIndex((l) => l.trim().toLowerCase() === heading.toLowerCase());
+                const section = at < 0 ? [] : body.split(/\r?\n/).slice(at + 1);
+                const end = section.findIndex((l) => /^#{1,2}\s/.test(l));
+                const content = (end < 0 ? section : section.slice(0, end)).map((l) => l.replace(/^[-*]\s*/, '').trim()).filter(Boolean);
+                if (!content.length) errors.push(`section « ${heading} » absente ou vide (écrire « Aucun » si rien de visible)`);
+              }
+            }
+
+            if (errors.length) core.setFailed(errors.join('\n'));
+            else core.info(`🟢 ${head} → ${base} : conforme${pr.draft ? ' (brouillon : flux seul)' : ''}.`);

@@ -1,0 +1,61 @@
+name: CI
+
+# CI du cadre lui-même, en un job Linux (budget : CI-BUDGET.md) : scripts, workflows, JSON, cohérence des versions,
+# tests de harness-sync.sh, markdown. Rien sur un brouillon.
+on:
+  push:
+    branches: [main]
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    name: Scripts, workflows, tests
+    if: github.event.pull_request.draft != true
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: ShellCheck
+        if: ${{ !cancelled() }}
+        run: shellcheck scripts/*.sh scripts/tests/*.sh plugins/harness/scripts/*.sh
+
+      - name: Python (syntaxe des hooks)
+        if: ${{ !cancelled() }}
+        run: python3 -m py_compile plugins/harness/scripts/guard-git.py
+
+      - name: JSON valides et versions cohérentes
+        if: ${{ !cancelled() }}
+        run: |
+          for f in $(git ls-files '*.json'); do jq empty "$f" || exit 1; done
+          V=$(cat VERSION); P=$(jq -r .version plugins/harness/.claude-plugin/plugin.json)
+          [ "$V" = "$P" ] || { echo "::error::VERSION ($V) ≠ plugin.json ($P)"; exit 1; }
+          grep -q "^## $V " CHANGELOG.md || { echo "::error::CHANGELOG.md sans section $V"; exit 1; }
+
+      - name: Tests de harness-sync.sh et des hooks
+        if: ${{ !cancelled() }}
+        run: scripts/tests/test-harness-sync.sh
+
+      - name: Workflows · actionlint
+        if: ${{ !cancelled() }}
+        run: docker run --rm -v "$PWD":/repo -w /repo rhysd/actionlint:1.7.7 -color
+
+      - name: Workflows · zizmor
+        if: ${{ !cancelled() }}
+        # Les gabarits référencent le cadre par tag ; harness-sync.sh les épingle par SHA chez le consommateur (testé).
+        run: pipx run zizmor==1.31.1 --offline --min-severity low .github/workflows
+
+      - name: Markdown (tableaux, ancres)
+        if: ${{ !cancelled() }}
+        run: npx --yes markdownlint-cli2@0.18.1

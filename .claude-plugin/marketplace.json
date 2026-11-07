@@ -1,0 +1,17 @@
+{
+  "name": "agentic-harness",
+  "description": "Cadre commun de développement agentique (Claude Code) des projets de François : méthode pilotée par les issues, lots, revues, orchestration, garde-fous git.",
+  "owner": {
+    "name": "François Guillon",
+    "url": "https://github.com/francoisgn"
+  },
+  "plugins": [
+    {
+      "name": "harness",
+      "source": "./plugins/harness",
+      "description": "Skills (lot-start, lot-finish, review-round, feedback-triage, lessons-check, harness-update) et hooks (garde-fou git, rappel de session) du cadre agentic-harness.",
+      "category": "workflow",
+      "tags": ["issues", "lots", "revue", "orchestration", "ci"]
+    }
+  ]
+}
