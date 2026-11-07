@@ -1,12 +1,14 @@
 name: Revue IA (réutilisable)
 
 # Le « service de revue » du cadre, équivalent maison de CodeRabbit (REVIEW-SERVICE.md) : un relecteur Claude, en
-# lecture seule sur le code, qui poste UNE revue par passage sur la tête de la PR, au format du cadre (constats
+# lecture seule sur le code, qui poste UN commentaire de revue par passage sur la tête de la PR, au format du cadre (constats
 # Haute / Moyenne / Basse / Détail, fichier:ligne, scénario d'échec, correctif ; LESSONS.md ; règles du projet).
 # Économie (CI-BUDGET.md, REVIEW-ROUNDS.md) :
 #   - rien sur un brouillon ; l'appelant le déclenche sur `ready_for_review` et `synchronize` d'une PR prête ;
 #   - un nouveau push annule la revue en cours (concurrency) ; tours bornés (`max-turns`) ;
 #   - label `revue: aucune` sur la PR → sautée (PR triviale, Dependabot).
+# Sortie limitée à un commentaire (`gh pr comment`, jamais `gh pr review`) : le relecteur ne peut pas émettre d'approbation
+# GitHub, même si un texte de la PR tente de l'y pousser (injection de prompt) ; le verdict reste du texte.
 # Sécurité : `pull_request` (jamais `pull_request_target`) : une PR de fork n'a pas le secret, le job est sauté. Ce
 # contrôle n'est donc JAMAIS requis dans le ruleset ; la revue adversariale de la session reste la garantie.
 on:
@@ -65,9 +67,9 @@ jobs:
         run: |
           {
             echo "Tu es le service de revue du cadre agentic-harness sur la PR #$PR, tête $HEAD_SHA, base $BASE_REF."
-            echo "Lecture seule sur le code : ni commit, ni push, ni merge. Tu postes UNE revue de PR, rien d'autre."
+            echo "Lecture seule sur le code : ni commit, ni push, ni merge. Tu postes UN commentaire de PR (gh pr comment), rien d'autre."
             echo "Lis : CLAUDE.md, .harness/docs/ESSENTIEL.md, .harness/docs/LESSONS.md, la spec liée (Closes/Refs)."
-            echo "Revue incrémentale : si tu as déjà posté une revue sur cette PR (gh pr view $PR --json reviews), relis"
+            echo "Revue incrémentale : si tu as déjà commenté cette PR (gh pr view $PR --json comments), relis"
             echo "seulement git diff <sha de ta dernière revue>...HEAD, et vérifie si tes constats précédents sont traités."
             echo "Sinon, relis git diff origin/$BASE_REF...HEAD. Pour chaque risque réel : scénario d'échec concret, fichier:ligne,"
             echo "correctif proportionné. Sévérités : Haute / Moyenne / Basse / Détail. Pas de constat de style qu'un"
@@ -101,4 +103,4 @@ jobs:
           claude_args: >-
             --model ${{ inputs.model }}
             --max-turns ${{ inputs.max-turns }}
-            --allowedTools "Read,Grep,Glob,Bash(git diff:*),Bash(git log:*),Bash(gh pr view:*),Bash(gh pr diff:*),Bash(gh pr review:*)"
+            --allowedTools "Read,Grep,Glob,Bash(git diff:*),Bash(git log:*),Bash(gh pr view:*),Bash(gh pr diff:*),Bash(gh pr comment:*)"

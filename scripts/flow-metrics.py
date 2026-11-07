@@ -49,7 +49,7 @@ def review_events(pull):
         # Verdicts en début de ligne seulement : une citation (`>`) ou une ligne de tableau (`|`) ne compte pas ;
         # un corps peut en porter plusieurs (consolidation de /compliance-review).
         verdicts = [m for line in body.splitlines() if not line.lstrip().startswith((">", "|"))
-                    for m in [VERDICT_RE.match(re.sub(r"^[-*]\s+", "", line.strip()))] if m]
+                    for m in [VERDICT_RE.match(re.sub(r"^(?:[-*]|\d+[.)])\s+", "", line.strip()))] if m]
         if verdicts:
             events += [{"source": VERDICT_SOURCE[m.group(1)], "at": at,
                         "problem": m.group(2) in ("CHANGEMENTS DEMANDÉS", "ÉCARTS")}
@@ -191,7 +191,7 @@ def analyse(data, now, stall_hours=24, draft_stall_hours=120, max_ci_runs=6, max
     durations = []
     for r in runs:
         start = r.get("run_started_at") or r.get("created_at")
-        if start and r.get("updated_at"):
+        if start and r.get("updated_at") and r.get("conclusion") != "skipped":  # un run sauté ne facture rien
             durations.append(max(0.0, (parse_time(r["updated_at"]) - parse_time(start)) / 60))
     # Annulés (cancel-in-progress) et sautés (brouillon) ne disent rien de la qualité : hors du dénominateur.
     finished = [r for r in runs if r.get("conclusion") in ("success", "failure")]

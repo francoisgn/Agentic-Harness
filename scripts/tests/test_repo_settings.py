@@ -72,6 +72,13 @@ class PlanTests(unittest.TestCase):
             for ruleset in json.loads(p.read_text(encoding="utf-8"))["rulesets"]:
                 self.assertEqual(ruleset.get("bypass_actors"), [], p)
 
+    def test_duplicate_ruleset_names_are_rejected(self):
+        with self.assertRaises(ValueError):
+            rs.plan({"rulesets": [{"name": "p"}, {"name": "p"}]}, {"repository": {}, "topics": [], "rulesets": []})
+
+    def test_current_without_repository_key(self):
+        self.assertEqual(rs.plan({"repository": {"description": "d"}}, {})[0]["op"], "patch-repo")
+
     def test_unmanaged_rulesets_are_never_deleted(self):
         current = {"repository": {}, "topics": [], "rulesets": [dict(RULESET, id=7, name="à la main")]}
         self.assertEqual(rs.plan({"rulesets": []}, current), [])

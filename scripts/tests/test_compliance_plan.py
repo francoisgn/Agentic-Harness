@@ -124,6 +124,20 @@ class PlanTests(unittest.TestCase):
         self.assertTrue(cp.plan({"compliance": "gdpr"}, self.root)["errors"])
         self.assertTrue(cp.plan({"compliance": [["gdpr"]]}, self.root)["errors"])
 
+    def test_non_string_id_agent_or_spec_is_an_error(self):
+        for entry in ({"id": ["x"]}, {"id": {"a": 1}}, {"id": "pci", "agent": ["a.md"]}, {"id": "dora", "spec": 3}):
+            self.assertTrue(cp.plan({"compliance": [entry]}, self.root)["errors"], entry)
+
+    def test_paths_outside_the_repository_are_refused(self):
+        outside = pathlib.Path(self.tmp.name).parent / "hors-depot.md"
+        outside.write_text(AGENT_OK)
+        try:
+            for path in (str(outside), "../hors-depot.md"):
+                errors = self.plan([{"id": "pci", "agent": path}])["errors"]
+                self.assertTrue(any("hors du dépôt" in e for e in errors), (path, errors))
+        finally:
+            outside.unlink()
+
     def test_duplicate_id_is_an_error(self):
         self.assertTrue(self.plan(["gdpr", {"id": "gdpr"}])["errors"])
 

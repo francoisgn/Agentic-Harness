@@ -35,6 +35,8 @@ body:
     attributes:
       label: Définition de fini
       description: "Tests verts (vus rouges d'abord), docs à jour, revue par un autre modèle, conformité si concernée, validation sur l'appareil."
+    validations:
+      required: true
   - type: textarea
     id: sources
     attributes:

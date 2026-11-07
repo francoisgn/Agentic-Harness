@@ -9,6 +9,7 @@ import subprocess
 import sys
 import tempfile
 import unittest
+from unittest import mock
 
 ROOT = pathlib.Path(__file__).resolve().parents[2]
 SCRIPT = ROOT / "scripts" / "flow-metrics.py"
@@ -180,7 +181,8 @@ class CollectTests(unittest.TestCase):
         original = fm._gh
         fm._gh = fake
         try:
-            data = fm.collect("o/r", 14)
+            with mock.patch.object(fm.time, "time", return_value=fm.parse_time(NOW)):
+                data = fm.collect("o/r", 14)
         finally:
             fm._gh = original
         self.assertTrue(any("pulls/7/reviews" in c for c in calls))
@@ -237,6 +239,18 @@ class BulletVerdictTests(unittest.TestCase):
         p = pull(1)
         p["comments"] = [comment("c", "- " + ADV_KO), comment("c", "* " + ADV_OK)]
         self.assertEqual([e["problem"] for e in fm.review_events(p)], [True, False])
+
+
+class SkippedRunTests(unittest.TestCase):
+    def test_skipped_runs_cost_no_minutes(self):
+        runs = [run("x", conclusion="skipped", minutes=0), run("x", conclusion="success", minutes=2.5)]
+        ci = fm.analyse({"issues": [], "pulls": [], "runs": runs}, now=fm.parse_time(NOW))["ci"]
+        self.assertEqual((ci["runs"], ci["billed_minutes_min"]), (2, 3))
+
+    def test_numbered_verdict_counts(self):
+        p = pull(1)
+        p["comments"] = [comment("c", "1. " + ADV_KO)]
+        self.assertEqual([e["problem"] for e in fm.review_events(p)], [True])
 
 
 class QualityTests(unittest.TestCase):

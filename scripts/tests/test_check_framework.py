@@ -76,6 +76,21 @@ class CheckFrameworkTests(unittest.TestCase):
             self.assertEqual(cf.pull_request_job_names(on + job), {"Tests"}, on)
         self.assertEqual(cf.pull_request_job_names("on: [pull_request_target]\n" + job), set())
 
+    def test_malformed_manifest_line_is_reported(self):
+        with open(self.tmp / "harness.manifest", "a") as f:
+            f.write("copy\n")
+        r = run(self.tmp)
+        self.assertNotIn("Traceback", r.stderr)
+        self.assertIn("mal formée", r.stdout)
+
+    def test_quoted_on_key_and_trailing_comment(self):
+        spec = __import__("importlib.util").util.spec_from_file_location("cf2", CHECK)
+        cf = __import__("importlib.util").util.module_from_spec(spec)
+        spec.loader.exec_module(cf)
+        job = "jobs:\n  a:\n    name: Tests\n    runs-on: x\n"
+        for on in ("'on':\n  pull_request:\n", "\"on\": [pull_request]\n", "on: # déclencheurs\n  pull_request:\n"):
+            self.assertEqual(cf.pull_request_job_names(on + job), {"Tests"}, on)
+
     def test_skill_without_description(self):
         p = self.tmp / "plugins/harness/skills/intent/SKILL.md"
         p.write_text(p.read_text().replace("description:", "desc:", 1))

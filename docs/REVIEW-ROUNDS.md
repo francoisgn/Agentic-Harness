@@ -42,9 +42,11 @@ CodeRabbit ou humaine) et l'**effort de correction** (commits après le premier 
 c'est la jauge de la qualité initiale et du coût de la seconde passe ([FINOPS](FINOPS.md) §4). La mesure n'est juste
 que si **tous** les verdicts sont visibles sur la PR, surtout le premier négatif :
 - l'auteur poste **chaque** verdict de revue adversariale et de conformité en commentaire de la PR, mot pour mot, y
-  compris `CHANGEMENTS DEMANDÉS` / `ÉCARTS` (jamais seulement le dernier `APPROUVÉ`) ; la première ligne reste au
-  format `**Revue adversariale (<modèle>) : <VERDICT>** — tête <sha>` (le tableau de bord la lit en début de ligne,
-  éventuellement en puce `- ` ; une citation `>` ou une ligne de tableau ne compte pas) ;
+  compris `CHANGEMENTS DEMANDÉS` / `ÉCARTS` (jamais seulement le dernier `APPROUVÉ`) ; la première ligne suit le
+  format de sa source : `**Revue adversariale (<modèle>) : APPROUVÉ | CHANGEMENTS DEMANDÉS** — tête <sha>`,
+  `**Revue conformité <référentiel> (<modèle>) : CONFORME | ÉCARTS | HORS PÉRIMÈTRE** — tête <sha>`, ou
+  `**Revue IA (<modèle>) : …**` pour le service de revue. Le tableau de bord la lit en début de ligne (éventuellement
+  en puce `- ` ou numérotée `1. `) ; une citation `>` ou une ligne de tableau ne compte pas ;
 - une revue faite avant l'ouverture de la PR se poste dès l'ouverture, dans l'ordre ;
 - un constat de sécurité se trace sans détail (« CHANGEMENTS DEMANDÉS — constat de sécurité, détail transmis en
   privé ») : il compte, il ne fuit pas ;

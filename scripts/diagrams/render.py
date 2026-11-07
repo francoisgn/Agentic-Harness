@@ -123,6 +123,15 @@ def _arrow(e, r):
     return "".join(parts)
 
 
+def invalid(source):
+    """Éléments mal formés : à corriger dans la source (message, pas de traceback)."""
+    issues = []
+    for e in source:
+        if e.get("type") == "arrow" and len(e.get("points") or []) < 2:
+            issues.append(f"{e.get('id')} : une flèche demande au moins deux points")
+    return issues
+
+
 def drawable(source):
     return [e for e in source if e["type"] not in ("cameraUpdate", "delete", "restoreCheckpoint")]
 
@@ -240,6 +249,10 @@ def main():
             problems.append(f"{name} : source docs/diagrams/{name}.json introuvable")
             continue
         source = json.loads((DIR / f"{name}.json").read_text(encoding="utf-8"))
+        bad = invalid(source)
+        if bad:
+            problems += [f"{name} : {b}" for b in bad]
+            continue
         problems += [f"{name} : {o}" for o in overflows(source)]
         outputs = {DIR / f"{name}.svg": render_svg(source), DIR / f"{name}.excalidraw": to_scene(source)}
         for path, content in outputs.items():

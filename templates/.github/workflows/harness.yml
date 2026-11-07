@@ -12,6 +12,8 @@ on:
   issues:
     types: [opened, edited, labeled, unlabeled, reopened, closed]
   schedule:
+    # Ces deux chaînes sont reprises à l'identique par les conditions des jobs `flow` et `settings`/`security`
+    # (github.event.schedule) : en changer une ici sans la changer là désactive le job en silence.
     - cron: "17 5 * * *"   # tableau de bord quotidien
     - cron: "47 5 * * 1"   # hebdomadaire : dérive des réglages, sécurité (CVE sans commit) si le job security est activé
   pull_request:

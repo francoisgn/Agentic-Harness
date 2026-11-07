@@ -64,6 +64,13 @@ def glob_match(path, pattern):
     return re.fullmatch(rx, path) is not None
 
 
+def _inside(root, rel):
+    """Le chemin reste dans le dépôt (ni absolu hors racine, ni `..` qui en sort)."""
+    base = pathlib.Path(root).resolve()
+    target = (base / rel).resolve()
+    return target == base or base in target.parents
+
+
 def _in_scope(entry, files, diff):
     paths, keywords = entry.get("paths") or [], entry.get("keywords") or []
     if not paths and not keywords:
@@ -93,8 +100,16 @@ def plan(config, root, files=(), diff=""):
             continue
         entry = {"id": raw} if isinstance(raw, str) else dict(raw)
         cid = entry.get("id")
-        if not cid:
-            errors.append(f"entrée sans `id` : {raw}")
+        if not cid or not isinstance(cid, str):
+            errors.append(f"entrée sans `id` texte : {raw!r}")
+            continue
+        bad = [k for k in ("agent", "spec") if entry.get(k) is not None and not isinstance(entry[k], str)]
+        if bad:
+            errors.append(f"{cid} : `{bad[0]}` doit être un chemin (texte)")
+            continue
+        outside = [k for k in ("agent", "spec") if entry.get(k) and not _inside(root, entry[k])]
+        if outside:
+            errors.append(f"{cid} : `{outside[0]}` pointe hors du dépôt, refusé")
             continue
         if cid in seen:
             errors.append(f"{cid} : déclaré deux fois")

@@ -53,7 +53,7 @@ Prérequis : `bash`, `git`, `python3` ; accès en lecture à `francoisgn/agentic
 5. **Vérifier** : `../agentic-harness/scripts/harness-sync.sh --target . --check` sort en 0 ; `git diff --stat` ne
    montre que l'attendu ; lancer une session Claude et constater le message « Cadre agentic-harness » au démarrage.
 6. **Commit unique**, puis PR en brouillon :
-   `Cadre agentic-harness 0.1.0 : adoption` (corps : ce qui a été retiré du `CLAUDE.md`, workflows remplacés, labels
+   `Cadre agentic-harness 0.2.0 : adoption` (corps : ce qui a été retiré du `CLAUDE.md`, workflows remplacés, labels
    déplacés ; `## Changelog` : « Aucun (outillage) »).
 7. **Après le merge** (opérateur) : lancer le workflow « Cadre » à la main (`workflow_dispatch`) pour créer les labels ;
    si ce dépôt du cadre est privé, vérifier l'accès Actions ([ADR 0001](adr/0001-mecanisme-de-distribution.md)).

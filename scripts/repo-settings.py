@@ -62,13 +62,17 @@ def plan(desired, current):
         unknown = sorted(set(repo) - REPO_FIELDS)
         if unknown:
             raise ValueError(f"champs de dépôt non gérés : {unknown} (permis : {sorted(REPO_FIELDS)})")
-        fields = {k: v for k, v in repo.items() if current["repository"].get(k) != v}
+        fields = {k: v for k, v in repo.items() if current.get("repository", {}).get(k) != v}
         if fields:
             actions.append({"op": "patch-repo", "fields": fields})
     if desired.get("topics") is not None:
         names = sorted(set(desired["topics"]))
         if names != sorted(current.get("topics", [])):
             actions.append({"op": "put-topics", "names": names})
+    names = [r.get("name") for r in desired.get("rulesets") or []]
+    duplicates = sorted({n for n in names if names.count(n) > 1})
+    if duplicates:
+        raise ValueError(f"rulesets déclarés deux fois : {duplicates} (le nom identifie un ruleset)")
     by_name = {r["name"]: r for r in current.get("rulesets", [])}
     for ruleset in desired.get("rulesets") or []:
         wanted = {k: ruleset[k] for k in RULESET_KEYS if k in ruleset}

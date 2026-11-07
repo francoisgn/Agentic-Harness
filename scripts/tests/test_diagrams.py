@@ -44,6 +44,10 @@ class RenderTests(unittest.TestCase):
         self.assertNotIn("Traceback", r.stderr)
         self.assertIn("absent", r.stdout)
 
+    def test_arrow_with_fewer_than_two_points_is_reported(self):
+        bad = dict(ARROW, points=[[0, 0]])
+        self.assertTrue(any("au moins deux points" in e for e in rd.invalid(bad and [bad])))
+
     def test_overflow_is_reported(self):
         long = dict(BOX, label={"text": "un texte bien trop long pour cette boîte", "fontSize": 20})
         self.assertTrue(rd.overflows([long]))

@@ -10,8 +10,8 @@ Définition du service de revue automatique des PR du cadre. Il **complète** la
 |---|---|
 | Déclencheur | PR **prête** (`ready_for_review`, puis `synchronize`) ; jamais un brouillon ; label `revue: aucune` → sautée |
 | Entrées | Diff `base...tête`, spec liée (`Closes`/`Refs`), `CLAUDE.md`, `ESSENTIEL.md`, `LESSONS.md`, consignes du projet (`.harness/review-instructions.md`) |
-| Sortie | **Une** revue de PR par tête : verdict `APPROUVÉ` / `CHANGEMENTS DEMANDÉS`, constats numérotés (Haute / Moyenne / Basse / Détail, `fichier:ligne`, scénario d'échec, correctif), liste « Vérifié » |
-| Droits | Lecture du code ; écriture d'une revue de PR seulement. Ni commit, ni push, ni merge |
+| Sortie | **Un** commentaire de revue par tête : verdict `APPROUVÉ` / `CHANGEMENTS DEMANDÉS`, constats numérotés (Haute / Moyenne / Basse / Détail, `fichier:ligne`, scénario d'échec, correctif), liste « Vérifié » |
+| Droits | Lecture du code ; un **commentaire** de PR seulement (`gh pr comment`), jamais une revue GitHub : il ne peut pas approuver, même sous injection de prompt. Ni commit, ni push, ni merge |
 | Modèle | Niveau ≥ celui de l'issue, **autre** que l'auteur si possible ; défaut : solide ; frontière pour les flux à risque |
 | Secrets | `ANTHROPIC_API_KEY` ou `CLAUDE_CODE_OAUTH_TOKEN` (secret de dépôt ou d'organisation) |
 | Forks | Pas de secret → job sauté ; c'est pourquoi le contrôle n'est **jamais requis** dans le ruleset |

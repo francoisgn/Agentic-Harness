@@ -7,7 +7,7 @@ name: Réglages
 on:
   push:
     branches: [master]
-    paths: [.github/repo-settings.json, scripts/repo-settings.py]
+    paths: [.github/repo-settings.json, scripts/repo-settings.py, .github/workflows/settings.yml]
   schedule:
     - cron: "41 5 * * 1"
   workflow_dispatch:
