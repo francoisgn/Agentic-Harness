@@ -1,0 +1,54 @@
+name: Cadre
+
+# Appelle les workflows réutilisables du cadre agentic-harness (docs/ADOPTION.md). Fichier du projet : l'adapter
+# librement ; harness-sync.sh ne réécrit que les références `@…` ci-dessous (mode refbump), épinglées au SHA du
+# commit du cadre avec le tag en commentaire (`@<sha> # vX.Y.Z`), comme toute action.
+# Budget : jobs Linux de quelques secondes (1 min facturée chacun) ; rien de macOS.
+# Les événements `issues` ne déclenchent que la copie de ce fichier présente sur la branche par défaut du dépôt.
+on:
+  push:
+    branches: [develop]   # ← branche par défaut du projet
+    paths: [.harness/labels.json, .github/labels.local.json]
+  issues:
+    types: [opened, edited, labeled, unlabeled, reopened, closed]
+  pull_request:
+    types: [opened, edited, reopened, synchronize, ready_for_review]
+  workflow_dispatch:
+
+permissions: {}
+
+jobs:
+  labels:
+    if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
+    permissions:
+      contents: read
+      issues: write
+    uses: francoisgn/agentic-harness/.github/workflows/labels-sync.yml@v0.1.0
+    with:
+      apply-aliases: false   # true pour renommer d'anciens labels (ex. `priority: high` → `P1 🔴`)
+
+  issue:
+    if: github.event_name == 'issues'
+    permissions:
+      contents: read
+      issues: write
+    uses: francoisgn/agentic-harness/.github/workflows/issue-hygiene.yml@v0.1.0
+
+  pr:
+    if: github.event_name == 'pull_request'
+    permissions:
+      contents: read
+      issues: write
+      pull-requests: read
+    uses: francoisgn/agentic-harness/.github/workflows/pr-hygiene.yml@v0.1.0
+    with:
+      # Modèle A (develop → beta → master). Modèle B (une branche d'intégration) : laisser vide.
+      flow: "beta:develop beta:hotfix/* master:beta master:hotfix/*"
+      require-changelog: true
+
+  # Socle docs + sécurité, si le projet ne l'a pas déjà (sinon supprimer ce job : on ne paie pas deux fois).
+  # security:
+  #   if: github.event_name == 'pull_request'
+  #   permissions:
+  #     contents: read
+  #   uses: francoisgn/agentic-harness/.github/workflows/docs-security.yml@v0.1.0

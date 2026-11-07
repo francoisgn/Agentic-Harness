@@ -1,0 +1,34 @@
+name: Fonctionnalité
+description: Une capacité nouvelle ou une amélioration
+labels: [feature]
+body:
+  - type: textarea
+    id: resume
+    attributes:
+      label: Résumé
+      description: "Une user story (« En tant que …, je veux …, pour … ») ou deux lignes de synthèse."
+    validations:
+      required: true
+  - type: textarea
+    id: besoin
+    attributes:
+      label: Besoin
+      description: Le problème à résoudre, pas encore la solution.
+    validations:
+      required: true
+  - type: textarea
+    id: proposition
+    attributes:
+      label: Proposition et critères d'acceptation
+  - type: textarea
+    id: sources
+    attributes:
+      label: Sources
+      description: Règle, documentation officielle, comportement de référence (lien ou fichier:ligne). Rien de deviné.
+  - type: dropdown
+    id: priorite
+    attributes:
+      label: Priorité
+      options: ["P1 🔴", "P2 🟠", "P3 🟢"]
+    validations:
+      required: true
