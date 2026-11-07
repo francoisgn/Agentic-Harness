@@ -60,6 +60,13 @@ class CheckFrameworkTests(unittest.TestCase):
         out = run(self.tmp).stdout
         self.assertIn("« check »", out)
 
+    def test_required_check_must_run_on_pull_request_and_not_be_reusable(self):
+        p = self.tmp / ".github/repo-settings.json"
+        original = p.read_text()
+        for name in ("Tableau de bord", "Réglages du dépôt"):  # job hors pull_request ; job de workflow réutilisable
+            p.write_text(original.replace('"context": "Scripts, workflows, tests"', f'"context": "{name}"'))
+            self.assertIn(f"« {name} »", run(self.tmp).stdout, name)
+
     def test_skill_without_description(self):
         p = self.tmp / "plugins/harness/skills/intent/SKILL.md"
         p.write_text(p.read_text().replace("description:", "desc:", 1))

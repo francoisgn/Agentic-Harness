@@ -28,13 +28,26 @@ RULESET_KEYS = ("name", "target", "enforcement", "conditions", "rules", "bypass_
 API = "https://api.github.com"
 
 
-def _canon(value):
-    """Forme comparable : listes de règles indépendantes de l'ordre, clés triées."""
-    if isinstance(value, dict):
-        return {k: _canon(v) for k, v in sorted(value.items())}
-    if isinstance(value, list):
-        return sorted((_canon(v) for v in value), key=lambda v: json.dumps(v, sort_keys=True, ensure_ascii=False))
-    return value
+def _covers(actual, wanted):
+    """`actual` (réponse de l'API) contient `wanted` (fichier) : clés du fichier ⊆ réponse, récursivement.
+
+    L'API renvoie des valeurs par défaut que le fichier ne dit pas (`allowed_merge_methods`, `integration_id`…) : elles
+    ne sont pas une dérive. Les listes se comparent sans ordre, élément par élément, à longueur égale (une règle en plus
+    côté GitHub EST une dérive).
+    """
+    if isinstance(wanted, dict):
+        return isinstance(actual, dict) and all(k in actual and _covers(actual[k], v) for k, v in wanted.items())
+    if isinstance(wanted, list):
+        if not isinstance(actual, list) or len(actual) != len(wanted):
+            return False
+        remaining = list(actual)
+        for w in wanted:
+            match = next((i for i, a in enumerate(remaining) if _covers(a, w)), None)
+            if match is None:
+                return False
+            remaining.pop(match)
+        return True
+    return actual == wanted
 
 
 def plan(desired, current):
@@ -62,7 +75,7 @@ def plan(desired, current):
         existing = by_name.get(ruleset["name"])
         if existing is None:
             actions.append({"op": "create-ruleset", "ruleset": wanted})
-        elif _canon({k: existing.get(k) for k in wanted}) != _canon(wanted):
+        elif not _covers(existing, wanted):
             actions.append({"op": "update-ruleset", "id": existing["id"], "ruleset": wanted})
     return actions
 

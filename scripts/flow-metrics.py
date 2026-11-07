@@ -46,11 +46,14 @@ def review_events(pull):
     items += [(c.get("body") or "", None, (c.get("user") or {}).get("login", ""), c.get("created_at"))
               for c in pull.get("comments", [])]
     for body, state, login, at in items:
-        m = VERDICT_RE.search(body)
-        if m:
-            if m.group(2) != "HORS PÉRIMÈTRE":
-                events.append({"source": VERDICT_SOURCE[m.group(1)], "at": at,
-                               "problem": m.group(2) in ("CHANGEMENTS DEMANDÉS", "ÉCARTS")})
+        # Verdicts en début de ligne seulement : une citation (`>`) ou une ligne de tableau (`|`) ne compte pas ;
+        # un corps peut en porter plusieurs (consolidation de /compliance-review).
+        verdicts = [m for line in body.splitlines() if not line.lstrip().startswith((">", "|"))
+                    for m in [VERDICT_RE.match(line.strip())] if m]
+        if verdicts:
+            events += [{"source": VERDICT_SOURCE[m.group(1)], "at": at,
+                        "problem": m.group(2) in ("CHANGEMENTS DEMANDÉS", "ÉCARTS")}
+                       for m in verdicts if m.group(2) != "HORS PÉRIMÈTRE"]
             continue
         if login.startswith("coderabbitai"):
             n = ACTIONABLE_RE.search(body)
@@ -70,7 +73,9 @@ def quality(merged):
          "agent": {"reviewed": 0, "problem": 0}, "human": {"reviewed": 0, "problem": 0}}
     fix_commits, fix_hours = [], []
     for p in merged:
-        events = review_events(p)
+        merged_at = parse_time(p["merged_at"])
+        # Un verdict posté après le merge ne dit rien de la qualité au premier passage
+        events = [e for e in review_events(p) if not e.get("at") or parse_time(e["at"]) <= merged_at]
         if not events:
             q["untraced"] += 1
             continue

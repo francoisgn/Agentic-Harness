@@ -12,9 +12,9 @@ Usage : compliance-plan.py [--root .] [--files f1 f2 … | --base origin/develop
 Sortie JSON {"reviewers": [...], "errors": [...]} ; code 1 si une entrée est invalide. Bibliothèque standard seulement.
 """
 import argparse
-import fnmatch
 import json
 import pathlib
+import re
 import subprocess
 import sys
 
@@ -47,17 +47,36 @@ def check_spec(path):
     return errors
 
 
+def glob_match(path, pattern):
+    """Glob de chemin : `*` et `?` restent dans un dossier, `**/` couvre zéro ou plusieurs dossiers, `/**` tout le dessous."""
+    rx, i = "", 0
+    while i < len(pattern):
+        if pattern.startswith("**/", i):
+            rx, i = rx + "(?:.*/)?", i + 3
+        elif pattern.startswith("**", i):
+            rx, i = rx + ".*", i + 2
+        elif pattern[i] == "*":
+            rx, i = rx + "[^/]*", i + 1
+        elif pattern[i] == "?":
+            rx, i = rx + "[^/]", i + 1
+        else:
+            rx, i = rx + re.escape(pattern[i]), i + 1
+    return re.fullmatch(rx, path) is not None
+
+
 def _in_scope(entry, files, diff):
     paths, keywords = entry.get("paths") or [], entry.get("keywords") or []
     if not paths and not keywords:
         return "à évaluer", "périmètre jugé par l'agent (section « Quand intervenir »)"
     for f in files:
         for g in paths:
-            if fnmatch.fnmatch(f, g):
+            if glob_match(f, g):
                 return "dans le périmètre", f"{f} correspond à {g}"
-    added = "\n".join(line for line in diff.splitlines() if line.startswith(("+", "-")))
+    # Lignes ajoutées ou retirées seulement (pas les en-têtes +++/--- qui portent des chemins), mot entier
+    changed = "\n".join(line[1:] for line in diff.splitlines()
+                        if line.startswith(("+", "-")) and not line.startswith(("+++", "---")))
     for k in keywords:
-        if k.lower() in added.lower():
+        if re.search(rf"(?<!\w){re.escape(k)}(?!\w)", changed, re.IGNORECASE):
             return "dans le périmètre", f"mot-clé « {k} » dans le diff"
     return "hors périmètre", "aucun chemin ni mot-clé configuré n'est touché"
 
@@ -65,7 +84,13 @@ def _in_scope(entry, files, diff):
 def plan(config, root, files=(), diff=""):
     root = pathlib.Path(root)
     reviewers, errors, seen = [], [], set()
-    for raw in config.get("compliance", []):
+    entries = config.get("compliance", [])
+    if not isinstance(entries, list):
+        return {"reviewers": [], "errors": ["`compliance` doit être une liste (ex. [\"gdpr\"])"]}
+    for raw in entries:
+        if not isinstance(raw, (str, dict)):
+            errors.append(f"entrée invalide (texte ou objet attendu) : {raw!r}")
+            continue
         entry = {"id": raw} if isinstance(raw, str) else dict(raw)
         cid = entry.get("id")
         if not cid:
@@ -126,8 +151,12 @@ def main():
     files, diff = a.files or [], ""
     if a.base:
         git = ["git", "-C", str(root), "diff", f"{a.base}...HEAD"]
-        files = subprocess.run(git + ["--name-only"], capture_output=True, text=True, check=True).stdout.split()
-        diff = subprocess.run(git, capture_output=True, text=True, check=True).stdout
+        names = subprocess.run(git + ["--name-only"], capture_output=True, text=True)
+        if names.returncode != 0:
+            print(f"✘ git diff {a.base}...HEAD : {names.stderr.strip()}", file=sys.stderr)
+            return 1
+        files = names.stdout.split()
+        diff = subprocess.run(git, capture_output=True, text=True).stdout
     if a.diff_file:
         diff = pathlib.Path(a.diff_file).read_text(encoding="utf-8")
     result = plan(config, root, files, diff)

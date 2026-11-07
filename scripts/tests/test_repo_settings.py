@@ -39,6 +39,27 @@ class PlanTests(unittest.TestCase):
                                                   "rulesets": [dict(RULESET, id=42, source="o/r", node_id="n")]})
         self.assertEqual(same, [])
 
+    def test_api_defaults_absent_from_file_do_not_cause_updates(self):
+        desired = {"rulesets": [{"name": "p", "target": "branch", "enforcement": "active",
+                                 "rules": [{"type": "pull_request", "parameters": {"required_approving_review_count": 0}},
+                                           {"type": "required_status_checks", "parameters": {
+                                               "required_status_checks": [{"context": "CI"}]}}]}]}
+        api = {"id": 9, "name": "p", "target": "branch", "enforcement": "active", "source_type": "Repository",
+               "rules": [{"type": "required_status_checks", "parameters": {
+                             "do_not_enforce_on_create": False,
+                             "required_status_checks": [{"context": "CI", "integration_id": 15368}]}},
+                         {"type": "pull_request", "parameters": {"required_approving_review_count": 0,
+                                                                 "allowed_merge_methods": ["merge", "squash"]}}]}
+        self.assertEqual(rs.plan(desired, {"repository": {}, "topics": [], "rulesets": [api]}), [])
+
+    def test_extra_rule_in_github_or_changed_value_triggers_update(self):
+        desired = {"rulesets": [{"name": "p", "rules": [{"type": "deletion"}]}]}
+        extra = {"id": 9, "name": "p", "rules": [{"type": "deletion"}, {"type": "non_fast_forward"}]}
+        changed = {"id": 9, "name": "p", "rules": [{"type": "creation"}]}
+        for cur in (extra, changed):
+            self.assertEqual([a["op"] for a in rs.plan(desired, {"repository": {}, "topics": [], "rulesets": [cur]})],
+                             ["update-ruleset"])
+
     def test_unmanaged_rulesets_are_never_deleted(self):
         current = {"repository": {}, "topics": [], "rulesets": [dict(RULESET, id=7, name="à la main")]}
         self.assertEqual(rs.plan({"rulesets": []}, current), [])

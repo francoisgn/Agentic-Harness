@@ -107,6 +107,23 @@ class PlanTests(unittest.TestCase):
         r = self.plan([entry], files=["README.md"], diff="+ texte")
         self.assertEqual(r["reviewers"][0]["scope"], "hors périmètre")
 
+    def test_keywords_are_whole_words_and_ignore_file_headers(self):
+        entry = {"id": "gdpr", "keywords": ["ict"]}
+        self.assertEqual(self.plan([entry], diff="+x = dict()")["reviewers"][0]["scope"], "hors périmètre")
+        self.assertEqual(self.plan([entry], diff="+++ b/ict/a.py\n+pass")["reviewers"][0]["scope"], "hors périmètre")
+        self.assertEqual(self.plan([entry], diff="+# risque ICT majeur")["reviewers"][0]["scope"], "dans le périmètre")
+
+    def test_globs_star_stays_in_one_directory_and_double_star_matches_root(self):
+        self.assertTrue(cp.glob_match("src/a.py", "src/*.py"))
+        self.assertFalse(cp.glob_match("src/x/a.py", "src/*.py"))
+        self.assertTrue(cp.glob_match("a.swift", "**/*.swift"))
+        self.assertTrue(cp.glob_match("x/y/a.swift", "**/*.swift"))
+        self.assertTrue(cp.glob_match("src/compte/x/y.swift", "src/compte/**"))
+
+    def test_malformed_config_gives_errors_not_tracebacks(self):
+        self.assertTrue(cp.plan({"compliance": "gdpr"}, self.root)["errors"])
+        self.assertTrue(cp.plan({"compliance": [["gdpr"]]}, self.root)["errors"])
+
     def test_duplicate_id_is_an_error(self):
         self.assertTrue(self.plan(["gdpr", {"id": "gdpr"}])["errors"])
 

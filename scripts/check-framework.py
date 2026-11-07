@@ -33,6 +33,23 @@ def frontmatter(path):
     return meta, text[end + 4:]
 
 
+def pull_request_job_names(text):
+    """Noms de checks qu'un workflow publie sur une PR : workflow déclenché par `pull_request` (pas `_target`),
+    jobs directs seulement (le check d'un job réutilisable s'appelle `appelant / appelé`)."""
+    on_block = re.search(r"^on:\s*\n((?:[ \t]+.*\n|\s*\n)*)", text, re.M)
+    if not on_block or not re.search(r"^\s+pull_request:", on_block.group(1), re.M):
+        return set()
+    jobs = text[text.find("\njobs:"):]
+    names = set()
+    for block in re.split(r"\n  (?=[A-Za-z0-9_-]+:\s*\n)", jobs)[1:]:
+        if re.search(r"^    uses:", block, re.M):
+            continue
+        m = re.search(r"^    name:\s*(.+?)\s*$", block, re.M)
+        if m:
+            names.add(m.group(1).strip("\"'"))
+    return names
+
+
 def check(root):
     errors = []
     for skill in sorted((root / "plugins/harness/skills").glob("*/SKILL.md")):
@@ -75,7 +92,7 @@ def check(root):
     if settings.is_file():
         job_names = set()
         for wf in (root / ".github/workflows").glob("*.yml"):
-            job_names |= set(re.findall(r"^    name:\s*(.+?)\s*$", wf.read_text(encoding="utf-8"), re.M))
+            job_names |= pull_request_job_names(wf.read_text(encoding="utf-8"))
         for ruleset in json.loads(settings.read_text(encoding="utf-8")).get("rulesets", []):
             for rule in ruleset.get("rules", []):
                 for chk in (rule.get("parameters") or {}).get("required_status_checks", []):

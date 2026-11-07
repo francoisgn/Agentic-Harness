@@ -221,6 +221,17 @@ class ReviewEventTests(unittest.TestCase):
                                ("adversariale", True), ("adversariale", False), ("conformité", True), ("ia", False)])
 
 
+class VerdictParsingTests(unittest.TestCase):
+    def test_quoted_or_table_verdicts_are_ignored_and_all_verdicts_of_a_body_count(self):
+        p = pull(1)
+        p["comments"] = [comment("c", "> " + ADV_KO + "\nréponse"),
+                         comment("c", "| **Revue conformité RGPD (opus) : ÉCARTS** | x |"),
+                         comment("c", "**Revue conformité RGPD (opus) : CONFORME** — tête a\n"
+                                      "**Revue conformité PCI (opus) : ÉCARTS** — tête a")]
+        self.assertEqual([(e["source"], e["problem"]) for e in fm.review_events(p)],
+                         [("conformité", False), ("conformité", True)])
+
+
 class QualityTests(unittest.TestCase):
     def merged(self, n, ref, events_comments=(), reviews=(), commits=()):
         p = pull(n, ref=ref, state="closed", created="2026-11-05T00:00:00Z", merged="2026-11-06T00:00:00Z")
@@ -246,6 +257,11 @@ class QualityTests(unittest.TestCase):
         self.assertEqual(q["human"], {"reviewed": 1, "problem": 0})
         self.assertEqual(q["fix_commits_mean"], 1.5)       # PR 1 : 2 commits après 02:00 ; PR 2 : 1 après 03:00
         self.assertEqual(q["fix_hours_median"], 21.5)      # 1er constat → merge : 22 h et 21 h
+
+    def test_verdict_posted_after_merge_is_ignored(self):
+        late = self.merged(1, "claude/a", [comment("c", ADV_KO, "2026-11-07T00:00:00Z")])
+        q = fm.analyse({"issues": [], "pulls": [late], "runs": []}, now=fm.parse_time(NOW))["quality"]
+        self.assertEqual((q["problem"], q["untraced"], q["fix_hours_median"]), (0, 1, None))
 
     def test_pr_without_any_traced_review_is_counted_apart(self):
         q = fm.analyse({"issues": [], "pulls": [self.merged(1, "claude/a")], "runs": []}, now=fm.parse_time(NOW))["quality"]
