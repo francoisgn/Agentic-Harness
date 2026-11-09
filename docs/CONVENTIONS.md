@@ -124,7 +124,7 @@ Tout dépôt qui suit le cadre dit ce qu'il est sans qu'on ouvre un fichier : un
 | Élément | Où il vit | Règle |
 |---|---|---|
 | **Description** | `.github/repo-settings.json` → `repository.description` | une phrase : ce que fait le projet, pour qui ; pas le texte du gabarit, pas une liste de fonctionnalités ; tenue vraie quand le périmètre change |
-| **Topics** | `.github/repo-settings.json` → `topics` | 5 à 10 mots-clés qu'un visiteur chercherait : domaine, technologie, usage ; minuscules, chiffres et tirets, 50 caractères au plus, 20 topics au plus ([doc GitHub](https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/classifying-your-repository-with-topics)) ; préférer un topic déjà répandu à un mot inventé |
+| **Topics** | `.github/repo-settings.json` → `topics` | 5 à 15 mots-clés qu'un visiteur chercherait : domaine, technologie, usage ; minuscules, chiffres et tirets, 50 caractères au plus, 20 topics au plus ([doc GitHub](https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/classifying-your-repository-with-topics)) ; préférer un topic déjà répandu à un mot inventé |
 
 Les deux se modifient par PR et s'appliquent au merge ([ADOPTION](ADOPTION.md) §Réglages du dépôt « as code ») ;
 `repo-settings.py` avertit s'ils manquent ou sont mal formés, et n'envoie jamais la description du gabarit.

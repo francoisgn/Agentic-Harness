@@ -54,7 +54,7 @@ Prérequis : `bash`, `git`, `python3` ; accès en lecture à `francoisgn/agentic
      à activer seulement si le projet n'a pas déjà l'équivalent ; le job `flow` (tableau de bord) est actif d'office.
    - `.harness/config.json` → `compliance` : référentiels dont les relecteurs sont lancés ([COMPLIANCE](COMPLIANCE.md)). Supprimer les workflows qu'il remplace (ex. `branch-flow.yml`).
    - **Identité du dépôt** ([CONVENTIONS](CONVENTIONS.md) §Identité du dépôt) : dans `.github/repo-settings.json`,
-     remplacer la description du gabarit par une phrase et remplir `topics` (5 à 10 mots-clés) ; une bannière
+     remplacer la description du gabarit par une phrase et remplir `topics` (5 à 15 mots-clés) ; une bannière
      `docs/assets/banner.svg` en tête du `README.md` et une social preview `docs/assets/social-preview.png`
      (1280×640). Images absentes : une issue, elles peuvent suivre l'adoption.
 5. **Vérifier** : `../agentic-harness/scripts/harness-sync.sh --target . --check` sort en 0 ; `git diff --stat` ne
@@ -183,7 +183,7 @@ script `.harness/scripts/repo-settings.py`) l'applique au merge :
 | Section | Effet |
 |---|---|
 | `repository` | Description (obligatoire, [CONVENTIONS](CONVENTIONS.md) §Identité du dépôt ; celle du gabarit n'est jamais envoyée), site, fonctions (wiki, discussions), politique de merge, suppression des branches mergées |
-| `topics` | Liste complète des topics (5 à 10 attendus ; avertissement s'ils manquent ou sont mal formés) |
+| `topics` | Liste complète des topics (5 à 15 attendus ; avertissement s'ils manquent ou sont mal formés) |
 | `rulesets` | Rulesets gérés par nom (créés ou mis à jour, jamais supprimés automatiquement) : protection de la branche par défaut, contrôles requis |
 
 - **Une fois, par le propriétaire** : créer un jeton fine-grained limité au dépôt, « Administration: read and write »,

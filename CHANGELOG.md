@@ -6,12 +6,13 @@ faire en passant à cette version.
 ## Non publié
 
 - **Identité du dépôt** (CONVENTIONS §Identité du dépôt) : tout dépôt qui suit le cadre porte une description (une
-  phrase), des topics (5 à 10), une bannière en tête du README (`docs/assets/banner.svg`) et une social preview
+  phrase), des topics (5 à 15), une bannière en tête du README (`docs/assets/banner.svg`) et une social preview
   (`docs/assets/social-preview.png`, 1280×640, texte en anglais, déposée à la main par l'opérateur). Le doc steward
   vérifie les quatre (STEWARDS §2, agent `doc-steward`), ADOPTION le prévoit.
 - `repo-settings.py` : avertit (sans bloquer) si la description ou les topics manquent ou sont mal formés ; la
   description restée celle du gabarit (`<…>`) n'est plus envoyée à GitHub.
-- Le cadre s'applique la règle : bannière et social preview ajoutées ; `check-framework.py` contrôle description,
+- Le cadre s'applique la règle : description réécrite en anglais (tout agent de code, plus seulement Claude Code),
+  topics élargis aux agents couverts, bannière et social preview ajoutées ; `check-framework.py` contrôle description,
   topics et images.
 
 Action : remplir la description et les topics dans `.github/repo-settings.json`, ajouter les deux images (une issue

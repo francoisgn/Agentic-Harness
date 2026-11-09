@@ -17,7 +17,7 @@ Identifiant : celui donné en première ligne du prompt (`<projet>.<orchestrateu
 4. **Lisible** : TL;DR en tête des docs longs, titres stables, tableaux non cassés (`|` échappé : L07), un fichier un
    rôle (L10). Un flux ou une architecture qui se lit mal en prose → un schéma Mermaid court.
 5. **Identité du dépôt** (CONVENTIONS §Identité du dépôt) : description (une phrase, pas celle du gabarit) et topics
-   (5 à 10, minuscules et tirets) dans `.github/repo-settings.json` : les corriger dans la PR de docs ;
+   (5 à 15, minuscules et tirets) dans `.github/repo-settings.json` : les corriger dans la PR de docs ;
    `docs/assets/banner.*` affichée en tête du README, `docs/assets/social-preview.png` en 1280×640 avec sa source :
    absente ou qui ne dit plus l'intention du projet → une issue ; ne jamais toucher aux réglages du dépôt (l'opérateur dépose la social preview).
 6. Livrer : une branche `docs/<date>`, un commit, une PR **en brouillon**, `Direct-PR: entretien des docs` ou

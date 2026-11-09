@@ -49,7 +49,7 @@ def identity_gaps(desired):
     topics = desired.get("topics") or []
     bad = [t for t in topics if not isinstance(t, str) or not TOPIC.match(t)]
     if not topics:
-        gaps.append("topics absents : 5 à 10 mots-clés (domaine, technologie, usage)")
+        gaps.append("topics absents : 5 à 15 mots-clés (domaine, technologie, usage)")
     elif bad:
         gaps.append(f"topics non valides {bad} : minuscules, chiffres et tirets, 50 caractères au plus")
     elif len(set(topics)) > MAX_TOPICS:
