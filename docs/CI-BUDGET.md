@@ -1,7 +1,7 @@
 # Budget CI et socle de sécurité
 
-Sources : `docs/CI.md`, `ci.yml`, `security.yml`, `scripts/ci/local-check.sh` de ios-app_credit-immo ; `ci.yml`,
-ADR 0005 (et son amendement du 05/11, #477), `CONTRIBUTING.md` §4, `.pre-commit-config.yaml` de HFRnow.
+Sources : `ci.yml`, ADR 0005 (et son amendement du 05/11, #477), `CONTRIBUTING.md` §4, `.pre-commit-config.yaml` de
+HFRnow ; pratique éprouvée sur d'autres projets (workflows de CI et de sécurité, script de CI locale).
 
 ## 1. Les deux règles de facturation
 Sur un dépôt privé, le quota gratuit est de 2 000 minutes par mois, et :
@@ -12,10 +12,51 @@ Un **dépôt public ne consomme aucune minute** (runners standard, macOS compris
 secret scanning : c'est le levier le plus fort quand le projet peut être public.
 
 ## 2. Règles 🟢
-- **PR en brouillon** pendant le travail : rien ne tourne (jobs conditionnés par `github.event.pull_request.draft != true`,
-  et `ready_for_review` dans les types d'événement pour lancer la CI au passage « Ready for review »).
-- **Un seul push par lot**, après les contrôles locaux (`scripts/ci/local-check.sh` ou équivalent) et le build Mac si
-  l'app change. Pas de push d'essai.
+
+### Pousser souvent, payer au passage « Ready »
+Un push ne doit rien coûter ; ce qui coûte, c'est la CI qu'il déclenche. Donc :
+- **Pousser tôt et souvent sur une PR en brouillon** : le travail survit à un plantage de session, il est visible des
+  autres sessions et de l'opérateur. Sur un brouillon, **rien de coûteux ne tourne** (macOS, jobs longs, sécurité
+  lourde) ; au plus un contrôle Linux de quelques secondes si le projet le veut.
+- **La CI coûteuse tourne au passage « Ready for review »**, ou à la demande par un **label explicite** (ex.
+  `ci: complète`) posé sur un brouillon quand on a vraiment besoin d'un verdict macOS avant la fin.
+- **Un commit par cycle de revue** : tous les constats d'un cycle corrigés, contrôlés en local, puis un seul push.
+- **Jamais de push « pour voir si la CI passe » sur une PR prête** : les contrôles rapides tournent en local avant
+  (`local-check.sh` ou équivalent, pre-commit, build Mac si l'app change) ; la CI confirme, elle ne découvre pas.
+  Besoin d'essayer ? Repasser la PR en brouillon, ou poser le label sur le brouillon.
+- **Aucune minute gaspillée** : un passage annulé, un job sauté ou une PR de docs ne doit pas allumer de runner macOS.
+
+Le mécanisme (recommandation à adapter ; le nom du label est au choix du projet) :
+```yaml
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review, labeled]
+concurrency:
+  group: ci-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+jobs:
+  linux:   # rapide : lint, tests unitaires, secrets
+    if: >-
+      (github.event.action != 'labeled' || github.event.label.name == 'ci: complète')
+      && (!github.event.pull_request.draft || contains(github.event.pull_request.labels.*.name, 'ci: complète'))
+    runs-on: ubuntu-latest
+    steps: [...]
+  macos:   # coûteux : ne part qu'après le job Linux vert
+    needs: linux
+    if: >-
+      (github.event.action != 'labeled' || github.event.label.name == 'ci: complète')
+      && (!github.event.pull_request.draft || contains(github.event.pull_request.labels.*.name, 'ci: complète'))
+    runs-on: macos-latest
+    steps: [...]
+```
+- `ready_for_review` dans les types : la CI part d'elle-même au passage « Ready » ; `labeled` filtré sur le seul label
+  utile, pour qu'un autre label ne relance rien.
+- Un job sauté (`if:` faux) compte comme réussi pour un contrôle requis (§4) : un brouillon ne se merge pas de toute
+  façon, et le passage « Ready » relance tout.
+- Variante quand les runners macOS sont rares et que le job macOS est requis : sur un brouillon, le faire tourner sur un
+  runner Linux qui échoue tout de suite (« brouillon : CI macOS au passage Ready ») plutôt que d'attendre un runner.
+
+### Le reste
 - **Regrouper** les contrôles Linux dans un job par workflow (tests + couverture + lint ; un seul job sécurité).
 - **Le job macOS dépend du job Linux** (`needs:`) : un lint ou un test rouge n'allume pas de runner macOS.
 - **Détection de changements** : le build iOS ne part que si l'app ou le moteur change (`git diff --quiet BASE...HEAD --
@@ -29,13 +70,12 @@ secret scanning : c'est le levier le plus fort quand le projet peut être public
 - Bots de revue : pas de revue des brouillons ni des fichiers générés.
 - Quand le quota est épuisé : rejouer la CI en local avant chaque merge (`local-check.sh` signale « INCOMPLET » s'il
   manque un outil, plutôt que de se dire vert).
+- CodeQL et l'analyse lourde peuvent ne tourner que sur la branche d'intégration et sur les PR d'un label dédié (flux à
+  risque).
 
-Variante HFRnow (runners macOS rares) : sur un brouillon, les jobs macOS requis échouent **immédiatement** sur un
-runner Linux (« Draft PR ») au lieu d'attendre ; ils tournent pour de vrai au passage « Ready for review ». CodeQL Swift
-ne tourne que sur la branche d'intégration et sur les PR labellisées `codeql` (flux à risque).
-
-**Ordre de grandeur (credit-immo, mesuré le 01/11)** : un push sur une PR coûtait 19 min de quota quoi qu'il touche ;
-il en coûte 4 sans changement de l'app (ou en cas d'échec Linux), 14 sinon. Une promotion coûte 4 + 30 min.
+**Ordre de grandeur** : mesurer ce que coûte un push sur une PR prête, avec et sans changement de l'app ; le chiffre
+guide les réglages (détection de changements, `needs:`, étapes réservées aux promotions). Le tableau de bord
+([FINOPS](FINOPS.md) §4) suit les minutes facturées.
 
 ## 3. Socle de sécurité
 Tout gratuit, sans compte tiers. Workflow réutilisable du cadre : `docs-security.yml` (markdownlint, gitleaks, zizmor,
@@ -92,8 +132,8 @@ chargent (LESSONS L44).
 
 Des agents produisent bien plus de commits qu'un humain (ratio suivi par le tableau de bord, [FINOPS](FINOPS.md) §4).
 La CI doit coûter par **lot prêt**, pas par commit :
-- les commits restent locaux et fins ; **un push par lot**, en brouillon (rien ne tourne) ; la CI part au passage
-  « Ready for review » ;
+- les commits restent fins et sont **poussés souvent sur le brouillon** (rien de coûteux n'y tourne) ; la CI complète
+  part au passage « Ready for review » ou sur le label explicite (§2) ; ensuite, un push par cycle de revue ;
 - les contrôles rapides (lint, secrets, tests unitaires) tournent **en local avant le push** (pre-commit,
   `local-check.sh`) : la CI confirme, elle ne découvre pas ;
 - détection de changements et `paths-ignore` : une PR de docs ne lance pas le build ; la sécurité lourde (SAST, SCA)

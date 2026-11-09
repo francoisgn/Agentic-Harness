@@ -18,13 +18,13 @@ planifié, fait une passe, rend compte, et s'arrête ([FINOPS](FINOPS.md) §1). 
 ## 1. Issue steward : une file prête à être prise
 
 Objectif : qu'un agent de lot puisse prendre une issue **sans poser de question**.
-- Labels d'axe complets (type, priorité, modèle, taille) ; `à clarifier` avec la question exacte quand une décision
+- Labels d'axe complets (type, priorité, et modèle / taille si le projet a ces axes : METHODOLOGY §4) ; `à clarifier` avec la question exacte quand une décision
   manque ; `bloqué` avec le prérequis ; `hôte: mac` si besoin.
 - Intention exploitable : user story, comportements d'erreur, définition de fini ([METHODOLOGY](METHODOLOGY.md) §2) ;
   sinon un commentaire qui liste ce qui manque.
 - Doublons : propose la fusion (la plus ancienne gagne), ne ferme jamais seul ce qu'un autre a écrit.
 - Routage : jalon, lot, dépendances (`Dépend de #n`), sous-issues du parapluie ; taille L → proposition de découpe.
-- Prises en charge abandonnées (> 24 h sans activité) : les signale à l'orchestrateur, ne les reprend pas.
+- Prises en charge abandonnées (`/claim` actif sans activité depuis 24 h) : les signale à l'orchestrateur, ne les reprend pas.
 
 ## 2. Doc steward : des docs toujours vraies et lisibles
 
@@ -34,6 +34,10 @@ Objectif : qu'un agent de lot puisse prendre une issue **sans poser de question*
   un flux ou une architecture se décrit mieux en image (Mermaid dans le Markdown : rendu par GitHub, versionné, relu
   comme du code).
 - Tient à jour les vues d'ensemble : README (contenu, état), plan des lots, index des ADR.
+- Si le projet tient un registre ([CONVENTIONS](CONVENTIONS.md) §Registre) : après un lot de merges, lance la commande
+  de repli du projet (`.harness/config.json` → `ledger.fold_command`), ouvre **une** PR de docs qui ne touche que les
+  fichiers du registre et que le script reproduit, signale les entrées mal formées sur leur PR, puis marque les PR
+  repliées (`ledger: done`).
 
 ## 3. Flow monitor : voir les dérives tôt
 

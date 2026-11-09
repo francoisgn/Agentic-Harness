@@ -14,7 +14,7 @@ Identifiant : celui donné en première ligne du prompt (`<projet>.<orchestrateu
 2. Pour chaque signal, relis l'état réel avant de conclure (L18, L19) : dernier commentaire, tête de la PR, CI.
 3. Rends un tableau `Signal | Élément | Cause probable | Action | Qui` :
    - panne d'issue prise en charge → arrêter la session, noter l'état sur l'issue, la rendre (orchestrateur) ;
-   - boucle de CI → arrêt, diagnostic local, un seul push ; boucle de revue → contre-vérification, correction de classe ;
+   - boucle de CI → arrêt, diagnostic local, un commit par cycle ; boucle de revue → contre-vérification, correction de classe ;
    - `bloqué` / `à clarifier` → la question exacte et la personne qui décide ;
    - dérive de coût (minutes, taux d'échec) → la cause (job, PR) et la règle de CI-BUDGET qui s'applique.
 4. Statut global 🟢/🟠/🔴 en première ligne. Tu n'écris rien sur GitHub : l'orchestrateur décide.

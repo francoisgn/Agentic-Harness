@@ -1,6 +1,8 @@
 ## Cadre commun : agentic-harness {{HARNESS_VERSION}}
 
-Ce bloc est géré par `scripts/harness-sync.sh` du cadre [agentic-harness](https://github.com/francoisgn/agentic-harness) : ne pas le modifier ici (une modification se propose dans le cadre). Le reste de ce fichier appartient au projet et l'emporte sur le cadre en cas de conflit, à signaler dans une issue.
+Ce bloc est géré par `scripts/harness-sync.sh`, qui vit dans le dépôt du cadre [agentic-harness](https://github.com/francoisgn/agentic-harness), pas dans ce dépôt : ne pas le modifier ici (une modification se propose dans le cadre). Mise à jour : skill `/harness-update`, ou, depuis la racine de ce dépôt, cloner le cadre au tag voulu à côté (`git clone --depth 1 --branch vX.Y.Z https://github.com/francoisgn/agentic-harness.git ../agentic-harness`) puis lancer `../agentic-harness/scripts/harness-sync.sh --target .` (`.harness/docs/ADOPTION.md` §Mises à jour).
+
+**Précédence** : les règles du projet l'emportent sur le cadre. Le projet consigne chaque dérogation au cadre, avec sa raison, dans la section « Harness overrides » de son `AGENTS.md` ; ses réglages vont dans `.harness/config.json` ; tout ce qui est hors de ce bloc lui appartient. Ordre en cas de conflit : section « Harness overrides », puis le reste des règles du projet (`AGENTS.md`, `CLAUDE.md`), puis `.harness/config.json`, puis `.harness/docs/`. Un conflit non tranché se signale dans une issue du projet.
 
 @.harness/docs/ESSENTIEL.md
 

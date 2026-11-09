@@ -76,9 +76,9 @@ Le tableau de bord (`flow-report.yml`, script `flow-metrics.py`) calcule chaque 
 
 | Signal | Seuil par défaut | Lecture | Action |
 |---|---|---|---|
-| Issue `pris en charge` sans activité | 24 h | Session morte ou bloquée en silence | Watchdog : arrêter, noter l'état, rendre l'issue |
+| Issue prise en charge (`/claim`, label `pris en charge`) sans activité | 24 h | Session morte ou bloquée en silence | Watchdog : arrêter, noter l'état, rendre l'issue |
 | PR prête sans activité / brouillon | 24 h / 120 h | Revue ou auteur en panne | Relancer le bon acteur |
-| Pushes testés par la CI sur une PR (SHA distincts) | > 6 | Boucle de push d'essai | Arrêt, diagnostic local, un seul push |
+| Pushes testés par la CI sur une PR (SHA distincts, runs sautés ou annulés exclus) | > 6 | Boucle de push d'essai | Arrêt, diagnostic local, un commit par cycle |
 | Revues sur une PR | > 3 | Boucle de revue (correctifs à l'instance, pas à la classe) | Contre-vérification, REVIEW-ROUNDS §3 |
 | `bloqué`, `à clarifier` | tout | Goulot externe ou décision produit | Remonter à l'opérateur, avec la question exacte |
 | Délai médian ouverture → merge | tendance | Fluidité | Comparer semaine à semaine |

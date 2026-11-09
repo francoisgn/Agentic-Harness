@@ -19,7 +19,7 @@ relire par un modèle plus fort. Chaque brique se garde, se remplace ou se compl
 | L'agent devine l'intention | Chaque issue porte user story, comportements d'erreur, définition de fini (`/intent`) |
 | Des tests écrits après coup, parfois verts sans le changement | TDD : test vu rouge, puis vert ; prouvé dans la PR |
 | L'auteur se relit lui-même | Revue adversariale par un autre modèle, verdicts tracés sur la PR |
-| Un push par idée, une CI par push | Brouillon, un push par lot, boucles bornées (3 cycles de revue, 6 pushes testés) |
+| Un push par idée, une CI coûteuse par push | Pushes fréquents sur un brouillon sans CI coûteuse, CI complète au passage « Ready », un commit par cycle de revue, boucles bornées (3 cycles, 6 pushes testés) |
 | Conformité oubliée ou manuelle | Relecteurs RGPD, AI Act, NIS2, ISO 27001, SOC 2, TISAX, PCI, HDS, ou les vôtres, lancés seulement si le diff les concerne |
 | « Où en est-on ? » | Tableau de bord quotidien : jalons, goulots, pannes, boucles, **ratio de PR à problème**, coût |
 | Les mêmes erreurs d'un projet à l'autre | 82 leçons sourcées, enrichies par issue « Leçon » |
@@ -33,7 +33,7 @@ relire par un modèle plus fort. Chaque brique se garde, se remplace ou se compl
 ![Six étapes : récupérer, synchroniser, régler, travailler, piloter, mettre à jour ; avec n'importe quel agent ; chaque brique remplaçable](docs/diagrams/tirer-parti.svg)
 
 ```bash
-git clone --depth 1 --branch v0.2.0 https://github.com/francoisgn/agentic-harness.git ../agentic-harness
+git clone --depth 1 --branch v0.3.0 https://github.com/francoisgn/agentic-harness.git ../agentic-harness
 ../agentic-harness/scripts/harness-sync.sh --target . --dry-run   # voir avant d'écrire
 ../agentic-harness/scripts/harness-sync.sh --target .
 ```
@@ -99,6 +99,6 @@ python3 scripts/check-framework.py && python3 -m unittest discover -s scripts/te
 - Contribuer : une issue avec son intention, une branche, une PR en brouillon, la CI verte, une revue par un autre
   modèle. Une leçon née dans votre projet : formulaire « Leçon ». Un schéma : modifier `docs/diagrams/<nom>.json`,
   lancer `scripts/diagrams/render.py`, commiter les trois fichiers.
-- Origines : distillé de deux projets réels (un client iOS de forum et un simulateur de crédit immobilier) ;
+- Origines : distillé de projets réels (dont un client iOS de forum, exemple public d'[UTILISATION](docs/UTILISATION.md)) ;
   inspirations citées : [OpenHarness](https://github.com/HKUDS/OpenHarness) (MIT) pour la boucle de réparation bornée
   et le tableau de bord ([ADR 0002](docs/adr/0002-agents-specialises-et-tableau-de-bord.md)).

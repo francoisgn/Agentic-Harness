@@ -90,7 +90,7 @@ jobs:
           set -euo pipefail
           BASE=$(jq -r '.integration_branch // empty' .harness/config.json 2>/dev/null || true)
           BASE=${BASE:-$DEFAULT_BRANCH}
-          BRANCH="harness/sync-$TAG"
+          BRANCH="chore/harness-sync-$TAG"
           if git ls-remote --exit-code --heads "https://x-access-token:${TOKEN}@github.com/${GITHUB_REPOSITORY}.git" "$BRANCH" >/dev/null; then
             echo "::notice::$BRANCH existe déjà : PR sans doute ouverte."; exit 0
           fi
@@ -107,7 +107,6 @@ jobs:
             if [ "$SYNC_WORKFLOWS" != "true" ]; then echo "🟠 Fichiers sous \`.github/workflows/\` non touchés : mettre à jour à la main les références \`@$TAG\` de \`harness.yml\`."; echo; fi
             echo '```'; sed 's/`//g' "$RUNNER_TEMP/sync.log"; echo '```'
             echo
-            echo "## Changelog"
-            echo "Aucun (outillage)."
+            echo "Direct-PR: mise à jour automatique du cadre (outillage, rien de visible : pas de section \`### Ledger\`)."
           } > "$RUNNER_TEMP/body.md"
           gh pr create --draft --base "$BASE" --head "$BRANCH" --title "Cadre agentic-harness : passage en $TAG" --body-file "$RUNNER_TEMP/body.md"

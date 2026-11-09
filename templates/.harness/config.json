@@ -4,5 +4,8 @@
   "protected_branches": ["main", "master", "develop", "beta"],
   "integration_branch": "develop",
   "branch_model": "A",
+  "branch_types": ["lot", "fix", "feat", "chore", "docs"],
+  "labels": { "model_prefixes": ["modèle:"], "size_prefixes": ["taille:"] },
+  "ledger": { "enabled": false, "label": "ledger", "fold_command": "" },
   "compliance": []
 }

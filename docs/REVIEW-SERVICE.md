@@ -28,7 +28,7 @@ Définition du service de revue automatique des PR du cadre. Il **complète** la
 Un dépôt où les agents poussent l'essentiel des commits multiplie les revues. Leviers, du plus rentable au moins :
 1. **Prévenir** : `/lessons-check` et la revue adversariale **avant** « Ready » ; le service ne doit trouver que ce qui
    a échappé aux deux. Un constat déjà dans LESSONS = l'auto-relecture est à resserrer.
-2. **Une revue par tête prête**, pas par push : brouillon pendant le travail, un push par cycle.
+2. **Une revue par tête prête**, pas par push : pushes fréquents sur le brouillon pendant le travail (pas de revue), un push par cycle une fois prête.
 3. **Revue incrémentale** : au cycle suivant, consigne de ne relire que `dernier-sha-relu...tête` (le service lit sa
    revue précédente).
 4. **Borne** : au-delà de 3 cycles, l'orchestrateur arrête la boucle ([FINOPS](FINOPS.md) §3).
