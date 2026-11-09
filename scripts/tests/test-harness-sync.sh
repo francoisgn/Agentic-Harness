@@ -73,12 +73,12 @@ ok "--skip-workflows / --skip-seed"
 
 # Hooks
 g() { printf '{"tool_input":{"command":%s},"cwd":"%s"}' "$(jq -Rn --arg c "$1" '$c')" "$T" | CLAUDE_PROJECT_DIR="$T" python3 "$GUARD" 2>/dev/null; echo $?; }
-[ "$(g 'git push --force origin claude/x')" = 2 ] || fail "guard : force"
+[ "$(g 'git push --force origin fix/x')" = 2 ] || fail "guard : force"
 [ "$(g 'cd x && git push origin develop')" = 2 ] || fail "guard : branche protégée"
 [ "$(g 'git push origin HEAD:refs/heads/master')" = 2 ] || fail "guard : refspec protégée"
 [ "$(g 'git -C . commit -n -m x')" = 2 ] || fail "guard : --no-verify"
 [ "$(g 'git push')" = 2 ] || fail "guard : push depuis develop courant"
-[ "$(g 'git push -u origin claude/lot-1')" = 0 ] || fail "guard : push légitime refusé"
+[ "$(g 'git push -u origin lot/lot-1')" = 0 ] || fail "guard : push légitime refusé"
 [ "$(g 'echo git push --force')" = 0 ] || fail "guard : faux positif"
 ok "guard-git"
 CLAUDE_PROJECT_DIR="$T" bash "$ROOT/plugins/harness/scripts/session-start.sh" vendored | grep -q 'Version vendorisée' || fail "session-start"
