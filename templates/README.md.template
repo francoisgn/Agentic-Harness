@@ -1,0 +1,46 @@
+# <Nom du projet>
+
+<!-- Tuiles technologiques : une par brique réelle du projet (langage, framework, plateforme, CI, licence).
+     Format : https://img.shields.io/badge/<nom>-<version>-<couleur>?logo=<slug simpleicons.org>&logoColor=white
+     Une tuile d'état (CI, version) pointe vers une source vivante, jamais un chiffre écrit à la main. -->
+![Langage](https://img.shields.io/badge/langage-version-informational)
+![Plateforme](https://img.shields.io/badge/plateforme-version-informational)
+![CI](https://img.shields.io/badge/CI-GitHub_Actions-2088FF?logo=githubactions&logoColor=white)
+
+> <Une phrase : ce que fait le produit, pour qui.>
+
+<!-- Une capture ou une image du produit en service (docs/images/…), avec un texte alternatif qui la décrit. -->
+
+**TL;DR** : <le problème, la réponse du produit, où il en est, en trois lignes.>
+
+## Architecture
+
+![Architecture du projet : interface, moteur, données, services externes, CI, agents](docs/diagrams/architecture.svg)
+
+<!-- Source : docs/diagrams/architecture.json → `python3 .harness/scripts/diagrams-render.py` → .svg et .excalidraw
+     (scène modifiable sur excalidraw.com). Les trois fichiers se commitent ensemble. -->
+
+## Avancement
+
+<!-- Tenu à jour par `/readme-update` à la fin de chaque lot : une ligne par lot ou jalon, état relu sur les issues. -->
+<!-- harness:begin avancement -->
+| Lot | Périmètre | État | Issue / PR |
+|---|---|---|---|
+| LOT-001 | <périmètre> | ⚪ à faire | #… |
+<!-- harness:end avancement -->
+
+États : ⚪ à faire · 🔵 en cours · 🟠 en revue · 🔴 bloqué · 🟢 livré.
+
+## Démarrage
+
+```bash
+# Commandes exactes : installer, lancer, tester.
+```
+
+## Contribuer
+
+Voir [CONTRIBUTING.md](CONTRIBUTING.md) : prendre une issue, ouvrir une PR, contrôles attendus.
+
+## Licence
+
+<Licence et lien vers le fichier.>

@@ -4,5 +4,5 @@ Ce bloc est géré par `scripts/harness-sync.sh` du cadre [agentic-harness](http
 
 @.harness/docs/ESSENTIEL.md
 
-À lire selon la tâche (non chargés d'office) : méthode `.harness/docs/METHODOLOGY.md`, conventions `.harness/docs/CONVENTIONS.md`, leçons `.harness/docs/LESSONS.md` (auto-relecture avant chaque PR), revues `.harness/docs/REVIEW-ROUNDS.md`, orchestration et choix du modèle `.harness/docs/ORCHESTRATION.md`, branches et versions `.harness/docs/BRANCHING-RELEASE.md`, budget CI et sécurité `.harness/docs/CI-BUDGET.md`, reprise sur Mac `.harness/docs/MAC-HANDOFF.md`.
-Skills : `/lot-start`, `/lot-finish`, `/review-round`, `/feedback-triage`, `/lessons-check`, `/harness-update`.
+À lire selon la tâche (non chargés d'office) : méthode `.harness/docs/METHODOLOGY.md`, conventions `.harness/docs/CONVENTIONS.md`, leçons `.harness/docs/LESSONS.md` (auto-relecture avant chaque PR), revues `.harness/docs/REVIEW-ROUNDS.md`, orchestration et choix du modèle `.harness/docs/ORCHESTRATION.md`, branches et versions `.harness/docs/BRANCHING-RELEASE.md`, budget CI et sécurité `.harness/docs/CI-BUDGET.md`, README du projet `.harness/docs/README-STANDARD.md`, reprise sur Mac `.harness/docs/MAC-HANDOFF.md`.
+Skills : `/lot-start`, `/lot-finish`, `/review-round`, `/feedback-triage`, `/lessons-check`, `/readme-update`, `/harness-update`.

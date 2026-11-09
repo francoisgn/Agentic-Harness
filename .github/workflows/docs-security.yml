@@ -1,6 +1,7 @@
 name: Docs et sécurité (réutilisable)
 
-# Socle gratuit, sans compte tiers (CI-BUDGET.md §Sécurité), en UN job : markdownlint (tableaux et ancres),
+# Socle gratuit, sans compte tiers (CI-BUDGET.md §Sécurité), en UN job : markdownlint (tableaux et ancres), README au
+# standard du cadre,
 # gitleaks (historique), zizmor et actionlint (workflows). Chaque outil tourne même si le précédent échoue : un
 # seul passage donne tous les constats. Rien ne tourne sur un brouillon.
 # Désactiver ce que le projet couvre déjà ailleurs (inputs), pour ne pas payer deux fois.
@@ -17,6 +18,10 @@ on:
         type: boolean
         default: true
       actionlint:
+        type: boolean
+        default: true
+      readme:
+        description: README du projet au standard du cadre (README-STANDARD.md) et schémas à jour ; sauté si les scripts ne sont pas vendorisés
         type: boolean
         default: true
 
@@ -40,6 +45,17 @@ jobs:
       - name: Markdown · tableaux et ancres (markdownlint, règles de .markdownlint-cli2.jsonc)
         if: ${{ !cancelled() && inputs.markdownlint }}
         run: npx --yes markdownlint-cli2@0.18.1
+
+      - name: README · standard du cadre et schémas à jour (.harness/config.json › readme)
+        if: ${{ !cancelled() && inputs.readme }}
+        run: |
+          if [ ! -f .harness/scripts/readme-check.py ]; then echo "::notice::readme-check.py non vendorisé : contrôle sauté"; exit 0; fi
+          rc=0
+          python3 .harness/scripts/readme-check.py || rc=1
+          if [ -d docs/diagrams ] && [ -f .harness/scripts/diagrams-render.py ]; then
+            python3 .harness/scripts/diagrams-render.py --check || rc=1
+          fi
+          exit "$rc"
 
       - name: Secrets · gitleaks (historique)
         if: ${{ !cancelled() && inputs.gitleaks }}

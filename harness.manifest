@@ -29,6 +29,10 @@ copy      scripts/flow-metrics.py                     .harness/scripts/flow-metr
 copy      scripts/compliance-plan.py                  .harness/scripts/compliance-plan.py
 copy      scripts/repo-settings.py                    .harness/scripts/repo-settings.py
 
+# README du projet : contrôle du standard et rendu des schémas Excalidraw (README-STANDARD.md)
+copy      scripts/readme-check.py                     .harness/scripts/readme-check.py
+copy      scripts/diagrams/render.py                  .harness/scripts/diagrams-render.py
+
 # Hooks vendorisés (garde-fou git, rappel de session) et leur déclaration
 copy      plugins/harness/scripts/guard-git.py        .harness/hooks/guard-git.py
 copy      plugins/harness/scripts/session-start.sh    .harness/hooks/session-start.sh
@@ -51,6 +55,12 @@ seed      templates/.github/ISSUE_TEMPLATE/tache.yml    .github/ISSUE_TEMPLATE/t
 seed      templates/docs/lots/TEMPLATE.md             docs/lots/TEMPLATE.md
 seed      templates/docs/compliance/TEMPLATE.md       docs/compliance/TEMPLATE.md
 seed      templates/.markdownlint-cli2.jsonc          .markdownlint-cli2.jsonc
+# README au standard du cadre : jamais réécrit s'il existe déjà (readme-check.py liste alors les écarts)
+seed      templates/README.md.template                README.md
+seed      templates/CONTRIBUTING.md.template          CONTRIBUTING.md
+seed      templates/docs/diagrams/architecture.json        docs/diagrams/architecture.json
+seed      templates/docs/diagrams/architecture.svg         docs/diagrams/architecture.svg
+seed      templates/docs/diagrams/architecture.excalidraw  docs/diagrams/architecture.excalidraw
 seed      templates/.github/workflows/harness.yml       .github/workflows/harness.yml
 seed      templates/.github/workflows/harness-sync.yml  .github/workflows/harness-sync.yml
 refbump   -                                           .github/workflows/harness.yml

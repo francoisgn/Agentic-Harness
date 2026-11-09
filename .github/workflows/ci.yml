@@ -40,7 +40,11 @@ jobs:
 
       - name: Schémas à jour avec leurs sources (docs/diagrams)
         if: ${{ !cancelled() }}
-        run: python3 scripts/diagrams/render.py --check
+        run: python3 scripts/diagrams/render.py --check && python3 scripts/diagrams/render.py --check --dir templates/docs/diagrams
+
+      - name: README du cadre au standard qu'il demande (README-STANDARD.md)
+        if: ${{ !cancelled() }}
+        run: python3 scripts/readme-check.py
 
       - name: ShellCheck
         if: ${{ !cancelled() }}

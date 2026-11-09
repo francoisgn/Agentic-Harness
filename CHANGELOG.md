@@ -3,6 +3,25 @@
 Format : une section par version (semver), du plus récent au plus ancien. « Action » = ce qu'un projet consommateur doit
 faire en passant à cette version.
 
+## Non publié
+
+- **README vivant, par défaut** ([README-STANDARD](docs/README-STANDARD.md)) : les agents tiennent le README du
+  projet comme un livrable : tuiles technologiques en en-tête, image, schéma d'architecture Excalidraw, tableau
+  d'avancement des lots, démarrage, section Contribuer. Skill `/readme-update` (appelé par `/lot-finish`),
+  `readme-check.py` et `diagrams-render.py` vendorisés, gabarits `README.md`, `CONTRIBUTING.md` et
+  `docs/diagrams/architecture.*` créés s'ils manquent ; contrôle dans `docs-security.yml` (entrée `readme`).
+  Chaque point se coupe dans `.harness/config.json` › `readme`.
+- **Socle de CI par paliers** ([CI-BASELINE](docs/CI-BASELINE.md)) : hygiène, qualité (une commande locale = la
+  CI), cher, sécurité lourde, processus ; six invariants de workflow ; relevé de trois projets réels.
+- **Labels** : [ADR 0003](docs/adr/0003-labels-lisibles-par-axe.md) (proposé) : `axe: valeur`, états « à trier » et
+  « prête ». Aucun label renommé dans cette version.
+- Le cadre applique son standard : README avec tuiles et bloc d'avancement, `CONTRIBUTING.md`, contrôlés en CI.
+- `scripts/diagrams/render.py` : option `--dir`.
+
+**Action** : relancer `harness-sync.sh`. Un README existant n'est pas touché : `python3
+.harness/scripts/readme-check.py` liste les écarts ; pour couper, `"readme": false` dans `.harness/config.json`.
+Le job `docs` de `harness.yml`, s'il est activé, contrôle désormais le README (`readme: false` pour l'éviter).
+
 ## 0.2.0 — 2026-11-07
 
 Intention, TDD, FinOps, stewards, conformité, sécurité et mesure du flux.

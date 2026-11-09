@@ -1,5 +1,7 @@
 # Budget CI et socle de sécurité
 
+Quoi mettre en CI, par paliers : [CI-BASELINE](CI-BASELINE.md). Ce fichier dit ce que ça coûte et comment l'outiller.
+
 Sources : `docs/CI.md`, `ci.yml`, `security.yml`, `scripts/ci/local-check.sh` de ios-app_credit-immo ; `ci.yml`,
 ADR 0005 (et son amendement du 05/11, #477), `CONTRIBUTING.md` §4, `.pre-commit-config.yaml` de HFRnow.
 

@@ -36,6 +36,9 @@ in an issue.
 - **TDD**: test first, seen red for the right reason, then the code. A test **fails without the change**. Self-review against the lessons table(s), then an **adversarial review by a
   different model** than the author, **every verdict posted on the PR**, negative ones included (first-pass quality is
   measured). A review finding is a claim to verify; fix the class, not the instance.
+- **Living README**: the project README is a deliverable, updated within the lot (`/readme-update`): technology
+  badges, image, Excalidraw architecture diagram, lot progress table, quick start, Contributing
+  (README-STANDARD.md; each item can be switched off in `.harness/config.json`).
 - **Persistence**: data written by a released version stays readable by every later version (new fields optional or
   defaulted, tolerant decoding, migration on read).
 - **Cloud (Linux) sessions**: code that only builds on a Mac is reviewed with compiler rigour; never claim "it builds"

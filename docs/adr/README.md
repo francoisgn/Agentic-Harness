@@ -10,3 +10,4 @@ Ce dossier contient les ADR **du cadre**. Chaque projet tient les siens dans son
 |---|---|---|
 | [0001](0001-mecanisme-de-distribution.md) | Distribuer le cadre : vendorisation versionnée + plugin + workflows réutilisables | Accepté |
 | [0002](0002-agents-specialises-et-tableau-de-bord.md) | Agents spécialisés vendorisés, service de revue et tableau de bord du flux | Proposé |
+| [0003](0003-labels-lisibles-par-axe.md) | Labels lisibles par axe : `axe: valeur`, états « à trier » et « prête » | Proposé |

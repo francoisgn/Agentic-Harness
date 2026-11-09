@@ -1,5 +1,13 @@
 # agentic-harness
 
+[![CI](https://github.com/francoisgn/agentic-harness/actions/workflows/ci.yml/badge.svg)](https://github.com/francoisgn/agentic-harness/actions/workflows/ci.yml)
+![Python, bibliothèque standard seule](https://img.shields.io/badge/Python-3_stdlib-3776AB?logo=python&logoColor=white)
+![Bash](https://img.shields.io/badge/Bash-ShellCheck-4EAA25?logo=gnubash&logoColor=white)
+![GitHub Actions](https://img.shields.io/badge/GitHub_Actions-workflows_réutilisables-2088FF?logo=githubactions&logoColor=white)
+![Claude Code](https://img.shields.io/badge/Claude_Code-plugin-D97757?logo=claude&logoColor=white)
+![AGENTS.md](https://img.shields.io/badge/AGENTS.md-tout_agent-111111)
+![Excalidraw](https://img.shields.io/badge/Excalidraw-schémas-6965DB?logo=excalidraw&logoColor=white)
+
 > Un harnais versionné et ouvert pour développer avec des agents de code : intention et TDD, issues → lots → PR,
 > revues adversariales, conformité branchable, stewards, FinOps et tableau de bord du flux. Pour tout dépôt GitHub,
 > tout agent (Claude Code, Codex, Cursor, Gemini CLI, Copilot, Aider…) et toute équipe.
@@ -21,6 +29,7 @@ relire par un modèle plus fort. Chaque brique se garde, se remplace ou se compl
 | L'auteur se relit lui-même | Revue adversariale par un autre modèle, verdicts tracés sur la PR |
 | Un push par idée, une CI par push | Brouillon, un push par lot, boucles bornées (3 cycles de revue, 6 pushes testés) |
 | Conformité oubliée ou manuelle | Relecteurs RGPD, AI Act, NIS2, ISO 27001, SOC 2, TISAX, PCI, HDS, ou les vôtres, lancés seulement si le diff les concerne |
+| Un README périmé, sans schéma ni avancement | README tenu à la fin de chaque lot : tuiles, schéma Excalidraw, tableau des lots, contrôlé en CI (`/readme-update`) |
 | « Où en est-on ? » | Tableau de bord quotidien : jalons, goulots, pannes, boucles, **ratio de PR à problème**, coût |
 | Les mêmes erreurs d'un projet à l'autre | 82 leçons sourcées, enrichies par issue « Leçon » |
 
@@ -50,6 +59,7 @@ un client iOS).
 
 ## État
 
+<!-- harness:begin avancement -->
 | Capacité | État | Où |
 |---|---|---|
 | Méthode, conventions, leçons, branches, budget CI | 🟢 en service | `docs/` |
@@ -59,6 +69,9 @@ un client iOS).
 | Conformité branchable (agent du cadre, de l'entreprise, ou spec seule) | 🟢 résolution testée | COMPLIANCE §2 |
 | Agents de conformité intégrés | 🟠 fondation : identifiants « (à vérifier) » à confirmer sur les textes officiels | `plugins/harness/agents/compliance-*.md` |
 | Pipeline sécurité, revue IA, réglages du dépôt « as code » | 🟠 à valider sur un premier projet | `security.yml`, `ai-review.yml`, `repo-settings.yml` |
+| README vivant : tuiles, schéma Excalidraw, avancement des lots, Contribuer | 🟢 contrôlé en CI ; 🟠 à valider sur un premier projet | [README-STANDARD](docs/README-STANDARD.md), `readme-check.py`, `/readme-update` |
+| Socle de CI par paliers | 🟢 documenté | [CI-BASELINE](docs/CI-BASELINE.md) |
+<!-- harness:end avancement -->
 
 ## Contenu
 
@@ -73,15 +86,16 @@ un client iOS).
 | [`docs/STEWARDS.md`](docs/STEWARDS.md) | Rôles d'entretien (issues, docs, flux) et rapport d'état non technique |
 | [`docs/REVIEW-ROUNDS.md`](docs/REVIEW-ROUNDS.md), [`docs/REVIEW-SERVICE.md`](docs/REVIEW-SERVICE.md) | Cycles de revue, traçabilité des verdicts, service de revue IA |
 | [`docs/COMPLIANCE.md`](docs/COMPLIANCE.md) | Relecteurs de conformité : catalogue, trois modes de branchement |
-| [`docs/CI-BUDGET.md`](docs/CI-BUDGET.md) | Minutes de CI, sécurité (SAST, SCA, secrets), variables, volume agentique |
+| [`docs/README-STANDARD.md`](docs/README-STANDARD.md) | Le README que les agents tiennent par défaut : tuiles, image, schéma Excalidraw, avancement, Contribuer |
+| [`docs/CI-BASELINE.md`](docs/CI-BASELINE.md), [`docs/CI-BUDGET.md`](docs/CI-BUDGET.md) | Socle de CI par paliers ; minutes de CI, sécurité (SAST, SCA, secrets), variables, volume agentique |
 | [`docs/LESSONS.md`](docs/LESSONS.md) | Leçons par portée, sources citées ; comment en proposer |
 | [`docs/CONVENTIONS.md`](docs/CONVENTIONS.md), [`docs/BRANCHING-RELEASE.md`](docs/BRANCHING-RELEASE.md), [`docs/MAC-HANDOFF.md`](docs/MAC-HANDOFF.md) | Commits et PR, branches et versions, partage cloud / poste local |
 | [`docs/adr/`](docs/adr/README.md) | Décisions du cadre |
 | [`docs/diagrams/`](docs/diagrams) | Schémas : source `.json`, scène `.excalidraw` (modifiable sur excalidraw.com), image `.svg` |
-| `plugins/harness/` | Adaptateur Claude Code : 10 skills, 13 agents, hooks, plugin |
+| `plugins/harness/` | Adaptateur Claude Code : 11 skills, 13 agents, hooks, plugin |
 | `templates/`, `i18n/en/` | Gabarits vendorisés ; édition anglaise des fichiers chargés à chaque session |
 | `.github/workflows/` | Workflows réutilisables (labels, hygiène, sécurité, revue IA, tableau de bord, réglages) et CI du cadre |
-| `scripts/` | Synchro, tableau de bord, conformité, réglages, rendu des schémas, contrôles de cohérence, tests |
+| `scripts/` | Synchro, tableau de bord, conformité, réglages, rendu des schémas, contrôle du README, contrôles de cohérence, tests |
 
 ## Qualité du harnais lui-même
 
@@ -93,12 +107,14 @@ python3 scripts/check-framework.py && python3 -m unittest discover -s scripts/te
   && scripts/tests/test-harness-sync.sh && python3 scripts/diagrams/render.py --check
 ```
 
-## Versions et contributions
+## Versions
 - Semver, tags `vX.Y.Z` sur `master`, [CHANGELOG](CHANGELOG.md) à chaque version (section « Action » pour les
   projets). Avant 1.0.0, un MINEUR peut casser : le CHANGELOG le dit.
-- Contribuer : une issue avec son intention, une branche, une PR en brouillon, la CI verte, une revue par un autre
-  modèle. Une leçon née dans votre projet : formulaire « Leçon ». Un schéma : modifier `docs/diagrams/<nom>.json`,
-  lancer `scripts/diagrams/render.py`, commiter les trois fichiers.
 - Origines : distillé de deux projets réels (un client iOS de forum et un simulateur de crédit immobilier) ;
   inspirations citées : [OpenHarness](https://github.com/HKUDS/OpenHarness) (MIT) pour la boucle de réparation bornée
   et le tableau de bord ([ADR 0002](docs/adr/0002-agents-specialises-et-tableau-de-bord.md)).
+
+## Contribuer
+
+Voir [CONTRIBUTING.md](CONTRIBUTING.md) : une issue avec son intention, une branche, une PR en brouillon, la CI verte,
+une revue par un autre modèle. Une leçon née dans votre projet : formulaire « Leçon ».

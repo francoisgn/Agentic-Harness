@@ -5,7 +5,10 @@
   → docs/diagrams/<nom>.excalidraw  scène native, à ouvrir et modifier sur excalidraw.com (Fichier → Ouvrir)
   → docs/diagrams/<nom>.svg         image du README, au trait « dessiné à la main », déterministe
 
-Usage : render.py [--check] [nom…]   --check : sort en 1 si un SVG ou une scène n'est pas à jour, ou si un texte déborde.
+Usage : render.py [--check] [--dir <dossier>] [nom…]
+  --check : sort en 1 si un SVG ou une scène n'est pas à jour, ou si un texte déborde.
+  --dir   : dossier des schémas (défaut : docs/diagrams du dépôt courant, sinon celui du cadre). Vendorisé dans un
+            projet sous .harness/scripts/diagrams-render.py (README-STANDARD.md §4).
 Modifier un schéma : éditer le .json (ou le .excalidraw puis reporter), relancer render.py, commiter les trois.
 """
 import argparse
@@ -246,29 +249,33 @@ def to_scene(source):
 def main():
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     ap.add_argument("--check", action="store_true")
+    ap.add_argument("--dir", type=pathlib.Path)
     ap.add_argument("names", nargs="*")
     a = ap.parse_args()
-    names = a.names or sorted(p.stem for p in DIR.glob("*.json"))
+    cwd = pathlib.Path.cwd() / "docs" / "diagrams"
+    ddir = a.dir or (cwd if cwd.is_dir() else DIR)
+    shown = lambda path: path.relative_to(ROOT) if path.is_relative_to(ROOT) else path  # noqa: E731
+    names = a.names or sorted(p.stem for p in ddir.glob("*.json"))
     problems = []
     for name in names:
-        if not (DIR / f"{name}.json").is_file():
-            problems.append(f"{name} : source docs/diagrams/{name}.json introuvable")
+        if not (ddir / f"{name}.json").is_file():
+            problems.append(f"{name} : source {shown(ddir / (name + '.json'))} introuvable")
             continue
-        source = json.loads((DIR / f"{name}.json").read_text(encoding="utf-8"))
+        source = json.loads((ddir / f"{name}.json").read_text(encoding="utf-8"))
         bad = invalid(source)
         if bad:
             problems += [f"{name} : {b}" for b in bad]
             continue
         problems += [f"{name} : {o}" for o in overflows(source)]
-        outputs = {DIR / f"{name}.svg": render_svg(source), DIR / f"{name}.excalidraw": to_scene(source)}
+        outputs = {ddir / f"{name}.svg": render_svg(source), ddir / f"{name}.excalidraw": to_scene(source)}
         for path, content in outputs.items():
             current = path.read_text(encoding="utf-8") if path.exists() else None
             if a.check:
                 if current != content:
-                    problems.append(f"{path.relative_to(ROOT)} : pas à jour (lancer scripts/diagrams/render.py)")
+                    problems.append(f"{shown(path)} : pas à jour (relancer le rendu des schémas sans --check)")
             elif current != content:
                 path.write_text(content, encoding="utf-8")
-                print(f"✔ {path.relative_to(ROOT)}")
+                print(f"✔ {shown(path)}")
     for p in problems:
         print(f"✘ {p}")
     return 1 if problems else 0

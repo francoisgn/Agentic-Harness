@@ -40,6 +40,9 @@ conflit se signale dans une issue.
   (ORCHESTRATION.md), **chaque verdict posté sur la PR**, même négatif (qualité au premier passage mesurée,
   REVIEW-ROUNDS.md §Traçabilité). Un constat de revue est une affirmation à vérifier ; on corrige la classe, pas l'instance
   (REVIEW-ROUNDS.md).
+- **README vivant** : le README du projet est un livrable, mis à jour dans le lot (`/readme-update`) : tuiles
+  technologiques, image, schéma d'architecture Excalidraw, tableau d'avancement des lots, démarrage, Contribuer
+  (README-STANDARD.md ; chaque point se coupe dans `.harness/config.json`).
 - **Persistance** : une sauvegarde écrite par une version publiée reste lisible par toutes les suivantes (champ
   nouveau optionnel ou par défaut, décodage tolérant, migration à la lecture ; CONVENTIONS.md).
 - **Session cloud (Linux)** : ce qui ne compile que sur Mac (app iOS) se relit avec une rigueur de compilateur ; le

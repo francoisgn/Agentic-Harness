@@ -1,0 +1,33 @@
+# Contribuer
+
+Humains et agents de code suivent le même chemin. Les règles des agents sont dans `AGENTS.md` / `CLAUDE.md` ; ce
+fichier est la porte d'entrée pour tout le monde.
+
+## En bref
+
+1. **Une issue d'abord** : chercher un doublon, puis décrire l'intention (ce que l'utilisateur obtient, les cas
+   d'erreur, la définition de fini). Un petit correctif peut s'en passer (`Direct-PR: <raison>` dans la PR).
+2. **Prendre l'issue** : un commentaire « Pris en charge — branche `<branche>` ». Une issue déjà prise ne se reprend pas.
+3. **Une branche** depuis la branche d'intégration à jour ; commits atomiques, un par issue.
+4. **Contrôles en local avant de pousser** :
+   ```bash
+   # Commandes exactes du projet : tests, lint, build.
+   ```
+5. **Une PR en brouillon**, `Closes #n` par issue, ce qui a été vérifié, ce qui ne l'a pas été. « Ready for review »
+   quand tout est fini et relu.
+6. **Revue** : un relecteur différent de l'auteur (humain, ou autre modèle pour un agent). Répondre à chaque constat.
+
+## Ce qu'une PR doit garder vrai
+
+- Les tests passent, et chaque nouveau test échoue sans le changement.
+- Le README reste à jour : tuiles, schéma d'architecture, tableau d'avancement (`/readme-update`, ou à la main).
+- Aucun secret, aucune donnée personnelle dans le code, les tests, les journaux ou la PR.
+
+## Lire l'état du projet
+
+Les labels disent où en est chaque issue : type, priorité, statut (`à clarifier`, `bloqué`, `pris en charge`). Le
+tableau d'avancement du [README](README.md#avancement) donne la vue par lot ; les jalons GitHub, la vue par version.
+
+## Signaler une faille
+
+Jamais dans une issue publique : <canal privé, ex. onglet Security › Report a vulnerability>.

@@ -14,7 +14,8 @@ adversariale), `.harness/docs/CI-BUDGET.md` (sinon les mêmes fichiers sous `${C
    `git status` : aucun fichier suivi oublié, aucun artefact. Chaque nouveau test a été vu **en échec** sans le
    changement. Code d'app non compilable ici (cloud Linux) : relu avec une rigueur de compilateur, et noté.
 2. **Auto-relecture** : skill `/lessons-check` (ou à la main contre `LESSONS.md`). Docs, plan, réglementation à jour
-   dans les mêmes commits. Version et Nouveautés **non** touchées (gérées à l'intégration).
+   dans les mêmes commits ; **README** : `/readme-update` (ligne du lot dans le tableau d'avancement, tuiles, schéma
+   d'architecture si les modules ou les flux ont changé ; `.harness/docs/README-STANDARD.md`). Version et Nouveautés **non** touchées (gérées à l'intégration).
 3. **Revue adversariale** : un sous-agent neuf, **d'un autre modèle** que l'auteur, en lecture seule, reçoit seulement
    le diff (`git diff origin/<intégration>...HEAD`), la spec, `ESSENTIEL.md`, `LESSONS.md`, avec la consigne
    d'ORCHESTRATION.md §3 — jamais tes conclusions. Corriger chaque constat Haute/Moyenne en un commit, faire revérifier.

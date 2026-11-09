@@ -4,5 +4,6 @@
   "protected_branches": ["main", "master", "develop", "beta"],
   "integration_branch": "develop",
   "branch_model": "A",
-  "compliance": []
+  "compliance": [],
+  "readme": { "badges": true, "image": true, "architecture": "excalidraw", "progress": true, "quickstart": true, "contributing": true }
 }

@@ -31,9 +31,10 @@ Objectif : qu'un agent de lot puisse prendre une issue **sans poser de question*
 - Compare les docs au code mergé : comportement décrit = comportement livré (LESSONS L08), liens et ancres vivants,
   tableaux non cassés (L07). Ce qui a dérivé : une PR de docs, une issue si le code est en cause.
 - Lisible par un humain : un fichier un rôle (L10), titres stables, TL;DR en tête des docs longs, **un schéma** quand
-  un flux ou une architecture se décrit mieux en image (Mermaid dans le Markdown : rendu par GitHub, versionné, relu
-  comme du code).
-- Tient à jour les vues d'ensemble : README (contenu, état), plan des lots, index des ADR.
+  un flux ou une architecture se décrit mieux en image (Excalidraw pour le README et les vues d'ensemble, source
+  versionnée et rendu contrôlé en CI ; Mermaid dans le Markdown pour un flux court).
+- Tient à jour les vues d'ensemble : README au standard ([README-STANDARD](README-STANDARD.md) : tuiles, image,
+  schéma d'architecture Excalidraw, avancement des lots, Contribuer), plan des lots, index des ADR.
 
 ## 3. Flow monitor : voir les dérives tôt
 
