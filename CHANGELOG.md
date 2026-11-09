@@ -3,6 +3,17 @@
 Format : une section par version (semver), du plus récent au plus ancien. « Action » = ce qu'un projet consommateur doit
 faire en passant à cette version.
 
+## Non publié
+
+- **Identité visuelle du dépôt** (CONVENTIONS §Identité visuelle du dépôt) : tout dépôt qui suit le cadre porte une
+  bannière en tête du README (`docs/assets/banner.svg`) et une social preview (`docs/assets/social-preview.png`,
+  1280×640, déposée à la main par l'opérateur). Le doc steward en vérifie la présence (STEWARDS §2, agent
+  `doc-steward`), ADOPTION le prévoit. Le cadre s'applique la règle : bannière et social preview ajoutées, contrôlées
+  par `check-framework.py`.
+
+Action : ajouter les deux images au projet (une issue suffit pour commencer) ; l'opérateur dépose la social preview
+dans les réglages du dépôt.
+
 ## 0.3.0 — 2026-11-09
 
 Retours du premier projet consommateur : un cadre neutre, des règles qui ne se contredisent plus. **Rupture de

@@ -53,12 +53,16 @@ Prérequis : `bash`, `git`, `python3` ; accès en lecture à `francoisgn/agentic
    - `.github/workflows/harness.yml` : branche de `push`, `flow` (modèle A ou vide), jobs `docs`, `security` et `review`
      à activer seulement si le projet n'a pas déjà l'équivalent ; le job `flow` (tableau de bord) est actif d'office.
    - `.harness/config.json` → `compliance` : référentiels dont les relecteurs sont lancés ([COMPLIANCE](COMPLIANCE.md)). Supprimer les workflows qu'il remplace (ex. `branch-flow.yml`).
+   - **Identité visuelle** ([CONVENTIONS](CONVENTIONS.md) §Identité visuelle du dépôt) : une bannière
+     `docs/assets/banner.svg` en tête du `README.md` et une social preview `docs/assets/social-preview.png`
+     (1280×640). Absentes : une issue, elles peuvent suivre l'adoption.
 5. **Vérifier** : `../agentic-harness/scripts/harness-sync.sh --target . --check` sort en 0 ; `git diff --stat` ne
    montre que l'attendu ; lancer une session Claude et constater le message « Cadre agentic-harness » au démarrage.
 6. **Commit unique**, puis PR en brouillon :
    `Cadre agentic-harness 0.3.0 : adoption` (corps : ce qui a été retiré du `CLAUDE.md`, workflows remplacés, labels
    déplacés ; pas de `### Ledger` : outillage).
 7. **Après le merge** (opérateur) : lancer le workflow « Cadre » à la main (`workflow_dispatch`) pour créer les labels ;
+   déposer la social preview (Settings → General → Social preview) ;
    si ce dépôt du cadre est privé, vérifier l'accès Actions ([ADR 0001](adr/0001-mecanisme-de-distribution.md)).
 
 ### Facultatif : PR de mise à jour automatique
