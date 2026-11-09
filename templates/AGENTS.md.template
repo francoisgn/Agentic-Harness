@@ -2,3 +2,8 @@
 
 <!-- harness:begin cadre -->
 <!-- harness:end cadre -->
+
+## Harness overrides
+<!-- Dérogations du projet au cadre agentic-harness, chacune avec sa raison (elles l'emportent sur .harness/docs/).
+     Ex. : « Branches : `<host>/<nom>` au lieu de `<type>/<nom-court>`, parce que… » ; « Pas de label de taille : le
+     niveau se lit dans docs/LOTS.md ». Vide si le projet suit le cadre tel quel. -->

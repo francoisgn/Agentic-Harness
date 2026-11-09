@@ -1,7 +1,7 @@
 {
   "name": "harness",
   "displayName": "Agentic Harness",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Adaptateur Claude Code du cadre commun de développement agentique (ouvert à tout agent de code) : intention et TDD, boucle issue → lot → PR, revue adversariale, relecteurs de conformité, stewards, tableau de bord du flux, FinOps, garde-fous git.",
   "author": {
     "name": "agentic-harness contributors",

@@ -24,7 +24,7 @@
 
   { "name": "à clarifier", "color": "f9d0c4", "axis": "statut", "description": "Décision produit attendue avant de coder" },
   { "name": "bloqué", "color": "000000", "axis": "statut", "aliases": ["status: blocked"], "description": "Dépend d'un prérequis (lot, capture, décision, accès)" },
-  { "name": "pris en charge", "color": "1d76db", "axis": "statut", "aliases": ["status: claimed"], "description": "Une session a pris l'issue (commentaire « Pris en charge — branche … »)" },
+  { "name": "pris en charge", "color": "1d76db", "axis": "statut", "aliases": ["status: claimed"], "description": "Une session a pris l'issue (commentaire `/claim <id>`, rendue par `/release`)" },
   { "name": "hôte: mac", "color": "6e7781", "axis": "hôte", "aliases": ["host: mac"], "description": "Demande le Mac (Xcode, simulateur, appareil, captures) : les sessions cloud n'y touchent pas" },
   { "name": "direct-pr", "color": "d93f0b", "axis": "suivi", "description": "PR sans issue (petit correctif, ligne Direct-PR:) : comptée pour le suivi" },
   { "name": "dependencies", "color": "0366d6", "axis": "suivi", "description": "Mise à jour de dépendance (Dependabot)" },

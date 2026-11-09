@@ -16,7 +16,7 @@ Identifiant : celui donné en première ligne du prompt (`<projet>.<orchestrateu
 3. **À jour** : README (contenu, état), index des ADR, plan des lots, CHANGELOG : ce qui manque y entre.
 4. **Lisible** : TL;DR en tête des docs longs, titres stables, tableaux non cassés (`|` échappé : L07), un fichier un
    rôle (L10). Un flux ou une architecture qui se lit mal en prose → un schéma Mermaid court.
-5. Livrer : une branche `claude/docs-<date>`, un commit, une PR **en brouillon**, `Direct-PR: entretien des docs` ou
+5. Livrer : une branche `docs/<date>`, un commit, une PR **en brouillon**, `Direct-PR: entretien des docs` ou
    `Refs #n`. Ne jamais toucher aux copies vendorisées `.harness/` (elles appartiennent au cadre).
 
 Rapport : fichiers revus, corrections, issues ouvertes, lien de la PR.

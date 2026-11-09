@@ -1,7 +1,7 @@
 # LOT-XXX — <nom court>
 
 - **Module / couche :** <moteur | app | outillage | docs>
-- **Modèle :** <auteur> → <relecteur> (jamais le même ; label `modèle:` de l'issue)
+- **Modèle :** <auteur> → <relecteur> (jamais le même ; label de niveau de l'issue, `modèle:` par défaut, sinon déduit du routage du projet)
 - **Taille :** S | M | L (L = à découper avant de commencer)
 - **Issue :** #…  ·  **Dépend de :** #… (ou —)
 

@@ -13,7 +13,8 @@ Instructions pour les agents de code (Claude Code lit ce fichier ; les autres ag
      demande le Mac, comment rejouer la CI en local. -->
 
 ## Conventions du projet
-<!-- À remplir : design system, règles métier sourcées, persistance, ce qui précise ou remplace le cadre. -->
+<!-- À remplir : design system, règles métier sourcées, persistance. Ce qui remplace le cadre va dans la section
+     « Harness overrides » de AGENTS.md, avec sa raison. -->
 
 ## Branches et CI
 <!-- À remplir : modèle de branches retenu (cf. BRANCHING-RELEASE.md : A develop → beta → master, ou B une seule

@@ -17,5 +17,6 @@ Demande : $ARGUMENTS. Référence : `.harness/docs/METHODOLOGY.md` §2 (sinon `$
    - `### Définition de fini` : tests (écrits d'abord, vus rouges), docs mises à jour, revue par un autre modèle,
      conformité si le périmètre l'exige, ce qui sera validé sur l'appareil ;
    - `### Hors périmètre` et `### Sources` (rien de deviné).
-3. Labels : type, priorité, modèle, taille ; `à clarifier` + la question exacte si une décision produit manque.
+3. Labels : type, priorité, et niveau de modèle et taille si le projet a ces axes (préfixes : `.harness/config.json` →
+   `labels`, METHODOLOGY §4) ; `à clarifier` + la question exacte si une décision produit manque.
 4. **Montrer le texte à l'opérateur avant de créer l'issue** ; après accord, la créer et donner le lien.

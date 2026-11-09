@@ -26,11 +26,11 @@ Prérequis : `bash`, `git`, `python3` ; accès en lecture à `francoisgn/agentic
 
 1. **Branche** depuis la branche d'intégration à jour :
    ```bash
-   git fetch origin && git switch -c claude/adoption-harness origin/develop
+   git fetch origin && git switch -c chore/adoption-harness origin/develop
    ```
 2. **Récupérer le cadre** à un tag, à côté du projet :
    ```bash
-   git clone --depth 1 --branch v0.2.0 https://github.com/francoisgn/agentic-harness.git ../agentic-harness
+   git clone --depth 1 --branch v0.3.0 https://github.com/francoisgn/agentic-harness.git ../agentic-harness
    ```
 3. **Voir avant d'écrire**, puis appliquer :
    ```bash
@@ -43,6 +43,9 @@ Prérequis : `bash`, `git`, `python3` ; accès en lecture à `francoisgn/agentic
    - `CLAUDE.md` : le bloc du cadre a été ajouté **en fin** de fichier s'il existait ; le remonter en tête (marqueurs
      compris) et retirer de la partie projet ce qui double désormais `ESSENTIEL.md` (workflow générique, pied de
      commentaire, labels génériques). Garder le spécifique : build, design system, règles métier, modèle de branches.
+   - `AGENTS.md` : section « Harness overrides » (créée par le gabarit, sinon l'ajouter) : chaque règle du cadre que
+     le projet remplace, avec sa raison (convention de branches, taxonomie de labels, politique de merge…). C'est
+     l'endroit que lisent les agents pour savoir où le projet s'écarte du cadre ; le bloc géré y renvoie.
    - `.harness/config.json` : `protected_branches`, `integration_branch`, `branch_model` (A ou B, BRANCHING-RELEASE.md).
    - `.github/labels.local.json` : les labels propres au projet (ex. `onglet: …`, `calcul`, `réglementaire`), au même
      format que `.harness/labels.json` (`axis` facultatif, utile pour l'hygiène des issues). Retirer l'ancien fichier de
@@ -53,8 +56,8 @@ Prérequis : `bash`, `git`, `python3` ; accès en lecture à `francoisgn/agentic
 5. **Vérifier** : `../agentic-harness/scripts/harness-sync.sh --target . --check` sort en 0 ; `git diff --stat` ne
    montre que l'attendu ; lancer une session Claude et constater le message « Cadre agentic-harness » au démarrage.
 6. **Commit unique**, puis PR en brouillon :
-   `Cadre agentic-harness 0.2.0 : adoption` (corps : ce qui a été retiré du `CLAUDE.md`, workflows remplacés, labels
-   déplacés ; `## Changelog` : « Aucun (outillage) »).
+   `Cadre agentic-harness 0.3.0 : adoption` (corps : ce qui a été retiré du `CLAUDE.md`, workflows remplacés, labels
+   déplacés ; pas de `### Ledger` : outillage).
 7. **Après le merge** (opérateur) : lancer le workflow « Cadre » à la main (`workflow_dispatch`) pour créer les labels ;
    si ce dépôt du cadre est privé, vérifier l'accès Actions ([ADR 0001](adr/0001-mecanisme-de-distribution.md)).
 
@@ -78,7 +81,7 @@ l'ignore), ajouter à `.claude/settings.json` :
 ```json
 {
   "extraKnownMarketplaces": {
-    "agentic-harness": { "source": { "source": "github", "repo": "francoisgn/agentic-harness", "ref": "v0.2.0" } }
+    "agentic-harness": { "source": { "source": "github", "repo": "francoisgn/agentic-harness", "ref": "v0.3.0" } }
   },
   "enabledPlugins": { "harness@agentic-harness": true }
 }
@@ -89,7 +92,7 @@ Dans un dépôt adopté, préférer ne **pas** l'activer (les skills existeraien
 ## Mises à jour
 - Skill `/harness-update` (guide pas à pas), ou à la main :
   ```bash
-  git switch -c claude/harness-vX.Y.Z origin/develop
+  git switch -c chore/harness-vX.Y.Z origin/develop
   ../agentic-harness/scripts/harness-sync.sh --ref vX.Y.Z --target .     # ou --source <clone à ce tag>
   ```
   Lire le `CHANGELOG.md` du cadre, relire `git diff`, un commit `Cadre agentic-harness : passage en vX.Y.Z`, PR brouillon.
@@ -106,7 +109,9 @@ la première fois) :
   "exclude": [".claude/skills/feedback-triage/*", ".github/ISSUE_TEMPLATE/*", "docs/lots/TEMPLATE.md"],
   "protected_branches": ["master", "dev-swift"],
   "integration_branch": "dev-swift",
-  "branch_model": "B"
+  "branch_model": "B",
+  "labels": { "model_prefixes": [], "size_prefixes": ["difficulty:"] },
+  "ledger": { "enabled": true, "label": "ledger", "fold_command": "python3 tooling/docs/ledger.py fold --apply --commit" }
 }
 ```
 - `language` : une source traduite `i18n/<langue>/<chemin>` du cadre remplace la source française quand elle existe.
@@ -115,6 +120,19 @@ la première fois) :
 - `exclude` : motifs glob sur les **destinations** (`*` traverse les `/`). Un fichier exclu n'est pas vendorisé ; s'il
   l'était déjà et n'a pas été modifié, la synchro suivante le retire. Exclure `CLAUDE.md` ou `AGENTS.md` supprime la
   gestion du bloc correspondant.
+
+Autres clés, lues par les hooks et les skills (absentes : valeurs par défaut) :
+
+| Clé | Défaut | Effet |
+|---|---|---|
+| `protected_branches` | `["main", "master", "develop", "beta"]` | Branches que le hook `guard-git` protège |
+| `branch_types` | `["lot", "fix", "feat", "chore", "docs"]` | Types de branche `<type>/<nom-court>` proposés par `/lot-start` et le hook |
+| `labels.model_prefixes` | `["modèle:"]` | Préfixes des labels de niveau de modèle ; `[]` = axe absent (niveau déduit du texte et du routage) |
+| `labels.size_prefixes` | `["taille:"]` | Préfixes des labels de taille ou de difficulté (ex. `["difficulty:"]`) ; `[]` = axe absent |
+| `ledger.enabled`, `ledger.label`, `ledger.fold_command` | `false`, `"ledger"`, `""` | Registre ([CONVENTIONS](CONVENTIONS.md) §Registre) : section `### Ledger` des PR, label, commande de repli du steward |
+
+`.harness/config.json` est un fichier du projet (créé une fois) : une clé ajoutée par une nouvelle version du cadre ne
+s'y ajoute pas d'elle-même ; sans elle, le défaut s'applique.
 
 ### Exemple : ezzz/HFRnow (branche `dev-swift`, docs en anglais, leçons et lots propres)
 1. Branche depuis `dev-swift` (jamais `master`, qui est l'app historique) ; créer `.harness/config.json` comme ci-dessus,
@@ -126,7 +144,10 @@ la première fois) :
    importe déjà `@AGENTS.md`) le bloc anglais qui importe `ESSENTIEL.md` ; `.harness/docs/LESSONS.md` du cadre complète
    `docs/agents/LESSONS.md` du projet, qui reste la référence (les deux se lisent à l'auto-relecture ; `/lessons-check`
    le fait).
-3. Garder la taxonomie de labels de HFRnow (`type:`, `priority:`, `difficulty:`…) : ne pas activer `apply-aliases`.
+3. Garder la taxonomie de labels de HFRnow (`type:`, `priority:`, `difficulty:`…) : ne pas activer `apply-aliases` ;
+   `labels` ci-dessus dit au cadre que la taille se lit dans `difficulty:` et que le niveau de modèle se déduit du
+   routage d'`AGENTS.md` §6. Ses branches `lot/`, `fix/`, `feat/`, `chore/`, `docs/` sont celles du cadre ; son
+   registre (#620) est la brique « ledger » du cadre, avec son propre script.
 4. Les leçons génériques nées dans HFRnow remontent au cadre par PR sur agentic-harness ; les leçons du domaine HFR
    restent dans le projet.
 

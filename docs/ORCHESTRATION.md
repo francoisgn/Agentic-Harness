@@ -1,7 +1,7 @@
 # Orchestration : sessions parallèles, sous-agents, choix du modèle
 
-Sources : `docs/agents/ORCHESTRATION.md`, `AGENTS.md` §6 et `docs/agents/EXTERNAL-AGENTS.md` §7–§8 de HFRnow ;
-labels `modèle:` et règle « la valeur du label fait foi » de ios-app_credit-immo.
+Sources : `docs/agents/ORCHESTRATION.md` (§Claims), `AGENTS.md` §6 et `docs/agents/EXTERNAL-AGENTS.md` §7–§8 de
+HFRnow ; pratique éprouvée sur d'autres projets (labels de niveau de modèle, « la valeur du label fait foi »).
 
 Coûts, routage des modèles et quotas : [FINOPS](FINOPS.md). Rôles d'entretien (issues, docs, flux) :
 [STEWARDS](STEWARDS.md). Agents prêts à l'emploi : `.claude/agents/` (`adversarial-reviewer`, `issue-steward`,
@@ -21,8 +21,10 @@ finira pas, puis un compte rendu à l'opérateur : ce qui est fait (avec les lie
 la session suivante.
 
 ## 2. Choix du modèle
-Point de départ, ajusté à l'usage. **La valeur du label `modèle:` de l'issue fait foi** ; en cas de doute, le modèle
-au-dessus.
+Point de départ, ajusté à l'usage. **La valeur du label de niveau de l'issue fait foi** (préfixe `modèle:` par défaut,
+réglable : `.harness/config.json` → `labels.model_prefixes`, [METHODOLOGY](METHODOLOGY.md) §4) ; en cas de doute, le
+modèle au-dessus. **Sans label**, on ne s'arrête pas : le niveau se déduit du tableau de routage du projet (son
+`AGENTS.md`), sinon du tableau ci-dessous appliqué au texte de l'issue, et la prise en charge dit lequel a été retenu.
 
 | Label | Travail typique | Relu par |
 |---|---|---|
@@ -72,8 +74,9 @@ Avant de passer la PR « Ready for review » :
   APPROUVÉ. Les constats de bots suivent [REVIEW-ROUNDS](REVIEW-ROUNDS.md).
 
 ## 4. Sessions enfants (orchestrateur)
-- **Une tâche par session** : une issue (ou un lot), prise en charge par l'orchestrateur au nom de l'enfant, avec le même
-  identifiant de session ; l'enfant ne prend rien d'autre.
+- **Une tâche par session** : une issue (ou un lot), prise en charge par l'orchestrateur au nom de l'enfant
+  (`/claim <identifiant de l'enfant>`), avec le même identifiant de bout en bout ; l'enfant ne prend rien d'autre, et
+  sa PR porte `Claim: <identifiant>`.
 - Chaque enfant reçoit un **identifiant** (§7) : première ligne de son prompt, titre et tags de sa session.
 - Le **prompt d'un enfant se suffit à lui-même** : garde-fous rappelés (ESSENTIEL.md et règles de l'opérateur), tâche
   exacte, conditions d'arrêt (« si X contredit le plan, s'arrêter et rendre compte »), format de rapport fixé, texte à
@@ -93,13 +96,13 @@ Avant de passer la PR « Ready for review » :
 - L'accès GitHub d'une session cloud ne couvre que les dépôts qui lui sont attachés (`add_repo` pour en ajouter un).
 
 ## 5. Lots en parallèle
-- Un lot = une branche = **un worktree** (`git worktree add ../<projet>-<lot> -b claude/<lot> origin/<intégration>`),
+- Un lot = une branche = **un worktree** (`git worktree add ../<projet>-<lot> -b lot/<nom-court> origin/<intégration>`),
   supprimé à la fin (`git worktree remove`), avec ses dossiers de build.
 - Paralléliser ce qui est indépendant ; sérialiser ce qui touche les mêmes fichiers. Une section de doc partagée : titre
   commun d'abord, une sous-section par lot (LESSONS L41).
-- Le budget CI borne le parallélisme : HFRnow a 5 jobs macOS simultanés ; une PR d'app en prend 2, une PR moteur 1, donc
-  au plus 2 PR d'app + 1 autre en CI à la fois ([CI-BUDGET](CI-BUDGET.md)).
-- Limite de PR ouvertes par contributeur (HFRnow : 5) : une PR prête ne reste pas ouverte ; à la limite, préparer la
+- Le budget CI borne le parallélisme : compter les jobs macOS simultanés du compte et ce qu'en prend une PR (ex. 5
+  jobs, 2 par PR d'app, 1 par PR moteur : au plus 2 PR d'app + 1 autre en CI à la fois) ([CI-BUDGET](CI-BUDGET.md)).
+- Limite de PR ouvertes par contributeur (ex. 5) : une PR prête ne reste pas ouverte ; à la limite, préparer la
   suivante sur une branche poussée sans PR et le dire sur l'issue (« Passation : branche `<nom>` à `<sha>`, fait : …,
   reste : … »).
 - Push refusé parce qu'une autre session a poussé : `fetch`, merge ou rebase par-dessus (sans jamais perdre ses
@@ -124,10 +127,10 @@ rattacher d'un coup d'œil à son projet, son orchestrateur, son rôle et sa tâ
    │          │            │        └─ ce sur quoi il travaille : i312 (issue), LOT-082, pr231, ou un mot (docs, quotidien)
    │          │            └─ rôle, vocabulaire fixe ci-dessous
    │          └─ orchestrateur qui l'a lancé : orc-<jjmm>[a|b…] (date de démarrage, lettre si plusieurs le même jour) ; « solo » sans orchestrateur
-   └─ nom court du projet, stable : hfrnow, credit, harness
+   └─ nom court du projet, stable : hfrnow, shop, harness
 ```
 
-Exemples : `hfrnow.orc-0711.lot.LOT-082` · `hfrnow.orc-0711.rev.pr231` · `credit.orc-0711.conf-gdpr.pr88` ·
+Exemples : `hfrnow.orc-0711.lot.LOT-082` · `hfrnow.orc-0711.rev.pr231` · `shop.orc-0711.conf-gdpr.pr88` ·
 `hfrnow.orc-0711.st-issues.quotidien` · `harness.solo.lot.i12` · `hfrnow.orc-0711.lot.LOT-082.2` (relance).
 
 | Rôle | Agent | Rôle | Agent |
@@ -145,8 +148,9 @@ Règles d'affichage, du plus court au plus complet :
   (ex. `[hfrnow] lot LOT-082 #312 · sonnet ← orc-0711`).
 - **Tags de session** : `projet:<projet>`, `orc:<orchestrateur>`, `rôle:<rôle>`, `issue:<n>`, `lot:<LOT-xxx>`,
   `modèle:<niveau>` (filtrables avec `list_sessions`).
-- **Branche et worktree** : inchangés (`claude/<lot>`, `../<projet>-<lot>`) ; l'identifiant les relie.
-- **Prise en charge, commentaires de fin, verdicts de revue** : la ligne `Agent : <identifiant> (<modèle>)`.
+- **Branche et worktree** : `<type>/<nom-court>`, `../<projet>-<lot>` ; l'identifiant les relie par la prise en charge.
+- **Prise en charge** : `/claim <identifiant>` en première ligne ; **PR** : `Claim: <identifiant>`.
+- **Commentaires de fin, verdicts de revue** : la ligne `Agent : <identifiant> (<modèle>)`.
 - **Commits** : trailer `Agent: <identifiant>` sous l'attribution. **PR** : `Agents :` dans la ligne des modèles
   (`Modèle auteur : sonnet (hfrnow.orc-0711.lot.LOT-082) · relecteur : opus (hfrnow.orc-0711.rev.pr231)`).
 - L'orchestrateur tient la **liste de ses agents vivants** (identifiant, issue, statut, démarré à) dans son compte
