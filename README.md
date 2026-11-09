@@ -57,6 +57,33 @@ un client iOS).
 | **Autres agents** (Codex, Cursor, Copilot, Gemini CLI, Aider…) | Bloc `AGENTS.md` ([format ouvert](https://agents.md)) qui pointe vers les règles (`.harness/docs/ESSENTIEL.md`) ; lu nativement ou à activer selon l'outil ([ADOPTION](docs/ADOPTION.md) §Brancher votre agent) ; méthode, labels, gabarits, CI et tableau de bord identiques |
 | **Équipe humaine** | Les mêmes issues, labels, PR, CI et tableau de bord ; rapport d'état lisible par un non-technicien |
 
+## Exploiter le savoir de ce dépôt
+
+Le dépôt se lit et se pioche sans rien installer : chaque fichier tient seul, cite ses sources, et se prend sans le
+reste.
+
+| Vous voulez | Lisez | Ou demandez à votre agent |
+|---|---|---|
+| Comprendre la méthode en 5 minutes | [ESSENTIEL](docs/ESSENTIEL.md), puis les trois schémas ci-dessus | « Lis `docs/ESSENTIEL.md` et dis-moi ce qui manque à mon projet » |
+| Éviter les erreurs déjà faites | [LESSONS](docs/LESSONS.md) : 82 leçons classées par portée, chacune sourcée | « Relis mon diff contre `docs/LESSONS.md` » (skill `/lessons-check`) |
+| Poser une CI sobre et sûre | [CI-BASELINE](docs/CI-BASELINE.md) (paliers, invariants), [CI-BUDGET](docs/CI-BUDGET.md) (coûts, outils) | « Compare mes workflows aux six invariants de `docs/CI-BASELINE.md` » |
+| Un README qui reste vrai | [README-STANDARD](docs/README-STANDARD.md) | `/readme-update`, ou `python3 scripts/readme-check.py --root <projet>` |
+| Faire relire le travail d'un agent | [REVIEW-ROUNDS](docs/REVIEW-ROUNDS.md), [ORCHESTRATION](docs/ORCHESTRATION.md) §3 | Agent `adversarial-reviewer`, skill `/review-round` |
+| Cadrer une issue avant de coder | [METHODOLOGY](docs/METHODOLOGY.md) §2 bis | Skill `/intent` |
+| Maîtriser le coût (modèles, boucles, minutes) | [FINOPS](docs/FINOPS.md) | Agent `flow-monitor`, skill `/status-report` |
+| Savoir pourquoi le cadre est fait ainsi | [ADR](docs/adr/README.md) : contexte, options écartées, conséquences | « Résume les ADR et ce qu'ils excluent » |
+
+Trois façons de s'en servir, de la plus légère à la plus complète :
+
+1. **Lire** : pointer un agent sur ce dépôt (clone ou URL) et lui poser la question ; rien n'est écrit chez vous.
+2. **Piocher** : copier un skill (`plugins/harness/skills/<nom>/`), un agent, un workflow ou un script. Les scripts
+   n'utilisent que la bibliothèque standard de Python ; les skills citent les docs qu'ils supposent.
+3. **Adopter** : la synchronisation versionnée de la section précédente, brique par brique
+   ([ADOPTION](docs/ADOPTION.md) §Adoption partielle, §Remplacer ou étendre une brique).
+
+Le savoir circule dans les deux sens : une leçon née dans votre projet se propose par le formulaire d'issue « Leçon »
+(skill `/lesson-propose`), avec sa source.
+
 ## État
 
 <!-- harness:begin avancement -->
