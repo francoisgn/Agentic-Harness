@@ -5,14 +5,17 @@ faire en passant à cette version.
 
 ## Non publié
 
-- **Identité visuelle du dépôt** (CONVENTIONS §Identité visuelle du dépôt) : tout dépôt qui suit le cadre porte une
-  bannière en tête du README (`docs/assets/banner.svg`) et une social preview (`docs/assets/social-preview.png`,
-  1280×640, déposée à la main par l'opérateur). Le doc steward en vérifie la présence (STEWARDS §2, agent
-  `doc-steward`), ADOPTION le prévoit. Le cadre s'applique la règle : bannière et social preview ajoutées, contrôlées
-  par `check-framework.py`.
+- **Identité du dépôt** (CONVENTIONS §Identité du dépôt) : tout dépôt qui suit le cadre porte une description (une
+  phrase), des topics (5 à 10), une bannière en tête du README (`docs/assets/banner.svg`) et une social preview
+  (`docs/assets/social-preview.png`, 1280×640, texte en anglais, déposée à la main par l'opérateur). Le doc steward
+  vérifie les quatre (STEWARDS §2, agent `doc-steward`), ADOPTION le prévoit.
+- `repo-settings.py` : avertit (sans bloquer) si la description ou les topics manquent ou sont mal formés ; la
+  description restée celle du gabarit (`<…>`) n'est plus envoyée à GitHub.
+- Le cadre s'applique la règle : bannière et social preview ajoutées ; `check-framework.py` contrôle description,
+  topics et images.
 
-Action : ajouter les deux images au projet (une issue suffit pour commencer) ; l'opérateur dépose la social preview
-dans les réglages du dépôt.
+Action : remplir la description et les topics dans `.github/repo-settings.json`, ajouter les deux images (une issue
+suffit pour commencer) ; l'opérateur dépose la social preview dans les réglages du dépôt.
 
 ## 0.3.0 — 2026-11-09
 

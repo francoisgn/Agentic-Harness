@@ -50,6 +50,12 @@ class CheckFrameworkTests(unittest.TestCase):
         p.write_bytes(bytes(data))
         self.assertIn("1280×640", run(self.tmp).stdout)
 
+    def test_repository_needs_description_and_topics(self):
+        p = self.tmp / ".github/repo-settings.json"
+        p.write_text(p.read_text().replace('"topics": [', '"topics_": ['))
+        out = run(self.tmp).stdout
+        self.assertIn("topics", out)
+
     def test_agent_name_must_match_file(self):
         p = self.tmp / "plugins/harness/agents/issue-steward.md"
         p.write_text(p.read_text().replace("name: issue-steward", "name: autre"))

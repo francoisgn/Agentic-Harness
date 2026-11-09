@@ -1,9 +1,9 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 400" width="1280" height="400" role="img" aria-labelledby="t d">
 <title id="t">agentic-harness</title>
-<desc id="d">À gauche, des trajectoires d'agents emmêlées ; elles passent dans la boucle d'un harnais et ressortent en voies parallèles qui franchissent quatre jalons (intention, TDD, revue adversariale, CI) jusqu'au merge ; un retour en pointillé ramène les leçons vers le harnais.</desc>
+<desc id="d">On the left, tangled agent trajectories; they pass through the harness buckle and come out as parallel lanes that clear four checkpoints (intent, TDD, adversarial review, CI) up to the merge; a dashed return path brings lessons back to the harness.</desc>
 <rect width="1280" height="400" rx="16" fill="#0d1117"/>
 <text x="48" y="76" font-family="'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="40" font-weight="700" fill="#f0f6fc">agentic-harness</text>
-<text x="48" y="112" font-family="Inter, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="19" fill="#9198a1">Le cadre versionné qui tient vos agents de code, de l'intention au merge.</text>
+<text x="48" y="112" font-family="Inter, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="19" fill="#9198a1">The versioned framework that keeps your coding agents on track, from intent to merge.</text>
 <path d="M38.0 222.0 C40.3 231.6 38.8 264.1 49.4 270.2 C60.0 276.4 64.7 270.8 91.0 252.5 C117.3 234.3 148.9 194.3 180.9 178.9 C213.0 163.6 228.7 175.4 251.1 175.8 C273.6 176.1 283.5 168.8 293.3 180.8 C303.2 192.7 276.3 223.6 300.6 235.4 C324.8 247.1 384.6 240.5 414.6 239.5 C444.6 238.5 443.4 232.2 450.6 230.4 L496.6 230.4 C555.8 230.4 543.9 195.9 603.1 195.9 L1131.4 195.9" fill="none" stroke="#a78bfa" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/>
 <path d="M38.0 193.6 C42.2 208.2 25.5 253.6 58.8 266.6 C92.2 279.7 179.6 248.1 204.8 258.9 C230.0 269.6 187.7 311.7 185.0 320.3 C182.2 329.0 173.3 327.8 191.2 302.2 C209.2 276.6 252.1 209.2 274.6 192.2 C297.2 175.3 276.1 206.4 304.1 217.5 C332.1 228.6 385.3 243.3 414.6 247.5 C443.9 251.8 443.4 240.5 450.6 238.7 L496.6 238.7 C555.8 238.7 543.9 221.4 603.1 221.4 L1131.4 221.4" fill="none" stroke="#60a5fa" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/>
 <path d="M38.0 201.7 C51.5 215.0 87.0 257.9 105.4 268.4 C123.8 278.9 122.8 272.2 130.0 254.4 C137.2 236.5 125.2 175.1 141.5 179.2 C157.9 183.3 181.7 266.9 212.0 274.8 C242.2 282.6 262.0 225.4 292.6 218.4 C323.1 211.4 340.5 235.2 364.9 239.8 C389.3 244.4 397.4 240.0 414.6 241.4 C431.7 242.8 443.4 245.9 450.6 247.0 L496.6 247.0 C555.8 247.0 543.9 247.0 603.1 247.0 L1131.4 247.0" fill="none" stroke="#22d3ee" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/>
@@ -15,7 +15,7 @@
 <circle cx="650.5" cy="247.0" r="5.4" fill="#0d1117" stroke="#22d3ee" stroke-width="2.6"/>
 <circle cx="650.5" cy="272.6" r="5.4" fill="#0d1117" stroke="#fbbf24" stroke-width="2.6"/>
 <circle cx="650.5" cy="298.1" r="5.4" fill="#0d1117" stroke="#f472b6" stroke-width="2.6"/>
-<text x="650.5" y="172.7" font-family="'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="13" fill="#9198a1" text-anchor="middle">intention</text>
+<text x="650.5" y="172.7" font-family="'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="13" fill="#9198a1" text-anchor="middle">intent</text>
 <line x1="775.3" y1="181.8" x2="775.3" y2="312.2" stroke="#3d444d" stroke-width="1.9" stroke-dasharray="5.1 5.1"/>
 <circle cx="775.3" cy="195.9" r="5.4" fill="#0d1117" stroke="#a78bfa" stroke-width="2.6"/>
 <circle cx="775.3" cy="221.4" r="5.4" fill="#0d1117" stroke="#60a5fa" stroke-width="2.6"/>
@@ -29,7 +29,7 @@
 <circle cx="900.0" cy="247.0" r="5.4" fill="#0d1117" stroke="#22d3ee" stroke-width="2.6"/>
 <circle cx="900.0" cy="272.6" r="5.4" fill="#0d1117" stroke="#fbbf24" stroke-width="2.6"/>
 <circle cx="900.0" cy="298.1" r="5.4" fill="#0d1117" stroke="#f472b6" stroke-width="2.6"/>
-<text x="900.0" y="172.7" font-family="'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="13" fill="#9198a1" text-anchor="middle">revue adversariale</text>
+<text x="900.0" y="172.7" font-family="'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="13" fill="#9198a1" text-anchor="middle">adversarial review</text>
 <line x1="1024.8" y1="181.8" x2="1024.8" y2="312.2" stroke="#3d444d" stroke-width="1.9" stroke-dasharray="5.1 5.1"/>
 <circle cx="1024.8" cy="195.9" r="5.4" fill="#0d1117" stroke="#a78bfa" stroke-width="2.6"/>
 <circle cx="1024.8" cy="221.4" r="5.4" fill="#0d1117" stroke="#60a5fa" stroke-width="2.6"/>
@@ -52,6 +52,6 @@
 <line x1="473.6" y1="222.4" x2="473.6" y2="271.6" stroke="#f0f6fc" stroke-width="3.7" stroke-linecap="round"/>
 <path d="M1131.4 314.1 Q1131.4 325.0 1091.4 325.0 L513.6 325.0 Q473.6 325.0 473.6 290.8" fill="none" stroke="#9198a1" stroke-width="1.9" stroke-dasharray="5.1 5.1" stroke-linecap="round"/>
 <path d="M467.2 294.4 L473.6 286.0 L480.0 294.4" fill="none" stroke="#9198a1" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/>
-<rect x="772.6" y="312.0" width="59.8" height="26.0" fill="#0d1117"/>
-<text x="802.5" y="329.5" font-family="'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="13" fill="#9198a1" text-anchor="middle">leçons</text>
+<rect x="767.4" y="312.0" width="70.2" height="26.0" fill="#0d1117"/>
+<text x="802.5" y="329.5" font-family="'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="13" fill="#9198a1" text-anchor="middle">lessons</text>
 </svg>

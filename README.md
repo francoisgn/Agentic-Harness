@@ -1,6 +1,6 @@
 # agentic-harness
 
-![agentic-harness : des trajectoires d'agents emmêlées passent dans la boucle du harnais et ressortent en voies tenues, jalon après jalon (intention, TDD, revue adversariale, CI), jusqu'au merge ; les leçons reviennent au harnais](docs/assets/banner.svg)
+![agentic-harness, « the versioned framework that keeps your coding agents on track, from intent to merge » : des trajectoires d'agents emmêlées passent dans la boucle du harnais et ressortent en voies tenues, jalon après jalon (intention, TDD, revue adversariale, CI), jusqu'au merge ; les leçons reviennent au harnais](docs/assets/banner.svg)
 
 > Un harnais versionné et ouvert pour développer avec des agents de code : intention et TDD, issues → lots → PR,
 > revues adversariales, conformité branchable, stewards, FinOps et tableau de bord du flux. Pour tout dépôt GitHub,
@@ -77,7 +77,7 @@ un client iOS).
 | [`docs/COMPLIANCE.md`](docs/COMPLIANCE.md) | Relecteurs de conformité : catalogue, trois modes de branchement |
 | [`docs/CI-BUDGET.md`](docs/CI-BUDGET.md) | Minutes de CI, sécurité (SAST, SCA, secrets), variables, volume agentique |
 | [`docs/LESSONS.md`](docs/LESSONS.md) | Leçons par portée, sources citées ; comment en proposer |
-| [`docs/CONVENTIONS.md`](docs/CONVENTIONS.md), [`docs/BRANCHING-RELEASE.md`](docs/BRANCHING-RELEASE.md), [`docs/MAC-HANDOFF.md`](docs/MAC-HANDOFF.md) | Commits et PR, identité visuelle du dépôt, branches et versions, partage cloud / poste local |
+| [`docs/CONVENTIONS.md`](docs/CONVENTIONS.md), [`docs/BRANCHING-RELEASE.md`](docs/BRANCHING-RELEASE.md), [`docs/MAC-HANDOFF.md`](docs/MAC-HANDOFF.md) | Commits et PR, identité du dépôt (description, topics, bannière, social preview), branches et versions, partage cloud / poste local |
 | [`docs/adr/`](docs/adr/README.md) | Décisions du cadre |
 | [`docs/assets/`](docs/assets) | Identité visuelle : bannière du README (`banner.svg`), social preview (`social-preview.svg` → `.png`, 1280×640) |
 | [`docs/diagrams/`](docs/diagrams) | Schémas : source `.json`, scène `.excalidraw` (modifiable sur excalidraw.com), image `.svg` |
@@ -89,7 +89,7 @@ un client iOS).
 ## Qualité du harnais lui-même
 
 Un job de CI (`ci.yml`), chaque étape lancée même si la précédente échoue : cohérence du cadre (skills, agents,
-manifeste, labels, nommage, contrôles requis, bannière et social preview), tests (vendorisation, hooks, tableau de bord, conformité, réglages,
+manifeste, labels, nommage, contrôles requis, description, topics, bannière et social preview), tests (vendorisation, hooks, tableau de bord, conformité, réglages,
 schémas), ShellCheck, versions, actionlint, zizmor, markdownlint, gitleaks. En local :
 ```bash
 python3 scripts/check-framework.py && python3 -m unittest discover -s scripts/tests -p 'test_*.py' \

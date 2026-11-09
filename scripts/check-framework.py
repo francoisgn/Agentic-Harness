@@ -9,6 +9,7 @@
 Usage : check-framework.py [--root <dépôt>]   (sort en 1 au moindre écart, liste tous les écarts)
 """
 import argparse
+import importlib.util
 import json
 import pathlib
 import re
@@ -119,7 +120,13 @@ def check(root):
                         errors.append(f".github/repo-settings.json : contrôle requis « {chk['context']} » absent des "
                                       f"jobs de .github/workflows ({sorted(job_names)})")
 
-    # Identité visuelle du dépôt (CONVENTIONS.md §Identité visuelle) : le cadre s'applique sa propre règle
+    # Identité du dépôt (CONVENTIONS.md §Identité du dépôt) : le cadre s'applique sa propre règle
+    if settings.is_file():
+        spec = importlib.util.spec_from_file_location("repo_settings", root / "scripts/repo-settings.py")
+        rs = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(rs)
+        errors += [f".github/repo-settings.json : {gap}"
+                   for gap in rs.identity_gaps(json.loads(settings.read_text(encoding="utf-8")))]
     banner, social = root / "docs/assets/banner.svg", root / "docs/assets/social-preview.png"
     if not banner.is_file():
         errors.append("docs/assets/banner.svg : bannière du README introuvable")

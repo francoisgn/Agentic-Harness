@@ -117,9 +117,20 @@ les sections `### Ledger` des PR par le steward, ou rédigées depuis leurs desc
   accepté ne se réécrit pas : il est remplacé par un autre.
 - Les instructions personnelles d'un opérateur vont dans un `CLAUDE.local.md` non versionné, pas dans le dépôt.
 
-## Identité visuelle du dépôt
-Tout dépôt qui suit le cadre porte **deux images** qui disent son intention au premier regard (ce que le projet fait
-et pour qui, pas un logo décoratif ni une capture) :
+## Identité du dépôt
+Tout dépôt qui suit le cadre dit ce qu'il est sans qu'on ouvre un fichier : une **description**, des **topics**, une
+**bannière** et une **social preview**.
+
+| Élément | Où il vit | Règle |
+|---|---|---|
+| **Description** | `.github/repo-settings.json` → `repository.description` | une phrase : ce que fait le projet, pour qui ; pas le texte du gabarit, pas une liste de fonctionnalités ; tenue vraie quand le périmètre change |
+| **Topics** | `.github/repo-settings.json` → `topics` | 5 à 10 mots-clés qu'un visiteur chercherait : domaine, technologie, usage ; minuscules, chiffres et tirets, 50 caractères au plus, 20 topics au plus ([doc GitHub](https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/classifying-your-repository-with-topics)) ; préférer un topic déjà répandu à un mot inventé |
+
+Les deux se modifient par PR et s'appliquent au merge ([ADOPTION](ADOPTION.md) §Réglages du dépôt « as code ») ;
+`repo-settings.py` avertit s'ils manquent ou sont mal formés, et n'envoie jamais la description du gabarit.
+
+Les **deux images** disent l'intention au premier regard (ce que le projet fait et pour qui, pas un logo décoratif
+ni une capture) :
 
 | Image | Fichier | Format | Où elle sert |
 |---|---|---|---|
@@ -127,13 +138,14 @@ et pour qui, pas un logo décoratif ni une capture) :
 | **Social preview** | `docs/assets/social-preview.png`, sa source à côté (`.svg` ou autre) | PNG **1280×640**, moins de 1 Mo, l'essentiel à plus de 40 px des bords | aperçu du lien du dépôt (réseaux, messageries) |
 
 - Les deux partagent le même motif et le même nom de projet ; une phrase d'intention au plus, pas de liste de
-  fonctionnalités. Aucun secret, aucune donnée personnelle, aucune marque tierce.
+  fonctionnalités. Leur texte est en **anglais** (un aperçu de lien circule hors du public du projet), sauf projet
+  dont le public est seulement francophone. Aucun secret, aucune donnée personnelle, aucune marque tierce.
 - La social preview **se dépose à la main** : dépôt → Settings → General → Social preview
   ([doc GitHub](https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/customizing-your-repositorys-social-media-preview),
   qui donne aussi la taille et le poids). C'est un réglage du dépôt : l'agent prépare le fichier et le signale,
   l'opérateur le dépose (ESSENTIEL §Garde-fous). `repo-settings.py` ne le couvre pas.
-- Elles changent quand l'intention du projet change, pas à chaque version. Le doc steward vérifie leur présence
-  ([STEWARDS](STEWARDS.md) §2) ; images absentes → une issue.
+- Elles changent quand l'intention du projet change, pas à chaque version. Le doc steward vérifie les quatre
+  éléments ([STEWARDS](STEWARDS.md) §2) ; absent ou périmé → une issue.
 
 ## Secrets
 Aucun secret dans le dépôt. Secrets de CI dans les secrets GitHub ; en local, dans des fichiers de configuration
