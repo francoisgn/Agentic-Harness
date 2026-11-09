@@ -1,33 +1,44 @@
-name: Labels (réutilisable)
+name: Labels (reusable)
 
-# Synchronise les labels du dépôt appelant : taxonomie du cadre vendorisée (.harness/labels.json) + labels propres au
-# projet (.github/labels.local.json, qui l'emportent à nom égal). Crée ou met à jour, ne supprime jamais.
-# `apply-aliases` renomme un ancien label (champ `aliases` du cadre, ex. `priority: high` → `P1 🔴`) au lieu d'en créer
-# un nouveau : les issues gardent leur label. À n'activer qu'après avoir mis à jour les workflows et docs du projet qui
-# citent les anciens noms.
-# Lit les fichiers du dépôt appelant : aucun accès au dépôt du cadre n'est nécessaire à l'exécution.
+# Syncs the labels of the calling repository: vendored harness taxonomy (.harness/labels.json) + project-specific
+# labels (.github/labels.local.json, which win on an equal name). Creates or updates, never deletes.
+# `apply-aliases` renames an old label (`aliases` field, e.g. `P1 🔴` → `priority: high`, `bloqué` → `status: blocked`)
+# instead of creating a new one: the issues keep their label. Enable it only after updating the project's workflows
+# and docs that cite the old names. An alias is renamed only while its new name does not exist yet.
+# GitHub default labels (bug, enhancement, question…) still present and unused by the harness set are listed in a
+# notice, never deleted: remove them by hand.
+# Reads the files of the calling repository: no access to the harness repository is needed at run time.
+#
+# The harness repository syncs its own labels with this same job (`push`, `workflow_dispatch`): the inputs are then
+# empty, so the taxonomy is read from templates/.github/labels.json and the aliases are applied. A direct trigger, not
+# a second workflow with a local `uses: ./…` call (flagged by zizmor, audit self-repository). These two triggers only
+# exist in the harness repository: a consumer project calls this file, it does not copy it.
 on:
   workflow_call:
     inputs:
       labels-file:
-        description: Taxonomie du cadre, vendorisée par harness-sync.sh
+        description: Harness taxonomy, vendored by harness-sync.sh
         type: string
         default: .harness/labels.json
       local-labels-file:
-        description: Labels propres au projet (facultatif)
+        description: Project-specific labels (optional)
         type: string
         default: .github/labels.local.json
       apply-aliases:
-        description: Renommer les anciens labels listés dans `aliases`
+        description: Rename the old labels listed in `aliases`
         type: boolean
         default: false
+  push:
+    branches: [master]
+    paths: [templates/.github/labels.json, .github/labels.local.json, .github/workflows/labels-sync.yml]
+  workflow_dispatch:
 
 permissions:
   contents: read
 
 jobs:
   sync:
-    name: Synchroniser les labels
+    name: Sync labels
     runs-on: ubuntu-latest
     timeout-minutes: 5
     permissions:
@@ -39,15 +50,16 @@ jobs:
           persist-credentials: false
       - uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
         env:
-          LABELS_FILE: ${{ inputs.labels-file }}
-          LOCAL_LABELS_FILE: ${{ inputs.local-labels-file }}
-          APPLY_ALIASES: ${{ inputs.apply-aliases }}
+          # Empty inputs = direct run in the harness repository (see the header).
+          LABELS_FILE: ${{ inputs.labels-file || 'templates/.github/labels.json' }}
+          LOCAL_LABELS_FILE: ${{ inputs.local-labels-file || '.github/labels.local.json' }}
+          APPLY_ALIASES: ${{ inputs.apply-aliases || !inputs.labels-file }}
         with:
           script: |
             const fs = require('fs');
             const read = (path, required) => {
               if (!fs.existsSync(path)) {
-                if (required) throw new Error(`${path} introuvable : lancer harness-sync.sh`);
+                if (required) throw new Error(`${path} not found: run harness-sync.sh`);
                 return [];
               }
               return JSON.parse(fs.readFileSync(path, 'utf8'));
@@ -65,7 +77,7 @@ jobs:
               const fields = { name: label.name, color: label.color, description: (label.description || '').slice(0, 100) };
               if (await exists(label.name)) {
                 await github.rest.issues.updateLabel({ owner, repo, ...fields });
-                core.info(`mis à jour : ${label.name}`);
+                core.info(`updated: ${label.name}`);
                 continue;
               }
               const alias = process.env.APPLY_ALIASES === 'true'
@@ -74,9 +86,26 @@ jobs:
               if (alias) {
                 await github.rest.issues.updateLabel({ owner, repo, name: alias, new_name: label.name,
                   color: fields.color, description: fields.description });
-                core.info(`renommé : ${alias} → ${label.name}`);
+                core.info(`renamed: ${alias} → ${label.name}`);
               } else {
                 await github.rest.issues.createLabel({ owner, repo, ...fields });
-                core.info(`créé : ${label.name}`);
+                core.info(`created: ${label.name}`);
               }
+            }
+
+            // GitHub default labels left over (read after the renames, so an alias just renamed is not listed).
+            const DEFAULTS = ['bug', 'documentation', 'duplicate', 'enhancement', 'good first issue', 'help wanted',
+              'invalid', 'question', 'wontfix'];
+            const wanted = new Set([...byName.keys()].map((n) => n.toLowerCase()));
+            const aliases = new Set([...byName.values()].flatMap((l) => l.aliases || []).map((n) => n.toLowerCase()));
+            const current = await github.paginate(github.rest.issues.listLabelsForRepo, { owner, repo, per_page: 100 });
+            const leftovers = current.map((l) => l.name)
+              .filter((n) => DEFAULTS.includes(n.toLowerCase()) && !wanted.has(n.toLowerCase()));
+            if (leftovers.length) {
+              const old = leftovers.filter((n) => aliases.has(n.toLowerCase()));
+              core.notice(`GitHub default labels still present and unused by the harness set: ${leftovers.join(', ')}. ` +
+                'Nothing is deleted: remove them by hand once no issue carries them.' +
+                (old.length ? ` Old names of harness labels (${old.join(', ')}): rename them with apply-aliases, ` +
+                  'or move their issues to the new label if both exist.' : ''),
+                { title: 'Unused default labels' });
             }

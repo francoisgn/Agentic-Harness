@@ -1,15 +1,15 @@
 #!/usr/bin/env python3
-"""Résout la clé `compliance` de .harness/config.json en relecteurs de conformité à lancer (COMPLIANCE.md §2).
+"""Resolves the `compliance` key of .harness/config.json into the compliance reviewers to run (COMPLIANCE.md §2).
 
-Trois façons de brancher un référentiel, au choix de l'entreprise :
-  "gdpr"                                         agent intégré du cadre (.claude/agents/compliance-gdpr.md)
-  {"id": "pci", "agent": "<chemin .md>"}         agent de l'entreprise, qui remplace l'intégré ou ajoute un référentiel
-  {"id": "dora", "spec": "<chemin .md>"}         spec seule : le relecteur générique `compliance-reviewer` l'applique
-Options communes : "paths" (globs) et "keywords" (mots du diff) décident du périmètre sans lancer d'agent ;
-"enabled": false désactive une entrée ; "confirme" nomme qui tranche (DPO, RSSI, QSA…).
+Three ways to plug in a compliance framework, as the company chooses:
+  "gdpr"                                    built-in agent of the harness (.claude/agents/compliance-gdpr.md)
+  {"id": "pci", "agent": "<.md path>"}      company agent, which replaces the built-in one or adds a framework
+  {"id": "dora", "spec": "<.md path>"}      spec only: the generic reviewer `compliance-reviewer` applies it
+Common options: "paths" (globs) and "keywords" (words of the diff) decide the scope without launching an agent;
+"enabled": false disables an entry; "confirmed_by" names who decides (DPO, CISO, QSA...).
 
-Usage : compliance-plan.py [--root .] [--files f1 f2 … | --base origin/develop] [--diff-file diff.txt]
-Sortie JSON {"reviewers": [...], "errors": [...]} ; code 1 si une entrée est invalide. Bibliothèque standard seulement.
+Usage: compliance-plan.py [--root .] [--files f1 f2 ... | --base origin/develop] [--diff-file diff.txt]
+JSON output {"reviewers": [...], "errors": [...]}; exit code 1 if an entry is invalid. Standard library only.
 """
 import argparse
 import json
@@ -20,8 +20,8 @@ import sys
 
 AGENTS_DIR = ".claude/agents"
 GENERIC = "compliance-reviewer"
-SPEC_SECTIONS = ("## Quand intervenir", "## Ce que je vérifie", "## Preuves attendues", "## Sources")
-SPEC_KEYS = ("id", "référentiel", "confirme")
+SPEC_SECTIONS = ("## When to step in", "## What I check", "## Expected evidence", "## Sources")
+SPEC_KEYS = ("id", "framework", "confirmed_by")
 
 
 def _frontmatter(text):
@@ -36,19 +36,19 @@ def _frontmatter(text):
 
 
 def check_spec(path):
-    """Écarts d'un fichier de spec de conformité (frontmatter et sections obligatoires)."""
+    """Gaps of a compliance spec file (frontmatter and mandatory sections)."""
     path = pathlib.Path(path)
     if not path.is_file():
-        return [f"spec introuvable : {path}"]
+        return [f"spec not found: {path}"]
     text = path.read_text(encoding="utf-8")
     meta = _frontmatter(text) or {}
-    errors = [f"{path} : clé `{k}` manquante dans l'en-tête" for k in SPEC_KEYS if not meta.get(k)]
-    errors += [f"{path} : section « {s} » manquante" for s in SPEC_SECTIONS if s not in text]
+    errors = [f"{path}: key `{k}` missing from the header" for k in SPEC_KEYS if not meta.get(k)]
+    errors += [f"{path}: section \"{s}\" missing" for s in SPEC_SECTIONS if s not in text]
     return errors
 
 
 def glob_match(path, pattern):
-    """Glob de chemin : `*` et `?` restent dans un dossier, `**/` couvre zéro ou plusieurs dossiers, `/**` tout le dessous."""
+    """Path glob: `*` and `?` stay within one directory, `**/` spans zero or more directories, `/**` everything below."""
     rx, i = "", 0
     while i < len(pattern):
         if pattern.startswith("**/", i):
@@ -65,7 +65,7 @@ def glob_match(path, pattern):
 
 
 def _inside(root, rel):
-    """Le chemin reste dans le dépôt (ni absolu hors racine, ni `..` qui en sort)."""
+    """The path stays inside the repository (neither absolute outside the root, nor a `..` that leaves it)."""
     base = pathlib.Path(root).resolve()
     target = (base / rel).resolve()
     return target == base or base in target.parents
@@ -74,18 +74,18 @@ def _inside(root, rel):
 def _in_scope(entry, files, diff):
     paths, keywords = entry.get("paths") or [], entry.get("keywords") or []
     if not paths and not keywords:
-        return "à évaluer", "périmètre jugé par l'agent (section « Quand intervenir »)"
+        return "to assess", "scope judged by the agent (section \"When to step in\")"
     for f in files:
         for g in paths:
             if glob_match(f, g):
-                return "dans le périmètre", f"{f} correspond à {g}"
-    # Lignes ajoutées ou retirées seulement (pas les en-têtes +++/--- qui portent des chemins), mot entier
+                return "in scope", f"{f} matches {g}"
+    # Added or removed lines only (not the +++/--- headers, which carry paths), whole word
     changed = "\n".join(line[1:] for line in diff.splitlines()
                         if line.startswith(("+", "-")) and not line.startswith(("+++", "---")))
     for k in keywords:
         if re.search(rf"(?<!\w){re.escape(k)}(?!\w)", changed, re.IGNORECASE):
-            return "dans le périmètre", f"mot-clé « {k} » dans le diff"
-    return "hors périmètre", "aucun chemin ni mot-clé configuré n'est touché"
+            return "in scope", f"keyword \"{k}\" in the diff"
+    return "out of scope", "no configured path or keyword is touched"
 
 
 def plan(config, root, files=(), diff=""):
@@ -93,66 +93,66 @@ def plan(config, root, files=(), diff=""):
     reviewers, errors, seen = [], [], set()
     entries = config.get("compliance", [])
     if not isinstance(entries, list):
-        return {"reviewers": [], "errors": ["`compliance` doit être une liste (ex. [\"gdpr\"])"]}
+        return {"reviewers": [], "errors": ["`compliance` must be a list (e.g. [\"gdpr\"])"]}
     for raw in entries:
         if not isinstance(raw, (str, dict)):
-            errors.append(f"entrée invalide (texte ou objet attendu) : {raw!r}")
+            errors.append(f"invalid entry (string or object expected): {raw!r}")
             continue
         entry = {"id": raw} if isinstance(raw, str) else dict(raw)
         cid = entry.get("id")
         if not isinstance(cid, str) or not cid.strip():
-            errors.append(f"entrée sans `id` texte : {raw!r}")
+            errors.append(f"entry without a string `id`: {raw!r}")
             continue
         cid = cid.strip()
-        if re.search(r"[/\\]|\.\.", cid):  # l'id entre dans un nom de fichier : ni dossier, ni remontée
-            errors.append(f"{cid!r} : `id` invalide (ni `/`, ni `\\`, ni `..`)")
+        if re.search(r"[/\\]|\.\.", cid):  # the id goes into a file name: no directory, no parent traversal
+            errors.append(f"{cid!r}: invalid `id` (no `/`, no `\\`, no `..`)")
             continue
         bad = [k for k in ("agent", "spec") if entry.get(k) is not None and not isinstance(entry[k], str)]
         if bad:
-            errors.append(f"{cid} : `{bad[0]}` doit être un chemin (texte)")
+            errors.append(f"{cid}: `{bad[0]}` must be a path (string)")
             continue
         outside = [k for k in ("agent", "spec") if entry.get(k) and not _inside(root, entry[k])]
         if outside:
-            errors.append(f"{cid} : `{outside[0]}` pointe hors du dépôt, refusé")
+            errors.append(f"{cid}: `{outside[0]}` points outside the repository, refused")
             continue
         if cid in seen:
-            errors.append(f"{cid} : déclaré deux fois")
+            errors.append(f"{cid}: declared twice")
             continue
         seen.add(cid)
         if entry.get("enabled", True) is False:
             continue
         if entry.get("agent") and entry.get("spec"):
-            errors.append(f"{cid} : `agent` ou `spec`, pas les deux")
+            errors.append(f"{cid}: `agent` or `spec`, not both")
             continue
         if entry.get("agent"):
             path = root / entry["agent"]
             meta = _frontmatter(path.read_text(encoding="utf-8")) if path.is_file() else None
             if not path.is_file():
-                errors.append(f"{cid} : agent introuvable {entry['agent']}")
+                errors.append(f"{cid}: agent not found {entry['agent']}")
                 continue
             if not meta or not meta.get("name"):
-                errors.append(f"{cid} : {entry['agent']} sans `name` dans son en-tête")
+                errors.append(f"{cid}: {entry['agent']} has no `name` in its header")
                 continue
-            mode, agent, file = "agent du projet", meta["name"], entry["agent"]
+            mode, agent, file = "project agent", meta["name"], entry["agent"]
         elif entry.get("spec"):
             spec_errors = check_spec(root / entry["spec"])
             if spec_errors:
-                errors += [f"{cid} : {e}" for e in spec_errors]
+                errors += [f"{cid}: {e}" for e in spec_errors]
                 continue
             if not (root / AGENTS_DIR / f"{GENERIC}.md").is_file():
-                errors.append(f"{cid} : relecteur générique {AGENTS_DIR}/{GENERIC}.md absent (exclu de la synchro ?)")
+                errors.append(f"{cid}: generic reviewer {AGENTS_DIR}/{GENERIC}.md missing (excluded from the sync?)")
                 continue
             mode, agent, file = "spec", GENERIC, entry["spec"]
         else:
             file = f"{AGENTS_DIR}/compliance-{cid}.md"
             if not (root / file).is_file():
-                errors.append(f"{cid} : pas d'agent intégré {file} ; fournir `agent` ou `spec`")
+                errors.append(f"{cid}: no built-in agent {file}; provide `agent` or `spec`")
                 continue
-            mode, agent = "intégré", f"compliance-{cid}"
+            mode, agent = "built-in", f"compliance-{cid}"
         scope, reason = _in_scope(entry, files, diff)
         reviewer = {"id": cid, "mode": mode, "agent": agent, "file": file, "scope": scope, "reason": reason}
-        if entry.get("confirme"):
-            reviewer["confirme"] = entry["confirme"]
+        if entry.get("confirmed_by"):
+            reviewer["confirmed_by"] = entry["confirmed_by"]
         reviewers.append(reviewer)
     return {"reviewers": reviewers, "errors": errors}
 
@@ -161,7 +161,7 @@ def main():
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     ap.add_argument("--root", default=".")
     ap.add_argument("--files", nargs="*", default=None)
-    ap.add_argument("--base", help="calcule fichiers et diff avec git diff <base>...HEAD")
+    ap.add_argument("--base", help="computes files and diff with git diff <base>...HEAD")
     ap.add_argument("--diff-file")
     a = ap.parse_args()
     root = pathlib.Path(a.root)
@@ -172,7 +172,7 @@ def main():
         git = ["git", "-C", str(root), "diff", f"{a.base}...HEAD"]
         names = subprocess.run(git + ["--name-only"], capture_output=True, text=True)
         if names.returncode != 0:
-            print(f"✘ git diff {a.base}...HEAD : {names.stderr.strip()}", file=sys.stderr)
+            print(f"✘ git diff {a.base}...HEAD: {names.stderr.strip()}", file=sys.stderr)
             return 1
         files = names.stdout.split()
         diff = subprocess.run(git, capture_output=True, text=True).stdout

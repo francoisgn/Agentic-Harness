@@ -9,17 +9,17 @@
 {
 "type": "text",
 "id": "t",
-"x": 330,
+"x": 338,
 "y": 20,
-"text": "agentic-harness : les mécanismes",
+"text": "agentic-harness: the mechanisms",
 "fontSize": 32
 },
 {
 "type": "text",
 "id": "st",
-"x": 300,
+"x": 326,
 "y": 64,
-"text": "un cadre versionné, pour tout agent de code et toute équipe",
+"text": "a versioned harness, for any coding agent and any team",
 "fontSize": 20,
 "strokeColor": "#757575"
 },
@@ -34,7 +34,7 @@
 "fillStyle": "solid",
 "strokeColor": "#f59e0b",
 "label": {
-"text": "Opérateur\n(humain)",
+"text": "Operator\n(human)",
 "fontSize": 20
 }
 },
@@ -52,7 +52,7 @@
 "fillStyle": "solid",
 "strokeColor": "#8b5cf6",
 "label": {
-"text": "Orchestrateur (SPOC)\nseul agent long : route, suit, relance",
+"text": "Orchestrator (SPOC)\nsole long-lived agent:\nroutes, tracks, restarts",
 "fontSize": 20
 }
 },
@@ -90,7 +90,7 @@
 "fillStyle": "solid",
 "strokeColor": "#f59e0b",
 "label": {
-"text": "Cadre versionné (vX.Y.Z)\nrègles, skills, agents, CI",
+"text": "Versioned harness (vX.Y.Z)\nrules, skills, agents, CI",
 "fontSize": 20
 }
 },
@@ -113,7 +113,7 @@
 ],
 "endArrowhead": "arrow",
 "label": {
-"text": "synchro par PR",
+"text": "sync by PR",
 "fontSize": 18
 }
 },
@@ -131,7 +131,7 @@
 "fillStyle": "solid",
 "strokeColor": "#4a9eed",
 "label": {
-"text": "Agents de lot\nTDD, modèle adapté",
+"text": "Lot agents\nTDD, right model tier",
 "fontSize": 20
 }
 },
@@ -149,7 +149,7 @@
 "fillStyle": "solid",
 "strokeColor": "#06b6d4",
 "label": {
-"text": "Stewards jetables\nissues, docs, flux",
+"text": "Disposable stewards\nissues, docs, flow",
 "fontSize": 20
 }
 },
@@ -167,7 +167,7 @@
 "fillStyle": "solid",
 "strokeColor": "#f59e0b",
 "label": {
-"text": "Relecteurs\nadversarial, conformité",
+"text": "Reviewers\nadversarial, compliance",
 "fontSize": 20
 }
 },
@@ -242,7 +242,7 @@
 "fillStyle": "solid",
 "strokeColor": "#22c55e",
 "label": {
-"text": "Dépôt = état partagé : issues, PR, docs, ADR, leçons\nle contexte vit ici, pas dans l'agent",
+"text": "Repository = shared state: issues, PRs, docs, ADRs, lessons\nthe context lives here, not in the agent",
 "fontSize": 20
 }
 },
@@ -323,7 +323,7 @@
 "fillStyle": "solid",
 "strokeColor": "#ef4444",
 "label": {
-"text": "CI\ntests, SAST, SCA,\nsecrets, revue IA",
+"text": "CI\ntests, SAST, SCA,\nsecrets, AI review",
 "fontSize": 18
 }
 },
@@ -350,7 +350,7 @@
 ],
 "endArrowhead": "arrow",
 "label": {
-"text": "PR prête",
+"text": "ready PR",
 "fontSize": 16
 }
 },
@@ -368,7 +368,7 @@
 "fillStyle": "solid",
 "strokeColor": "#ec4899",
 "label": {
-"text": "Tableau de bord\npannes, boucles,\nPR à problème, coût",
+"text": "Dashboard\nstalls, loops,\nproblem PRs, cost",
 "fontSize": 18
 }
 },
@@ -423,7 +423,7 @@
 "endArrowhead": "arrow",
 "strokeColor": "#ec4899",
 "label": {
-"text": "dérives : arrêter, relancer, réaffecter",
+"text": "drift: stop, restart, reassign",
 "fontSize": 16
 }
 },
@@ -442,7 +442,7 @@
 "strokeColor": "#f59e0b",
 "strokeWidth": 1,
 "label": {
-"text": "Garde-fous : rien de deviné, aucun secret, boucles bornées (3 revues, 6 pushes), chaque verdict tracé",
+"text": "Guardrails: nothing guessed, no secret, bounded loops (3 reviews, 6 pushes), every verdict traced",
 "fontSize": 18
 }
 }

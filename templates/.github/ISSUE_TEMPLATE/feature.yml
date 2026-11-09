@@ -1,51 +1,52 @@
-name: Fonctionnalité
-description: Une capacité nouvelle ou une amélioration
-labels: [feature]
+name: Feature
+description: A new capability or an improvement
+labels: ["type: feature", "status: needs-triage"]
 body:
   - type: textarea
-    id: resume
+    id: summary
     attributes:
-      label: Résumé
-      description: "User story : « En tant que <qui>, je veux que <X> fasse <Y>, pour <bénéfice> » (METHODOLOGY.md §2 bis)."
+      label: Summary
+      description: 'User story: "As a <who>, I want <X> to do <Y>, so that <benefit>" (METHODOLOGY.md §2 bis).'
     validations:
       required: true
   - type: textarea
-    id: besoin
+    id: need
     attributes:
-      label: Besoin
-      description: Le problème à résoudre, pas encore la solution.
+      label: Need
+      description: The problem to solve, not the solution yet.
     validations:
       required: true
   - type: textarea
-    id: proposition
+    id: proposal
     attributes:
-      label: Proposition et critères d'acceptation
-      description: "Étant donné … / Quand … / Alors … : un critère = un test, écrit avant le code."
+      label: Proposal and acceptance criteria
+      description: "Given … / When … / Then …: one criterion = one test, written before the code."
     validations:
       required: true
   - type: textarea
-    id: erreurs
+    id: errors
     attributes:
-      label: Comportements d'erreur
-      description: "Entrée invalide, panne externe, limite → résultat attendu (message, état conservé). « Aucun » se justifie."
+      label: Error behaviours
+      description: 'Invalid input, external failure, limit → expected result (message, state kept). "None" must be justified.'
     validations:
       required: true
   - type: textarea
-    id: fini
+    id: done
     attributes:
-      label: Définition de fini
-      description: "Tests verts (vus rouges d'abord), docs à jour, revue par un autre modèle, conformité si concernée, validation sur l'appareil."
+      label: Definition of done
+      description: "Tests green (seen red first), docs up to date, review by another model, compliance if concerned, validation on the device."
     validations:
       required: true
   - type: textarea
     id: sources
     attributes:
       label: Sources
-      description: Règle, documentation officielle, comportement de référence (lien ou fichier:ligne). Rien de deviné.
+      description: Rule, official documentation, reference behaviour (link or file:line). Nothing guessed.
   - type: dropdown
-    id: priorite
+    id: priority
     attributes:
-      label: Priorité
-      options: ["P1 🔴", "P2 🟠", "P3 🟢"]
+      label: Priority
+      description: Triage sets the matching `priority:` label.
+      options: [critical (data loss or crash), high, medium, low]
     validations:
       required: true

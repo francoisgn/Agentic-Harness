@@ -1,23 +1,23 @@
 # CLAUDE.md
 
-Instructions pour les agents de code (Claude Code lit ce fichier ; les autres agents lisent `AGENTS.md`). Détail du produit : [README.md](README.md).
+Instructions for coding agents (Claude Code reads this file; other agents read `AGENTS.md`). Product details: [README.md](README.md).
 
-<!-- harness:begin cadre -->
-<!-- harness:end cadre -->
+<!-- harness:begin harness -->
+<!-- harness:end harness -->
 
-## Le projet
-<!-- À remplir : ce que fait le produit en 3 lignes, ses modules, ce qui vit où. -->
+## The project
+<!-- To fill in: what the product does in 3 lines, its modules, what lives where. -->
 
-## Build et tests
-<!-- À remplir : commandes exactes (tests, lint, couverture, build), ce qui marche dans le conteneur Linux et ce qui
-     demande le Mac, comment rejouer la CI en local. -->
+## Build and tests
+<!-- To fill in: exact commands (tests, lint, coverage, build), what works in the Linux container and what
+     needs the Mac, how to replay the CI locally. -->
 
-## Conventions du projet
-<!-- À remplir : design system, règles métier sourcées, persistance, ce qui précise ou remplace le cadre. -->
+## Project conventions
+<!-- To fill in: design system, sourced business rules, persistence, what refines or replaces the harness. -->
 
-## Branches et CI
-<!-- À remplir : modèle de branches retenu (cf. BRANCHING-RELEASE.md : A develop → beta → master, ou B une seule
-     branche d'intégration), branches protégées (aussi dans .harness/config.json), particularités de la CI. -->
+## Branches and CI
+<!-- To fill in: branch model chosen (see BRANCHING-RELEASE.md: A develop → beta → master, or B a single
+     integration branch), protected branches (also in .harness/config.json), CI specifics. -->
 
-## Labels propres au projet
-<!-- À remplir : labels ajoutés dans .github/labels.local.json (ex. `onglet: …`, `area: …`) et quand les poser. -->
+## Project-specific labels
+<!-- To fill in: labels added in .github/labels.local.json (e.g. `area: …`, `type: lot`) and when to set them. -->

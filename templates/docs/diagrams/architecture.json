@@ -11,7 +11,7 @@
   "id": "t",
   "x": 40,
   "y": 20,
-  "text": "Architecture : à remplacer par celle du projet",
+  "text": "Architecture: replace with the project's own",
   "fontSize": 30
  },
  {
@@ -19,7 +19,7 @@
   "id": "st",
   "x": 40,
   "y": 62,
-  "text": "modifier docs/diagrams/architecture.json, relancer le rendu, commiter les trois fichiers",
+  "text": "edit docs/diagrams/architecture.json, re-run the render, commit the three files",
   "fontSize": 18,
   "strokeColor": "#757575"
  },
@@ -37,7 +37,7 @@
   "fillStyle": "solid",
   "strokeColor": "#4a9eed",
   "label": {
-   "text": "Interface\nécrans, vues, CLI",
+   "text": "Interface\nscreens, views, CLI",
    "fontSize": 20
   }
  },
@@ -55,7 +55,7 @@
   "fillStyle": "solid",
   "strokeColor": "#22c55e",
   "label": {
-   "text": "Moteur\nrègles métier, testées",
+   "text": "Engine\nbusiness rules, tested",
    "fontSize": 20
   }
  },
@@ -73,7 +73,7 @@
   "fillStyle": "solid",
   "strokeColor": "#f59e0b",
   "label": {
-   "text": "Données\npersistance, migrations",
+   "text": "Data\npersistence, migrations",
    "fontSize": 20
   }
  },
@@ -129,7 +129,7 @@
   "fillStyle": "solid",
   "strokeColor": "#8b5cf6",
   "label": {
-   "text": "Services externes\nAPI, authentification",
+   "text": "External services\nAPI, authentication",
    "fontSize": 20
   }
  },
@@ -166,7 +166,7 @@
   "fillStyle": "solid",
   "strokeColor": "#f59e0b",
   "label": {
-   "text": "CI et livraison\ntests, sécurité, release",
+   "text": "CI and delivery\ntests, security, release",
    "fontSize": 20
   }
  },
@@ -184,7 +184,7 @@
   "fillStyle": "solid",
   "strokeColor": "#06b6d4",
   "label": {
-   "text": "Agents et opérateur\nissues, lots, PR",
+   "text": "Agents and operator\nissues, lots, PRs",
    "fontSize": 20
   }
  }

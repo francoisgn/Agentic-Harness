@@ -1,4 +1,4 @@
-# Actions épinglées par SHA (CI-BUDGET.md §3) : Dependabot les met à jour, groupées, une PR par semaine.
+# Actions pinned by SHA (CI-BUDGET.md §3): Dependabot updates them, grouped, one PR per week.
 version: 2
 updates:
   - package-ecosystem: github-actions

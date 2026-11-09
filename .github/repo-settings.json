@@ -1,14 +1,14 @@
 {
-  "$comment": "Réglages du dépôt du cadre, appliqués au merge par .github/workflows/settings.yml (scripts/repo-settings.py). Modifier par PR, jamais à la main dans Settings (la dérive est signalée chaque semaine).",
+  "$comment": "Repository settings of the harness, applied on merge by .github/workflows/settings.yml (scripts/repo-settings.py). Change them by PR, never by hand in Settings (drift is reported every week).",
   "repository": {
-    "description": "Cadre versionné pour piloter le développement agentique (Claude Code) : intention et TDD, issues → lots → PR, revues adversariales, conformité branchable, stewards, FinOps et tableau de bord du flux.",
+    "description": "Versioned harness to steer agentic development (Claude Code): intent and TDD, issues → lots → PRs, adversarial reviews, pluggable compliance, stewards, FinOps and flow dashboard.",
     "has_wiki": false,
     "delete_branch_on_merge": true
   },
   "topics": ["agentic", "claude-code", "ai-agents", "devops", "code-review", "compliance", "finops", "tdd", "github-actions", "framework"],
   "rulesets": [
     {
-      "name": "master protégée",
+      "name": "protected master",
       "target": "branch",
       "enforcement": "active",
       "conditions": { "ref_name": { "include": ["~DEFAULT_BRANCH"], "exclude": [] } },

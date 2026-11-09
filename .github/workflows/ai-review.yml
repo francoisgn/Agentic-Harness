@@ -1,28 +1,28 @@
-name: Revue IA (réutilisable)
+name: AI review (reusable)
 
-# Le « service de revue » du cadre, équivalent maison de CodeRabbit (REVIEW-SERVICE.md) : un relecteur Claude, en
-# lecture seule sur le code, qui poste UN commentaire de revue par passage sur la tête de la PR, au format du cadre (constats
-# Haute / Moyenne / Basse / Détail, fichier:ligne, scénario d'échec, correctif ; LESSONS.md ; règles du projet).
-# Économie (CI-BUDGET.md, REVIEW-ROUNDS.md) :
-#   - rien sur un brouillon ; l'appelant le déclenche sur `ready_for_review` et `synchronize` d'une PR prête ;
-#   - un nouveau push annule la revue en cours (concurrency) ; tours bornés (`max-turns`) ;
-#   - label `revue: aucune` sur la PR → sautée (PR triviale, Dependabot).
-# Sortie limitée à un commentaire (`gh pr comment`, jamais `gh pr review`) : le relecteur ne peut pas émettre d'approbation
-# GitHub, même si un texte de la PR tente de l'y pousser (injection de prompt) ; le verdict reste du texte.
-# Sécurité : `pull_request` (jamais `pull_request_target`) : une PR de fork n'a pas le secret, le job est sauté. Ce
-# contrôle n'est donc JAMAIS requis dans le ruleset ; la revue adversariale de la session reste la garantie.
+# The harness "review service", the in-house equivalent of CodeRabbit (REVIEW-SERVICE.md): a Claude reviewer, read-only
+# on the code, that posts ONE review comment per run on the PR head, in the harness format (findings
+# High / Medium / Low / Detail, file:line, failure scenario, fix; LESSONS.md; project rules).
+# Economy (CI-BUDGET.md, REVIEW-ROUNDS.md):
+#   - nothing on a draft; the caller triggers it on `ready_for_review` and `synchronize` of a ready PR;
+#   - a new push cancels the review in progress (concurrency); bounded turns (`max-turns`);
+#   - label `review: skip` on the PR → skipped (trivial PR, Dependabot). Project-local label (.github/labels.local.json).
+# Output limited to a comment (`gh pr comment`, never `gh pr review`): the reviewer cannot issue a GitHub approval,
+# even if some text in the PR tries to push it to (prompt injection); the verdict stays text.
+# Security: `pull_request` (never `pull_request_target`): a fork PR does not have the secret, the job is skipped. So
+# this check is NEVER required in the ruleset; the session's adversarial review remains the guarantee.
 on:
   workflow_call:
     inputs:
       model:
-        description: Modèle relecteur (niveau ≥ celui de l'issue, ORCHESTRATION.md §2), ex. claude-opus-5-5
+        description: Reviewer model (tier ≥ the one of the issue, ORCHESTRATION.md §2), e.g. claude-opus-5-5
         type: string
         default: "claude-sonnet-5-5"
       max-turns:
         type: number
         default: 30
       prompt-file:
-        description: Consignes du projet ajoutées au prompt du cadre (chemin dans le dépôt ; absent = ignoré)
+        description: Project instructions appended to the harness prompt (path in the repository; missing = ignored)
         type: string
         default: ".harness/review-instructions.md"
     secrets:
@@ -36,11 +36,11 @@ permissions:
 
 jobs:
   review:
-    name: Revue IA
+    name: AI review
     if: >-
       github.event_name == 'pull_request'
       && github.event.pull_request.draft != true
-      && !contains(github.event.pull_request.labels.*.name, 'revue: aucune')
+      && !contains(github.event.pull_request.labels.*.name, 'review: skip')
       && github.event.pull_request.head.repo.full_name == github.repository
     runs-on: ubuntu-latest
     timeout-minutes: 20
@@ -58,7 +58,7 @@ jobs:
           persist-credentials: false
           fetch-depth: 0
 
-      - name: Consignes
+      - name: Instructions
         env:
           PROMPT_FILE: ${{ inputs.prompt-file }}
           PR: ${{ github.event.pull_request.number }}
@@ -66,27 +66,28 @@ jobs:
           BASE_REF: ${{ github.event.pull_request.base.ref }}
         run: |
           {
-            echo "Tu es le service de revue du cadre agentic-harness sur la PR #$PR, tête $HEAD_SHA, base $BASE_REF."
-            echo "Lecture seule sur le code : ni commit, ni push, ni merge. Tu postes UN commentaire de PR (gh pr comment), rien d'autre."
-            echo "Lis : CLAUDE.md, .harness/docs/ESSENTIEL.md, .harness/docs/LESSONS.md, la spec liée (Closes/Refs)."
-            echo "Revue incrémentale : si tu as déjà commenté cette PR (gh pr view $PR --json comments), relis"
-            echo "seulement git diff <sha de ta dernière revue>...HEAD, et vérifie si tes constats précédents sont traités."
-            echo "Sinon, relis git diff origin/$BASE_REF...HEAD. Pour chaque risque réel : scénario d'échec concret, fichier:ligne,"
-            echo "correctif proportionné. Sévérités : Haute / Moyenne / Basse / Détail. Pas de constat de style qu'un"
-            echo "linter attrape ; pas de constat sans chemin d'exécution ; regrouper les cas d'une même classe."
-            echo "Vérifie aussi : tests qui échoueraient sans le changement (LESSONS L01), secrets en dur, données"
-            echo "personnelles, docs à jour dans le même commit (L09), sources citées pour tout fait externe (L21)."
-            echo "Faille de sécurité exploitable : seulement « CHANGEMENTS DEMANDÉS — constat de sécurité, détail"
-            echo "transmis en privé », sans détail public."
-            echo "Format : **Revue IA (<modèle>) : APPROUVÉ | CHANGEMENTS DEMANDÉS** — tête <sha>, constats numérotés,"
-            echo "liste Vérifié ; moins de 400 mots ; en français ; terminer par le pied du cadre :"
+            echo "You are the review service of the agentic-harness harness on PR #$PR, head $HEAD_SHA, base $BASE_REF."
+            echo "Read-only on the code: no commit, no push, no merge. You post ONE PR comment (gh pr comment), nothing else."
+            echo "Read: CLAUDE.md, .harness/docs/ESSENTIALS.md, .harness/docs/LESSONS.md, the linked spec (Closes/Refs)."
+            echo "Incremental review: if you already commented on this PR (gh pr view $PR --json comments), review"
+            echo "only git diff <sha of your last review>...HEAD, and check whether your previous findings are handled."
+            echo "Otherwise, review git diff origin/$BASE_REF...HEAD. For each real risk: concrete failure scenario, file:line,"
+            echo "proportionate fix. Severities: High / Medium / Low / Detail. No style finding that a"
+            echo "linter catches; no finding without an execution path; group the cases of one class."
+            echo "Also check: tests that would fail without the change (LESSONS L01), hard-coded secrets, personal"
+            echo "data, docs updated in the same commit (L09), sources cited for every external fact (L21)."
+            echo "Exploitable security flaw: only \"CHANGES REQUESTED: security finding, details sent"
+            echo "privately\", with no public detail."
+            echo "Format: **AI review (<model>): APPROVED | CHANGES REQUESTED**, head <sha>, numbered findings,"
+            echo "Verified list; under 400 words; in the project's language (.harness/config.json › language, default"
+            echo "English); end with the harness footer:"
             echo "---"
             echo "_Generated by [Claude Code](https://claude.ai/code)_"
-            if [ -f "$PROMPT_FILE" ]; then echo; echo "Consignes du projet :"; cat "$PROMPT_FILE"; fi
+            if [ -f "$PROMPT_FILE" ]; then echo; echo "Project instructions:"; cat "$PROMPT_FILE"; fi
           } >"$RUNNER_TEMP/prompt.md"
 
       - id: prompt
-        name: Lire les consignes
+        name: Read the instructions
         run: |
           {
             echo "text<<HARNESS_EOF"
@@ -94,7 +95,7 @@ jobs:
             echo "HARNESS_EOF"
           } >>"$GITHUB_OUTPUT"
 
-      - name: Revue
+      - name: Review
         uses: anthropics/claude-code-action@61a9c274fa7110a66dfafc1bbbced03833eb25fe # v1.0.269
         with:
           anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}

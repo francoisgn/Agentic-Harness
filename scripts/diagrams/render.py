@@ -1,15 +1,15 @@
 #!/usr/bin/env python3
-"""Rend les schémas du README depuis leur source Excalidraw « squelette » (bibliothèque standard seulement).
+"""Renders the README diagrams from their Excalidraw "skeleton" source (standard library only).
 
-  docs/diagrams/<nom>.json        source : éléments Excalidraw (rectangle, ellipse, texte, flèche, `label` intégré)
-  → docs/diagrams/<nom>.excalidraw  scène native, à ouvrir et modifier sur excalidraw.com (Fichier → Ouvrir)
-  → docs/diagrams/<nom>.svg         image du README, au trait « dessiné à la main », déterministe
+  docs/diagrams/<name>.json        source: Excalidraw elements (rectangle, ellipse, text, arrow, built-in `label`)
+  → docs/diagrams/<name>.excalidraw  native scene, to open and edit on excalidraw.com (File → Open)
+  → docs/diagrams/<name>.svg         README image, with a "hand-drawn" stroke, deterministic
 
-Usage : render.py [--check] [--dir <dossier>] [nom…]
-  --check : sort en 1 si un SVG ou une scène n'est pas à jour, ou si un texte déborde.
-  --dir   : dossier des schémas (défaut : docs/diagrams du dépôt courant, sinon celui du cadre). Vendorisé dans un
-            projet sous .harness/scripts/diagrams-render.py (README-STANDARD.md §4).
-Modifier un schéma : éditer le .json (ou le .excalidraw puis reporter), relancer render.py, commiter les trois.
+Usage: render.py [--check] [--dir <directory>] [name...]
+  --check: exits 1 if an SVG or a scene is not up to date, or if a text overflows.
+  --dir:   directory of the diagrams (default: docs/diagrams of the current repository, otherwise the harness's).
+           Vendored into a project as .harness/scripts/diagrams-render.py (README-STANDARD.md §4).
+Changing a diagram: edit the .json (or the .excalidraw, then carry it over), run render.py again, commit all three.
 """
 import argparse
 import hashlib
@@ -23,7 +23,7 @@ from xml.sax.saxutils import escape
 ROOT = pathlib.Path(__file__).resolve().parents[2]
 DIR = ROOT / "docs" / "diagrams"
 FONT = "Segoe UI, Helvetica, Arial, sans-serif"
-CHAR_W = 0.52      # largeur moyenne d'un caractère, en em (estimation pour la police ci-dessus)
+CHAR_W = 0.52      # mean width of a character, in em (estimate for the font above)
 LINE_H = 1.25
 PAD = 24
 
@@ -33,7 +33,7 @@ def _rng(eid):
 
 
 def _jitter_line(r, x1, y1, x2, y2, rough):
-    """Segment légèrement tremblé : deux passes décalées, comme le trait d'Excalidraw (roughness 1)."""
+    """Slightly shaky segment: two offset passes, like the Excalidraw stroke (roughness 1)."""
     out = []
     for _ in range(2):
         j = lambda: r.uniform(-rough, rough)  # noqa: E731
@@ -92,7 +92,7 @@ def _shape(e, r):
 
 
 def _arrowhead(x, y, angle, color, sw):
-    # `angle` pointe de la pointe vers le segment : les deux ailes s'en écartent de ±30°
+    # `angle` points from the tip towards the segment: the two wings spread ±30° from it
     a1, a2 = angle + math.radians(30), angle - math.radians(30)
     size = 14
     return (f'<path d="M{x + size * math.cos(a1):.1f} {y + size * math.sin(a1):.1f} L{x:.1f} {y:.1f} '
@@ -115,7 +115,7 @@ def _arrow(e, r):
         parts.append(_arrowhead(x2, y2, math.atan2(y1 - y2, x1 - x2), color, sw))
     label = e.get("label")
     if label:
-        # Étiquette au milieu du plus long segment, sur fond blanc
+        # Label in the middle of the longest segment, on a white background
         i = max(range(len(pts) - 1), key=lambda k: math.dist(pts[k], pts[k + 1]))
         mx, my = (pts[i][0] + pts[i + 1][0]) / 2, (pts[i][1] + pts[i + 1][1]) / 2
         size = label.get("fontSize", 16)
@@ -127,17 +127,17 @@ def _arrow(e, r):
 
 
 def invalid(source):
-    """Éléments mal formés : à corriger dans la source (message, pas de traceback)."""
+    """Malformed elements: to fix in the source (message, no traceback)."""
     issues = []
     for e in source:
         if e.get("type") != "arrow":
             continue
         pts = e.get("points") or []
         if not isinstance(pts, list) or len(pts) < 2:
-            issues.append(f"{e.get('id')} : une flèche demande au moins deux points")
+            issues.append(f"{e.get('id')}: an arrow needs at least two points")
         elif not all(isinstance(p, (list, tuple)) and len(p) == 2
                      and all(isinstance(c, (int, float)) and not isinstance(c, bool) for c in p) for p in pts):
-            issues.append(f"{e.get('id')} : chaque point de flèche est une paire de nombres [x, y]")
+            issues.append(f"{e.get('id')}: every arrow point is a pair of numbers [x, y]")
     return issues
 
 
@@ -146,7 +146,7 @@ def drawable(source):
 
 
 def overflows(source):
-    """Textes qui débordent de leur forme (estimation) : à corriger dans la source."""
+    """Texts that overflow their shape (estimate): to fix in the source."""
     issues = []
     for e in drawable(source):
         label = e.get("label")
@@ -155,8 +155,8 @@ def overflows(source):
             need_w = text_width(label["text"], size) * (1.25 if e["type"] == "ellipse" else 1) + 20
             need_h = len(label["text"].split("\n")) * size * LINE_H + 12
             if need_w > e["width"] or need_h > e["height"]:
-                issues.append(f"{e['id']} : « {label['text'].splitlines()[0]}… » déborde "
-                              f"({need_w:.0f}×{need_h:.0f} pour {e['width']}×{e['height']})")
+                issues.append(f"{e['id']}: \"{label['text'].splitlines()[0]}…\" overflows "
+                              f"({need_w:.0f}×{need_h:.0f} for {e['width']}×{e['height']})")
     return issues
 
 
@@ -198,7 +198,7 @@ def render_svg(source):
 
 
 def to_scene(source):
-    """Scène Excalidraw native : les étiquettes deviennent des textes liés à leur forme (containerId)."""
+    """Native Excalidraw scene: labels become texts bound to their shape (containerId)."""
     out = []
     base = {"angle": 0, "strokeColor": "#1e1e1e", "backgroundColor": "transparent", "fillStyle": "solid",
             "strokeWidth": 2, "strokeStyle": "solid", "roughness": 1, "opacity": 100, "groupIds": [],
@@ -259,20 +259,20 @@ def main():
     problems = []
     for name in names:
         if not (ddir / f"{name}.json").is_file():
-            problems.append(f"{name} : source {shown(ddir / (name + '.json'))} introuvable")
+            problems.append(f"{name}: source {shown(ddir / (name + '.json'))} not found")
             continue
         source = json.loads((ddir / f"{name}.json").read_text(encoding="utf-8"))
         bad = invalid(source)
         if bad:
-            problems += [f"{name} : {b}" for b in bad]
+            problems += [f"{name}: {b}" for b in bad]
             continue
-        problems += [f"{name} : {o}" for o in overflows(source)]
+        problems += [f"{name}: {o}" for o in overflows(source)]
         outputs = {ddir / f"{name}.svg": render_svg(source), ddir / f"{name}.excalidraw": to_scene(source)}
         for path, content in outputs.items():
             current = path.read_text(encoding="utf-8") if path.exists() else None
             if a.check:
                 if current != content:
-                    problems.append(f"{shown(path)} : pas à jour (relancer le rendu des schémas sans --check)")
+                    problems.append(f"{shown(path)}: not up to date (run the diagram rendering again without --check)")
             elif current != content:
                 path.write_text(content, encoding="utf-8")
                 print(f"✔ {shown(path)}")

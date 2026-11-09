@@ -9,17 +9,17 @@
 {
 "type": "text",
 "id": "t",
-"x": 280,
+"x": 313,
 "y": 20,
-"text": "Tirer parti du harnais dans votre projet",
+"text": "Leverage the harness in your project",
 "fontSize": 32
 },
 {
 "type": "text",
 "id": "st",
-"x": 250,
+"x": 349,
 "y": 64,
-"text": "n'importe quel dépôt GitHub, n'importe quel agent de code, en six étapes",
+"text": "any GitHub repository, any coding agent, in six steps",
 "fontSize": 20,
 "strokeColor": "#757575"
 },
@@ -37,7 +37,7 @@
 "fillStyle": "solid",
 "strokeColor": "#4a9eed",
 "label": {
-"text": "1. Récupérer\ngit clone --branch vX.Y.Z\nagentic-harness",
+"text": "1. Fetch\ngit clone --branch vX.Y.Z\nagentic-harness",
 "fontSize": 20
 }
 },
@@ -55,7 +55,7 @@
 "fillStyle": "solid",
 "strokeColor": "#4a9eed",
 "label": {
-"text": "2. Synchroniser\nharness-sync.sh --dry-run\npuis sans --dry-run",
+"text": "2. Sync\nharness-sync.sh --dry-run\nthen without --dry-run",
 "fontSize": 20
 }
 },
@@ -92,7 +92,7 @@
 "fillStyle": "solid",
 "strokeColor": "#f59e0b",
 "label": {
-"text": "3. Régler\n.harness/config.json :\nbranches, langue, conformité",
+"text": "3. Configure\n.harness/config.json:\nbranches, language, compliance",
 "fontSize": 20
 }
 },
@@ -129,7 +129,7 @@
 "fillStyle": "solid",
 "strokeColor": "#22c55e",
 "label": {
-"text": "4. Travailler\n/intent, /lot-start, revues,\n/lot-finish",
+"text": "4. Work\n/intent, /lot-start, reviews,\n/lot-finish",
 "fontSize": 20
 }
 },
@@ -166,7 +166,7 @@
 "fillStyle": "solid",
 "strokeColor": "#ec4899",
 "label": {
-"text": "5. Piloter\ntableau de bord quotidien,\n/status-report",
+"text": "5. Steer\ndaily dashboard,\n/status-report",
 "fontSize": 20
 }
 },
@@ -203,7 +203,7 @@
 "fillStyle": "solid",
 "strokeColor": "#8b5cf6",
 "label": {
-"text": "6. Mettre à jour\nPR de synchro hebdomadaire,\nleçons remontées au cadre",
+"text": "6. Update\nweekly sync PR,\nlessons fed back upstream",
 "fontSize": 20
 }
 },
@@ -246,7 +246,7 @@
 "endArrowhead": "arrow",
 "strokeStyle": "dashed",
 "label": {
-"text": "nouvelle version",
+"text": "new version",
 "fontSize": 16
 }
 },
@@ -265,7 +265,7 @@
 "strokeColor": "#757575",
 "strokeWidth": 1,
 "label": {
-"text": "Votre agent de code\nClaude Code : adaptateur fourni\n(skills, agents, hooks, plugin)\nautres agents : AGENTS.md\n(natif ou à activer selon l'outil)",
+"text": "Your coding agent\nClaude Code: adapter provided\n(skills, agents, hooks, plugin)\nother agents: AGENTS.md\n(native or to enable, per tool)",
 "fontSize": 20
 }
 },
@@ -284,7 +284,7 @@
 "strokeColor": "#757575",
 "strokeWidth": 1,
 "label": {
-"text": "Chaque brique se remplace\nvotre relecteur de conformité, votre bot de revue,\nvos outils de sécurité, vos labels :\nexclure la copie du cadre, poser la vôtre",
+"text": "Every building block can be replaced\nyour compliance reviewer, your review bot,\nyour security tools, your labels:\nexclude the harness copy, bring your own",
 "fontSize": 20
 }
 }

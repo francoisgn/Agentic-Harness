@@ -1,5 +1,5 @@
 {
-  "language": "fr",
+  "language": "en",
   "exclude": [],
   "protected_branches": ["main", "master", "develop", "beta"],
   "integration_branch": "develop",

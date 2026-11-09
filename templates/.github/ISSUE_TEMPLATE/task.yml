@@ -1,32 +1,38 @@
-name: Tâche ou lot
-description: Travail planifié (lot, outillage, docs, CI, release)
+name: Task or lot
+description: Planned work (lot, tooling, docs, CI, release)
+labels: ["status: needs-triage"]
 body:
-  - type: textarea
-    id: resume
+  - type: markdown
     attributes:
-      label: Résumé
-      description: Deux lignes de synthèse lisibles d'un coup d'œil.
+      value: |
+        Set exactly one `type:` label at triage: `type: epic` for a lot (`LOT-NNN` in the title, sub-issues),
+        `type: chore` or `type: docs` for a task.
+  - type: textarea
+    id: summary
+    attributes:
+      label: Summary
+      description: Two summary lines readable at a glance.
     validations:
       required: true
   - type: input
     id: lot
     attributes:
       label: Lot
-      placeholder: "LOT-012 (si c'en est un : spec dans docs/lots/)"
+      placeholder: "LOT-012 (if it is one: spec in docs/lots/)"
   - type: textarea
-    id: perimetre
+    id: scope
     attributes:
-      label: Périmètre et critères d'acceptation
-      description: Ce qui est dedans, ce qui est dehors, comment on saura que c'est fini.
+      label: Scope and acceptance criteria
+      description: What is in, what is out, how we will know it is done.
     validations:
       required: true
   - type: textarea
-    id: erreurs
+    id: errors
     attributes:
-      label: Comportements d'erreur et définition de fini
-      description: "Cas d'échec attendus ; ce qui doit être vrai pour fermer (tests, docs, revue, conformité)."
+      label: Error behaviours and definition of done
+      description: "Expected failure cases; what must be true to close (tests, docs, review, compliance)."
   - type: textarea
-    id: dependances
+    id: dependencies
     attributes:
-      label: Dépend de
-      description: "Issues ou lots préalables (#n), captures, décisions. Vide si rien."
+      label: Depends on
+      description: "Prerequisite issues or lots (#n), captures, decisions. Empty if none."

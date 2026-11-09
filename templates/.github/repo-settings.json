@@ -1,13 +1,13 @@
 {
-  "$comment": "Réglages du dépôt, appliqués au merge par le job `settings` de harness.yml (secret REPO_ADMIN_TOKEN). Fichier du projet : l'adapter, puis modifier par PR, jamais à la main dans Settings. Ajouter les contrôles requis (noms de jobs) une fois la CI stable : CI-BUDGET.md §4.",
+  "$comment": "Repository settings, applied on merge by the `settings` job of harness.yml (secret REPO_ADMIN_TOKEN). Project file: adapt it, then change it by PR, never by hand in Settings. Add the required checks (job names) once the CI is stable: CI-BUDGET.md §4.",
   "repository": {
-    "description": "<une phrase : ce que fait le projet, pour qui>",
+    "description": "<one sentence: what the project does, for whom>",
     "delete_branch_on_merge": true
   },
   "topics": [],
   "rulesets": [
     {
-      "name": "branche par défaut protégée",
+      "name": "protected default branch",
       "target": "branch",
       "enforcement": "active",
       "conditions": { "ref_name": { "include": ["~DEFAULT_BRANCH"], "exclude": [] } },

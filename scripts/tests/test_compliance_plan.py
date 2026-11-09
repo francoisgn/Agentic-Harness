@@ -1,4 +1,4 @@
-"""Tests de scripts/compliance-plan.py : résolution de `compliance` (.harness/config.json) en relecteurs à lancer."""
+"""Tests of scripts/compliance-plan.py: resolving `compliance` (.harness/config.json) into the reviewers to run."""
 import importlib.util
 import json
 import pathlib
@@ -15,19 +15,19 @@ spec.loader.exec_module(cp)
 
 SPEC_OK = """---
 id: dora
-référentiel: Règlement (UE) 2022/2554 (DORA)
-confirme: RSSI
+framework: Regulation (EU) 2022/2554 (DORA)
+confirmed_by: CISO
 ---
 # DORA
 
-## Quand intervenir
+## When to step in
 - incident, ict
 
-## Ce que je vérifie
-1. Journal d'incident — art. 17 (à vérifier)
+## What I check
+1. Incident log: art. 17 (to verify)
 
-## Preuves attendues
-- Registre des incidents
+## Expected evidence
+- Incident register
 
 ## Sources
 - https://eur-lex.europa.eu/eli/reg/2022/2554/oj
@@ -35,11 +35,11 @@ confirme: RSSI
 
 AGENT_OK = """---
 name: acme-pci-qsa
-description: Relecteur PCI interne d'ACME.
+description: ACME's internal PCI reviewer.
 tools: Read, Grep
 model: opus
 ---
-# Relecteur PCI ACME
+# ACME PCI reviewer
 """
 
 
@@ -62,9 +62,14 @@ class PlanTests(unittest.TestCase):
     def test_builtin_by_id(self):
         r = self.plan(["gdpr"])
         self.assertEqual(r["errors"], [])
-        self.assertEqual(r["reviewers"], [{"id": "gdpr", "mode": "intégré", "agent": "compliance-gdpr",
-                                           "file": ".claude/agents/compliance-gdpr.md", "scope": "à évaluer",
-                                           "reason": "périmètre jugé par l'agent (section « Quand intervenir »)"}])
+        self.assertEqual(r["reviewers"], [{"id": "gdpr", "mode": "built-in", "agent": "compliance-gdpr",
+                                           "file": ".claude/agents/compliance-gdpr.md", "scope": "to assess",
+                                           "reason": 'scope judged by the agent (section "When to step in")'}])
+
+    def test_confirmed_by_is_passed_through(self):
+        r = self.plan([{"id": "gdpr", "confirmed_by": "DPO"}, "pci"])
+        self.assertEqual(r["reviewers"][0]["confirmed_by"], "DPO")
+        self.assertNotIn("confirmed_by", r["reviewers"][1])
 
     def test_unknown_builtin_is_an_error(self):
         self.assertIn("soc2", " ".join(self.plan(["soc2"])["errors"]))
@@ -74,11 +79,11 @@ class PlanTests(unittest.TestCase):
         path.write_text(AGENT_OK)
         r = self.plan([{"id": "pci", "agent": ".claude/agents/acme-pci-qsa.md"}])
         self.assertEqual(r["errors"], [])
-        self.assertEqual((r["reviewers"][0]["mode"], r["reviewers"][0]["agent"]), ("agent du projet", "acme-pci-qsa"))
+        self.assertEqual((r["reviewers"][0]["mode"], r["reviewers"][0]["agent"]), ("project agent", "acme-pci-qsa"))
 
     def test_company_agent_missing_or_without_name(self):
         self.assertTrue(self.plan([{"id": "pci", "agent": "absent.md"}])["errors"])
-        (self.root / "x.md").write_text("# sans frontmatter\n")
+        (self.root / "x.md").write_text("# no frontmatter\n")
         self.assertTrue(self.plan([{"id": "pci", "agent": "x.md"}])["errors"])
 
     def test_spec_runs_generic_reviewer(self):
@@ -90,7 +95,7 @@ class PlanTests(unittest.TestCase):
                          ("spec", "compliance-reviewer", "docs/compliance/dora.md"))
 
     def test_spec_missing_sections_is_an_error(self):
-        (self.root / "dora.md").write_text(SPEC_OK.replace("## Sources", "## Liens"))
+        (self.root / "dora.md").write_text(SPEC_OK.replace("## Sources", "## Links"))
         self.assertIn("Sources", " ".join(self.plan([{"id": "dora", "spec": "dora.md"}])["errors"]))
 
     def test_agent_and_spec_together_is_an_error(self):
@@ -100,25 +105,25 @@ class PlanTests(unittest.TestCase):
         self.assertEqual(self.plan([{"id": "gdpr", "enabled": False}])["reviewers"], [])
 
     def test_paths_and_keywords_decide_scope(self):
-        entry = {"id": "gdpr", "paths": ["src/compte/**"], "keywords": ["cookie"]}
-        self.assertEqual(self.plan([entry], files=["src/compte/session.swift"])["reviewers"][0]["scope"], "dans le périmètre")
+        entry = {"id": "gdpr", "paths": ["src/account/**"], "keywords": ["cookie"]}
+        self.assertEqual(self.plan([entry], files=["src/account/session.swift"])["reviewers"][0]["scope"], "in scope")
         self.assertEqual(self.plan([entry], files=["README.md"], diff="+ let cookie = x")["reviewers"][0]["scope"],
-                         "dans le périmètre")
-        r = self.plan([entry], files=["README.md"], diff="+ texte")
-        self.assertEqual(r["reviewers"][0]["scope"], "hors périmètre")
+                         "in scope")
+        r = self.plan([entry], files=["README.md"], diff="+ text")
+        self.assertEqual(r["reviewers"][0]["scope"], "out of scope")
 
     def test_keywords_are_whole_words_and_ignore_file_headers(self):
         entry = {"id": "gdpr", "keywords": ["ict"]}
-        self.assertEqual(self.plan([entry], diff="+x = dict()")["reviewers"][0]["scope"], "hors périmètre")
-        self.assertEqual(self.plan([entry], diff="+++ b/ict/a.py\n+pass")["reviewers"][0]["scope"], "hors périmètre")
-        self.assertEqual(self.plan([entry], diff="+# risque ICT majeur")["reviewers"][0]["scope"], "dans le périmètre")
+        self.assertEqual(self.plan([entry], diff="+x = dict()")["reviewers"][0]["scope"], "out of scope")
+        self.assertEqual(self.plan([entry], diff="+++ b/ict/a.py\n+pass")["reviewers"][0]["scope"], "out of scope")
+        self.assertEqual(self.plan([entry], diff="+# major ICT risk")["reviewers"][0]["scope"], "in scope")
 
     def test_globs_star_stays_in_one_directory_and_double_star_matches_root(self):
         self.assertTrue(cp.glob_match("src/a.py", "src/*.py"))
         self.assertFalse(cp.glob_match("src/x/a.py", "src/*.py"))
         self.assertTrue(cp.glob_match("a.swift", "**/*.swift"))
         self.assertTrue(cp.glob_match("x/y/a.swift", "**/*.swift"))
-        self.assertTrue(cp.glob_match("src/compte/x/y.swift", "src/compte/**"))
+        self.assertTrue(cp.glob_match("src/account/x/y.swift", "src/account/**"))
 
     def test_malformed_config_gives_errors_not_tracebacks(self):
         self.assertTrue(cp.plan({"compliance": "gdpr"}, self.root)["errors"])
@@ -129,19 +134,19 @@ class PlanTests(unittest.TestCase):
             self.assertTrue(cp.plan({"compliance": [entry]}, self.root)["errors"], entry)
 
     def test_paths_outside_the_repository_are_refused(self):
-        outside = pathlib.Path(self.tmp.name).parent / "hors-depot.md"
+        outside = pathlib.Path(self.tmp.name).parent / "outside-repo.md"
         outside.write_text(AGENT_OK)
         try:
-            for path in (str(outside), "../hors-depot.md"):
+            for path in (str(outside), "../outside-repo.md"):
                 errors = self.plan([{"id": "pci", "agent": path}])["errors"]
-                self.assertTrue(any("hors du dépôt" in e for e in errors), (path, errors))
+                self.assertTrue(any("outside the repository" in e for e in errors), (path, errors))
         finally:
             outside.unlink()
 
     def test_blank_or_path_like_id_is_an_error(self):
         for cid in ("   ", "../../x", "a/b", "a\\b"):
             self.assertTrue(self.plan([{"id": cid}])["errors"], cid)
-        self.assertTrue(self.plan([" gdpr", "gdpr "])["errors"])  # doublon une fois les espaces retirés
+        self.assertTrue(self.plan([" gdpr", "gdpr "])["errors"])  # duplicate once the spaces are stripped
         self.assertEqual(self.plan([" gdpr "])["reviewers"][0]["agent"], "compliance-gdpr")
 
     def test_duplicate_id_is_an_error(self):
@@ -155,7 +160,7 @@ class PlanTests(unittest.TestCase):
                             capture_output=True, text=True)
         self.assertEqual(ok.returncode, 0, ok.stderr)
         self.assertEqual(json.loads(ok.stdout)["reviewers"][0]["agent"], "compliance-gdpr")
-        cfg.write_text(json.dumps({"compliance": ["inconnu"]}))
+        cfg.write_text(json.dumps({"compliance": ["unknown"]}))
         ko = subprocess.run([sys.executable, str(SCRIPT), "--root", str(self.root)], capture_output=True, text=True)
         self.assertEqual(ko.returncode, 1)
 

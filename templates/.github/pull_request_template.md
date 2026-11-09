@@ -1,27 +1,27 @@
-<!-- Titre dans le style des PR précédentes. PR ouverte en brouillon ; « Ready for review » quand tout est fini et relu
-     (cadre : CONVENTIONS.md §PR, CI-BUDGET.md). -->
+<!-- Title in the style of the previous PRs. PR opened as a draft; "Ready for review" when everything is done and
+     reviewed (harness: CONVENTIONS.md §PR, CI-BUDGET.md). -->
 
 ## Issues
-<!-- Une ligne par issue fermée. Travail partiel : Refs #n et ce qui reste. Petit correctif sans issue : Direct-PR: <raison>. -->
+<!-- One line per closed issue. Partial work: Refs #n and what is left. Small fix without an issue: Direct-PR: <reason>. -->
 Closes #
 
-## Résumé par issue
-- #… :
+## Summary per issue
+- #…:
 
-## Vérifié
-<!-- Tests ajoutés (nom, ce qu'ils vérifient, montrés en échec sans le changement), commandes lancées, build Mac. -->
+## Verified
+<!-- Tests added (name, what they check, shown failing without the change), commands run, Mac build. -->
 
-## Revues
-<!-- Chaque verdict (adversarial, conformité) est posté en commentaire, le premier négatif compris
-     (REVIEW-ROUNDS.md §Traçabilité) ; ici, le résumé : relecteur, verdict, tête. -->
+## Reviews
+<!-- Each verdict (adversarial, compliance) is posted as a comment, the first negative one included
+     (REVIEW-ROUNDS.md §Traceability); here, the summary: reviewer, verdict, head. -->
 -
 
-## Points de vigilance / non testé
-<!-- Ce qui n'a pas pu être compilé ou vérifié ici (ex. app non compilable dans le conteneur Linux), à valider sur l'appareil. -->
+## Watch points / not tested
+<!-- What could not be compiled or verified here (e.g. app not buildable in the Linux container), to validate on the device. -->
 
 ## Changelog
-<!-- Matière des Nouveautés : une ligne par changement visible, en français, côté utilisateur. « Aucun » si rien de visible. -->
+<!-- Material for What's New: one line per visible change, in the project's language, from the user's side. "None" if nothing is visible. -->
 -
 
-<!-- Modèle auteur / relecteur (doivent différer), avec l'identifiant de chaque agent (ORCHESTRATION.md §7) : -->
-Modèle auteur : … (<projet>.<orc>.lot.<cible>) · relecteur : … (<projet>.<orc>.rev.<cible>)
+<!-- Author / reviewer model (must differ), with the identifier of each agent (ORCHESTRATION.md §7): -->
+Author model: … (<project>.<orc>.lot.<target>) · reviewer: … (<project>.<orc>.rev.<target>)

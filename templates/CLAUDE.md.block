@@ -1,8 +1,8 @@
-## Cadre commun : agentic-harness {{HARNESS_VERSION}}
+## Shared harness: agentic-harness {{HARNESS_VERSION}}
 
-Ce bloc est géré par `scripts/harness-sync.sh` du cadre [agentic-harness](https://github.com/francoisgn/agentic-harness) : ne pas le modifier ici (une modification se propose dans le cadre). Le reste de ce fichier appartient au projet et l'emporte sur le cadre en cas de conflit, à signaler dans une issue.
+This block is managed by `scripts/harness-sync.sh` of the [agentic-harness](https://github.com/francoisgn/agentic-harness) harness: do not edit it here (propose changes in the harness). The rest of this file belongs to the project and wins over the harness on any conflict, to be reported in an issue.
 
-@.harness/docs/ESSENTIEL.md
+@.harness/docs/ESSENTIALS.md
 
-À lire selon la tâche (non chargés d'office) : méthode `.harness/docs/METHODOLOGY.md`, conventions `.harness/docs/CONVENTIONS.md`, leçons `.harness/docs/LESSONS.md` (auto-relecture avant chaque PR), revues `.harness/docs/REVIEW-ROUNDS.md`, orchestration et choix du modèle `.harness/docs/ORCHESTRATION.md`, branches et versions `.harness/docs/BRANCHING-RELEASE.md`, budget CI et sécurité `.harness/docs/CI-BUDGET.md`, README du projet `.harness/docs/README-STANDARD.md`, reprise sur Mac `.harness/docs/MAC-HANDOFF.md`.
-Skills : `/lot-start`, `/lot-finish`, `/review-round`, `/feedback-triage`, `/lessons-check`, `/readme-update`, `/harness-update`.
+Read as the task requires (not loaded by default): method `.harness/docs/METHODOLOGY.md`, conventions `.harness/docs/CONVENTIONS.md`, lessons `.harness/docs/LESSONS.md` (self-review before every PR), reviews `.harness/docs/REVIEW-ROUNDS.md`, orchestration and model choice `.harness/docs/ORCHESTRATION.md`, branches and releases `.harness/docs/BRANCHING-RELEASE.md`, CI budget and security `.harness/docs/CI-BUDGET.md`, project README `.harness/docs/README-STANDARD.md`, Mac handoff `.harness/docs/MAC-HANDOFF.md`.
+Skills: `/intent`, `/lot-start`, `/lot-finish`, `/review-round`, `/feedback-triage`, `/lessons-check`, `/readme-update`, `/status-report`, `/compliance-review`, `/lesson-propose`, `/harness-update`.

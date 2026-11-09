@@ -1,16 +1,17 @@
 #!/usr/bin/env python3
-"""Contrôle le README d'un projet contre le standard du cadre (README-STANDARD.md ; bibliothèque standard seulement).
+"""Checks a project's README against the harness standard (README-STANDARD.md; standard library only).
 
-Vérifie, chaque point se désactivant dans `.harness/config.json` › `readme` (`false` pour tout couper) :
-- badges        en-tête (avant le premier `## `) avec au moins une tuile technologique ;
-- image         au moins une image hors badges ; chaque image a un texte alternatif ; chaque image locale existe ;
-- architecture  un schéma d'architecture : une image `.svg` dont la source `.excalidraw` est versionnée à côté
-                (`"architecture": "any"` accepte n'importe quelle image ou un bloc Mermaid) ;
-- progress      le bloc `<!-- harness:begin avancement -->` … `<!-- harness:end avancement -->` contient un tableau,
-                et cite chaque lot de `docs/LOTS.md` s'il existe ;
-- quickstart    une section d'installation ou de démarrage ;
-- contributing  une section « Contribuer » qui pointe vers un `CONTRIBUTING.md` présent.
-Usage : readme-check.py [--root <dépôt>] [--readme README.md]   (sort en 1 au moindre écart, liste tous les écarts)
+Verifies the points below; each one can be switched off in `.harness/config.json` › `readme` (`false` cuts them all):
+- badges        header (before the first `## `) with at least one technology badge;
+- image         at least one image besides badges; every image has an alternative text; every local image exists;
+- architecture  an architecture diagram: a `.svg` image whose `.excalidraw` source is versioned next to it
+                (`"architecture": "any"` accepts any image or a Mermaid block);
+- progress      the block `<!-- harness:begin progress -->` … `<!-- harness:end progress -->` holds a table,
+                and names every lot of `docs/LOTS.md` if that file exists;
+- quickstart    an installation or getting-started section;
+- contributing  a "Contributing" section that points to an existing `CONTRIBUTING.md`.
+Section headings are detected in English first; French headings stay accepted (a consumer project may be in French).
+Usage: readme-check.py [--root <repository>] [--readme README.md]   (exits 1 on any gap, lists every gap)
 """
 import argparse
 import json
@@ -23,8 +24,10 @@ DEFAULTS = {"badges": True, "image": True, "architecture": "excalidraw", "progre
 BADGE_HOSTS = ("img.shields.io", "badgen.net", "badge.fury.io", "/badge.svg", "/badges/")
 IMAGE = re.compile(r"!\[([^\]]*)\]\(\s*<?([^)\s>]+)>?(?:\s+\"[^\"]*\")?\s*\)")
 HTML_IMAGE = re.compile(r"<img\b[^>]*>", re.I)
-BEGIN, END = "<!-- harness:begin avancement -->", "<!-- harness:end avancement -->"
-QUICKSTART = re.compile(r"^#{2,3}\s.*(install|démarr|demarr|quick ?start|getting started|utilis|usage|tirer parti)", re.I | re.M)
+BEGIN, END = "<!-- harness:begin progress -->", "<!-- harness:end progress -->"
+# English first, then the French stems (démarrage, utilisation, contribuer) of consumer projects written in French.
+QUICKSTART = re.compile(r"^#{2,3}\s.*(install|quick ?start|getting started|usage|using|démarr|demarr|utilis)",
+                        re.I | re.M)
 CONTRIBUTING = re.compile(r"^#{2,3}\s.*contribu", re.I | re.M)
 LOT_ID = re.compile(r"\bLOT-[A-Za-z0-9]+\b")
 TABLE_ROW = re.compile(r"^\|.*\|\s*$", re.M)
@@ -32,21 +35,21 @@ TABLE_RULE = re.compile(r"^\|?\s*:?-{3,}")
 
 
 def settings(root):
-    """Réglages effectifs : défauts, puis `.harness/config.json` › `readme` ; None si le contrôle est coupé."""
+    """Effective settings: defaults, then `.harness/config.json` › `readme`; None if the check is switched off."""
     path = root / ".harness" / "config.json"
     custom = json.loads(path.read_text(encoding="utf-8")).get("readme", {}) if path.is_file() else {}
     if custom is False:
         return None
     if not isinstance(custom, dict):
-        raise ValueError(".harness/config.json : `readme` doit être un objet ou false")
+        raise ValueError(".harness/config.json: `readme` must be an object or false")
     unknown = sorted(set(custom) - set(DEFAULTS))
     if unknown:
-        raise ValueError(f".harness/config.json : clé(s) `readme` inconnue(s) {unknown} (connues : {sorted(DEFAULTS)})")
+        raise ValueError(f".harness/config.json: unknown `readme` key(s) {unknown} (known: {sorted(DEFAULTS)})")
     return dict(DEFAULTS, **custom)
 
 
 def images(text):
-    """(alt, cible) de chaque image, Markdown ou HTML, hors blocs de code."""
+    """(alt, target) of every image, Markdown or HTML, outside code blocks."""
     text = re.sub(r"```.*?```", "", text, flags=re.S)
     found = [(alt.strip(), target) for alt, target in IMAGE.findall(text)]
     for tag in HTML_IMAGE.findall(text):
@@ -66,7 +69,7 @@ def is_remote(target):
 
 
 def local_path(root, readme, target):
-    """Chemin d'une image locale, ou None si elle sort du dépôt."""
+    """Path of a local image, or None if it leaves the repository."""
     clean = target.split("#")[0].split("?")[0]
     base = root if clean.startswith("/") else readme.parent
     path = (base / clean.lstrip("/")).resolve()
@@ -84,29 +87,29 @@ def check(root, readme_name="README.md"):
         return []
     readme = root / readme_name
     if not readme.is_file():
-        return [f"{readme_name} : absent (gabarit : templates/README.md.template du cadre)"]
+        return [f"{readme_name}: missing (template: templates/README.md.template of the harness)"]
     text = readme.read_text(encoding="utf-8")
     errors = []
     if not re.search(r"^#\s+\S", text, re.M) and not re.search(r"<h1\b", text, re.I):
-        errors.append(f"{readme_name} : pas de titre de niveau 1")
+        errors.append(f"{readme_name}: no level-1 title")
     pics = images(text)
     first_section = re.search(r"^##\s", text, re.M)
     header = text[:first_section.start()] if first_section else text
 
     if conf["badges"] and not any(is_badge(t) for _, t in images(header)):
-        errors.append(f"{readme_name} : en-tête sans tuile technologique (badge avant le premier « ## »)")
+        errors.append(f"{readme_name}: header without a technology badge (badge before the first \"##\")")
 
     content = [(alt, t) for alt, t in pics if not is_badge(t)]
     if conf["image"]:
         if not content:
-            errors.append(f"{readme_name} : aucune image (capture, schéma) hors badges")
-        errors += [f"{readme_name} : image sans texte alternatif ({t})" for alt, t in pics if not alt]
+            errors.append(f"{readme_name}: no image (screenshot, diagram) besides badges")
+        errors += [f"{readme_name}: image without alternative text ({t})" for alt, t in pics if not alt]
         for _, target in content:
             if is_remote(target):
                 continue
             path = local_path(root, readme, target)
             if path is None or not path.is_file():
-                errors.append(f"{readme_name} : image introuvable ({target})")
+                errors.append(f"{readme_name}: image not found ({target})")
 
     if conf["architecture"]:
         sourced = []
@@ -116,39 +119,39 @@ def check(root, readme_name="README.md"):
                 sourced.append(target)
         if conf["architecture"] == "any":
             if not content and "```mermaid" not in text:
-                errors.append(f"{readme_name} : aucun schéma d'architecture (image ou bloc Mermaid)")
+                errors.append(f"{readme_name}: no architecture diagram (image or Mermaid block)")
         elif not sourced:
-            errors.append(f"{readme_name} : aucun schéma d'architecture avec sa source Excalidraw "
-                          "(image .svg et fichier .excalidraw du même nom, ex. docs/diagrams/architecture.*)")
+            errors.append(f"{readme_name}: no architecture diagram with its Excalidraw source "
+                          "(.svg image and .excalidraw file of the same name, e.g. docs/diagrams/architecture.*)")
 
     if conf["progress"]:
         block = progress_block(text)
         if block is None:
-            errors.append(f"{readme_name} : bloc d'avancement absent ({BEGIN} … {END})")
+            errors.append(f"{readme_name}: progress block missing ({BEGIN} … {END})")
         else:
             rows = [r for r in TABLE_ROW.findall(block) if not TABLE_RULE.match(r.strip().strip("|").strip())]
-            if len(rows) < 2:   # en-tête + au moins une ligne
-                errors.append(f"{readme_name} : bloc d'avancement sans tableau (une ligne par lot ou jalon)")
+            if len(rows) < 2:   # header + at least one row
+                errors.append(f"{readme_name}: progress block without a table (one row per lot or milestone)")
             plan = root / "docs" / "LOTS.md"
             if plan.is_file():
                 missing = sorted(set(LOT_ID.findall(plan.read_text(encoding="utf-8"))) - set(LOT_ID.findall(block)))
                 if missing:
-                    errors.append(f"{readme_name} : lot(s) de docs/LOTS.md absents du bloc d'avancement : "
+                    errors.append(f"{readme_name}: lot(s) of docs/LOTS.md missing from the progress block: "
                                   + ", ".join(missing))
 
     if conf["quickstart"] and not QUICKSTART.search(text):
-        errors.append(f"{readme_name} : pas de section d'installation ou de démarrage")
+        errors.append(f"{readme_name}: no installation or getting-started section")
 
     if conf["contributing"]:
         section = CONTRIBUTING.search(text)
         if not section:
-            errors.append(f"{readme_name} : pas de section « Contribuer »")
-        guides = [p for p in (root / "CONTRIBUTING.md", root / ".github" / "CONTRIBUTING.md", root / "docs" / "CONTRIBUTING.md")
-                  if p.is_file()]
+            errors.append(f"{readme_name}: no \"Contributing\" section")
+        guides = [p for p in (root / "CONTRIBUTING.md", root / ".github" / "CONTRIBUTING.md",
+                              root / "docs" / "CONTRIBUTING.md") if p.is_file()]
         if not guides:
-            errors.append("CONTRIBUTING.md : absent (gabarit : templates/CONTRIBUTING.md.template du cadre)")
+            errors.append("CONTRIBUTING.md: missing (template: templates/CONTRIBUTING.md.template of the harness)")
         elif section and "CONTRIBUTING.md" not in text:
-            errors.append(f"{readme_name} : la section « Contribuer » ne pointe pas vers CONTRIBUTING.md")
+            errors.append(f"{readme_name}: the \"Contributing\" section does not point to CONTRIBUTING.md")
     return errors
 
 
@@ -163,7 +166,7 @@ def main():
         errors = [str(exc)]
     for e in errors:
         print(f"✘ {e}")
-    print(f"{'🔴' if errors else '🟢'} README : {len(errors)} écart(s)")
+    print(f"{'🔴' if errors else '🟢'} README: {len(errors)} gap(s)")
     return 1 if errors else 0
 
 

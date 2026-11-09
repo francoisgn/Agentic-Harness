@@ -1,6 +1,6 @@
-# Les failles de sécurité ne passent jamais par une issue publique (SECURITY.md, signalement privé).
+# Security flaws never go through a public issue (SECURITY.md, private reporting).
 blank_issues_enabled: true
 contact_links:
-  - name: Signaler une faille de sécurité (privé)
-    url: https://docs.github.com/fr/code-security/security-advisories/guidance-on-reporting-and-writing-information-about-vulnerabilities/privately-reporting-a-security-vulnerability
-    about: Ne jamais publier une faille dans une issue.
+  - name: Report a security flaw (private)
+    url: https://docs.github.com/en/code-security/security-advisories/guidance-on-reporting-and-writing-information-about-vulnerabilities/privately-reporting-a-security-vulnerability
+    about: Never publish a flaw in an issue.

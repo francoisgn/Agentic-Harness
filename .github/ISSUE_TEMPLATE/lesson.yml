@@ -1,36 +1,36 @@
-name: Leçon
-description: Proposer une leçon au tableau LESSONS.md du cadre (erreur à ne pas refaire, valable au-delà d'un projet)
-title: "Leçon : "
-labels: [leçon, docs]
+name: Lesson
+description: Propose a lesson for the harness LESSONS.md table (a mistake not to repeat, valid beyond one project)
+title: "Lesson: "
+labels: [lesson, "type: docs", "status: needs-triage"]
 body:
   - type: markdown
     attributes:
       value: |
-        Skill `/lesson-propose`. Vérifier d'abord qu'elle n'est pas déjà dans `docs/LESSONS.md` (sinon : c'est
-        l'auto-relecture qui l'a manquée, le dire ici). Le numéro `L..` est attribué par la PR qui l'intègre.
+        Skill `/lesson-propose`. First check that it is not already in `docs/LESSONS.md` (if it is, the self-review
+        missed it: say so here). The `L..` number is assigned by the PR that integrates it.
   - type: dropdown
-    id: portee
+    id: scope
     attributes:
-      label: Portée
-      options: [général, docs, ci, linux-cloud, swift, ios, sécurité, conformité]
+      label: Scope
+      options: [general, docs, ci, linux-cloud, swift, ios, security, compliance]
     validations:
       required: true
   - type: textarea
-    id: lecon
+    id: lesson
     attributes:
-      label: Leçon
-      description: Une phrase impérative et vérifiable en revue (ce qu'il faut faire), pas l'anecdote.
+      label: Lesson
+      description: One imperative sentence that a review can verify (what to do), not the anecdote.
     validations:
       required: true
   - type: textarea
     id: source
     attributes:
       label: Source
-      description: "Projet, PR, commentaire ou commit, à un SHA nommé. Rien de deviné."
+      description: "Project, PR, comment or commit, at a named SHA. Nothing guessed."
     validations:
       required: true
   - type: textarea
-    id: contre-exemple
+    id: counter-example
     attributes:
-      label: Contre-exemple et vérification
-      description: Ce qui s'est passé, et comment un relecteur (ou un test, un linter) vérifie la leçon.
+      label: Counter-example and verification
+      description: What happened, and how a reviewer (or a test, a linter) verifies the lesson.

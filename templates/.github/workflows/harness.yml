@@ -1,21 +1,21 @@
-name: Cadre
+name: Harness
 
-# Appelle les workflows réutilisables du cadre agentic-harness (docs/ADOPTION.md). Fichier du projet : l'adapter
-# librement ; harness-sync.sh ne réécrit que les références `@…` ci-dessous (mode refbump), épinglées au SHA du
-# commit du cadre avec le tag en commentaire (`@<sha> # vX.Y.Z`), comme toute action.
-# Budget : jobs Linux de quelques secondes (1 min facturée chacun) ; rien de macOS.
-# Les événements `issues` ne déclenchent que la copie de ce fichier présente sur la branche par défaut du dépôt.
+# Calls the reusable workflows of the agentic-harness harness (docs/ADOPTION.md). Project file: adapt it
+# freely; harness-sync.sh only rewrites the `@…` references below (refbump mode), pinned to the SHA of the
+# harness commit with the tag as a comment (`@<sha> # vX.Y.Z`), like any action.
+# Budget: Linux jobs of a few seconds (1 min billed each); nothing on macOS.
+# `issues` events only trigger the copy of this file present on the repository's default branch.
 on:
   push:
-    branches: [develop]   # ← branche par défaut du projet
+    branches: [develop]   # ← the project's default branch
     paths: [.harness/labels.json, .github/labels.local.json, .github/repo-settings.json]
   issues:
     types: [opened, edited, labeled, unlabeled, reopened, closed]
   schedule:
-    # Ces deux chaînes sont reprises à l'identique par les conditions des jobs `flow` et `settings`/`security`
-    # (github.event.schedule) : en changer une ici sans la changer là désactive le job en silence.
-    - cron: "17 5 * * *"   # tableau de bord quotidien
-    - cron: "47 5 * * 1"   # hebdomadaire : dérive des réglages, sécurité (CVE sans commit) si le job security est activé
+    # These two strings are repeated verbatim in the conditions of the `flow` and `settings`/`security` jobs
+    # (github.event.schedule): changing one here without changing it there silently disables the job.
+    - cron: "17 5 * * *"   # daily dashboard
+    - cron: "47 5 * * 1"   # weekly: settings drift, security (CVE without a commit) if the security job is enabled
   pull_request:
     types: [opened, edited, reopened, synchronize, ready_for_review]
   workflow_dispatch:
@@ -30,7 +30,7 @@ jobs:
       issues: write
     uses: francoisgn/agentic-harness/.github/workflows/labels-sync.yml@v0.2.0
     with:
-      apply-aliases: false   # true pour renommer d'anciens labels (ex. `priority: high` → `P1 🔴`)
+      apply-aliases: false   # true to rename old labels (e.g. `P1 🔴` → `priority: high`), once the project's workflows and docs use the new names
 
   issue:
     if: github.event_name == 'issues'
@@ -47,12 +47,12 @@ jobs:
       pull-requests: read
     uses: francoisgn/agentic-harness/.github/workflows/pr-hygiene.yml@v0.2.0
     with:
-      # Modèle A (develop → beta → master). Modèle B (une branche d'intégration) : laisser vide.
+      # Model A (develop → beta → master). Model B (one integration branch): leave empty.
       flow: "beta:develop beta:hotfix/* master:beta master:hotfix/*"
       require-changelog: true
 
-  # Réglages du dépôt « as code » (.github/repo-settings.json) : appliqués au push, dérive contrôlée le lundi.
-  # Secret REPO_ADMIN_TOKEN (fine-grained, ce dépôt seul, « Administration: write ») ; absent → avertissement seulement.
+  # Repository settings "as code" (.github/repo-settings.json): applied on push, drift checked on Monday.
+  # Secret REPO_ADMIN_TOKEN (fine-grained, this repository only, "Administration: write"); missing → warning only.
   settings:
     if: github.event_name == 'push' || github.event_name == 'workflow_dispatch' || (github.event_name == 'schedule' && github.event.schedule == '47 5 * * 1')
     permissions:
@@ -63,7 +63,7 @@ jobs:
     secrets:
       REPO_ADMIN_TOKEN: ${{ secrets.REPO_ADMIN_TOKEN }}
 
-  # Tableau de bord du flux (FINOPS.md §4) : une issue « Tableau de bord du projet » mise à jour chaque jour.
+  # Flow dashboard (FINOPS.md §4): a "Project dashboard" issue updated every day.
   flow:
     if: (github.event_name == 'schedule' && github.event.schedule == '17 5 * * *') || github.event_name == 'workflow_dispatch'
     permissions:
@@ -73,14 +73,14 @@ jobs:
       actions: read
     uses: francoisgn/agentic-harness/.github/workflows/flow-report.yml@v0.2.0
 
-  # Socle docs + sécurité, si le projet ne l'a pas déjà (sinon supprimer ces jobs : on ne paie pas deux fois).
+  # Docs + security baseline, if the project does not have it already (otherwise delete these jobs: do not pay twice).
   # docs:
   #   if: github.event_name == 'pull_request' && github.event.action != 'edited'
   #   permissions:
   #     contents: read
   #   uses: francoisgn/agentic-harness/.github/workflows/docs-security.yml@v0.2.0
   #   with:
-  #     gitleaks: false   # déjà dans le job security
+  #     gitleaks: false   # already in the security job
   # security:   # SAST (Semgrep) + SCA (Trivy) + secrets (gitleaks), CI-BUDGET.md §3
   #   if: (github.event_name == 'pull_request' && github.event.action != 'edited') || (github.event_name == 'schedule' && github.event.schedule == '47 5 * * 1')
   #   permissions:
@@ -89,7 +89,7 @@ jobs:
   #   with:
   #     semgrep-configs: "p/default p/secrets p/github-actions"   # + p/swift, p/python…
 
-  # Service de revue IA (REVIEW-SERVICE.md) : secret ANTHROPIC_API_KEY ou CLAUDE_CODE_OAUTH_TOKEN ; jamais requis.
+  # AI review service (REVIEW-SERVICE.md): secret ANTHROPIC_API_KEY or CLAUDE_CODE_OAUTH_TOKEN; never required.
   # review:
   #   if: github.event_name == 'pull_request' && github.event.action != 'edited'
   #   permissions:

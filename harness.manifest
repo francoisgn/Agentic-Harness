@@ -1,48 +1,48 @@
-# Fichiers que scripts/harness-sync.sh vendorise dans un dépôt consommateur.
-# Une ligne par entrée : MODE SOURCE DESTINATION [ID [GABARIT]]   (SOURCE relative au cadre, DESTINATION au consommateur)
+# Files that scripts/harness-sync.sh vendors into a consumer repository.
+# One line per entry: MODE SOURCE DESTINATION [ID [TEMPLATE]]   (SOURCE relative to the harness, DESTINATION to the consumer)
 #
-#   copy       fichier possédé par le cadre : remplacé à chaque synchro ; refusé s'il a été modifié localement
-#              (empreinte différente de celle du verrou .harness/lock), sauf --force. Supprimé si l'entrée disparaît
-#              du manifeste et que le fichier n'a pas été modifié.
-#   tree       comme copy, pour chaque fichier d'un dossier (récursif).
-#   block      bloc géré entre <!-- harness:begin ID --> et <!-- harness:end ID --> ; le reste du fichier n'est jamais
-#              touché. Fichier absent : créé depuis GABARIT (qui contient les marqueurs). Marqueurs absents : bloc ajouté
-#              en fin de fichier. {{HARNESS_VERSION}} est remplacé par la version.
-#   seed       créé seulement s'il n'existe pas (fichier du projet ensuite, jamais réécrit).
-#   jsonmerge  fusion JSON : ajoute les clés et éléments de liste absents, ne modifie jamais une valeur existante.
-#   refbump    réécrit les références `<dépôt du cadre>/.github/workflows/<fichier>@<ref>` vers le commit synchronisé
-#              (`@<sha> # vX.Y.Z`, épinglage exigé par zizmor ; `@vX.Y.Z` si le commit est inconnu ou modifié).
-# Les destinations sous .github/workflows/ sont sautées avec --skip-workflows (le GITHUB_TOKEN ne peut pas les pousser).
+#   copy       file owned by the harness: replaced at every sync; refused if it was modified locally
+#              (digest different from the one in the .harness/lock lock), unless --force. Deleted if the entry
+#              disappears from the manifest and the file was not modified.
+#   tree       like copy, for every file of a directory (recursive).
+#   block      managed block between <!-- harness:begin ID --> and <!-- harness:end ID -->; the rest of the file is
+#              never touched. Missing file: created from TEMPLATE (which contains the markers). Missing markers: block
+#              appended at the end of the file. {{HARNESS_VERSION}} is replaced by the version.
+#   seed       created only if it does not exist (a project file from then on, never rewritten).
+#   jsonmerge  JSON merge: adds the missing keys and list items, never changes an existing value.
+#   refbump    rewrites the references `<harness repository>/.github/workflows/<file>@<ref>` to the synced commit
+#              (`@<sha> # vX.Y.Z`, pinning required by zizmor; `@vX.Y.Z` if the commit is unknown or modified).
+# Destinations under .github/workflows/ are skipped with --skip-workflows (the GITHUB_TOKEN cannot push them).
 
-# Règles et méthode (lues par l'agent, importées par CLAUDE.md pour ESSENTIEL.md)
+# Rules and method (read by the agent, imported by CLAUDE.md for ESSENTIALS.md)
 tree      docs                                        .harness/docs
 copy      templates/.github/labels.json               .harness/labels.json
 
-# Skills : copiés dans le dépôt pour fonctionner aussi en session cloud (qui ne charge pas les plugins du dépôt)
+# Skills: copied into the repository so they also work in a cloud session (which does not load the repository's plugins)
 tree      plugins/harness/skills                      .claude/skills
 
-# Sous-agents (relecteur adversarial, stewards, conformité) : .claude/agents/ fonctionne en cloud comme en local
+# Subagents (adversarial reviewer, stewards, compliance): .claude/agents/ works in the cloud as it does locally
 tree      plugins/harness/agents                      .claude/agents
 
-# Script du tableau de bord du flux (appelé par flow-report.yml et /status-report)
+# Flow dashboard script (called by flow-report.yml and /status-report)
 copy      scripts/flow-metrics.py                     .harness/scripts/flow-metrics.py
 copy      scripts/compliance-plan.py                  .harness/scripts/compliance-plan.py
 copy      scripts/repo-settings.py                    .harness/scripts/repo-settings.py
 
-# README du projet : contrôle du standard et rendu des schémas Excalidraw (README-STANDARD.md)
+# Project README: standard check and rendering of the Excalidraw diagrams (README-STANDARD.md)
 copy      scripts/readme-check.py                     .harness/scripts/readme-check.py
 copy      scripts/diagrams/render.py                  .harness/scripts/diagrams-render.py
 
-# Hooks vendorisés (garde-fou git, rappel de session) et leur déclaration
+# Vendored hooks (git guardrail, session reminder) and their declaration
 copy      plugins/harness/scripts/guard-git.py        .harness/hooks/guard-git.py
 copy      plugins/harness/scripts/session-start.sh    .harness/hooks/session-start.sh
 jsonmerge templates/.claude/settings.harness.json     .claude/settings.json
 
-# Instructions d'agent : seul le bloc « cadre » appartient au cadre
-block     templates/CLAUDE.md.block                   CLAUDE.md   cadre   templates/CLAUDE.md.template
-block     templates/AGENTS.md.block                   AGENTS.md   cadre   templates/AGENTS.md.template
+# Agent instructions: only the "harness" block belongs to the harness
+block     templates/CLAUDE.md.block                   CLAUDE.md   harness templates/CLAUDE.md.template
+block     templates/AGENTS.md.block                   AGENTS.md   harness templates/AGENTS.md.template
 
-# Gabarits du projet (créés une fois, puis à lui)
+# Project templates (created once, then the project's own)
 seed      templates/.harness/config.json              .harness/config.json
 seed      templates/.github/labels.local.json         .github/labels.local.json
 seed      templates/.github/repo-settings.json        .github/repo-settings.json
@@ -51,11 +51,11 @@ seed      templates/.github/ISSUE_TEMPLATE/config.yml   .github/ISSUE_TEMPLATE/c
 seed      templates/.github/ISSUE_TEMPLATE/feedback.yml .github/ISSUE_TEMPLATE/feedback.yml
 seed      templates/.github/ISSUE_TEMPLATE/bug.yml      .github/ISSUE_TEMPLATE/bug.yml
 seed      templates/.github/ISSUE_TEMPLATE/feature.yml  .github/ISSUE_TEMPLATE/feature.yml
-seed      templates/.github/ISSUE_TEMPLATE/tache.yml    .github/ISSUE_TEMPLATE/tache.yml
+seed      templates/.github/ISSUE_TEMPLATE/task.yml     .github/ISSUE_TEMPLATE/task.yml
 seed      templates/docs/lots/TEMPLATE.md             docs/lots/TEMPLATE.md
 seed      templates/docs/compliance/TEMPLATE.md       docs/compliance/TEMPLATE.md
 seed      templates/.markdownlint-cli2.jsonc          .markdownlint-cli2.jsonc
-# README au standard du cadre : jamais réécrit s'il existe déjà (readme-check.py liste alors les écarts)
+# README at the harness standard: never rewritten if it already exists (readme-check.py then lists the gaps)
 seed      templates/README.md.template                README.md
 seed      templates/CONTRIBUTING.md.template          CONTRIBUTING.md
 seed      templates/docs/diagrams/architecture.json        docs/diagrams/architecture.json

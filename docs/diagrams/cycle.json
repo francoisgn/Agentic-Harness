@@ -9,9 +9,9 @@
 {
 "type": "text",
 "id": "t",
-"x": 300,
+"x": 355,
 "y": 20,
-"text": "Le cycle d'un changement, de l'intention à la leçon",
+"text": "The cycle of a change, from intent to lesson",
 "fontSize": 30
 },
 {
@@ -28,7 +28,7 @@
 "fillStyle": "solid",
 "strokeColor": "#f59e0b",
 "label": {
-"text": "1. Intention\nuser story, erreurs,\ndéfinition de fini",
+"text": "1. Intent\nuser story, errors,\ndefinition of done",
 "fontSize": 20
 }
 },
@@ -46,7 +46,7 @@
 "fillStyle": "solid",
 "strokeColor": "#06b6d4",
 "label": {
-"text": "2. Issue prête\nlabels, doublons,\ndépendances",
+"text": "2. Ready issue\nlabels, duplicates,\ndependencies",
 "fontSize": 20
 }
 },
@@ -83,7 +83,7 @@
 "fillStyle": "solid",
 "strokeColor": "#4a9eed",
 "label": {
-"text": "3. Lot en TDD\ntest rouge, code, vert\nagent nommé",
+"text": "3. Lot in TDD\nred test, code, green\nnamed agent",
 "fontSize": 20
 }
 },
@@ -120,7 +120,7 @@
 "fillStyle": "solid",
 "strokeColor": "#f59e0b",
 "label": {
-"text": "4. Revues\nleçons, adversariale,\nconformité",
+"text": "4. Reviews\nlessons, adversarial,\ncompliance",
 "fontSize": 18
 }
 },
@@ -172,7 +172,7 @@
 "strokeColor": "#ef4444",
 "strokeStyle": "dashed",
 "label": {
-"text": "constats : 1 commit par cycle, 3 cycles max",
+"text": "findings: 1 commit per round, 3 rounds max",
 "fontSize": 16
 }
 },
@@ -190,7 +190,7 @@
 "fillStyle": "solid",
 "strokeColor": "#8b5cf6",
 "label": {
-"text": "5. PR prête\nun seul push,\nverdicts tracés",
+"text": "5. Ready PR\na single push,\ntraced verdicts",
 "fontSize": 20
 }
 },
@@ -227,7 +227,7 @@
 "fillStyle": "solid",
 "strokeColor": "#ef4444",
 "label": {
-"text": "6. CI\ntests, SAST, SCA,\nsecrets, revue IA",
+"text": "6. CI\ntests, SAST, SCA,\nsecrets, AI review",
 "fontSize": 20
 }
 },
@@ -264,7 +264,7 @@
 "fillStyle": "solid",
 "strokeColor": "#22c55e",
 "label": {
-"text": "7. Merge\nselon la politique\ndu projet",
+"text": "7. Merge\nper the project's\npolicy",
 "fontSize": 20
 }
 },
@@ -301,7 +301,7 @@
 "fillStyle": "solid",
 "strokeColor": "#ec4899",
 "label": {
-"text": "8. Mesure\nPR à problème, effort,\nboucles, coût",
+"text": "8. Measure\nproblem PRs, effort,\nloops, cost",
 "fontSize": 20
 }
 },
@@ -344,7 +344,7 @@
 "endArrowhead": "arrow",
 "strokeColor": "#ec4899",
 "label": {
-"text": "leçons",
+"text": "lessons",
 "fontSize": 18
 }
 },
@@ -363,7 +363,7 @@
 "strokeColor": "#757575",
 "strokeWidth": 1,
 "label": {
-"text": "Un écart à une étape se règle à cette étape :\ndécision produit manquante (à clarifier, on ne code pas), test vert sans le changement (refusé),\nboucle de CI ou de revue (arrêt, diagnostic, réaffectation), leçon déjà connue (resserrer l'auto-relecture)",
+"text": "A gap at one step is settled at that step:\nmissing product decision (status: needs-decision, no coding), test green without the change (refused),\nCI or review loop (stop, diagnose, reassign), lesson already known (tighten the self-review)",
 "fontSize": 18
 }
 }

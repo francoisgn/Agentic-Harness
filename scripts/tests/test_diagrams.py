@@ -1,4 +1,4 @@
-"""Tests de scripts/diagrams/render.py : rendu déterministe, scène Excalidraw valide, débordements détectés."""
+"""Tests of scripts/diagrams/render.py: deterministic rendering, valid Excalidraw scene, overflows detected."""
 import importlib.util
 import json
 import pathlib
@@ -10,9 +10,9 @@ spec = importlib.util.spec_from_file_location("render", ROOT / "scripts" / "diag
 rd = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(rd)
 
-BOX = {"type": "rectangle", "id": "b", "x": 0, "y": 0, "width": 200, "height": 80, "label": {"text": "Court", "fontSize": 20}}
+BOX = {"type": "rectangle", "id": "b", "x": 0, "y": 0, "width": 200, "height": 80, "label": {"text": "Short", "fontSize": 20}}
 ARROW = {"type": "arrow", "id": "a", "x": 200, "y": 40, "width": 100, "height": 0, "points": [[0, 0], [100, 0]],
-         "label": {"text": "lien", "fontSize": 16}}
+         "label": {"text": "link", "fontSize": 16}}
 
 
 class RenderTests(unittest.TestCase):
@@ -21,7 +21,7 @@ class RenderTests(unittest.TestCase):
         first = rd.render_svg(src)
         xml.dom.minidom.parseString(first)
         self.assertEqual(first, rd.render_svg(src))
-        self.assertIn(">Court<", first)
+        self.assertIn(">Short<", first)
 
     def test_scene_binds_labels_to_their_container(self):
         scene = json.loads(rd.to_scene([BOX, ARROW]))
@@ -46,14 +46,14 @@ class RenderTests(unittest.TestCase):
 
     def test_arrow_with_fewer_than_two_points_is_reported(self):
         bad = dict(ARROW, points=[[0, 0]])
-        self.assertTrue(any("au moins deux points" in e for e in rd.invalid(bad and [bad])))
+        self.assertTrue(any("at least two points" in e for e in rd.invalid(bad and [bad])))
 
     def test_malformed_arrow_points_are_reported(self):
         for pts in ([[0, 0], [100]], [[0, 0], ["a", 1]], [[0, 0], 5], 5, "ab"):
             self.assertTrue(rd.invalid([dict(ARROW, points=pts)]), pts)
 
     def test_overflow_is_reported(self):
-        long = dict(BOX, label={"text": "un texte bien trop long pour cette boîte", "fontSize": 20})
+        long = dict(BOX, label={"text": "a text far too long for this box", "fontSize": 20})
         self.assertTrue(rd.overflows([long]))
         self.assertEqual(rd.overflows([BOX]), [])
 

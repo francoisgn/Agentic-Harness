@@ -1,46 +1,46 @@
-# <Nom du projet>
+# <Project name>
 
-<!-- Tuiles technologiques : une par brique réelle du projet (langage, framework, plateforme, CI, licence).
-     Format : https://img.shields.io/badge/<nom>-<version>-<couleur>?logo=<slug simpleicons.org>&logoColor=white
-     Une tuile d'état (CI, version) pointe vers une source vivante, jamais un chiffre écrit à la main. -->
-![Langage](https://img.shields.io/badge/langage-version-informational)
-![Plateforme](https://img.shields.io/badge/plateforme-version-informational)
+<!-- Technology badges: one per real building block of the project (language, framework, platform, CI, license).
+     Format: https://img.shields.io/badge/<name>-<version>-<colour>?logo=<simpleicons.org slug>&logoColor=white
+     A status badge (CI, version) points to a live source, never a number written by hand. -->
+![Language](https://img.shields.io/badge/language-version-informational)
+![Platform](https://img.shields.io/badge/platform-version-informational)
 ![CI](https://img.shields.io/badge/CI-GitHub_Actions-2088FF?logo=githubactions&logoColor=white)
 
-> <Une phrase : ce que fait le produit, pour qui.>
+> <One sentence: what the product does, for whom.>
 
-<!-- Une capture ou une image du produit en service (docs/images/…), avec un texte alternatif qui la décrit. -->
+<!-- A screenshot or an image of the product in use (docs/images/…), with alternative text that describes it. -->
 
-**TL;DR** : <le problème, la réponse du produit, où il en est, en trois lignes.>
+**TL;DR**: <the problem, the product's answer, where it stands, in three lines.>
 
 ## Architecture
 
-![Architecture du projet : interface, moteur, données, services externes, CI, agents](docs/diagrams/architecture.svg)
+![Project architecture: interface, engine, data, external services, CI, agents](docs/diagrams/architecture.svg)
 
-<!-- Source : docs/diagrams/architecture.json → `python3 .harness/scripts/diagrams-render.py` → .svg et .excalidraw
-     (scène modifiable sur excalidraw.com). Les trois fichiers se commitent ensemble. -->
+<!-- Source: docs/diagrams/architecture.json → `python3 .harness/scripts/diagrams-render.py` → .svg and .excalidraw
+     (scene editable on excalidraw.com). Commit the three files together. -->
 
-## Avancement
+## Progress
 
-<!-- Tenu à jour par `/readme-update` à la fin de chaque lot : une ligne par lot ou jalon, état relu sur les issues. -->
-<!-- harness:begin avancement -->
-| Lot | Périmètre | État | Issue / PR |
+<!-- Kept up to date by `/readme-update` at the end of each lot: one line per lot or milestone, state re-read from the issues. -->
+<!-- harness:begin progress -->
+| Lot | Scope | State | Issue / PR |
 |---|---|---|---|
-| LOT-001 | <périmètre> | ⚪ à faire | #… |
-<!-- harness:end avancement -->
+| LOT-001 | <scope> | ⚪ to do | #… |
+<!-- harness:end progress -->
 
-États : ⚪ à faire · 🔵 en cours · 🟠 en revue · 🔴 bloqué · 🟢 livré.
+States: ⚪ to do · 🔵 in progress · 🟠 in review · 🔴 blocked · 🟢 shipped.
 
-## Démarrage
+## Quick start
 
 ```bash
-# Commandes exactes : installer, lancer, tester.
+# Exact commands: install, run, test.
 ```
 
-## Contribuer
+## Contributing
 
-Voir [CONTRIBUTING.md](CONTRIBUTING.md) : prendre une issue, ouvrir une PR, contrôles attendus.
+See [CONTRIBUTING.md](CONTRIBUTING.md): claim an issue, open a PR, expected checks.
 
-## Licence
+## License
 
-<Licence et lien vers le fichier.>
+<License and link to the file.>

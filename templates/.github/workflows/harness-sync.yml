@@ -1,23 +1,23 @@
-name: Synchro du cadre
+name: Harness sync
 
-# Chaque semaine (ou à la main), regarde le dernier tag vX.Y.Z du cadre agentic-harness ; s'il est plus récent que
-# .harness/VERSION, lance harness-sync.sh à ce tag et ouvre une PR en BROUILLON vers la branche d'intégration
-# (docs/ADOPTION.md §Mises à jour). Rien d'autre : la relecture et le merge restent humains.
+# Every week (or by hand), looks at the latest vX.Y.Z tag of the agentic-harness harness; if it is newer than
+# .harness/VERSION, runs harness-sync.sh at that tag and opens a DRAFT PR to the integration branch
+# (docs/ADOPTION.md §Updates). Nothing else: review and merge stay human.
 #
-# Accès (docs/adr/0001) :
-#   - cadre public : rien à faire ; cadre privé : secret HARNESS_TOKEN = jeton fine-grained « Contents: read » sur
-#     francoisgn/agentic-harness, plus « Contents / Pull requests: write » sur CE dépôt ;
-#   - le GITHUB_TOKEN ne peut pas pousser de fichier sous .github/workflows/ : sans variable HARNESS_SYNC_WORKFLOWS=true
-#     (et un HARNESS_TOKEN qui a « Workflows: write »), la synchro les saute et la PR le signale ;
-#   - Settings → Actions → General : « Allow GitHub Actions to create and approve pull requests » (si GITHUB_TOKEN).
-# Une PR ouverte avec le GITHUB_TOKEN ne déclenche pas la CI : elle part au passage « Ready for review ».
+# Access (docs/adr/0001):
+#   - public harness: nothing to do; private harness: secret HARNESS_TOKEN = fine-grained token "Contents: read" on
+#     francoisgn/agentic-harness, plus "Contents / Pull requests: write" on THIS repository;
+#   - the GITHUB_TOKEN cannot push a file under .github/workflows/: without the variable HARNESS_SYNC_WORKFLOWS=true
+#     (and a HARNESS_TOKEN that has "Workflows: write"), the sync skips them and the PR says so;
+#   - Settings → Actions → General: "Allow GitHub Actions to create and approve pull requests" (if GITHUB_TOKEN).
+# A PR opened with the GITHUB_TOKEN does not trigger the CI: it starts on the switch to "Ready for review".
 on:
   schedule:
-    - cron: "23 4 * * 1"   # lundi matin, hors heures chargées
+    - cron: "23 4 * * 1"   # Monday morning, off-peak
   workflow_dispatch:
     inputs:
       ref:
-        description: Tag du cadre à appliquer (vide = dernier tag)
+        description: Harness tag to apply (empty = latest tag)
         required: false
         type: string
 
@@ -29,7 +29,7 @@ concurrency:
 
 jobs:
   sync:
-    name: Proposer la mise à jour du cadre
+    name: Propose the harness update
     runs-on: ubuntu-latest
     timeout-minutes: 10
     permissions:
@@ -45,7 +45,7 @@ jobs:
         with:
           persist-credentials: false
 
-      - name: Version visée
+      - name: Target version
         id: target
         run: |
           set -euo pipefail
@@ -55,15 +55,15 @@ jobs:
             TAG=$(git ls-remote --tags --refs "$AUTH_URL" 'v*' | sed 's#.*refs/tags/##' \
               | grep -E '^v[0-9]+\.[0-9]+\.[0-9]+$' | sort -V | tail -1)
           fi
-          [ -n "$TAG" ] || { echo "::error::Aucun tag vX.Y.Z lisible sur $HARNESS_REPO (dépôt privé sans HARNESS_TOKEN ?)"; exit 1; }
+          [ -n "$TAG" ] || { echo "::error::No readable vX.Y.Z tag on $HARNESS_REPO (private repository without HARNESS_TOKEN?)"; exit 1; }
           echo "tag=$TAG" >> "$GITHUB_OUTPUT"
           if [ "v$CURRENT" = "$TAG" ]; then
-            echo "::notice::Cadre à jour ($TAG)."; echo "todo=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::Harness up to date ($TAG)."; echo "todo=false" >> "$GITHUB_OUTPUT"
           else
-            echo "Cadre : v$CURRENT → $TAG"; echo "todo=true" >> "$GITHUB_OUTPUT"
+            echo "Harness: v$CURRENT → $TAG"; echo "todo=true" >> "$GITHUB_OUTPUT"
           fi
 
-      - name: Synchroniser
+      - name: Sync
         if: steps.target.outputs.todo == 'true'
         id: sync
         env:
@@ -79,7 +79,7 @@ jobs:
           echo "status=$STATUS" >> "$GITHUB_OUTPUT"
           if [ -z "$(git status --porcelain)" ]; then echo "changed=false" >> "$GITHUB_OUTPUT"; else echo "changed=true" >> "$GITHUB_OUTPUT"; fi
 
-      - name: Ouvrir la PR en brouillon
+      - name: Open the draft PR
         if: steps.sync.outputs.changed == 'true'
         env:
           TAG: ${{ steps.target.outputs.tag }}
@@ -92,22 +92,22 @@ jobs:
           BASE=${BASE:-$DEFAULT_BRANCH}
           BRANCH="harness/sync-$TAG"
           if git ls-remote --exit-code --heads "https://x-access-token:${TOKEN}@github.com/${GITHUB_REPOSITORY}.git" "$BRANCH" >/dev/null; then
-            echo "::notice::$BRANCH existe déjà : PR sans doute ouverte."; exit 0
+            echo "::notice::$BRANCH already exists: the PR is probably open."; exit 0
           fi
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git switch -c "$BRANCH"
           git add -A
-          git commit -q -m "Cadre agentic-harness : passage en $TAG"
+          git commit -q -m "agentic-harness: update to $TAG"
           git push -q "https://x-access-token:${TOKEN}@github.com/${GITHUB_REPOSITORY}.git" "HEAD:refs/heads/$BRANCH"
           {
-            echo "Mise à jour du cadre [agentic-harness](https://github.com/${HARNESS_REPO}) vers \`$TAG\` : CHANGELOG du cadre pour le détail."
+            echo "Update of the [agentic-harness](https://github.com/${HARNESS_REPO}) harness to \`$TAG\`: see the harness CHANGELOG for details."
             echo
-            if [ "$STATUS" = 3 ]; then echo "🟠 **Conflits** : des fichiers du cadre modifiés localement ont été laissés en l'état (journal ci-dessous)."; echo; fi
-            if [ "$SYNC_WORKFLOWS" != "true" ]; then echo "🟠 Fichiers sous \`.github/workflows/\` non touchés : mettre à jour à la main les références \`@$TAG\` de \`harness.yml\`."; echo; fi
+            if [ "$STATUS" = 3 ]; then echo "🟠 **Conflicts**: harness files modified locally were left as they are (log below)."; echo; fi
+            if [ "$SYNC_WORKFLOWS" != "true" ]; then echo "🟠 Files under \`.github/workflows/\` not touched: update the \`@$TAG\` references of \`harness.yml\` by hand."; echo; fi
             echo '```'; sed 's/`//g' "$RUNNER_TEMP/sync.log"; echo '```'
             echo
             echo "## Changelog"
-            echo "Aucun (outillage)."
+            echo "None (tooling)."
           } > "$RUNNER_TEMP/body.md"
-          gh pr create --draft --base "$BASE" --head "$BRANCH" --title "Cadre agentic-harness : passage en $TAG" --body-file "$RUNNER_TEMP/body.md"
+          gh pr create --draft --base "$BASE" --head "$BRANCH" --title "agentic-harness: update to $TAG" --body-file "$RUNNER_TEMP/body.md"
