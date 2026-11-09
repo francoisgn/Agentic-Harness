@@ -89,6 +89,30 @@ class GuardTests(unittest.TestCase):
                 self.assertBlocked(command, cwd=self.on_protected)
         self.assertAllowed("git push origin HEAD", cwd=self.on_feature)
 
+    def test_branch_chosen_earlier_in_the_line_is_current(self):
+        for command in ("git switch -c fix/y origin/develop && git push -u origin HEAD",
+                        "git checkout -b lot/1 && git push", "git switch --create=feat/z && git push origin @",
+                        "git switch --detach && git push origin HEAD:fix/z"):
+            with self.subTest(command=command):
+                self.assertAllowed(command, cwd=self.on_protected)
+        for command in ("git switch main && git push", "git checkout develop && git push -u origin HEAD",
+                        "git switch -c fix/y && git switch develop && git push", "git checkout x.txt && git push"):
+            with self.subTest(command=command):
+                self.assertBlocked(command, cwd=self.on_protected if "x.txt" in command else self.on_feature)
+
+    def test_tags_at_sign_no_dry_run_and_wildcards(self):
+        for command in ("git push --tags", "git push origin --tags", "git push origin v1.0.0"):
+            with self.subTest(command=command):
+                self.assertAllowed(command, cwd=self.on_protected)
+        for command in ("git push origin @", "git push -u origin @"):
+            with self.subTest(command=command):
+                self.assertBlocked(command, cwd=self.on_protected)
+        for command in ("git push -n --no-dry-run -f origin fix/x", "git push origin 'refs/heads/*:refs/heads/*'",
+                        "git push origin 'refs/heads/ma*'", "gi't' push origin main", "\\git push -f origin x"):
+            with self.subTest(command=command):
+                self.assertBlocked(command)
+        self.assertAllowed("git push origin 'refs/heads/fix/*:refs/heads/fix/*'")
+
     def test_git_dash_c_directory_and_cd_are_followed(self):
         self.assertAllowed("git -C wt push origin HEAD", cwd=self.on_protected)
         self.assertBlocked("git -C .. push origin HEAD", cwd=self.on_feature)

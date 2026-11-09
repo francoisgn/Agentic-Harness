@@ -17,7 +17,7 @@ on:
     - cron: "17 5 * * *"   # tableau de bord quotidien
     - cron: "47 5 * * 1"   # hebdomadaire : dérive des réglages, sécurité (CVE sans commit) si le job security est activé
   pull_request:
-    types: [opened, edited, reopened, synchronize, ready_for_review]
+    types: [opened, edited, reopened, synchronize, ready_for_review, labeled, unlabeled]   # labels : contrôle du registre
   workflow_dispatch:
 
 permissions: {}
@@ -76,14 +76,14 @@ jobs:
 
   # Socle docs + sécurité, si le projet ne l'a pas déjà (sinon supprimer ces jobs : on ne paie pas deux fois).
   # docs:
-  #   if: github.event_name == 'pull_request' && github.event.action != 'edited'
+  #   if: github.event_name == 'pull_request' && !contains(fromJSON('["edited", "labeled", "unlabeled"]'), github.event.action)
   #   permissions:
   #     contents: read
   #   uses: francoisgn/agentic-harness/.github/workflows/docs-security.yml@v0.3.0
   #   with:
   #     gitleaks: false   # déjà dans le job security
   # security:   # SAST (Semgrep) + SCA (Trivy) + secrets (gitleaks), CI-BUDGET.md §3
-  #   if: (github.event_name == 'pull_request' && github.event.action != 'edited') || (github.event_name == 'schedule' && github.event.schedule == '47 5 * * 1')
+  #   if: (github.event_name == 'pull_request' && !contains(fromJSON('["edited", "labeled", "unlabeled"]'), github.event.action)) || (github.event_name == 'schedule' && github.event.schedule == '47 5 * * 1')
   #   permissions:
   #     contents: read
   #   uses: francoisgn/agentic-harness/.github/workflows/security.yml@v0.3.0
@@ -92,7 +92,7 @@ jobs:
 
   # Service de revue IA (REVIEW-SERVICE.md) : secret ANTHROPIC_API_KEY ou CLAUDE_CODE_OAUTH_TOKEN ; jamais requis.
   # review:
-  #   if: github.event_name == 'pull_request' && github.event.action != 'edited'
+  #   if: github.event_name == 'pull_request' && !contains(fromJSON('["edited", "labeled", "unlabeled"]'), github.event.action)
   #   permissions:
   #     contents: read
   #     pull-requests: write

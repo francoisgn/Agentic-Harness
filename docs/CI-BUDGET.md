@@ -26,33 +26,39 @@ Un push ne doit rien coûter ; ce qui coûte, c'est la CI qu'il déclenche. Donc
   Besoin d'essayer ? Repasser la PR en brouillon, ou poser le label sur le brouillon.
 - **Aucune minute gaspillée** : un passage annulé, un job sauté ou une PR de docs ne doit pas allumer de runner macOS.
 
-Le mécanisme (recommandation à adapter ; le nom du label est au choix du projet) :
+Le mécanisme (recommandation à adapter ; le nom du label est au choix du projet) : la CI est un workflow
+réutilisable, appelé par deux déclencheurs séparés.
 ```yaml
+# .github/workflows/ci.yml : pushes et passage « Ready » ; un brouillon ne lance que s'il porte le label
 on:
   pull_request:
-    types: [opened, synchronize, reopened, ready_for_review, labeled]
+    types: [opened, synchronize, reopened, ready_for_review]
 concurrency:
   group: ci-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 jobs:
-  linux:   # rapide : lint, tests unitaires, secrets
-    if: >-
-      (github.event.action != 'labeled' || github.event.label.name == 'ci: complète')
-      && (!github.event.pull_request.draft || contains(github.event.pull_request.labels.*.name, 'ci: complète'))
-    runs-on: ubuntu-latest
-    steps: [...]
-  macos:   # coûteux : ne part qu'après le job Linux vert
-    needs: linux
-    if: >-
-      (github.event.action != 'labeled' || github.event.label.name == 'ci: complète')
-      && (!github.event.pull_request.draft || contains(github.event.pull_request.labels.*.name, 'ci: complète'))
-    runs-on: macos-latest
-    steps: [...]
+  ci:
+    if: ${{ !github.event.pull_request.draft || contains(github.event.pull_request.labels.*.name, 'ci: complète') }}
+    uses: ./.github/workflows/ci-jobs.yml   # jobs `linux` puis `macos` (needs: linux), noms = contrôles requis
+---
+# .github/workflows/ci-label.yml : le label posé sur un brouillon lance la CI complète tout de suite
+on:
+  pull_request:
+    types: [labeled]
+jobs:
+  ci-label:   # autre nom : ses contrôles (`ci-label / …`) ne remplacent jamais les contrôles requis
+    if: ${{ github.event.label.name == 'ci: complète' && github.event.pull_request.draft }}
+    concurrency:   # au niveau du job : un job sauté (autre label) ne rejoint aucun groupe, n'annule rien
+      group: ci-label-${{ github.event.pull_request.number }}
+      cancel-in-progress: true
+    uses: ./.github/workflows/ci-jobs.yml
 ```
-- `ready_for_review` dans les types : la CI part d'elle-même au passage « Ready » ; `labeled` filtré sur le seul label
-  utile, pour qu'un autre label ne relance rien.
-- Un job sauté (`if:` faux) compte comme réussi pour un contrôle requis (§4) : un brouillon ne se merge pas de toute
-  façon, et le passage « Ready » relance tout.
+- `ready_for_review` dans les types : la CI part d'elle-même au passage « Ready ».
+- Les labels sont dans un **workflow à part**, sans `concurrency` au niveau du workflow : un autre label (`ledger`,
+  `pris en charge`…) n'y produit qu'un job sauté sous un autre nom, qui n'annule pas la CI en cours et ne publie pas
+  de contrôle requis « sauté » sur la tête (un job sauté compte comme réussi pour un contrôle requis, §4). Les
+  contrôles requis viennent seulement de `ci.yml`, qui repart au passage « Ready ».
+- Un job sauté sur un brouillon ne gêne pas : un brouillon ne se merge pas, et le passage « Ready » relance tout.
 - Variante quand les runners macOS sont rares et que le job macOS est requis : sur un brouillon, le faire tourner sur un
   runner Linux qui échoue tout de suite (« brouillon : CI macOS au passage Ready ») plutôt que d'attendre un runner.
 

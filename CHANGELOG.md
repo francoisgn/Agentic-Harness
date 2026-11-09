@@ -32,7 +32,8 @@ convention** (avant 1.0.0, un MINEUR peut casser) : branches, prise en charge et
   `--mirror`, `--all`, suppression d'une branche protégée (`--delete`, `-d`, `:branche`), `git -C`, `git -c`,
   enveloppes (`env`, `command`, `exec`, `sudo`, `xargs`, `eval`, `bash -c`, `sh -c`…), sous-shells, groupes,
   substitutions, here-documents, tous les séparateurs ; `git push` nu, `git push origin` et `HEAD` résolus contre la
-  branche courante (`rev-parse`) ; repli sur une expression prudente si la commande ne se découpe pas. Laisse passer
+  branche courante (`rev-parse`, ou la branche choisie plus tôt dans la ligne par `git switch` / `git checkout`),
+  `@` comme `HEAD`, `--tags` seul permis, refspecs à joker couvrant une branche protégée refusées ; repli sur une expression prudente si la commande ne se découpe pas. Laisse passer
   `--dry-run`, `--force-if-includes` seul et les branches non protégées ; reste ouvert sur une entrée illisible. Le
   ruleset côté serveur reste la vraie protection (BRANCHING-RELEASE §Règles communes). Tests :
   `scripts/tests/test_guard_git.py`.

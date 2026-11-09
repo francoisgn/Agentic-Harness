@@ -17,13 +17,17 @@ Ne sont pas refusés : `git push --dry-run` (`-n`), `--force-if-includes` seul, 
 
 Une commande refusée sort en code 2 : Claude Code bloque l'appel et montre le message à l'agent. L'opérateur reste
 libre de lancer la commande lui-même s'il le décide.
-Limites assumées : un hook côté agent se contourne (alias git, script intermédiaire, variable non résolue, push
-par l'API) ; la vraie protection reste le ruleset côté serveur (BRANCHING-RELEASE.md §Règles communes).
+La branche courante est celle du dépôt, ou celle qu'une commande précédente de la même ligne vient de choisir
+(`git switch [-c] <b>`, `git checkout [-b] <b>`). Une refspec à joker (`refs/heads/*`) qui couvre une branche protégée
+est refusée.
+Limites assumées : un hook côté agent se contourne (alias git, script intermédiaire, script passé sur l'entrée
+standard d'un shell (`… | sh`, `bash <<EOF`), variable non résolue, push par l'API) ; la vraie protection reste le ruleset côté serveur (BRANCHING-RELEASE.md §Règles communes).
 Bibliothèque standard uniquement ; une entrée de hook illisible ou une erreur interne laisse passer la commande (le
 hook ne bloque jamais le travail par sa propre faute), comme l'absence de python3.
 """
 from __future__ import annotations
 
+import fnmatch
 import json
 import os
 import re
@@ -349,16 +353,31 @@ def current_branch(cwd: str) -> str | None:
     return None
 
 
-def _branch_of(ref: str, cwd: str) -> str | None:
-    if ref == "HEAD" or CURRENT_BRANCH_EXPR.match(ref):
-        return current_branch(cwd)
+def _branch_of(ref: str, current) -> str | None:
+    """Branche que désigne `ref` ; `HEAD`, `@` et `$(git branch --show-current)` : la branche courante (`current()`)."""
+    if ref in ("HEAD", "@") or CURRENT_BRANCH_EXPR.match(ref):
+        return current()
     return ref.removeprefix("refs/heads/")
 
 
-def check_push(args: list[str], protected: list[str], cwd: str, advice: str) -> str | None:
-    """Motif de refus d'un `git push`, ou None."""
+def _protected_match(branch: str | None, protected: list[str]) -> str | None:
+    """La branche protégée que désigne `branch` (nom exact, ou motif à joker qui la couvre), sinon None."""
+    if branch is None:
+        return None
+    if branch in protected:
+        return branch
+    if "*" in branch:
+        return next((name for name in protected if fnmatch.fnmatchcase(name, branch)), None)
+    return None
+
+
+def check_push(args: list[str], protected: list[str], cwd: str, advice: str, head: str | None = None) -> str | None:
+    """Motif de refus d'un `git push`, ou None. `head` : branche courante déjà connue par la ligne de commande (une
+    chaîne vide pour une HEAD détachée) ; None : la lire dans `cwd`."""
+    def current() -> str | None:
+        return (head or None) if head is not None else current_branch(cwd)
     positional: list[str] = []
-    force = no_verify = dry_run = delete = repo_option = False
+    force = no_verify = dry_run = delete = repo_option = tags = False
     wide = None
     index = 0
     while index < len(args):
@@ -378,6 +397,10 @@ def check_push(args: list[str], protected: list[str], cwd: str, advice: str) -> 
                 no_verify = True
             elif _long(arg, "--dry-run", 4):
                 dry_run = True
+            elif _long(arg, "--no-dry-run", 7):
+                dry_run = False
+            elif arg == "--tags":
+                tags = True
             elif _long(arg, "--delete", 4):
                 delete = True
             elif _long(arg, "--mirror", 3):
@@ -415,19 +438,48 @@ def check_push(args: list[str], protected: list[str], cwd: str, advice: str) -> 
         if refspec.startswith("+"):
             return f"refspec forcée `{refspec}` interdite"
         if delete or refspec.startswith(":"):
-            branch = _branch_of(refspec.lstrip(":"), cwd)
-            if branch in protected:
+            branch = _protected_match(_branch_of(refspec.lstrip(":"), current), protected)
+            if branch:
                 return f"suppression de la branche protégée `{branch}` interdite"
             continue
         source, _, destination = refspec.partition(":")
-        branch = _branch_of(destination or source, cwd)
-        if branch in protected:
+        branch = _protected_match(_branch_of(destination or source, current), protected)
+        if branch:
             return f"push direct vers la branche protégée `{branch}` interdit : {advice}"
-    if not refspecs and not delete:
-        branch = current_branch(cwd)
+    if not refspecs and not delete and not tags:  # `--tags` seul ne pousse que les tags
+        branch = current()
         if branch in protected:
             return f"push depuis la branche protégée `{branch}` interdit : {advice}"
     return None
+
+
+def local_branch_exists(cwd: str, name: str) -> bool:
+    try:
+        out = subprocess.run(["git", "-C", cwd, "rev-parse", "--verify", "--quiet", f"refs/heads/{name}"],
+                             capture_output=True, text=True, timeout=5, check=False)
+    except (OSError, subprocess.SubprocessError, ValueError):
+        return False
+    return out.returncode == 0
+
+
+def switched_branch(sub: str, args: list[str]) -> str | None:
+    """Branche que `git switch|checkout <args>` rend courante ("" pour une HEAD détachée), ou None si on ne sait pas."""
+    create = {"-c", "-C", "--create", "--force-create"} if sub == "switch" else {"-b", "-B", "--orphan"}
+    positional: list[str] = []
+    for index, arg in enumerate(args):
+        if arg == "--":
+            return None if sub == "checkout" else (args[index + 1] if index + 1 < len(args) else None)
+        if arg in create:
+            return args[index + 1] if index + 1 < len(args) else None
+        if arg.split("=", 1)[0] in ("--create", "--force-create", "--orphan") and "=" in arg:
+            return arg.split("=", 1)[1]
+        if arg in ("--detach", "-d") and sub == "switch" or arg == "--detach":
+            return ""
+        if not arg.startswith("-"):
+            positional.append(arg)
+    if sub == "checkout" and len(positional) != 1:
+        return None  # `checkout <commit> <fichiers>` ne change pas de branche
+    return positional[0] if positional else None
 
 
 def check_commit(args: list[str]) -> str | None:
@@ -489,7 +541,7 @@ def raw_reason(command: str, protected: list[str], cwd: str, advice: str) -> str
 def reason_for(command: str, protected: list[str], cwd: str, advice: str = "passer par une branche et une PR",
                depth: int = 0) -> str | None:
     """Motif de refus de la première commande fautive de `command`, ou None."""
-    if depth > MAX_DEPTH or "git" not in command:
+    if depth > MAX_DEPTH or "git" not in re.sub(r"['\"\\]", "", command):
         return None
     try:
         tokens, nested = tokenize(command)
@@ -500,6 +552,7 @@ def reason_for(command: str, protected: list[str], cwd: str, advice: str = "pass
         if reason:
             return reason
     base = cwd
+    heads: dict[str, str] = {}  # dossier → branche choisie plus tôt dans la ligne ("" : HEAD détachée)
     for words in simple_commands(tokens):
         words, script = unwrap(words)
         if script is not None:
@@ -514,8 +567,17 @@ def reason_for(command: str, protected: list[str], cwd: str, advice: str = "pass
         where = base
         for directory in dirs:
             where = os.path.join(where, os.path.expanduser(directory))
+        if sub in ("switch", "checkout"):
+            switched = switched_branch(sub, args)
+            if sub == "checkout" and switched and not any(a in ("-b", "-B", "--orphan") or a.startswith("--orphan=")
+                                                          for a in args):
+                # `checkout <nom>` change de branche seulement si <nom> en est une (sinon c'est un fichier)
+                switched = switched if switched in protected or local_branch_exists(where, switched) else None
+            if switched is not None:
+                heads[os.path.normpath(where)] = switched
+            continue
         if sub == "push":
-            reason = check_push(args, protected, where, advice)
+            reason = check_push(args, protected, where, advice, heads.get(os.path.normpath(where)))
         elif sub == "commit":
             reason = check_commit(args)
         else:
@@ -556,7 +618,7 @@ def main() -> int:
         command = payload.get("tool_input", {}).get("command", "")
         cwd = payload.get("cwd") or os.getcwd()
         project_dir = os.environ.get("CLAUDE_PROJECT_DIR") or cwd
-        if not isinstance(command, str) or "git" not in command:
+        if not isinstance(command, str) or "git" not in re.sub(r"['\"\\]", "", command):
             return 0
         config = load_config(project_dir)
         protected = _string_list(config.get("protected_branches"), DEFAULT_PROTECTED)

@@ -113,7 +113,7 @@ jobs:
                 }
                 const labelled = pr.labels.some((l) => l.name === ledgerLabel);
                 if (labelled && !blocks) errors.push(`label \`${ledgerLabel}\` sans section « ${process.env.LEDGER_HEADING.trim()} » ni bloc d'entrée`);
-                if (!labelled && at >= 0) errors.push(`section « ${process.env.LEDGER_HEADING.trim()} » sans le label \`${ledgerLabel}\` (le demander à un membre, puis pousser)`);
+                if (!labelled && at >= 0) errors.push(`section « ${process.env.LEDGER_HEADING.trim()} » sans le label \`${ledgerLabel}\` (le demander à un membre : poser ou retirer le label relance ce contrôle)`);
               }
               if (process.env.REQUIRE_CHANGELOG === 'true') {
                 const heading = process.env.CHANGELOG_HEADING.trim();

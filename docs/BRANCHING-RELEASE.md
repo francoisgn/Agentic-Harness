@@ -35,7 +35,8 @@ hotfix/* (depuis master) ──PR──▶ master, puis report master → beta �
 - Deux lignes de défense : le hook `guard-git` côté agent refuse avant exécution les push forcés, les push vers une
   branche protégée (aussi `HEAD` ou un `git push` nu depuis elle), leur suppression et `--no-verify`, à travers les
   options groupées, `git -C`/`-c` et les enveloppes shell courantes ; il laisse passer `--dry-run`. Il échoue
-  **ouvert** (entrée illisible, python3 absent) et se contourne (alias git, script intermédiaire, API) : **la vraie
+  **ouvert** (entrée illisible, python3 absent) et se contourne (alias git, script intermédiaire ou passé sur l'entrée
+  standard d'un shell, API) : **la vraie
   protection reste le ruleset côté serveur** (PR obligatoire, pas de force-push, pas de suppression), toujours activé.
 - Branches de travail : `<type>/<nom-court>` avec les types `lot`, `fix`, `feat`, `chore`, `docs` (réglables :
   `.harness/config.json` → `branch_types`), plus `hotfix/` en modèle A. Une PR par lot, `Closes #n` pour chaque issue.
