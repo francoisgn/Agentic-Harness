@@ -39,15 +39,15 @@ Options common to every entry:
 - `"paths"` (globs: `*` and `?` stay within one directory, `**/` covers zero or more directories, `src/**` everything
   below) and `"keywords"` (whole words, case-insensitive, searched in the added or removed lines of the diff, file
   headers excluded): the scope is decided **without starting an agent** (no token spent on an out-of-scope diff); without them, the agent judges;
-- `"confirme"`: who decides (DPO, CISO, QSA); `"enabled": false`: disables without deleting.
+- `"confirmed_by"`: who decides (DPO, CISO, QSA); `"enabled": false`: disables without deleting.
 
 Full example:
 ```json
 {
   "compliance": [
     "gdpr",
-    { "id": "pci", "agent": ".claude/agents/acme-pci-qsa.md", "paths": ["src/paiement/**"], "confirme": "QSA ACME" },
-    { "id": "dora", "spec": "docs/compliance/dora.md", "keywords": ["incident", "ict"], "confirme": "CISO" },
+    { "id": "pci", "agent": ".claude/agents/acme-pci-qsa.md", "paths": ["src/paiement/**"], "confirmed_by": "QSA ACME" },
+    { "id": "dora", "spec": "docs/compliance/dora.md", "keywords": ["incident", "ict"], "confirmed_by": "CISO" },
     { "id": "iso27001", "enabled": false }
   ],
   "exclude": [".claude/agents/compliance-tisax.md", ".claude/agents/compliance-hds.md"]
@@ -58,7 +58,7 @@ Full example:
   `/compliance-review`) says, for each entry, which agent runs, on which file, and whether the diff is in its
   scope; an invalid entry (agent not found, incomplete spec, unknown id, duplicate) makes the plan fail.
 - **Spec**: template `docs/compliance/TEMPLATE.md` (created at adoption, owned by the project): header `id`,
-  `framework`, `confirme`, then "When to step in", "What I check", "Expected evidence", "Sources".
+  `framework`, `confirmed_by`, then "When to step in", "What I check", "Expected evidence", "Sources".
   The generic reviewer cites only what the spec cites; a gap in the spec is reported, not invented.
 - **Company agent**: an agent file (Claude Code adapter: header `name`, `description`, `tools`, `model`) in
   the repository; the harness never syncs it. Keep the response format of §3 so that verdicts can be

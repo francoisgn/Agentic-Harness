@@ -46,7 +46,7 @@ class CheckFrameworkTests(unittest.TestCase):
         p.write_text(json.dumps(labels))
 
     def test_label_name_must_follow_axis_value_format(self):
-        for bad in ("bug", "Type: bug", "priorité: haute", "status:claimed", "status: needs decision"):
+        for bad in ("bug", "Type: bug", "type: über", "status:claimed", "status: needs decision"):
             self.set_labels(lambda labels, bad=bad: labels.append({"name": bad, "color": "ffffff"}))
             r = run(self.tmp)
             self.assertEqual(r.returncode, 1, bad)
