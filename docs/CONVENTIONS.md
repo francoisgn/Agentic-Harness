@@ -1,86 +1,87 @@
-# Conventions : commits, PR, commentaires, persistance
+# Conventions: commits, PRs, comments, persistence
 
-Sources : `CLAUDE.md` de ios-app_credit-immo (conventions, workflow, version et Nouveautés, décision #244) et
-`AGENTS.md` §8 de HFRnow (PR, merge, doublons).
+Sources: `CLAUDE.md` of ios-app_credit-immo (conventions, workflow, version and What's New, decision #244) and
+`AGENTS.md` §8 of HFRnow (PRs, merge, duplicates).
 
-## Langue
-Français partout : interface, code (commentaires, noms métier), commits, issues, PR, docs. Un projet peut décider
-autrement (projet ouvert à des contributeurs anglophones) : il l'écrit dans son `CLAUDE.md`, qui l'emporte.
+## Language
+Project language: write the interface, code comments and domain names, commits, issues, PRs and docs in the
+project's language (`.harness/config.json` › `language`, default English). The harness itself is in English. A
+project can decide otherwise: it writes it in its `CLAUDE.md`, which wins.
 
 ## Branches
-`claude/<lot>` pour les sessions Claude, `feature/<sujet>` pour un humain, `hotfix/<sujet>` depuis la branche de
-production. Une branche part de la branche d'intégration **à jour**. Détail et promotions : [BRANCHING-RELEASE](BRANCHING-RELEASE.md).
+`claude/<lot>` for Claude sessions, `feature/<subject>` for a human, `hotfix/<subject>` from the production
+branch. A branch starts from the **up-to-date** integration branch. Detail and promotions: [BRANCHING-RELEASE](BRANCHING-RELEASE.md).
 
 ## Commits
-- Un commit **atomique par issue** (ou par étape logique d'une issue), message en français, au présent, dans le style
-  des commits existants (`git log`) : `Onglet : ce qui change (#n)` ou `Zone : ce qui change`. Dire **pourquoi** quand ce
-  n'est pas évident.
-- Attribution en fin de message selon la consigne de la session, par exemple :
+- One **atomic commit per issue** (or per logical step of an issue), message in the project's language, present
+  tense, in the style of the existing commits (`git log`): `Tab: what changes (#n)` or `Area: what changes`. Say
+  **why** when it is not obvious.
+- Attribution at the end of the message as the session instructs, for example:
   ```
-  Co-Authored-By: Claude <modèle> <noreply@anthropic.com>
+  Co-Authored-By: Claude <model> <noreply@anthropic.com>
   Claude-Session: https://claude.ai/code/session_…
   ```
-- Jamais d'artefact généré, de `DerivedData`, `.build`, ni de fichier ignoré par `.gitignore`.
-- Commits petits, poussés **une fois par lot** (budget CI) ; l'historique local peut être fin, le push est unique.
+- Never a generated artefact, `DerivedData`, `.build`, or a file ignored by `.gitignore`.
+- Small commits, pushed **once per lot** (CI budget); the local history can be fine-grained, the push is single.
 
 ## Pull requests
-- Ouverte **en brouillon** (aucune CI ne tourne), passée « Ready for review » quand tout est fini, relu, compilé.
-- **Titre** dans le style des PR précédentes : `Zone : résumé (#n)`, `Relecture 0.6.0 (3) : …`, `LOT-012 : …`.
-- **Corps**, dans cet ordre (gabarit `templates/.github/pull_request_template.md`) :
-  1. `Closes #n`, **une ligne par issue** (`Refs #n` pour un travail partiel, en disant ce qui reste ; `Direct-PR: <raison>`
-     pour un petit correctif sans issue, jamais pour un lot) ;
-  2. résumé par issue : le problème, la cause, ce qui change et pourquoi si large et pas plus ;
-  3. vérification : tests (noms, ce qu'ils vérifient, montrés en échec sans le changement), commandes lancées ;
-  4. points de vigilance / non testé (ex. app non compilée dans le conteneur Linux, à valider sur iPhone) ;
-  5. section **« Changelog »** : matière des Nouveautés, une ligne par changement visible, côté utilisateur ;
-  6. modèles auteur et relecteur ; la ligne de génération en dernier.
-- On ne merge pas soi-même sauf politique contraire du projet (credit-immo : le mainteneur merge ; HFRnow : l'auteur merge une
-  PR prête, sauf flux à risque).
-- Pas de nouvelle PR tant qu'une des siennes a un commentaire de revue sans réponse.
-- Avant d'ouvrir : chercher les doublons (issues et PR, ouvertes et fermées) et les PR qui touchent les mêmes fichiers.
+- Opened **as a draft** (no CI runs), moved to "Ready for review" when everything is finished, reviewed, compiled.
+- **Title** in the style of the previous PRs: `Area: summary (#n)`, `Review 0.6.0 (3): …`, `LOT-012: …`.
+- **Body**, in this order (template `templates/.github/pull_request_template.md`):
+  1. `Closes #n`, **one line per issue** (`Refs #n` for partial work, saying what is left; `Direct-PR: <reason>`
+     for a small fix without an issue, never for a lot);
+  2. summary per issue: the problem, the cause, what changes and why this wide and no wider;
+  3. verification: tests (names, what they check, shown failing without the change), commands run;
+  4. watch points / not tested (e.g. app not compiled in the Linux container, to validate on iPhone);
+  5. **"Changelog"** section: material for What's New, one line per visible change, from the user's side;
+  6. author and reviewer models; the generation line last.
+- Do not merge yourself unless the project's policy says otherwise (credit-immo: the maintainer merges; HFRnow: the author merges a
+  ready PR, except for risky flows).
+- No new PR while one of your own has a review comment without a reply.
+- Before opening: search for duplicates (issues and PRs, open and closed) and for PRs that touch the same files.
 
-## Commentaires GitHub
-- Prise en charge : « Pris en charge — branche `claude/<lot>` » + plan en 3 à 5 puces.
-- Fin : fait, lien de la PR, ce qui reste, décisions prises, à valider sur l'appareil.
-- Issue résolue sans `Closes` : « Résolu par #PR ». Merge sur une branche qui ne ferme pas les issues : « Fait dans
-  #PR (mergée en `<sha>`) », puis vérifier qu'elle est fermée.
-- Blocage : commentaire qui commence par `BLOQUÉ :` avec la question exacte ou la liste de ce qui manque.
-- Décision attendue de l'opérateur, en session autonome : une ligne finissant par « Décision attendue (opérateur) »,
-  puis passer au point suivant.
-- Ne jamais `@mentionner` une personne ou un bot sans raison (cela envoie des e-mails) ; depuis le cloud, les mentions
-  sont altérées (LESSONS L46).
-- **Tout commentaire écrit par un agent se termine par un pied d'attribution qui nomme l'agent.** Claude Code :
+## GitHub comments
+- Claim: "Claimed: branch `claude/<lot>`" + a plan in 3 to 5 bullets.
+- End: done, PR link, what is left, decisions taken, to validate on the device.
+- Issue resolved without `Closes`: "Resolved by #PR". Merge into a branch that does not close issues: "Done in
+  #PR (merged as `<sha>`)", then check that it is closed.
+- Blocker: a comment that starts with `BLOCKED:` with the exact question or the list of what is missing.
+- Decision needed from the operator, in an autonomous session: a line ending with "Decision needed (operator)",
+  then move on to the next item.
+- Never `@mention` a person or a bot without a reason (it sends emails); from the cloud, mentions are
+  altered (LESSONS L46).
+- **Every comment written by an agent ends with an attribution footer that names the agent.** Claude Code:
   ```
   ---
   _Generated by [Claude Code](https://claude.ai/code)_
   ```
 
-## Persistance : compatibilité ascendante
-Décision #244 de credit-immo (30/10), généralisée : **une sauvegarde écrite par une version publiée doit rester
-lisible par toutes les versions suivantes.**
-- Nouveau champ → optionnel ou avec une valeur par défaut, décodé de façon tolérante (`decodeIfPresent`).
-- Champ renommé ou supprimé → migration à la lecture (ancienne clé lue puis convertie, fonction dédiée du type
-  `migrate(legacy:)`), testée avec une sauvegarde réelle de l'ancienne version (fichier de test figé).
-- La version de format (`payloadVersion`) ne s'incrémente que pour un changement impossible à migrer, et cela demande
-  une décision produit (issue `à clarifier`).
-- Contrepartie acceptée : une version plus ancienne peut ne pas relire une sauvegarde plus récente (appareils non à jour
-  qui partagent iCloud).
-- SwiftData + CloudKit : jamais `@Attribute(.unique)`, propriétés optionnelles ou par défaut, relations optionnelles.
+## Persistence: backward compatibility
+Decision #244 of credit-immo (30 October), generalised: **a save written by a published version must stay
+readable by every later version.**
+- New field → optional or with a default value, decoded tolerantly (`decodeIfPresent`).
+- Renamed or removed field → migration on read (old key read then converted, dedicated function such as
+  `migrate(legacy:)`), tested with a real save from the old version (frozen test file).
+- The format version (`payloadVersion`) is incremented only for a change that cannot be migrated, and that needs
+  a product decision (`status: needs-decision` issue).
+- Accepted trade-off: an older version may not be able to read a more recent save (devices not up to date that
+  share iCloud).
+- SwiftData + CloudKit: never `@Attribute(.unique)`, optional or defaulted properties, optional relationships.
 
-## Version et « Nouveautés »
-Les PR de lot ne touchent **ni** la version (`MARKETING_VERSION` ou équivalent) **ni** le fichier des Nouveautés : ils
-sont gérés à l'intégration (version posée sur la branche d'intégration par une PR dédiée, Nouveautés rédigées depuis les
-sections « Changelog » des PR), puis tag `vX.Y.Z` après la promotion. Détail : [BRANCHING-RELEASE](BRANCHING-RELEASE.md).
+## Version and "What's New"
+Lot PRs touch **neither** the version (`MARKETING_VERSION` or equivalent) **nor** the What's New file: both are
+handled at integration (version set on the integration branch by a dedicated PR, What's New written from the
+"Changelog" sections of the PRs), then tag `vX.Y.Z` after the promotion. Detail: [BRANCHING-RELEASE](BRANCHING-RELEASE.md).
 
 ## Docs
-- Un fichier, un rôle ; `CLAUDE.md` (ou `AGENTS.md`) est l'entrée unique, tout le reste s'y rattache.
-- Les `.md` portent le contexte durable et renvoient aux issues `#n` ; un TODO vit dans une issue.
-- Les règles métier se sourcent (fichier de réglementation ou de protocole tenu à jour, faits datés).
-- Une décision structurante = un ADR (`docs/adr/NNNN-titre.md`, gabarit [adr/TEMPLATE.md](adr/TEMPLATE.md)). Un ADR
-  accepté ne se réécrit pas : il est remplacé par un autre.
-- Les instructions personnelles d'un opérateur vont dans un `CLAUDE.local.md` non versionné, pas dans le dépôt.
+- One file, one role; `CLAUDE.md` (or `AGENTS.md`) is the single entry point, everything else hangs off it.
+- The `.md` files carry the durable context and point to issues `#n`; a TODO lives in an issue.
+- Domain rules are sourced (regulation or protocol file kept up to date, dated facts).
+- A structuring decision = an ADR (`docs/adr/NNNN-title.md`, template [adr/TEMPLATE.md](adr/TEMPLATE.md)). An
+  accepted ADR is not rewritten: it is superseded by another.
+- An operator's personal instructions go in an unversioned `CLAUDE.local.md`, not in the repository.
 
 ## Secrets
-Aucun secret dans le dépôt. Secrets de CI dans les secrets GitHub ; en local, dans des fichiers de configuration
-ignorés par git ; clés d'API tierces injectées, jamais commitées. gitleaks et la protection au push bloquent : ne jamais
-les contourner. Une faille se signale en privé (SECURITY.md), jamais dans une issue publique.
+No secret in the repository. CI secrets in GitHub secrets; locally, in configuration files ignored by git;
+third-party API keys injected, never committed. gitleaks and push protection block: never bypass them. A
+vulnerability is reported privately (SECURITY.md), never in a public issue.

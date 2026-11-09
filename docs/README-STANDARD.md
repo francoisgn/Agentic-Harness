@@ -1,90 +1,90 @@
-# Le README du projet : standard par défaut
+# The project README: default standard
 
-**TL;DR** : par défaut, les agents tiennent le README du projet comme un livrable. Il porte six choses : des tuiles
-technologiques en en-tête, une image du produit, un schéma d'architecture (Excalidraw), l'avancement des lots, le
-démarrage, et comment contribuer. Un script le contrôle, un skill le met à jour, chaque point se coupe.
+**TL;DR**: by default, agents maintain the project README as a deliverable. It carries six things: technology
+badges in the header, an image of the product, an architecture diagram (Excalidraw), the progress of the lots, the
+quick start, and how to contribute. A script checks it, a skill updates it, every item can be switched off.
 
-Pourquoi : le README est la seule page que lisent à la fois l'opérateur, un nouveau contributeur et un agent qui
-arrive sans contexte. Un README périmé fait repartir chaque session de zéro ; un README tenu à la fin de chaque lot
-coûte quelques lignes par PR.
+Why: the README is the only page read by the operator, a new contributor and an agent arriving
+without context alike. A stale README makes every session start from scratch; a README maintained at the end of every
+lot costs a few lines per PR.
 
-## 1. Ce que le README contient
+## 1. What the README contains
 
-| # | Élément | Règle | Contrôlé |
+| # | Item | Rule | Checked |
 |---|---|---|---|
-| 1 | **En-tête** | Titre, puis les **tuiles technologiques** (langage, framework, plateforme, CI, licence), puis une phrase : ce que fait le produit, pour qui | au moins une tuile avant le premier `##` |
-| 2 | **Image** | Une capture ou une image du produit en service, avec un texte alternatif | une image hors tuiles ; alt présent ; fichier local présent |
-| 3 | **Architecture** | Un schéma de ce qui est livré : `docs/diagrams/architecture.svg`, source `.excalidraw` versionnée à côté | image `.svg` + `.excalidraw` du même nom |
-| 4 | **Avancement** | Un tableau, une ligne par lot (ou jalon), entre les marqueurs `harness:begin avancement` / `harness:end avancement` | marqueurs, tableau, chaque `LOT-…` de `docs/LOTS.md` cité |
-| 5 | **Démarrage** | Les commandes exactes pour installer, lancer, tester | une section d'installation ou de démarrage |
-| 6 | **Contribuer** | Une section courte qui renvoie à `CONTRIBUTING.md` (issue, branche, contrôles, PR, revue) | section présente, fichier présent, lien |
+| 1 | **Header** | Title, then the **technology badges** (language, framework, platform, CI, licence), then one sentence: what the product does, for whom | at least one badge before the first `##` |
+| 2 | **Image** | A screenshot or an image of the product in use, with alt text | one image other than badges; alt present; local file present |
+| 3 | **Architecture** | A diagram of what is delivered: `docs/diagrams/architecture.svg`, `.excalidraw` source versioned next to it | `.svg` image + `.excalidraw` of the same name |
+| 4 | **Progress** | A table, one row per lot (or milestone), between the markers `harness:begin progress` / `harness:end progress` | markers, table, every `LOT-…` of `docs/LOTS.md` cited |
+| 5 | **Quick start** | The exact commands to install, run, test | a heading containing install, quick start, getting started or usage |
+| 6 | **Contributing** | A short section that points to `CONTRIBUTING.md` (issue, branch, checks, PR, review) | a heading containing "contribut", file present, link |
 
-Ordre libre après l'en-tête. Le reste (FAQ, feuille de route, crédits) appartient au projet.
+Free order after the header. The rest (FAQ, roadmap, credits) belongs to the project.
 
-## 2. Tuiles technologiques
+## 2. Technology badges
 
-- Une tuile par brique **réellement utilisée**, lue dans les manifestes du projet, version comprise. Pas de tuile
-  décorative, pas plus d'une ligne.
-- Format : `https://img.shields.io/badge/<nom>-<version>-<couleur>?logo=<slug>&logoColor=white` (slugs :
+- One badge per component **actually used**, read from the project's manifests, version included. No decorative
+  badge, no more than one line.
+- Format: `https://img.shields.io/badge/<name>-<version>-<colour>?logo=<slug>&logoColor=white` (slugs:
   simpleicons.org).
-- Une tuile d'**état** (CI, dernière version, couverture) pointe vers une source vivante (badge du workflow GitHub,
-  release) : jamais un chiffre écrit à la main, il serait faux au commit suivant.
+- A **status** badge (CI, latest version, coverage) points to a live source (GitHub workflow badge,
+  release): never a hand-written number, it would be wrong at the next commit.
 
-## 3. Avancement des lots
+## 3. Lot progress
 
 ```markdown
-<!-- harness:begin avancement -->
-| Lot | Périmètre | État | Issue / PR |
+<!-- harness:begin progress -->
+| Lot | Scope | State | Issue / PR |
 |---|---|---|---|
-| LOT-001 | Moteur de calcul | 🟢 livré | #12 · #31 |
-| LOT-002 | Écran de saisie | 🔵 en cours | #14 |
-<!-- harness:end avancement -->
+| LOT-001 | Calculation engine | 🟢 delivered | #12 · #31 |
+| LOT-002 | Input screen | 🔵 in progress | #14 |
+<!-- harness:end progress -->
 ```
 
-- États : ⚪ à faire · 🔵 en cours · 🟠 en revue · 🔴 bloqué · 🟢 livré.
-- La **source de vérité reste l'issue** ([METHODOLOGY](METHODOLOGY.md)) : le tableau en est une vue, réécrite à la
-  fin de chaque lot (`/lot-finish` → `/readme-update`) à partir de l'état relu sur GitHub. `docs/LOTS.md` reste le
-  plan et ne change pas pour un avancement.
-- Sans plan de lots : une ligne par jalon GitHub (milestone), ou par capacité du produit.
-- Deux lots parallèles touchent le même tableau : chacun ne modifie que sa ligne, pour éviter le conflit.
+- States: ⚪ to do · 🔵 in progress · 🟠 in review · 🔴 blocked · 🟢 delivered.
+- The **source of truth stays the issue** ([METHODOLOGY](METHODOLOGY.md)): the table is a view of it, rewritten at
+  the end of every lot (`/lot-finish` → `/readme-update`) from the state reread on GitHub. `docs/LOTS.md` stays the
+  plan and does not change for progress.
+- Without a lot plan: one row per GitHub milestone, or per product capability.
+- Two parallel lots touch the same table: each changes only its own row, to avoid the conflict.
 
-## 4. Schéma d'architecture : Excalidraw par défaut
+## 4. Architecture diagram: Excalidraw by default
 
-Excalidraw parce que le schéma se lit par un humain non technique, se modifie à la souris sur excalidraw.com, et que
-sa source est un JSON versionné que la CI sait rendre et contrôler.
+Excalidraw because the diagram can be read by a non-technical human, edited with the mouse on excalidraw.com, and
+its source is versioned JSON that CI can render and check.
 
-| Fichier | Rôle |
+| File | Role |
 |---|---|
-| `docs/diagrams/<nom>.json` | Source : liste d'éléments (rectangle, ellipse, texte, flèche, `label`) |
-| `docs/diagrams/<nom>.svg` | Image affichée dans le README, rendu déterministe |
-| `docs/diagrams/<nom>.excalidraw` | Scène native, à ouvrir sur excalidraw.com |
+| `docs/diagrams/<name>.json` | Source: list of elements (rectangle, ellipse, text, arrow, `label`) |
+| `docs/diagrams/<name>.svg` | Image shown in the README, deterministic render |
+| `docs/diagrams/<name>.excalidraw` | Native scene, to open on excalidraw.com |
 
 ```bash
-python3 .harness/scripts/diagrams-render.py            # rend docs/diagrams/*.json
-python3 .harness/scripts/diagrams-render.py --check    # CI : sort en 1 si un rendu est périmé ou un texte déborde
+python3 .harness/scripts/diagrams-render.py            # renders docs/diagrams/*.json
+python3 .harness/scripts/diagrams-render.py --check    # CI: exits 1 if a render is stale or a text overflows
 ```
 
-Les trois fichiers se commitent ensemble. Le schéma montre **ce qui est livré** ; 5 à 9 boîtes. Mermaid reste permis
-pour un flux court dans une doc interne ; pour le README, `"architecture": "any"` l'accepte aussi.
+The three files are committed together. The diagram shows **what is delivered**; 5 to 9 boxes. Mermaid stays allowed
+for a short flow in an internal doc; for the README, `"architecture": "any"` accepts it too.
 
-## 5. Qui le tient, et quand
+## 5. Who maintains it, and when
 
-| Moment | Qui | Quoi |
+| When | Who | What |
 |---|---|---|
-| Adoption | `harness-sync.sh` | Crée `README.md`, `CONTRIBUTING.md` et `docs/diagrams/architecture.*` **s'ils n'existent pas** ; ne les réécrit jamais ensuite |
-| Fin de lot | l'agent du lot (`/lot-finish`, étape 2) | `/readme-update` : ligne du lot, tuiles, schéma si l'architecture a bougé |
-| Après un merge, chaque semaine | `doc-steward` | Compare README et code mergé, ouvre une PR de docs |
-| Chaque PR prête | CI (`docs-security.yml`, entrée `readme`) | `readme-check.py` + `diagrams-render.py --check` |
+| Adoption | `harness-sync.sh` | Creates `README.md`, `CONTRIBUTING.md` and `docs/diagrams/architecture.*` **if they do not exist**; never rewrites them afterwards |
+| End of lot | the lot's agent (`/lot-finish`, step 2) | `/readme-update`: the lot's row, badges, diagram if the architecture moved |
+| After a merge, every week | `doc-steward` | Compares the README with the merged code, opens a docs PR |
+| Every ready PR | CI (`docs-security.yml`, input `readme`) | `readme-check.py` + `diagrams-render.py --check` |
 
-## 6. Régler ou couper
+## 6. Tune or switch off
 
-Dans `.harness/config.json` ; absent = tout actif.
+In `.harness/config.json`; absent = everything on.
 
 ```json
 "readme": { "badges": true, "image": true, "architecture": "excalidraw", "progress": true,
             "quickstart": true, "contributing": true }
 ```
 
-- Une clé à `false` coupe le point. `"architecture": "any"` accepte une image quelconque ou un bloc Mermaid.
-- `"readme": false` coupe tout (dépôt de configuration, bibliothèque interne sans lots).
-- Un README déjà en place n'est pas remplacé : `readme-check.py` liste les écarts, le projet choisit ce qu'il comble.
+- A key set to `false` switches the item off. `"architecture": "any"` accepts any image or a Mermaid block.
+- `"readme": false` switches everything off (configuration repository, internal library without lots).
+- A README already in place is not replaced: `readme-check.py` lists the gaps, the project chooses which to close.

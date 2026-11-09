@@ -1,62 +1,62 @@
-# Cycles de revue (bots, CodeQL, humains)
+# Review rounds (bots, CodeQL, humans)
 
-Source : `docs/agents/REVIEW-ROUNDS.md` de HFRnow, traduit et généralisé. Skill : `/review-round`.
+Source: `docs/agents/REVIEW-ROUNDS.md` of HFRnow, generalised. Skill: `/review-round`.
 
-Chaque cycle coûte un passage de CI, une nouvelle revue et des jetons. Le faire **une fois, complètement**.
+Each round costs a CI run, a new review and tokens. Do it **once, completely**.
 
-1. **Tout lire d'abord** : commentaires en ligne, « Outside diff range », détails, bloc « Prompt for AI agents », chaque
-   fil ouvert de la PR.
-2. **Un constat est une affirmation à vérifier, pas un ordre.** Suivre un vrai chemin (entrée ou appelant → défaillance).
-   Réel et correctif proportionné → corriger. Tiré par les cheveux ou correctif plus coûteux que le gain → répondre dans
-   son fil avec le chemin suivi et pourquoi non, et le signaler au mainteneur.
-   **Un constat de sécurité reste ouvert jusqu'à la décision du mainteneur.**
-3. **Corriger la classe, pas l'instance** : lister les cas voisins (autres points d'entrée, autres analyseurs ou
-   requêtes du même motif, ordre inverse, autres limites) et les corriger tous, un test par cas.
-4. **Chaque test est montré en échec sans le correctif** (annuler le cœur du changement, voir rouge) et passe par le vrai
-   point d'entrée. Un run filtré doit annoncer des tests exécutés (LESSONS L01).
-5. **Contre-vérification avant de pousser** : un agent séparé reçoit le constat, le diff et LESSONS.md, **pas** la
-   conclusion de l'auteur, avec la consigne de trouver ce que le correctif rate ou casse. Intégrer ses constats.
-6. **Un commit + un push par cycle**, tous les constats traités. Jamais un push par constat.
-7. **Puis une réponse par fil** (commit correctif, ou pourquoi non), dans la même unité de travail que le push ; un push
-   seul n'est pas une réponse. Constats hors diff : un commentaire de PR adressé au bot. Résoudre chaque fil traité.
-8. **Constats facultatifs** (détail, suggestion) : jamais de push pour eux seuls. Réponse d'une ligne ; les intégrer au
-   prochain push qui touche ces fichiers.
-9. **Après le cycle** : comparer les constats à [LESSONS](LESSONS.md). Déjà listé = l'auto-relecture l'a manqué,
-   resserrer cette étape. Nouveau genre = nouvelle ligne.
+1. **Read everything first**: inline comments, "Outside diff range", details, the "Prompt for AI agents" block, every
+   open thread of the PR.
+2. **A finding is a claim to verify, not an order.** Follow a real path (input or caller → failure).
+   Real and the fix is proportionate → fix it. Far-fetched, or the fix costs more than the gain → reply in
+   its thread with the path followed and why not, and flag it to the maintainer.
+   **A security finding stays open until the maintainer decides.**
+3. **Fix the class, not the instance**: list the neighbouring cases (other entry points, other parsers or
+   queries of the same pattern, reverse order, other limits) and fix them all, one test per case.
+4. **Every test is shown failing without the fix** (revert the core of the change, see red) and goes through the real
+   entry point. A filtered run must report executed tests (LESSONS L01).
+5. **Cross-check before pushing**: a separate agent receives the finding, the diff and LESSONS.md, **not** the
+   author's conclusion, with the instruction to find what the fix misses or breaks. Integrate its findings.
+6. **One commit + one push per round**, all findings handled. Never one push per finding.
+7. **Then one reply per thread** (fixing commit, or why not), in the same unit of work as the push; a push
+   alone is not a reply. Findings outside the diff: a PR comment addressed to the bot. Resolve every handled thread.
+8. **Optional findings** (nit, suggestion): never a push for them alone. One-line reply; fold them into the
+   next push that touches those files.
+9. **After the round**: compare the findings with [LESSONS](LESSONS.md). Already listed = the self-review missed it,
+   tighten that step. New kind = new line.
 
-Un bot de revue peut sauter une revue (« Review skipped ») ou se mettre en pause sur une branche : après le push,
-vérifier qu'il a relu la **nouvelle tête** ; sinon demander `@coderabbitai review` (depuis une session cloud, les
-`@mentions` sont altérées : l'opérateur le poste). Le cycle n'est complet que quand le bot a relu la tête poussée.
+A review bot can skip a review ("Review skipped") or pause on a branch: after the push,
+check that it reviewed the **new head**; otherwise ask for `@coderabbitai review` (from a cloud session,
+`@mentions` are altered: the operator posts it). The round is complete only when the bot has reviewed the pushed head.
 
-**Bruit de CI ou vraie panne** : un contrôle qui échoue en quelques secondes sans journal (jeton absent, service
-indisponible, runner jamais acquis) n'est pas « CI rouge » : le dire et pointer les vrais contrôles. « Instable » n'est
-pas une cause : une relance au plus, puis enquête.
+**CI noise or real failure**: a check that fails in a few seconds with no log (missing token, service
+unavailable, runner never acquired) is not "CI red": say so and point to the real checks. "Flaky" is
+not a cause: one re-run at most, then investigate.
 
-**Prête à merger** = contrôles requis verts **et** zéro fil ouvert **et** le bot a relu la tête **et** une revue
-adversariale APPROUVÉ sur cette tête (et la politique de merge du projet).
+**Ready to merge** = required checks green **and** zero open threads **and** the bot has reviewed the head **and** an
+adversarial review APPROVED on that head (and the project's merge policy).
 
-## Traçabilité : chaque verdict sur la PR
+## Traceability: every verdict on the PR
 
-Le harnais mesure le **ratio de PR à problème** (au moins un constat en revue adversariale, revue IA, conformité,
-CodeRabbit ou humaine) et l'**effort de correction** (commits après le premier constat, délai jusqu'au merge) :
-c'est la jauge de la qualité initiale et du coût de la seconde passe ([FINOPS](FINOPS.md) §4). La mesure n'est juste
-que si **tous** les verdicts sont visibles sur la PR, surtout le premier négatif :
-- l'auteur poste **chaque** verdict de revue adversariale et de conformité en commentaire de la PR, mot pour mot, y
-  compris `CHANGEMENTS DEMANDÉS` / `ÉCARTS` (jamais seulement le dernier `APPROUVÉ`) ; la première ligne suit le
-  format de sa source : `**Revue adversariale (<modèle>) : APPROUVÉ | CHANGEMENTS DEMANDÉS** — tête <sha>`,
-  `**Revue conformité <référentiel> (<modèle>) : CONFORME | ÉCARTS | HORS PÉRIMÈTRE** — tête <sha>`, ou
-  `**Revue IA (<modèle>) : …**` pour le service de revue. Le tableau de bord la lit en début de ligne (éventuellement
-  en puce `- ` ou numérotée `1. `) ; une citation `>` ou une ligne de tableau ne compte pas ;
-- une revue faite avant l'ouverture de la PR se poste dès l'ouverture, dans l'ordre ;
-- un constat de sécurité se trace sans détail (« CHANGEMENTS DEMANDÉS — constat de sécurité, détail transmis en
-  privé ») : il compte, il ne fuit pas ;
-- ne jamais réécrire ni supprimer un verdict passé pour « nettoyer » la PR.
+The harness measures the **problem-PR ratio** (at least one finding in adversarial review, AI review, compliance,
+CodeRabbit or human review) and the **fix effort** (commits after the first finding, time to merge):
+this is the gauge of initial quality and of the cost of the second pass ([FINOPS](FINOPS.md) §4). The measure is only
+right if **all** verdicts are visible on the PR, above all the first negative one:
+- the author posts **every** adversarial and compliance review verdict as a PR comment, word for word,
+  including `CHANGES REQUESTED` / `GAPS` (never only the last `APPROVED`); the first line follows the
+  format of its source: `**Adversarial review (<model>): APPROVED | CHANGES REQUESTED** — head <sha>`,
+  `**Compliance review <framework> (<model>): COMPLIANT | GAPS | OUT OF SCOPE** — head <sha>`, or
+  `**AI review (<model>): …**` for the review service. The dashboard reads it at the start of a line (possibly
+  as a `- ` bullet or a numbered `1. ` item); a `>` quote or a table row does not count;
+- a review done before the PR is opened is posted as soon as it opens, in order;
+- a security finding is traced without detail ("CHANGES REQUESTED — security finding, detail sent
+  privately"): it counts, it does not leak;
+- never rewrite or delete a past verdict to "clean up" the PR.
 
-Une PR mergée sans aucun verdict tracé est signalée à part (🟠) et sort du ratio.
+A PR merged with no traced verdict is reported separately (🟠) and leaves the ratio.
 
-## Configuration CodeRabbit recommandée
-Sur le modèle des deux projets (`.coderabbit.yaml`) : `language: fr-FR`, `auto_review.drafts: false` (pas de revue des
-brouillons, comme la CI), `base_branches` = branches d'intégration et de promotion, `path_filters` qui excluent les
-fichiers générés (PNG, SVG exportés), `path_instructions` qui rappellent les règles du projet par dossier (moteur sans UI,
-workflows épinglés par SHA et permissions minimales, données de test anonymisées, docs sourcées). Profil `chill` pour un
-projet solo, `assertive` quand des contributeurs externes arrivent.
+## Recommended CodeRabbit configuration
+Modelled on the two projects (`.coderabbit.yaml`): `language` set to the project's language (`fr-FR` in both),
+`auto_review.drafts: false` (no review of drafts, like the CI), `base_branches` = integration and promotion branches,
+`path_filters` that exclude generated files (PNG, exported SVG), `path_instructions` that restate the project's rules
+per directory (engine without UI, workflows pinned by SHA with minimal permissions, anonymised test data, sourced
+docs). Profile `chill` for a solo project, `assertive` when external contributors arrive.

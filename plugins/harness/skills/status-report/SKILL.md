@@ -1,19 +1,19 @@
 ---
 name: status-report
-description: Produit un rapport d'état du projet lisible par un public non technique (TL;DR RAG, jalons, livré, prochaines étapes, blocages et décisions attendues, risques, coût) à partir du tableau de bord du flux et des issues. À utiliser pour un point hebdomadaire, un comité, ou quand l'opérateur demande « où en est-on ? ».
-argument-hint: "[période, défaut : 7 jours]"
+description: Produces a project status report readable by a non-technical audience (RAG TL;DR, milestones, shipped, next steps, blockers and pending decisions, risks, cost) from the flow dashboard and the issues. Use for a weekly update, a steering committee, or when the operator asks "where do we stand?".
+argument-hint: "[period, default: 7 days]"
 ---
 
-# Rapport d'état
+# Status report
 
-Période : $ARGUMENTS (défaut 7 jours). Format : `.harness/docs/STEWARDS.md` §4.
+Period: $ARGUMENTS (default 7 days). Format: `.harness/docs/STEWARDS.md` §4.
 
-1. **Données** : `python3 .harness/scripts/flow-metrics.py --repo <owner/nom> --json-out /tmp/flow.json` (ou l'issue
-   « Tableau de bord » du jour) ; jalons GitHub (milestones, échéances) ; PR mergées et issues fermées sur la période ;
-   issues `bloqué`, `à clarifier`, P1.
-2. **Traduire** pour un non-technicien : ce que l'utilisateur gagne (sections « Changelog » des PR), pas les fichiers ;
-   pas de SHA ni de jargon ; liens cliquables.
-3. **Rédiger** dans le format de STEWARDS §4 : TL;DR avec 🟢/🟠/🔴 en première ligne ; un jalon = une ligne avec barre
-   d'avancement et échéance ; chaque blocage formulé « qui doit décider quoi, avant quand ».
-4. Vérifier chaque chiffre contre sa source avant de livrer (L18). Livrer dans la conversation ; le publier (issue,
-   page) seulement si l'opérateur le demande.
+1. **Data**: `python3 .harness/scripts/flow-metrics.py --repo <owner/name> --json-out /tmp/flow.json` (or today's
+   "Project dashboard" issue); GitHub milestones (due dates); PRs merged and issues closed over the period; issues
+   labelled `status: blocked`, `status: needs-decision`, `priority: critical`, `priority: high`.
+2. **Translate** for a non-technical reader: what the user gains ("Changelog" sections of the PRs), not the files;
+   no SHA, no jargon; clickable links.
+3. **Write** in the format of STEWARDS §4: TL;DR with 🟢/🟠/🔴 on the first line; one milestone = one line with a
+   progress bar and a due date; each blocker phrased as "who must decide what, by when".
+4. Check each figure against its source before delivering (L18). Deliver in the conversation; publish it (issue,
+   page) only if the operator asks.

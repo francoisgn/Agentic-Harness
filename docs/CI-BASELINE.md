@@ -1,84 +1,84 @@
-# Socle de CI : ce que tout projet a, par paliers
+# CI baseline: what every project has, by tiers
 
-**TL;DR** : cinq paliers, du gratuit au cher. Le palier 0 vaut pour tout dépôt, même un dépôt de configuration ; les
-suivants s'ajoutent selon le projet. Chaque ligne se coupe. Relevé sur trois projets réels le 2026-11-09 (un client
-iOS, un développeur de photos en Rust, un dépôt de configuration shell) : ce socle est leur dénominateur commun, plus
-ce qui leur a manqué. Budget et détail des outils : [CI-BUDGET](CI-BUDGET.md).
+**TL;DR**: five tiers, from free to expensive. Tier 0 applies to every repository, even a configuration repository;
+the next ones are added depending on the project. Every row can be switched off. Surveyed on three real projects on
+2026-11-09 (an iOS client, a photo developer in Rust, a shell configuration repository): this baseline is their common
+denominator, plus what they lacked. Budget and tool details: [CI-BUDGET](CI-BUDGET.md).
 
-## 1. Les paliers
+## 1. The tiers
 
-| Palier | Pour qui | Contenu | Coût par PR prête |
+| Tier | For whom | Content | Cost per ready PR |
 |---|---|---|---|
-| **0 · Hygiène** | tout dépôt | secrets (gitleaks), lint des workflows (zizmor, actionlint), Markdown et README ([README-STANDARD](README-STANDARD.md)), Dependabot `github-actions` hebdomadaire groupé | 1 min Linux |
-| **1 · Qualité** | tout dépôt avec du code | **une commande locale, la même que la CI** ; lint du langage en mode strict ; tests | 1 à 10 min Linux |
-| **2 · Cher** | macOS, simulateur, VM, matrice d'OS | derrière le palier 1 (`needs:`), seulement si les chemins concernés changent, jamais sur un brouillon | 10 min et plus, ×10 sur macOS |
-| **3 · Sécurité lourde** | code livré à des utilisateurs | SAST, dépendances (CVE), sur PR prête + branche d'intégration + chaque semaine | 2 à 5 min Linux |
-| **4 · Processus** | projet piloté par issues | labels synchronisés depuis un fichier, PR liée à une issue, ruleset versionné, tableau de bord | secondes |
+| **0 · Hygiene** | every repository | secrets (gitleaks), workflow lint (zizmor, actionlint), Markdown and README ([README-STANDARD](README-STANDARD.md)), weekly grouped Dependabot `github-actions` | 1 min Linux |
+| **1 · Quality** | every repository with code | **one local command, the same as CI**; language lint in strict mode; tests | 1 to 10 min Linux |
+| **2 · Expensive** | macOS, simulator, VM, OS matrix | behind tier 1 (`needs:`), only if the relevant paths change, never on a draft | 10 min and more, ×10 on macOS |
+| **3 · Heavy security** | code shipped to users | SAST, dependencies (CVEs), on ready PRs + integration branch + every week | 2 to 5 min Linux |
+| **4 · Process** | issue-driven project | labels synced from a file, PR linked to an issue, versioned ruleset, dashboard | seconds |
 
-Paliers 0, 3 et 4 : workflows réutilisables du cadre (`docs-security.yml`, `security.yml`, `labels-sync.yml`,
-`issue-hygiene.yml`, `pr-hygiene.yml`, `repo-settings.yml`, `flow-report.yml`), appelés par `harness.yml`. Paliers 1
-et 2 : au projet, le cadre n'impose ni l'outil ni le langage.
+Tiers 0, 3 and 4: reusable workflows of the harness (`docs-security.yml`, `security.yml`, `labels-sync.yml`,
+`issue-hygiene.yml`, `pr-hygiene.yml`, `repo-settings.yml`, `flow-report.yml`), called by `harness.yml`. Tiers 1
+and 2: up to the project, the harness imposes neither the tool nor the language.
 
-## 2. Les six invariants de tout workflow
+## 2. The six invariants of every workflow
 
-Vérifiés par zizmor, actionlint et la revue ; aucun ne dépend du langage.
+Checked by zizmor, actionlint and review; none depends on the language.
 
-| # | Invariant | Pourquoi |
+| # | Invariant | Why |
 |---|---|---|
-| 1 | `permissions: contents: read` (ou `{}`) en tête ; l'écriture se donne au job qui en a besoin | un workflow compromis ne peut pas écrire |
-| 2 | Actions épinglées par SHA complet, version en commentaire ; Dependabot les met à jour | un tag se déplace |
-| 3 | `concurrency` avec annulation sur les PR, jamais sur une branche protégée | un push n'en paie qu'un |
-| 4 | `timeout-minutes` sur chaque job | un job bloqué coûte 6 h par défaut |
-| 5 | `persist-credentials: false` ; jamais de `${{ … }}` d'événement dans un `run:` | injection, fuite du jeton |
-| 6 | Rien sur un brouillon ; les contrôles requis passent sans secret (PR de fork) | budget, contributions externes |
+| 1 | `permissions: contents: read` (or `{}`) at the top; write access goes to the job that needs it | a compromised workflow cannot write |
+| 2 | Actions pinned by full SHA, version in a comment; Dependabot updates them | a tag can move |
+| 3 | `concurrency` with cancellation on PRs, never on a protected branch | a push pays for only one run |
+| 4 | `timeout-minutes` on every job | a stuck job costs 6 h by default |
+| 5 | `persist-credentials: false`; never an event `${{ … }}` in a `run:` | injection, token leak |
+| 6 | Nothing on a draft; required checks pass without a secret (fork PRs) | budget, external contributions |
 
-## 3. Palier 1 : la commande locale d'abord
+## 3. Tier 1: the local command first
 
-Le socle ne commence pas par un workflow mais par **une commande** (`make check`, `cargo xtask ci`,
-`pre-commit run --all-files`, `scripts/ci/local-check.sh`) que l'agent lance avant chaque push et que la CI rejoue
-telle quelle. Sans elle, « rien sur un brouillon » veut dire que l'agent découvre ses erreurs au passage « Ready »,
-et que chaque correction coûte un passage.
+The baseline does not start with a workflow but with **one command** (`make check`, `cargo xtask ci`,
+`pre-commit run --all-files`, `scripts/ci/local-check.sh`) that the agent runs before every push and that CI replays
+as is. Without it, "nothing on a draft" means the agent discovers its errors on the move to "Ready",
+and every fix costs a run.
 
-- Elle dit **INCOMPLET** quand un outil manque, jamais « vert ».
-- Elle a un mode rapide (ce qui a changé) et un mode complet (ce que la CI lance).
-- Elle écrit un résumé lisible (ce qui a tourné, ce qui a été sauté, pourquoi) que la PR reprend.
-- `CLAUDE.md` › Build et tests la nomme. Le hook pre-commit en lance la partie rapide.
+- It says **INCOMPLETE** when a tool is missing, never "green".
+- It has a fast mode (what changed) and a full mode (what CI runs).
+- It writes a readable summary (what ran, what was skipped, why) that the PR reuses.
+- `CLAUDE.md` › Build and tests names it. The pre-commit hook runs its fast part.
 
-## 4. Ce que le relevé a montré
+## 4. What the survey showed
 
-| Constat | Où | Ce que le socle en tire |
+| Finding | Where | What the baseline takes from it |
 |---|---|---|
-| 🔴 Des workflows `issues`, `issue_comment`, `pull_request_target`, `schedule` écrits mais **jamais lancés** : ils ne partent que de la branche par défaut, et le projet travaille sur une autre | client iOS | La branche d'intégration **est** la branche par défaut, ou ces workflows vivent aussi sur la branche par défaut. Et l'état d'une issue se lit sans workflow : un label posé à la main vaut un label posé par un robot |
-| 🔴 Jobs macOS sans `timeout-minutes` ; aucun cache des dépendances | client iOS | Invariant 4 ; cache au palier 2 |
-| 🔴 Actions par tag, écriture donnée au workflow entier, ni timeout ni concurrence | dépôt de configuration | Palier 0 et invariants 1 à 4 : le dépôt « trop petit pour une CI » est celui qui a les droits les plus larges |
-| 🔴 Aucun scan de secrets, aucun audit de CVE des dépendances | projet Rust | Paliers 0 et 3 |
-| 🟠 Secrets hérités en bloc (`secrets: inherit`) par un workflow partagé suivi sur une branche | projet Rust | Un workflow réutilisable s'épingle par SHA et reçoit ses secrets nommément |
-| 🟠 Le scan de secrets tourne deux fois par push (hook rejoué + job dédié ; `push` + `pull_request`) | deux projets | Un contrôle, un endroit |
-| 🟠 Pas de point d'entrée local unique | client iOS | Palier 1 |
-| 🟢 Une commande locale = la CI, avec rapport de ce qui a été sauté | projet Rust | Le modèle du palier 1 |
-| 🟢 Détection de changements + échec immédiat des jobs macOS sur brouillon | client iOS | Palier 2 ([CI-BUDGET](CI-BUDGET.md) §2) |
-| 🟢 Contrôle de chaîne d'approvisionnement fait maison (verrou à jour, sources git autorisées) | projet Rust | Palier 3, quand un audit de CVE ne suffit pas |
+| 🔴 `issues`, `issue_comment`, `pull_request_target`, `schedule` workflows written but **never run**: they only start from the default branch, and the project works on another one | iOS client | The integration branch **is** the default branch, or these workflows also live on the default branch. And the state of an issue reads without a workflow: a label set by hand is worth a label set by a robot |
+| 🔴 macOS jobs without `timeout-minutes`; no dependency cache | iOS client | Invariant 4; cache at tier 2 |
+| 🔴 Actions by tag, write access given to the whole workflow, no timeout and no concurrency | configuration repository | Tier 0 and invariants 1 to 4: the repository "too small for CI" is the one with the widest rights |
+| 🔴 No secret scan, no CVE audit of dependencies | Rust project | Tiers 0 and 3 |
+| 🟠 Secrets inherited in bulk (`secrets: inherit`) by a shared workflow tracked on a branch | Rust project | A reusable workflow is pinned by SHA and receives its secrets by name |
+| 🟠 The secret scan runs twice per push (hook replayed + dedicated job; `push` + `pull_request`) | two projects | One check, one place |
+| 🟠 No single local entry point | iOS client | Tier 1 |
+| 🟢 One local command = CI, with a report of what was skipped | Rust project | The model for tier 1 |
+| 🟢 Change detection + immediate failure of macOS jobs on a draft | iOS client | Tier 2 ([CI-BUDGET](CI-BUDGET.md) §2) |
+| 🟢 Home-made supply-chain check (lock file up to date, allowed git sources) | Rust project | Tier 3, when a CVE audit is not enough |
 
-## 5. Ce que ce socle remet en cause dans le cadre
+## 5. What this baseline calls into question in the harness
 
-1. **« Rien sur un brouillon » ne tient que si le palier 1 existe.** Le cadre donnait la règle sans fournir la
-   commande : c'est maintenant la première chose à poser, avant tout workflow.
-2. **Le cadre ne s'applique pas ses propres règles partout** : ses labels ne sont pas synchronisés sur son propre
-   dépôt, et il n'a pas de fichier de licence. Un cadre se juge d'abord sur lui-même.
-3. **Un job, pas dix.** Les contrôles Linux d'un palier tiennent dans un job dont chaque étape tourne même si la
-   précédente échoue : un passage, tous les constats, une minute facturée. À éclater seulement quand un contrôle
-   requis doit pouvoir être sauté seul.
-4. **L'automatisation du processus (palier 4) est un confort, pas une fondation** : sur le projet le plus actif,
-   elle est inerte depuis des mois et le suivi tient quand même, à la main, sur 437 issues. Les règles doivent donc
-   rester applicables sans elle.
-5. **La revue IA en CI n'est pas dans le socle.** Elle demande un secret, donc ne peut pas être un contrôle requis
-   (invariant 6) ; elle reste une option.
+1. **"Nothing on a draft" only holds if tier 1 exists.** The harness gave the rule without providing the
+   command: it is now the first thing to put in place, before any workflow.
+2. **The harness does not apply its own rules everywhere**: its labels are not synced on its own
+   repository, and it has no licence file. A harness is judged on itself first.
+3. **One job, not ten.** The Linux checks of a tier fit in one job where every step runs even if the
+   previous one fails: one run, all the findings, one billed minute. Split it only when a required
+   check must be skippable on its own.
+4. **Process automation (tier 4) is a convenience, not a foundation**: on the most active project,
+   it has been inert for months and tracking still holds, by hand, across 437 issues. The rules must therefore
+   stay applicable without it.
+5. **AI review in CI is not in the baseline.** It needs a secret, so it cannot be a required check
+   (invariant 6); it stays an option.
 
-## 6. Adopter le socle dans un projet
+## 6. Adopting the baseline in a project
 
-1. Palier 1 : écrire la commande locale, la nommer dans `CLAUDE.md`, la faire rejouer par le workflow du projet.
-2. Palier 0 : décommenter le job `docs` de `harness.yml`.
-3. Vérifier que la branche d'intégration est la branche par défaut (sinon les jobs `issue`, `flow`, `settings`
-   restent muets).
-4. Ruleset : contrôles requis = noms de jobs réels ([CI-BUDGET](CI-BUDGET.md) §4), dans `.github/repo-settings.json`.
-5. Paliers 2 et 3 selon le projet.
+1. Tier 1: write the local command, name it in `CLAUDE.md`, have the project's workflow replay it.
+2. Tier 0: uncomment the `docs` job of `harness.yml`.
+3. Check that the integration branch is the default branch (otherwise the `issue`, `flow`, `settings` jobs
+   stay silent).
+4. Ruleset: required checks = real job names ([CI-BUDGET](CI-BUDGET.md) §4), in `.github/repo-settings.json`.
+5. Tiers 2 and 3 depending on the project.

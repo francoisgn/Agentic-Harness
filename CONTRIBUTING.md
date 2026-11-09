@@ -1,40 +1,40 @@
-# Contribuer à agentic-harness
+# Contributing to agentic-harness
 
-Le cadre est une boîte à outils, pas une doctrine : chaque brique doit pouvoir se garder, se remplacer ou se couper.
-Une contribution qui ajoute une règle dit aussi comment la désactiver.
+The harness is a toolbox, not a doctrine: each building block must be possible to keep, replace or switch off.
+A contribution that adds a rule also says how to disable it.
 
-## En bref
+## In short
 
-1. **Une issue d'abord**, avec son intention : l'échec observé dans un vrai projet, ce que la brique change, comment
-   on saura que c'est fini. Une leçon née dans votre projet : formulaire « Leçon ».
-2. **Une branche** depuis `master` à jour ; commits atomiques, en français, dans le style de `git log`.
-3. **Contrôles en local** (les mêmes que la CI, un job Linux) :
+1. **An issue first**, with its intent: the failure observed in a real project, what the building block changes, how
+   we will know it is done. A lesson born in your project: "Lesson" form.
+2. **A branch** from an up-to-date `master`; atomic commits, in English, in the style of `git log`.
+3. **Local checks** (the same as the CI, one Linux job):
    ```bash
    python3 scripts/check-framework.py && python3 -m unittest discover -s scripts/tests -p 'test_*.py' \
      && scripts/tests/test-harness-sync.sh && python3 scripts/diagrams/render.py --check \
      && python3 scripts/readme-check.py
    ```
-4. **Une PR en brouillon**, puis « Ready for review » quand tout est fini et relu par un autre modèle que l'auteur.
-   Rien ne tourne en CI sur un brouillon.
+4. **A draft PR**, then "Ready for review" when everything is done and reviewed by a model other than the author.
+   Nothing runs in CI on a draft.
 
-## Ce qu'une PR garde vrai
+## What a PR keeps true
 
-| Vous touchez | À mettre à jour dans la même PR |
+| You touch | Update in the same PR |
 |---|---|
-| Un skill, un agent | `name` = dossier ou fichier, `description` ; le compte et la table du README ; `templates/CLAUDE.md.block` |
-| Un fichier vendorisé | `harness.manifest` ; un test dans `scripts/tests/test-harness-sync.sh` si le mode est nouveau |
-| Un script | Bibliothèque standard seulement ; un test `scripts/tests/test_*.py` vu en échec sans le changement |
-| Un schéma | `docs/diagrams/<nom>.json`, puis `scripts/diagrams/render.py` ; commiter `.json`, `.svg`, `.excalidraw` |
-| Un label | `templates/.github/labels.json` (nom unique, axe) ; `docs/METHODOLOGY.md` |
-| Une règle chargée à chaque session | `docs/ESSENTIEL.md` **et** `i18n/en/docs/ESSENTIEL.md` ; rester court |
-| Un comportement visible d'un projet | `CHANGELOG.md`, ligne « Action » si le projet doit faire quelque chose |
+| A skill, an agent | `name` = folder or file, `description`; the count and the table in the README; `templates/CLAUDE.md.block` |
+| A vendored file | `harness.manifest`; a test in `scripts/tests/test-harness-sync.sh` if the mode is new |
+| A script | Standard library only; a test `scripts/tests/test_*.py` seen failing without the change |
+| A diagram | `docs/diagrams/<name>.json`, then `scripts/diagrams/render.py`; commit `.json`, `.svg`, `.excalidraw` |
+| A label | `templates/.github/labels.json` (unique name, axis); `docs/METHODOLOGY.md` |
+| A rule loaded in every session | `docs/ESSENTIALS.md`; keep it short |
+| A behaviour visible to a project | `CHANGELOG.md`, with an "Action" line if the project has to do something |
 
-## Ce qui n'entre pas
+## What does not go in
 
-- Une règle sans échec observé derrière elle, ou qui ne se coupe pas.
-- Une dépendance (paquet Python, action tierce non épinglée par SHA, compte tiers obligatoire).
-- Un nom de personne, de client ou de projet privé ; un secret, même factice mais plausible.
+- A rule with no observed failure behind it, or one that cannot be switched off.
+- A dependency (Python package, third-party action not pinned by SHA, mandatory third-party account).
+- The name of a person, a client or a private project; a secret, even a fake but plausible one.
 
-## Signaler une faille
+## Reporting a vulnerability
 
-Jamais dans une issue publique : onglet **Security** › *Report a vulnerability* du dépôt.
+Never in a public issue: use the **Security** tab › *Report a vulnerability* of the repository.

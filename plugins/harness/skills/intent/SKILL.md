@@ -1,21 +1,22 @@
 ---
 name: intent
-description: Transforme une demande (message, note, idée) en issue exploitable par un agent — user story, comportements d'erreur, définition de fini, critères d'acceptation testables, labels d'axe — selon le cadre agentic-harness. À utiliser avant tout travail qui n'a pas encore d'issue claire.
-argument-hint: "<demande en une phrase>"
+description: Turns a request (message, note, idea) into an issue an agent can work from (user story, error behaviours, definition of done, testable acceptance criteria, axis labels), following the agentic-harness harness. Use before any work that does not yet have a clear issue.
+argument-hint: "<request in one sentence>"
 ---
 
-# Définir l'intention
+# Define the intent
 
-Demande : $ARGUMENTS. Référence : `.harness/docs/METHODOLOGY.md` §2 (sinon `${CLAUDE_PLUGIN_ROOT}/docs/METHODOLOGY.md`).
+Request: $ARGUMENTS. Reference: `.harness/docs/METHODOLOGY.md` §2 (otherwise `${CLAUDE_PLUGIN_ROOT}/docs/METHODOLOGY.md`).
 
-1. **Doublons** d'abord : issues et PR, ouvertes et fermées. Une existe → la compléter plutôt qu'en créer une.
-2. Rédiger, en français :
-   - `### Résumé` : « En tant que <qui>, je veux que <X> fasse <Y>, pour <bénéfice> » ;
-   - `### Comportements d'erreur` : chaque entrée invalide, panne externe, limite, avec le résultat attendu (message,
-     code, état conservé) ; « aucun » doit être justifié ;
-   - `### Critères d'acceptation` : Étant donné / Quand / Alors, chacun vérifiable par un test ;
-   - `### Définition de fini` : tests (écrits d'abord, vus rouges), docs mises à jour, revue par un autre modèle,
-     conformité si le périmètre l'exige, ce qui sera validé sur l'appareil ;
-   - `### Hors périmètre` et `### Sources` (rien de deviné).
-3. Labels : type, priorité, modèle, taille ; `à clarifier` + la question exacte si une décision produit manque.
-4. **Montrer le texte à l'opérateur avant de créer l'issue** ; après accord, la créer et donner le lien.
+1. **Duplicates** first: issues and PRs, open and closed. One exists → complete it rather than create another.
+2. Write, in the project's language:
+   - `### Summary`: "As <who>, I want <X> to do <Y>, so that <benefit>";
+   - `### Error behaviours`: each invalid input, external failure, limit, with the expected result (message, code,
+     state kept); "none" must be justified;
+   - `### Acceptance criteria`: Given / When / Then, each verifiable by a test;
+   - `### Definition of done`: tests (written first, seen red), docs updated, review by another model, compliance if
+     the scope requires it, what will be validated on the device;
+   - `### Out of scope` and `### Sources` (nothing guessed).
+3. Labels: type, priority, difficulty, status; `status: needs-decision` + the exact question if a product decision is
+   missing.
+4. **Show the text to the operator before creating the issue**; after approval, create it and give the link.

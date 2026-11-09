@@ -2,7 +2,7 @@
   "name": "harness",
   "displayName": "Agentic Harness",
   "version": "0.2.0",
-  "description": "Adaptateur Claude Code du cadre commun de développement agentique (ouvert à tout agent de code) : intention et TDD, boucle issue → lot → PR, revue adversariale, relecteurs de conformité, stewards, tableau de bord du flux, FinOps, garde-fous git.",
+  "description": "Claude Code adapter for the shared agentic development harness (open to any coding agent): intent and TDD, issue → lot → PR loop, adversarial review, compliance reviewers, stewards, flow dashboard, FinOps, git guardrails.",
   "author": {
     "name": "agentic-harness contributors",
     "url": "https://github.com/francoisgn/agentic-harness"

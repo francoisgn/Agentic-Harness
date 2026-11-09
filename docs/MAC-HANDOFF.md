@@ -1,74 +1,73 @@
-# Cloud Linux et Mac : qui fait quoi, comment passer la main
+# Cloud Linux and Mac: who does what, how to hand over
 
-Sources : `CLAUDE.md` (« Conteneur Linux : moteur oui, app non », #256), `scripts/mac-handoff.sh`,
-`scripts/install-swift-linux.sh` de ios-app_credit-immo ; `docs/agents/MAC-SESSIONS.md`, `scripts/cloud-setup.sh`,
-`AGENTS.md` §10 de HFRnow.
+Sources: `CLAUDE.md` ("Linux container: engine yes, app no", #256), `scripts/mac-handoff.sh`,
+`scripts/install-swift-linux.sh` of ios-app_credit-immo; `docs/agents/MAC-SESSIONS.md`, `scripts/cloud-setup.sh`,
+`AGENTS.md` §10 of HFRnow.
 
-## 1. Partage des rôles
+## 1. Division of roles
 
-| Environnement | Peut | Ne peut pas |
+| Environment | Can | Cannot |
 |---|---|---|
-| **Session cloud** (conteneur Linux) | Code et docs ; tests du moteur (`swift test` sur le paquet sans UI) ; lint ; scripts ; issues et PR | Compiler l'app (SwiftUI, Charts, StoreKit, UIKit), simulateur, appareil, signature, réglages du dépôt |
-| **Mac** (agent de code en CLI ou humain) | Xcode, simulateur, appareil, captures réelles, smoke tests, build signé | — (mais c'est le goulot : il ne fait que ce qui exige un Mac) |
-| **CI** | Arbitre : ce qui n'est pas vert en CI n'est pas fini | — |
+| **Cloud session** (Linux container) | Code and docs; engine tests (`swift test` on the package without UI); lint; scripts; issues and PRs | Compile the app (SwiftUI, Charts, StoreKit, UIKit), simulator, device, signing, repository settings |
+| **Mac** (CLI coding agent or human) | Xcode, simulator, device, real screenshots, smoke tests, signed build | — (but it is the bottleneck: it only does what requires a Mac) |
+| **CI** | Referee: what is not green in CI is not finished | — |
 
-Conséquences :
-- Garder le moteur **sans dépendance UI** (Foundation seulement) pour qu'il se teste partout.
-- En cloud, relire le code de l'app **avec une rigueur de compilateur** : types, `@MainActor`, `Sendable` (Swift 6,
-  concurrence stricte), exhaustivité des `switch`, API réelles de la version d'OS visée. Ne jamais écrire « compile »
-  sans l'avoir vu ; écrire « non compilé ici, à vérifier sur Mac » dans « Points de vigilance » de la PR.
-- Les issues qui demandent le Mac portent `hôte: mac` ; les sessions cloud n'y touchent pas.
-- **Découpler** : ce que découvre le Mac et qui se code ailleurs (moteur, docs) devient une issue **sans** `hôte: mac`,
-  pour qu'une session cloud la prenne. Pas d'aller-retour Mac ↔ cloud pour un petit correctif d'app (< ~30 lignes) : le
-  Mac le fait.
+Consequences:
+- Keep the engine **free of UI dependencies** (Foundation only) so that it can be tested everywhere.
+- In the cloud, review the app code **with a compiler's rigour**: types, `@MainActor`, `Sendable` (Swift 6,
+  strict concurrency), exhaustive `switch` statements, real APIs of the targeted OS version. Never write "compiles"
+  without having seen it; write "not compiled here, to verify on a Mac" under "Watch points / not tested" in the PR.
+- Issues that require the Mac carry `needs: host`; cloud sessions do not touch them.
+- **Decouple**: what the Mac discovers and that can be coded elsewhere (engine, docs) becomes an issue **without**
+  `needs: host`, so that a cloud session takes it. No Mac ↔ cloud round trip for a small app fix (< ~30 lines): the
+  Mac does it.
 
-## 2. Préparer le conteneur cloud
-Un script d'installation (collé dans le « setup script » de l'environnement cloud, ou lancé à la main) installe **la même
-version** de la chaîne d'outils que la CI Linux : archive officielle, **signature vérifiée** (clés publiées du projet,
-import bloc par bloc si gpg refuse le fichier entier), puis le linter à la version de la CI avec empreinte vérifiée.
-Les hôtes nécessaires (ex. `download.swift.org`, `github.com`, `release-assets.githubusercontent.com`) vont dans les
-domaines autorisés de l'environnement. Exemples : `scripts/install-swift-linux.sh` (credit-immo, Swift 6.1.2 dans
+## 2. Preparing the cloud container
+An install script (pasted into the "setup script" of the cloud environment, or run by hand) installs **the same
+version** of the toolchain as the Linux CI: official archive, **signature verified** (the project's published keys,
+imported block by block if gpg refuses the whole file), then the linter at the CI's version with a verified checksum.
+The required hosts (e.g. `download.swift.org`, `github.com`, `release-assets.githubusercontent.com`) go in the
+environment's allowed domains. Examples: `scripts/install-swift-linux.sh` (credit-immo, Swift 6.1.2 in
 `/opt/swift`), `scripts/cloud-setup.sh` (HFRnow, Swift 6.2.x + SwiftLint).
 
-## 3. Passer la main au Mac : le script de reprise
-Modèle : `scripts/mac-handoff.sh` de credit-immo. Lancé sur le Mac, sans interaction, il :
-1. synchronise la branche à tester (refuse un arbre sale ou une branche locale divergente : la tête locale doit égaler
-   `origin/<branche>`) ;
-2. rejoue la CI locale sans le build app (`local-check.sh --no-app`) ;
-3. compile l'app pour un simulateur choisi dynamiquement, comme le job CI (mêmes conditions de compilation selon la
-   version d'Xcode), `CODE_SIGNING_ALLOWED=NO` ;
-4. **seulement si le build réussit** (et sauf `--no-smoke`) : installe, lance, tourne l'appareil, vérifie qu'elle ne
-   plante pas, récupère les journaux de plantage, prend des captures ;
-5. écrit `build/handoff/REPORT.md` : en-tête (branche @ SHA, date, macOS, Xcode), résultats 🟢 / 🟠 / 🔴, erreurs de
-   compilation (extrait), début du journal de plantage, puis la **liste de vérifications à la main** de la release ;
-   le copie dans le presse-papiers.
+## 3. Handing over to the Mac: the handoff script
+Model: `scripts/mac-handoff.sh` of credit-immo. Run on the Mac, without interaction, it:
+1. syncs the branch to test (refuses a dirty tree or a diverged local branch: the local head must equal
+   `origin/<branch>`);
+2. replays the local CI without the app build (`local-check.sh --no-app`);
+3. compiles the app for a dynamically chosen simulator, like the CI job (same compilation conditions depending on
+   the Xcode version), `CODE_SIGNING_ALLOWED=NO`;
+4. **only if the build succeeds** (and unless `--no-smoke`): installs, launches, rotates the device, checks that it
+   does not crash, collects the crash logs, takes screenshots;
+5. writes `build/handoff/REPORT.md`: header (branch @ SHA, date, macOS, Xcode), results 🟢 / 🟠 / 🔴, compilation
+   errors (excerpt), start of the crash log, then the release's **manual checklist**;
+   copies it to the clipboard.
 
-L'opérateur colle `REPORT.md` dans la session cloud, qui corrige et repousse. Règle : un seul aller-retour par lot quand
-c'est possible (tout corriger d'un coup).
+The operator pastes `REPORT.md` into the cloud session, which fixes and pushes again. Rule: a single round trip per
+lot when possible (fix everything in one go).
 
-## 4. Sessions Mac autonomes
-Quand le Mac travaille sans surveillance (captures, vérifications à la main, lots Mac), son prompt commence par un
-**contrat d'autonomie** (modèle : `MAC-SESSIONS.md` de HFRnow) :
-- l'opérateur ne regarde pas : **ne jamais s'arrêter pour poser une question** ; une décision nécessaire = un court
-  commentaire sur l'issue concernée, finissant par « Décision attendue (opérateur) », puis l'élément suivant ; tous les
-  éléments sautés vont dans le rapport final ;
-- pré-autorisations explicites et bornées (ex. écritures permises seulement entre les comptes de test de l'opérateur) ;
-  tout le reste est sauté et listé ;
-- les règles du dépôt l'emportent sur le prompt en cas de conflit (le dire dans le rapport) ;
-- jetons comptés : lire seulement les fichiers utiles, filtrer les journaux de build aux erreurs et au statut final ;
-- **conditions d'arrêt** : file vide ou seulement des éléments bloqués ; durée maximale (ex. 6 h) ; CI rouge sur la
-  branche d'intégration pour une raison extérieure (le signaler, ne pas corriger) ; réponse anormale d'un service
-  externe (403, captcha) → tout trafic arrêté ;
-- parallélisme borné par le budget CI (au plus 2 lots Mac à la fois, chacun dans son worktree et son sous-agent) ;
-- chien de garde des sous-agents (30 min sans commit ni commentaire, ou 3 fois la même commande en échec → arrêt) ;
-- ménage : worktrees, DerivedData, clones de simulateur supprimés ; checkout principal propre sur la branche
-  d'intégration ;
-- **rapport final** : un commentaire sur l'issue de suivi de l'orchestrateur (fait → PR → mergé ou non, faits appris,
-  issues ouvertes, lots débloqués, éléments sautés et décisions attendues, par quoi commence la session suivante), et le
-  même rapport dans le terminal.
+## 4. Autonomous Mac sessions
+When the Mac works unattended (screenshots, manual checks, Mac lots), its prompt starts with an
+**autonomy contract** (model: `MAC-SESSIONS.md` of HFRnow):
+- the operator is not watching: **never stop to ask a question**; a needed decision = a short comment on the
+  issue concerned, ending with "Decision needed (operator)", then the next item; all skipped items go in the
+  final report;
+- explicit, bounded pre-authorisations (e.g. writes allowed only between the operator's test accounts);
+  everything else is skipped and listed;
+- the repository's rules win over the prompt in case of conflict (say so in the report);
+- tokens are counted: read only the useful files, filter build logs down to errors and the final status;
+- **stop conditions**: empty queue or only blocked items; maximum duration (e.g. 6 h); red CI on the integration
+  branch for an outside reason (report it, do not fix it); abnormal response from an external service (403,
+  captcha) → all traffic stopped;
+- parallelism bounded by the CI budget (at most 2 Mac lots at a time, each in its own worktree and subagent);
+- subagent watchdog (30 min without a commit or a comment, or the same command failing 3 times → stop);
+- cleanup: worktrees, DerivedData, simulator clones deleted; main checkout clean on the integration branch;
+- **final report**: a comment on the orchestrator's tracking issue (done → PR → merged or not, facts learned,
+  issues opened, lots unblocked, skipped items and decisions needed, what the next session starts with), and the
+  same report in the terminal.
 
-## 5. Vérifier ce que le cloud a mergé sans Mac
-Quand des merges ont été acceptés sans vérification Mac pour aller vite : un build unique à la tête de la branche
-d'intégration, toutes les vérifications à la suite, groupées par écran. Une vérification qui échoue à la tête est
-reproduite au SHA du merge qu'elle couvre avant de blâmer qui que ce soit (sinon `git bisect` entre les deux). Grave
-(plantage, perte de données, fuite) → PR de revert immédiate en `P1 🔴`, signalée en tête du rapport.
+## 5. Checking what the cloud merged without a Mac
+When merges were accepted without a Mac check to go fast: a single build at the head of the integration branch, all
+the checks in a row, grouped by screen. A check that fails at the head is reproduced at the SHA of the merge it
+covers before blaming anyone (otherwise `git bisect` between the two). Serious (crash, data loss, leak) → immediate
+revert PR as `priority: critical`, reported at the top of the report.

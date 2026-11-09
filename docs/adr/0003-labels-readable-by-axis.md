@@ -1,83 +1,84 @@
-# 0003 — Labels lisibles par axe : `axe: valeur`, états « à trier » et « prête »
+# 0003 — Labels readable by axis: `axis: value`, states "needs triage" and "ready"
 
-**Statut :** Proposé — 2026-11-09 (le mainteneur décide ; rien n'est renommé tant que cet ADR n'est pas accepté)
+**Status:** Accepted — 2026-11-09 (maintainer), option 2
 
-## Contexte
-Relevé du 2026-11-09 sur les dépôts qui suivent ou ont inspiré le cadre.
+## Context
+Survey of 2026-11-09 on the repositories that follow or inspired the harness.
 
-- **Client iOS** (437 issues, 269 PR, 51 labels) : quatre axes préfixés, tenus exclusifs à la main. Sur 217 issues
-  ouvertes, 216 portent exactement un `status:`, toutes un `type:` et une `priority:`. États les plus peuplés :
-  `status: ready` (84), `status: blocked` (64), `status: needs-triage` (52), `status: claimed` (16). Le statut est
-  retiré à la fermeture. Aucun jalon GitHub, aucun assigné ; lot et jalon vivent dans les titres (`LOT-147`, `(M4)`).
-  Les PR ne sont presque pas labellisées (202 sur 269) : leur état se lit sur la PR (brouillon, revue, contrôles).
-  Les huit labels GitHub par défaut ont zéro usage.
-- **Projet Rust (fork)** : suivi hors GitHub ; l'amont utilise `priority: critical|high|medium|low`, `needs info`,
-  `in progress`, et propose `difficulty: trivial|easy|medium|hard`.
-- **Le cadre** (`templates/.github/labels.json`, 27 labels) : noms français sans préfixe (`bloqué`, `à clarifier`,
-  `pris en charge`), priorités avec emoji (`P1 🔴`), deux axes (`modèle:` ×4, `taille:` ×3) là où le projet réel en
-  utilise un (`difficulty:` ×4). Aucun des projets observés n'utilise les noms canoniques du cadre ; ils passent par
-  les `aliases`.
-- **Trous** : le cadre n'a ni « à trier » ni « prête », soit 136 des 217 issues ouvertes du projet le plus actif. Un
-  agent ne peut pas distinguer une issue prenable d'une issue non triée. `bloqué` mélange dépendance technique et
-  décision humaine attendue.
-- **Poids mort** (zéro usage observé) : `ux`, `release`, `feedback`, `taille:` ×3, `modèle:` ×4, `tableau de bord`,
+- **iOS client** (437 issues, 269 PRs, 51 labels): four prefixed axes, kept exclusive by hand. Of 217 open issues,
+  216 carry exactly one `status:`, and all carry a `type:` and a `priority:`. Most populated states:
+  `status: ready` (84), `status: blocked` (64), `status: needs-triage` (52), `status: claimed` (16). The status is
+  removed on close. No GitHub milestone, no assignee; lot and milestone live in the titles (`LOT-147`, `(M4)`).
+  PRs are almost never labelled (202 of 269 are not): their state is read on the PR (draft, review, checks).
+  The eight default GitHub labels have zero usage.
+- **Rust project (fork)**: tracking outside GitHub; upstream uses `priority: critical|high|medium|low`, `needs info`,
+  `in progress`, and proposes `difficulty: trivial|easy|medium|hard`.
+- **The harness** (`templates/.github/labels.json`, 27 labels): French names without a prefix (`bloqué`,
+  `à clarifier`, `pris en charge`), priorities with emoji (`P1 🔴`), two axes (`modèle:` ×4, `taille:` ×3) where the
+  real project uses one (`difficulty:` ×4). None of the observed projects uses the canonical names of the harness;
+  they go through the `aliases`.
+- **Gaps**: the harness has neither "needs triage" nor "ready", which is 136 of the 217 open issues of the most
+  active project. An agent cannot tell an issue that can be taken from one that is not triaged. `bloqué` mixes a
+  technical dependency with a pending human decision.
+- **Dead weight** (zero usage observed): `ux`, `release`, `feedback`, `taille:` ×3, `modèle:` ×4, `tableau de bord`,
   `revue: aucune`, `conformité`.
-- Le dépôt du cadre lui-même ne porte que les labels GitHub par défaut : `labels.json` n'y est pas appliqué, le
-  label `leçon` de son formulaire n'existe pas.
+- The harness repository itself carries only the default GitHub labels: `labels.json` is not applied there, and the
+  `leçon` label of its form does not exist.
 
 ## Options
-1. **Garder les noms actuels, ajouter deux états** (`à trier`, `prête`). Aucune migration. Les axes restent non
-   filtrables par préfixe, l'emoji reste dans les priorités, le cadre reste à côté de ce que les projets utilisent.
-2. **Passer à `axe: valeur`, en anglais, ASCII, sans emoji** ; les noms actuels deviennent des `aliases` (le
-   mécanisme existe, on en inverse le sens). Migration : `labels-sync` avec `apply-aliases: true`, plus
-   `flow-metrics.py`, `issue-hygiene.yml`, les formulaires et les docs. Changement cassant, donc version mineure avec
-   ligne « Action ».
-3. **Option 2, avec le jeu de noms réglable par langue** (`i18n/<langue>/labels.json`). Même migration ; les projets
-   francophones gardent des noms français préfixés (`statut: prête`). Deux jeux à maintenir.
+1. **Keep the current names, add two states** (`à trier`, `prête`). No migration. The axes still cannot be filtered
+   by prefix, the emoji stays in the priorities, the harness stays apart from what projects use.
+2. **Move to `axis: value`, in English, ASCII, no emoji**; the current names become `aliases` (the mechanism exists,
+   its direction is reversed). Migration: `labels-sync` with `apply-aliases: true`, plus `flow-metrics.py`,
+   `issue-hygiene.yml`, the forms and the docs. Breaking change, so a minor version with an "Action" line.
+3. **Option 2, with the set of names configurable by language** (`i18n/<language>/labels.json`). Same migration;
+   French-speaking projects keep prefixed French names (`statut: prête`). Two sets to maintain.
 
-## Décision
-Proposée : **option 2**.
+## Decision
+**Option 2.**
 
-| Axe | Labels | Exclusif | Obligatoire |
+| Axis | Labels | Exclusive | Mandatory |
 |---|---|---|---|
-| `status:` (issues ouvertes, retiré à la fermeture) | `needs-triage`, `ready`, `claimed`, `blocked`, `needs-decision` | oui | oui |
-| `type:` | `bug`, `feature`, `chore`, `docs`, `security`, `epic` | oui | oui |
-| `priority:` | `critical`, `high`, `medium`, `low` | oui | après tri |
-| `difficulty:` | `trivial`, `easy`, `medium`, `hard` (le niveau de modèle conseillé va dans la description) | oui | après tri |
-| `needs:` (cumulable, issues et PR) | `info`, `host`, `review` | non | non |
-| suivi | `direct-pr`, `dependencies` | non | non |
-| local (`labels.local.json`) | `area: <module>`, `origin: …`, labels déclencheurs de CI, `leçon` pour le dépôt du cadre | — | — |
+| `status:` (open issues, removed on close) | `needs-triage`, `ready`, `claimed`, `blocked`, `needs-decision` | yes | yes |
+| `type:` | `bug`, `feature`, `chore`, `docs`, `security`, `epic` | yes | yes |
+| `priority:` | `critical`, `high`, `medium`, `low` | yes | after triage |
+| `difficulty:` | `trivial`, `easy`, `medium`, `hard` (the recommended model tier goes in the description) | yes | after triage |
+| `needs:` (can be combined, issues and PRs) | `info`, `host`, `review` | no | no |
+| tracking | `direct-pr`, `dependencies` | no | no |
+| local (`labels.local.json`) | `area: <module>`, `origin: …`, labels that trigger CI, `lesson` for the harness repository | — | — |
 
-- 24 labels au lieu de 27 ; quatre axes exclusifs lisibles par préfixe.
-- `status: needs-decision` (aujourd'hui `à clarifier`) sépare « un humain doit trancher » de `status: blocked`
-  (dépendance, accès, capture).
-- **Pas de label par lot ni par jalon** : jalon = milestone GitHub ; lot = `type: epic` avec sous-issues,
-  identifiant `LOT-NNN` gardé dans le titre.
-- **Pas de label d'état de PR** par défaut : brouillon, décision de revue et contrôles se lisent sur la PR ;
-  `needs: review` reste disponible pour une PR prête sans relecteur.
-- Prise en charge : `status: claimed` + commentaire daté (session, branche) ; signalée abandonnée après 24 h sans PR
-  en brouillon ni commentaire d'avancement.
-- Supprimés : `ux` (devient `area:` local), `release` (jalon), `feedback` (`type: epic`), `taille:` et `modèle:`
-  (`difficulty:`), `tableau de bord`, `revue: aucune`, `conformité` (local si besoin).
-- L'état se lit **sans workflow** : `issue-hygiene` contrôle (exactement un `status:` et un `type:` par issue
-  ouverte, `status:` retiré à la fermeture) mais la règle tient aussi posée à la main.
-- `labels-sync` signale les labels GitHub par défaut inutilisés au lieu de les laisser doubler les axes.
+- 24 labels instead of 27; four exclusive axes readable by prefix.
+- `status: needs-decision` (formerly `à clarifier`) separates "a human must decide" from `status: blocked`
+  (dependency, access, capture).
+- **No label per lot or per milestone**: milestone = GitHub milestone; lot = `type: epic` with sub-issues,
+  identifier `LOT-NNN` kept in the title.
+- **No PR state label** by default: draft, review decision and checks are read on the PR; `needs: review` stays
+  available for a ready PR with no reviewer.
+- Claim: `status: claimed` + dated comment (session, branch); flagged as abandoned after 24 h with no draft PR and no
+  progress comment.
+- Removed: `ux` (becomes a local `area:`), `release` (milestone), `feedback` (`type: epic`), `taille:` and `modèle:`
+  (`difficulty:`), `tableau de bord`, `revue: aucune`, `conformité` (local if needed).
+- The state is read **without a workflow**: `issue-hygiene` checks (exactly one `status:` and one `type:` per open
+  issue, `status:` removed on close) but the rule also holds when applied by hand.
+- `labels-sync` reports unused default GitHub labels instead of letting them duplicate the axes.
 
-Lire l'état d'un projet :
+Reading the state of a project:
 
-| Question | Requête |
+| Question | Query |
 |---|---|
-| En cours | `label:"status: claimed"`, PR ouvertes |
-| Prenable | `label:"status: ready"`, triée par `priority:` |
-| Bloqué / décision humaine | `label:"status: blocked"` / `label:"status: needs-decision"` |
-| À trier | `label:"status: needs-triage"` |
-| Hors de portée d'une session cloud | `label:"needs: host"` |
-| Par jalon / par lot | `milestone:<nom>` / sous-issues de l'epic |
+| In progress | `label:"status: claimed"`, open PRs |
+| Can be taken | `label:"status: ready"`, sorted by `priority:` |
+| Blocked / human decision | `label:"status: blocked"` / `label:"status: needs-decision"` |
+| To triage | `label:"status: needs-triage"` |
+| Out of reach of a cloud session | `label:"needs: host"` |
+| By milestone / by lot | `milestone:<name>` / sub-issues of the epic |
 
-## Conséquences
-- Plus facile : filtrer par axe, écrire le tableau de bord et le tableau d'avancement du README, accueillir un
-  contributeur anglophone, s'aligner sur ce que les projets font déjà.
-- Plus difficile : une migration par projet (alias appliqués une fois), `flow-metrics.py` et `issue-hygiene.yml` à
-  adapter avec leurs tests, docs à reprendre (METHODOLOGY, ESSENTIEL, STEWARDS, formulaires).
-- À surveiller : la règle « français partout » ne s'applique plus aux noms de labels ; le dire dans CONVENTIONS.
-- À faire d'abord, quelle que soit l'option : appliquer `labels.json` au dépôt du cadre.
+## Consequences
+- Easier: filtering by axis, writing the dashboard and the README progress table, welcoming an English-speaking
+  contributor, aligning with what projects already do.
+- Harder: one migration per project (aliases applied once), `flow-metrics.py` and `issue-hygiene.yml` to adapt with
+  their tests, docs to rework (METHODOLOGY, ESSENTIALS, STEWARDS, forms).
+- Migration: the old French names remain as `aliases` in `templates/.github/labels.json`, for a one-time migration
+  with `apply-aliases: true`.
+- To watch: the "French everywhere" rule no longer applies to label names; say so in CONVENTIONS.
+- To do first, whatever the option: apply `labels.json` to the harness repository.

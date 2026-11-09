@@ -1,34 +1,34 @@
 ---
 name: readme-update
-description: Met le README du projet au standard du cadre agentic-harness et le garde vrai — tuiles technologiques en en-tête, image du produit, schéma d'architecture Excalidraw, tableau d'avancement des lots, démarrage, section Contribuer. À utiliser à la fin d'un lot, après un merge qui change l'architecture ou l'état d'un lot, ou quand le README est absent, vide ou périmé.
-argument-hint: "[lot ou section à mettre à jour, défaut : tout]"
+description: Brings the project README up to the agentic-harness standard and keeps it true (technology badges in the header, product image, Excalidraw architecture diagram, lot progress table, getting started, Contributing section). Use at the end of a lot, after a merge that changes the architecture or the state of a lot, or when the README is missing, empty or out of date.
+argument-hint: "[lot or section to update, default: everything]"
 ---
 
-# Mettre le README à jour
+# Update the README
 
-Cible : $ARGUMENTS (défaut : tout le README). Standard : `.harness/docs/README-STANDARD.md` (sinon
-`${CLAUDE_PLUGIN_ROOT}/docs/README-STANDARD.md`). Ce que le projet a coupé dans `.harness/config.json` › `readme` ne
-se remet pas.
+Target: $ARGUMENTS (default: the whole README). Standard: `.harness/docs/README-STANDARD.md` (otherwise
+`${CLAUDE_PLUGIN_ROOT}/docs/README-STANDARD.md`). What the project turned off in `.harness/config.json` › `readme`
+is not put back.
 
-1. **Constater** : `python3 .harness/scripts/readme-check.py` liste les écarts. README absent : partir du gabarit
-   `README.md` du cadre ; `CONTRIBUTING.md` absent : idem.
-2. **Tuiles** : une par brique réellement utilisée, lue dans les manifestes (`Package.swift`, `Cargo.toml`,
-   `package.json`, `pyproject.toml`, workflows), pas de mémoire. Version = celle du manifeste. Tuile d'état (CI,
-   release) = badge vivant du workflow. Retirer celles qui ne sont plus vraies.
-3. **Schéma d'architecture** : si les modules, les flux ou les services externes ont changé, modifier
-   `docs/diagrams/architecture.json`, puis `python3 .harness/scripts/diagrams-render.py` et commiter `.json`, `.svg`,
-   `.excalidraw` ensemble. Le schéma montre ce qui est livré, pas la cible ; 5 à 9 boîtes, un verbe sur chaque flèche
-   utile. Un débordement de texte signalé par le rendu se corrige (boîte plus large ou texte plus court).
-4. **Avancement** : réécrire le tableau entre `<!-- harness:begin avancement -->` et `<!-- harness:end avancement -->`.
-   Une ligne par lot de `docs/LOTS.md` (sinon par jalon GitHub) ; l'état se lit sur l'issue et sa PR **maintenant**
-   (ouverte, prise en charge, PR prête, mergée, `bloqué`), jamais sur le souvenir de la session :
-   ⚪ à faire · 🔵 en cours · 🟠 en revue · 🔴 bloqué · 🟢 livré.
-5. **Images** : une capture n'entre que si elle montre le produit actuel ; texte alternatif qui décrit ce qu'on voit ;
-   fichier sous `docs/images/`. Une capture qui demande un appareil ou un poste précis : une issue, pas une image
-   inventée.
-6. **Démarrage et Contribuer** : rejouer les commandes citées (ou dire lesquelles n'ont pas pu l'être ici) ; la
-   section Contribuer renvoie à `CONTRIBUTING.md`.
-7. **Vérifier** : `python3 .harness/scripts/readme-check.py` sans écart, `diagrams-render.py --check` vert. Les
-   changements partent dans le commit du lot (ou une PR de docs en brouillon hors lot).
+1. **Assess**: `python3 .harness/scripts/readme-check.py` lists the gaps. README missing: start from the harness's
+   `README.md` template; `CONTRIBUTING.md` missing: same.
+2. **Badges**: one per building block actually used, read from the manifests (`Package.swift`, `Cargo.toml`,
+   `package.json`, `pyproject.toml`, workflows), not from memory. Version = the one in the manifest. Status badge
+   (CI, release) = the workflow's live badge. Remove those that are no longer true.
+3. **Architecture diagram**: if the modules, flows or external services changed, edit
+   `docs/diagrams/architecture.json`, then `python3 .harness/scripts/diagrams-render.py` and commit `.json`, `.svg`,
+   `.excalidraw` together. The diagram shows what is shipped, not the target; 5 to 9 boxes, one verb on each useful
+   arrow. A text overflow reported by the render gets fixed (wider box or shorter text).
+4. **Progress**: rewrite the table between `<!-- harness:begin progress -->` and `<!-- harness:end progress -->`.
+   One row per lot of `docs/LOTS.md` (otherwise per GitHub milestone); the state is read from the issue and its PR
+   **now** (open, claimed, PR ready, merged, `status: blocked`), never from the session's memory:
+   ⚪ to do · 🔵 in progress · 🟠 in review · 🔴 blocked · 🟢 shipped.
+5. **Images**: a screenshot goes in only if it shows the current product; alt text that describes what is seen;
+   file under `docs/images/`. A screenshot that needs a specific device or machine: an issue, not an invented
+   image.
+6. **Getting started and Contributing**: replay the commands quoted (or say which ones could not be replayed here);
+   the Contributing section points to `CONTRIBUTING.md`.
+7. **Verify**: `python3 .harness/scripts/readme-check.py` with no gap, `diagrams-render.py --check` green. The
+   changes go into the lot's commit (or a draft docs PR outside a lot).
 
-Rendre compte : écarts trouvés, sections modifiées, ce qui reste à fournir par l'opérateur (capture, licence).
+Report: gaps found, sections modified, what the operator still has to provide (screenshot, licence).

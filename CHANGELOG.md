@@ -1,93 +1,103 @@
 # Changelog
 
-Format : une section par version (semver), du plus récent au plus ancien. « Action » = ce qu'un projet consommateur doit
-faire en passant à cette version.
+Format: one section per version (semver), from newest to oldest. "Action" = what a consumer project must do when
+moving to this version.
 
-## Non publié
+## Unreleased
 
-- **README vivant, par défaut** ([README-STANDARD](docs/README-STANDARD.md)) : les agents tiennent le README du
-  projet comme un livrable : tuiles technologiques en en-tête, image, schéma d'architecture Excalidraw, tableau
-  d'avancement des lots, démarrage, section Contribuer. Skill `/readme-update` (appelé par `/lot-finish`),
-  `readme-check.py` et `diagrams-render.py` vendorisés, gabarits `README.md`, `CONTRIBUTING.md` et
-  `docs/diagrams/architecture.*` créés s'ils manquent ; contrôle dans `docs-security.yml` (entrée `readme`).
-  Chaque point se coupe dans `.harness/config.json` › `readme`.
-- **Socle de CI par paliers** ([CI-BASELINE](docs/CI-BASELINE.md)) : hygiène, qualité (une commande locale = la
-  CI), cher, sécurité lourde, processus ; six invariants de workflow ; relevé de trois projets réels.
-- **Labels** : [ADR 0003](docs/adr/0003-labels-lisibles-par-axe.md) (proposé) : `axe: valeur`, états « à trier » et
-  « prête ». Aucun label renommé dans cette version.
-- Le cadre applique son standard : README avec tuiles et bloc d'avancement, `CONTRIBUTING.md`, contrôlés en CI.
-- `scripts/diagrams/render.py` : option `--dir`.
+- **English**: the whole harness is now in English; `i18n/` removed; files renamed (ESSENTIEL → ESSENTIALS,
+  UTILISATION → USAGE, diagram and ADR names, issue forms `lesson.yml`, `task.yml`); managed block id `cadre` →
+  `harness`; README progress markers `avancement` → `progress`.
+- **Labels** ([ADR 0003](docs/adr/0003-labels-readable-by-axis.md), accepted): `axis: value` names (`status:`,
+  `type:`, `priority:`, `difficulty:`, `needs:`); new states `status: needs-triage` and `status: ready`; old names
+  kept as aliases.
+- **Living README, by default** ([README-STANDARD](docs/README-STANDARD.md)): agents maintain the project README as a
+  deliverable: technology badges in the header, image, Excalidraw architecture diagram, lot progress table, quick
+  start, Contributing section. Skill `/readme-update` (called by `/lot-finish`), `readme-check.py` and
+  `diagrams-render.py` vendored, templates `README.md`, `CONTRIBUTING.md` and `docs/diagrams/architecture.*` created
+  if missing; check in `docs-security.yml` (input `readme`). Each point can be switched off in
+  `.harness/config.json` › `readme`.
+- **Tiered CI baseline** ([CI-BASELINE](docs/CI-BASELINE.md)): hygiene, quality (one local command = the CI),
+  expensive, heavy security, process; six workflow invariants; survey of three real projects.
+- The harness applies its own standard: README with badges and progress block, `CONTRIBUTING.md`, checked in CI.
+- `scripts/diagrams/render.py`: `--dir` option.
 
-**Action** : relancer `harness-sync.sh`. Un README existant n'est pas touché : `python3
-.harness/scripts/readme-check.py` liste les écarts ; pour couper, `"readme": false` dans `.harness/config.json`.
-Le job `docs` de `harness.yml`, s'il est activé, contrôle désormais le README (`readme: false` pour l'éviter).
+**Action**: run `harness-sync.sh` again; rename the markers `harness:begin cadre`/`harness:end cadre` to `harness`,
+and `avancement` to `progress` in README; run the label sync once with `apply-aliases: true`;
+`.harness/docs/ESSENTIEL.md` import in CLAUDE.md becomes `.harness/docs/ESSENTIALS.md` (rewritten by the sync).
+An existing README is not touched: `python3 .harness/scripts/readme-check.py` lists the gaps; to switch it off,
+`"readme": false` in `.harness/config.json`. The `docs` job of `harness.yml`, if enabled, now checks the README
+(`readme: false` to avoid it).
 
 ## 0.2.0 — 2026-11-07
 
-Intention, TDD, FinOps, stewards, conformité, sécurité et mesure du flux.
+Intent, TDD, FinOps, stewards, compliance, security and flow measurement.
 
-- **Ouvert à tous** : plus aucune référence nominative au créateur (rôles : mainteneur, opérateur ; auteur du plugin
-  « agentic-harness contributors ») ; le cadre vaut pour tout agent de code (Claude Code, Codex CLI, Cursor, Gemini CLI,
-  Copilot, Aider… ; chargement par `AGENTS.md`, natif ou à activer selon l'outil : ADOPTION §Brancher votre agent), Claude Code restant l'adaptateur fourni (plugin, hooks, `.claude/`) ; pied de commentaire nommant
-  l'agent ; niveaux de modèles par fournisseur (ORCHESTRATION §2).
-- **Méthode** : intention obligatoire des issues (user story, comportements d'erreur, critères Étant donné / Quand /
-  Alors, définition de fini : METHODOLOGY §2 bis) et TDD (§2 ter) ; formulaires d'issue enrichis ; ESSENTIEL (fr, en).
-- **Docs** : FINOPS (orchestrateur SPOC seul agent long, contexte dans le dépôt, routage des modèles, quotas et
-  reprise, boucles bornées, signaux de dérive), STEWARDS (rôles d'entretien, rapport non technique), REVIEW-SERVICE
-  (service de revue maison), COMPLIANCE (relecteurs de conformité), UTILISATION (guide pas à pas, exemple SwiftHFR),
-  ADR 0002 ; CI-BUDGET §3 (secrets et variables) et §5 (volume agentique) ; ORCHESTRATION §7 (**nommage des agents**
-  `<projet>.<orchestrateur>.<rôle>.<cible>`, vérifié en CI) ; LESSONS : remontée des leçons par issue.
-- **Agents** (vendorisés en `.claude/agents/`) : `adversarial-reviewer`, `issue-steward`, `doc-steward`,
+- **Open to all**: no more reference by name to the creator (roles: maintainer, operator; plugin author
+  "agentic-harness contributors"); the harness applies to any coding agent (Claude Code, Codex CLI, Cursor, Gemini
+  CLI, Copilot, Aider…; loaded through `AGENTS.md`, natively or to be enabled depending on the tool: ADOPTION
+  §Connect your coding agent), Claude Code remaining the adapter provided (plugin, hooks, `.claude/`); comment footer
+  naming the agent; model tiers per provider (ORCHESTRATION §2).
+- **Method**: mandatory intent for issues (user story, error behaviours, Given / When / Then criteria, definition of
+  done: METHODOLOGY §2 bis) and TDD (§2 ter); richer issue forms; ESSENTIALS (French, English).
+- **Docs**: FINOPS (SPOC orchestrator as the only long-lived agent, context in the repository, model routing, quotas
+  and resuming, bounded loops, drift signals), STEWARDS (upkeep roles, non-technical report), REVIEW-SERVICE
+  (in-house review service), COMPLIANCE (compliance reviewers), USAGE (step-by-step guide, SwiftHFR example),
+  ADR 0002; CI-BUDGET §3 (secrets and variables) and §5 (agentic volume); ORCHESTRATION §7 (**agent naming**
+  `<project>.<orchestrator>.<role>.<target>`, checked in CI); LESSONS: lessons reported through issues.
+- **Agents** (vendored into `.claude/agents/`): `adversarial-reviewer`, `issue-steward`, `doc-steward`,
   `flow-monitor`, `compliance-gdpr`, `-eu-ai-act`, `-nis2`, `-iso27001`, `-soc2`, `-tisax`, `-pci` (DSS, PIN, P2PE),
-  `-hds`, et le relecteur générique `compliance-reviewer`. Les identifiants d'exigence non vérifiés sur le texte
-  officiel sont marqués « (à vérifier) ».
-- **Conformité branchable** (COMPLIANCE §2) : par référentiel, agent intégré, agent de l'entreprise, ou spec seule
-  (`docs/compliance/<id>.md`, gabarit fourni) appliquée par le relecteur générique ; périmètre décidé sans jeton par
-  `paths` / `keywords` ; résolution et validation par `compliance-plan.py` (vendorisé, testé).
-- **Qualité au premier passage** : le tableau de bord mesure le ratio de PR à problème (constat en revue
-  adversariale, IA, conformité, CodeRabbit, humaine), agents / humains, et l'effort de correction (commits après le
-  premier constat, délai jusqu'au merge) ; règle de traçabilité de chaque verdict (REVIEW-ROUNDS §Traçabilité).
-- **Réglages du dépôt « as code »** : `.github/repo-settings.json` (description, topics, rulesets) appliqué au merge
-  par `repo-settings.yml` / `repo-settings.py` (secret `REPO_ADMIN_TOKEN`), dérive contrôlée chaque semaine ; le
-  cadre s'en sert pour lui-même (`settings.yml`). Contrôles requis vérifiés contre les noms de jobs réels.
-- **Schémas** : README illustré de trois schémas (mécanismes, cycle d'un changement, tirer parti du harnais), source
-  `docs/diagrams/*.json`, scène `.excalidraw` modifiable et SVG rendus par `scripts/diagrams/render.py` (contrôlés
-  en CI).
-- **Points d'extension** (ADOPTION §Remplacer ou étendre une brique) : chaque brique du cadre se garde, se remplace
-  par celle de l'entreprise ou se complète.
-- **Skills** : `/intent`, `/lesson-propose`, `/status-report`, `/compliance-review` ; `/lot-start` pose l'identifiant
-  d'agent.
-- **Workflows réutilisables** : `security.yml` (Semgrep CE, Trivy, gitleaks), `flow-report.yml` (issue « Tableau de
-  bord du projet »), `ai-review.yml` (revue IA, claude-code-action épinglée, jamais requise).
-- **Script** `flow-metrics.py` (vendorisé en `.harness/scripts/`) : jalons, goulots, travaux en panne, boucles de CI
-  et de revue, ratio agents / humains, délai de merge, minutes de CI ; tests unitaires.
-- **Labels** : `leçon`, `tableau de bord`, `revue: aucune`, `conformité`. `.harness/config.json` : clé `compliance`.
-- **CI du cadre** : contrôle de cohérence (`check-framework.py` : skills, agents, manifeste, labels, nommage), tests
-  Python, gitleaks ; Dependabot pour les actions ; formulaire d'issue « Leçon ».
+  `-hds`, and the generic reviewer `compliance-reviewer`. Requirement identifiers not verified against the official
+  text are marked "(to verify)".
+- **Pluggable compliance** (COMPLIANCE §2): per compliance framework, built-in agent, company agent, or spec only
+  (`docs/compliance/<id>.md`, template provided) applied by the generic reviewer; scope decided without tokens by
+  `paths` / `keywords`; resolution and validation by `compliance-plan.py` (vendored, tested).
+- **First-pass quality**: the dashboard measures the ratio of PRs with a problem (finding in adversarial, AI,
+  compliance, CodeRabbit or human review), agents / humans, and the correction effort (commits after the first
+  finding, time to merge); traceability rule for each verdict (REVIEW-ROUNDS §Traceability).
+- **Repository settings "as code"**: `.github/repo-settings.json` (description, topics, rulesets) applied on merge
+  by `repo-settings.yml` / `repo-settings.py` (secret `REPO_ADMIN_TOKEN`), drift checked every week; the harness
+  uses it for itself (`settings.yml`). Required checks verified against the real job names.
+- **Diagrams**: README illustrated with three diagrams (mechanisms, cycle of a change, leveraging the harness),
+  source `docs/diagrams/*.json`, editable `.excalidraw` scene and SVGs rendered by `scripts/diagrams/render.py`
+  (checked in CI).
+- **Extension points** (ADOPTION §Replace or extend a building block): each building block of the harness can be
+  kept, replaced by the company's own, or extended.
+- **Skills**: `/intent`, `/lesson-propose`, `/status-report`, `/compliance-review`; `/lot-start` sets the agent
+  identifier.
+- **Reusable workflows**: `security.yml` (Semgrep CE, Trivy, gitleaks), `flow-report.yml` ("Project dashboard"
+  issue), `ai-review.yml` (AI review, pinned claude-code-action, never required).
+- **Script** `flow-metrics.py` (vendored into `.harness/scripts/`): milestones, bottlenecks, stalled work, CI and
+  review loops, agents / humans ratio, time to merge, CI minutes; unit tests.
+- **Labels**: `leçon`, `tableau de bord`, `revue: aucune`, `conformité` (names at that version; renamed since, see
+  Unreleased). `.harness/config.json`: `compliance` key.
+- **Harness CI**: consistency check (`check-framework.py`: skills, agents, manifest, labels, naming), Python tests,
+  gitleaks; Dependabot for actions; "Lesson" issue form.
 
-Action supplémentaire : créer le secret `REPO_ADMIN_TOKEN` pour que le job `settings` applique
-`.github/repo-settings.json` (sinon il avertit seulement).
+Additional action: create the `REPO_ADMIN_TOKEN` secret so that the `settings` job applies
+`.github/repo-settings.json` (otherwise it only warns).
 
-Correctif : la CI du cadre écoutait `main`, la branche par défaut est `master`.
+Fix: the harness CI listened to `main`, the default branch is `master`.
 
-Action : `/harness-update` vers v0.2.0. Dans `harness.yml` (fichier du projet, non réécrit) : ajouter le
-déclencheur `schedule` et le job `flow` (voir le gabarit), activer au besoin `security` et `review`. Renseigner
-`compliance` dans `.harness/config.json` et exclure les agents de conformité inutiles.
+Action: `/harness-update` to v0.2.0. In `harness.yml` (project file, not rewritten): add the `schedule` trigger and
+the `flow` job (see the template), enable `security` and `review` as needed. Fill in `compliance` in
+`.harness/config.json` and exclude the compliance agents you do not need.
 
 ## 0.1.0 — 2026-11-07
 
-Première version, distillée de HFRnow (`dev-swift`) et ios-app_credit-immo (`develop`).
+First version, distilled from HFRnow (`dev-swift`) and ios-app_credit-immo (`develop`).
 
-- Docs (français) : ESSENTIEL (règles chargées à chaque session), METHODOLOGY, CONVENTIONS, LESSONS (82 leçons à
-  portée, sources citées), ORCHESTRATION, REVIEW-ROUNDS, BRANCHING-RELEASE, CI-BUDGET, MAC-HANDOFF, ADOPTION, ADR 0001
-  et gabarit d'ADR. Édition anglaise d'ESSENTIEL et des blocs `CLAUDE.md`/`AGENTS.md` (`i18n/en/`).
-- Taxonomie de labels canonique (type, priorité, modèle, taille, statut, hôte) avec `axis` et `aliases`.
-- Gabarits : bloc `CLAUDE.md`/`AGENTS.md`, formulaires d'issue (retour de test, bug, fonctionnalité, tâche), PR, lot,
-  markdownlint, `.harness/config.json`, workflows appelants `harness.yml` et `harness-sync.yml`.
-- `scripts/harness-sync.sh` : vendorisation idempotente (modes copy, tree, block, seed, jsonmerge, refbump), verrou à
-  empreintes, `--check`, `--dry-run`, `--force`, `--skip-workflows`, `--skip-seed`, langue et exclusions par projet.
-- Plugin `harness` (marketplace `agentic-harness`) : six skills, hook `guard-git` (push forcé, push vers une branche
-  protégée, `--no-verify`), hook de rappel en début de session.
-- Workflows réutilisables : `labels-sync`, `issue-hygiene`, `pr-hygiene`, `docs-security`.
+- Docs (French): ESSENTIALS (rules loaded in every session), METHODOLOGY, CONVENTIONS, LESSONS (82 scoped lessons,
+  sources cited), ORCHESTRATION, REVIEW-ROUNDS, BRANCHING-RELEASE, CI-BUDGET, MAC-HANDOFF, ADOPTION, ADR 0001 and
+  ADR template. English edition of ESSENTIALS and of the `CLAUDE.md`/`AGENTS.md` blocks (`i18n/en/`).
+- Canonical label taxonomy (type, priority, model, size, status, host) with `axis` and `aliases`.
+- Templates: `CLAUDE.md`/`AGENTS.md` block, issue forms (test feedback, bug, feature, task), PR, lot, markdownlint,
+  `.harness/config.json`, calling workflows `harness.yml` and `harness-sync.yml`.
+- `scripts/harness-sync.sh`: idempotent vendoring (modes copy, tree, block, seed, jsonmerge, refbump), lock with
+  fingerprints, `--check`, `--dry-run`, `--force`, `--skip-workflows`, `--skip-seed`, per-project language and
+  exclusions.
+- Plugin `harness` (marketplace `agentic-harness`): six skills, `guard-git` hook (force push, push to a protected
+  branch, `--no-verify`), reminder hook at session start.
+- Reusable workflows: `labels-sync`, `issue-hygiene`, `pr-hygiene`, `docs-security`.
 
-Action : adoption, voir docs/ADOPTION.md.
+Action: adoption, see docs/ADOPTION.md.

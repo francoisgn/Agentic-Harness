@@ -1,136 +1,155 @@
-# Méthode : le travail piloté par les issues
+# Method: issue-driven work
 
-Comment une idée devient une PR mergée, quel que soit le projet. Sources : `CLAUDE.md` de ios-app_credit-immo
-(workflow piloté par les issues, schéma `docs/diagrams/workflow.svg`), `AGENTS.md` §5–§9 et `docs/LOTS.md` de HFRnow
-(boucle de lot, plan, prises en charge, définition de « fini »).
+How an idea becomes a merged PR, whatever the project. Sources: `CLAUDE.md` of ios-app_credit-immo
+(issue-driven workflow, diagram `docs/diagrams/workflow.svg`), `AGENTS.md` §5–§9 and `docs/LOTS.md` of HFRnow
+(lot loop, plan, claims, definition of "done").
 
-## 1. Où vit quoi : l'état partagé
+## 1. What lives where: shared state
 
-Les sessions (cloud, Mac, humains, autres agents) ne se coordonnent **que** par de l'état visible. Le bloc-notes, la
-mémoire d'un agent et `/tmp` ne comptent pas.
+Sessions (cloud, Mac, humans, other agents) coordinate **only** through visible state. The scratchpad, an agent's
+memory and `/tmp` do not count.
 
-| Où | Rôle |
+| Where | Role |
 |---|---|
-| **Issues** | Le **suivi** : une issue par lot, bug, point de retour, tâche ; prise en charge, labels de statut, blocages |
-| **PR** | Le travail en cours et en revue ; le fil de la PR est la trace de ce qui a été fait et pourquoi |
-| **`docs/LOTS.md`** (si le projet découpe en lots) | Le **plan** : périmètre, dépendances, modèle, priorité de chaque lot, lié à son issue. Jamais modifié pour un avancement |
-| **`docs/lots/LOT-XXX-*.md`** | La **spec** d'un lot (gabarit : `templates/docs/lots/TEMPLATE.md`) |
-| **`docs/adr/`** | Les décisions. Une décision hors ADR n'est pas une décision |
-| **`.md` du projet** | Le contexte durable ; ils renvoient aux issues (`#n`) au lieu de porter des TODO |
+| **Issues** | The **tracking**: one issue per lot, bug, feedback point, task; claim, status labels, blockers |
+| **PRs** | Work in progress and in review; the PR thread is the record of what was done and why |
+| **`docs/LOTS.md`** (if the project splits work into lots) | The **plan**: scope, dependencies, model tier, priority of each lot, linked to its issue. Never edited to record progress |
+| **`docs/lots/LOT-XXX-*.md`** | The **spec** of a lot (template: `templates/docs/lots/TEMPLATE.md`) |
+| **`docs/adr/`** | The decisions. A decision outside an ADR is not a decision |
+| **The project's `.md` files** | The durable context; they point to issues (`#n`) instead of carrying TODOs |
 
-## 2. La boucle (une issue, une PR)
+## 2. The loop (one issue, one PR)
 
-1. **Issue** : titre clair, puis l'**intention** (§2 bis) : user story, comportements d'erreur, critères
-   d'acceptation, définition de fini, sources. Labels obligatoires (§4). Skill : `/intent`.
-   Chercher un doublon avant de créer (titres, corps, synonymes, issues et PR ouvertes **et** fermées) ; la plus
-   ancienne est celle qu'on garde.
-2. **Prête ?** Toutes ses dépendances sont faites, ses entrées existent (données, captures, accès), aucune décision
-   produit ne manque (sinon `à clarifier`, on ne code pas), pas `hôte: mac` si on est en cloud.
-3. **Prise en charge** avant d'écrire du code : commentaire « Pris en charge — branche `claude/<lot>` » + plan en 3 à 5
-   puces (label `pris en charge` si le projet le suit). Première prise en charge gagne. On s'arrête avant la fin →
-   dire où on en est sur la PR et l'issue, puis rendre la main (« Rendue : … »). Une prise en charge qui semble
-   abandonnée depuis 24 h : demander au mainteneur, ne jamais la reprendre d'office.
-4. **Spec** : l'issue suffit pour un bug, une tâche, une doc ; un lot a sa spec `docs/lots/LOT-XXX-*.md`.
-5. **Réalisation en TDD** (§2 ter) : branche depuis la branche d'intégration à jour (`git fetch` d'abord) ; commits
-   atomiques par issue ; tests écrits d'abord et vus rouges ; pas de refactor opportuniste hors périmètre (si un point est
-   ambigu : l'option la plus simple, notée dans le commentaire de fin).
-6. **Vérification** : tests et lint en local ; auto-relecture contre [LESSONS](LESSONS.md) ; revue adversariale par
-   un autre modèle ([ORCHESTRATION](ORCHESTRATION.md) §3) ; build Mac si l'app est touchée ([MAC-HANDOFF](MAC-HANDOFF.md)).
-7. **PR** en brouillon, **un seul push** ([CONVENTIONS](CONVENTIONS.md) §PR). « Ready for review » quand tout est fini.
-   Cycles de revue de bots : [REVIEW-ROUNDS](REVIEW-ROUNDS.md).
-8. **Fin** : commentaire sur chaque issue (fait, lien de la PR, ce qui reste, décisions prises, à valider sur
-   l'appareil). Issue résolue sans `Closes` ou fermée à la main → commentaire « Résolu par #PR ». Fermer une issue
-   retire ses labels de statut.
+1. **Issue**: clear title, then the **intent** (§2 bis): user story, error behaviours, acceptance criteria,
+   definition of done, sources. Mandatory labels (§4). Skill: `/intent`.
+   Search for a duplicate before creating (titles, bodies, synonyms, open **and** closed issues and PRs); the
+   oldest is the one to keep.
+2. **Ready?** All its dependencies are done, its inputs exist (data, screenshots, access), no product decision is
+   missing (otherwise `status: needs-decision`, do not code), not `needs: host` if you are in the cloud.
+3. **Claim** before writing code: comment "Claimed: branch `claude/<lot>`" + a plan in 3 to 5 bullets (set
+   `status: claimed`). The first claim wins. If you stop before the end, say where you are on the PR and the
+   issue, then hand it back ("Released: …"). A claim that looks abandoned for 24 h: ask the maintainer, never take
+   it over on your own.
+4. **Spec**: the issue is enough for a bug, a task, a doc; a lot has its spec `docs/lots/LOT-XXX-*.md`.
+5. **Implementation in TDD** (§2 ter): branch from the up-to-date integration branch (`git fetch` first); atomic
+   commits per issue; tests written first and seen red; no opportunistic refactor outside the scope (if a point is
+   ambiguous: the simplest option, noted in the end comment).
+6. **Verification**: tests and lint locally; self-review against [LESSONS](LESSONS.md); adversarial review by
+   another model ([ORCHESTRATION](ORCHESTRATION.md) §3); Mac build if the app is touched ([MAC-HANDOFF](MAC-HANDOFF.md)).
+7. **Draft PR**, **one push** ([CONVENTIONS](CONVENTIONS.md) §Pull requests). "Ready for review" when everything is
+   finished. Bot review cycles: [REVIEW-ROUNDS](REVIEW-ROUNDS.md).
+8. **End**: comment on each issue (done, PR link, what is left, decisions taken, to validate on the device). Issue
+   resolved without `Closes` or closed by hand → comment "Resolved by #PR". Closing an issue removes its status
+   labels.
 
-**Fini** = définition de fini de l'issue respectée, code au bon endroit, tests écrits d'abord et verts en CI, lint et sécurité verts, docs à jour dans le même commit, relu par un
-autre modèle ou un humain, auto-relecture faite, `Closes #n` et issue fermée après le merge (vérifiée fermée).
+**Done** = the issue's definition of done is met, code in the right place, tests written first and green in CI, lint and security green, docs updated in the same commit, reviewed by
+another model or a human, self-review done, `Closes #n` and issue closed after the merge (checked closed).
 
-## 2 bis. L'intention : ce qu'un agent doit savoir avant d'écrire une ligne
+## 2 bis. The intent: what an agent must know before writing a line
 
-Un agent ne devine pas une intention : il la lit. Toute issue de travail porte :
+An agent does not guess an intent: it reads it. Every work issue carries:
 
-| Section | Contenu | Exemple |
+| Section | Content | Example |
 |---|---|---|
-| `### Résumé` | « En tant que <qui>, je veux que <X> fasse <Y>, pour <bénéfice> » | En tant qu'emprunteur, je veux que le simulateur recalcule la mensualité quand je change la durée, pour comparer |
-| `### Comportements d'erreur` | Chaque entrée invalide, panne externe, limite → résultat attendu | Durée hors 5–30 ans : message sous le champ, dernier résultat valide conservé |
-| `### Critères d'acceptation` | Étant donné / Quand / Alors, un test par critère | Étant donné 200 000 € à 3 % sur 20 ans, quand…, alors 1 109,20 € (source : …) |
-| `### Définition de fini` | Ce qui doit être vrai pour fermer | Tests verts en CI, doc mise à jour, revue adversariale APPROUVÉ, validé sur iPhone |
-| `### Hors périmètre`, `### Sources` | Ce qu'on ne fait pas ; d'où viennent les faits | — |
+| `### Summary` | "As <who>, I want <X> to do <Y>, so that <benefit>" | As a borrower, I want the simulator to recompute the monthly payment when I change the term, so that I can compare |
+| `### Error behaviours` | Each invalid input, external failure, limit → expected result | Term outside 5–30 years: message under the field, last valid result kept |
+| `### Acceptance criteria` | Given / When / Then, one test per criterion | Given €200,000 at 3% over 20 years, when…, then €1,109.20 (source: …) |
+| `### Definition of done` | What must be true to close | Tests green in CI, doc updated, adversarial review APPROVED, validated on iPhone |
+| `### Out of scope`, `### Sources` | What is not done; where the facts come from | — |
 
-Il manque une de ces sections et elle demande une décision produit → `à clarifier` avec la question exacte ; on ne
-code pas. Le steward d'issues ([STEWARDS](STEWARDS.md) §1) veille à ce que la file soit prête.
+One of these sections is missing and it needs a product decision → `status: needs-decision` with the exact
+question; do not code. The issue steward ([STEWARDS](STEWARDS.md) §1) keeps the queue ready.
 
-## 2 ter. TDD : le test d'abord, rouge, puis vert
+## 2 ter. TDD: the test first, red, then green
 
-1. **Rouge** : traduire chaque critère d'acceptation et chaque comportement d'erreur en test, par le vrai point
-   d'entrée ; le lancer et **le voir échouer pour la bonne raison** (pas une erreur de compilation ou d'import).
-2. **Vert** : le code minimal qui fait passer ; aucun test n'est affaibli pour passer.
-3. **Refactor** : nettoyer avec les tests verts, sans changer le comportement.
-4. Un correctif de bug commence par le test qui reproduit le bug. Un constat de revue corrigé a son test (REVIEW-ROUNDS
-   §4). La PR dit, dans « Vérifié », quels tests ont été vus rouges (LESSONS L01).
-5. Ce qui ne se teste pas automatiquement (rendu, appareil) se dit dans « Points de vigilance », avec la vérification
-   manuelle prévue.
+1. **Red**: turn each acceptance criterion and each error behaviour into a test, through the real entry point; run
+   it and **see it fail for the right reason** (not a compile or import error).
+2. **Green**: the minimal code that makes it pass; no test is weakened to pass.
+3. **Refactor**: clean up with the tests green, without changing behaviour.
+4. A bug fix starts with the test that reproduces the bug. A fixed review finding has its test (REVIEW-ROUNDS
+   §4). The PR says, under "Verified", which tests were seen red (LESSONS L01).
+5. What cannot be tested automatically (rendering, device) goes under "Watch points / not tested", with the planned
+   manual check.
 
-## 3. Retours de test : issue parapluie + une issue par point
+## 3. Test feedback: umbrella issue + one issue per point
 
-Un lot de retours (session de test sur iPhone, relecture d'un proche) devient :
-- **une issue parapluie** `feedback` + priorité, avec un tableau de suivi :
+A batch of feedback (test session on iPhone, review by a relative) becomes:
+- **an umbrella issue** `type: epic` + priority, with a tracking table:
 
-  | Réf | Point | Lot | Issue | PR |
+  | Ref | Point | Lot | Issue | PR |
   |---|---|---|---|---|
-  | Sim3 | Capacité : fusion des deux jauges | lot-ux-1 | #212 | #230 |
+  | Sim3 | Capacity: merge the two gauges | lot-ux-1 | #212 | #230 |
 
-- **une issue par point**, titre `[Réf] Onglet : sujet` (ex. `[Sim3] Capacité : fusion…`), rattachée au parapluie
-  (sous-issue), avec ses labels complets ;
-- le parapluie se met à jour à chaque PR (colonne PR) et se ferme quand tous ses points le sont.
+- **one issue per point**, title `[Ref] Tab: subject` (e.g. `[Sim3] Capacity: merge…`), attached to the umbrella
+  (sub-issue), with its full labels;
+- the umbrella is updated at each PR (PR column) and closes when all its points are closed.
 
-Skill : `/feedback-triage`.
+Skill: `/feedback-triage`.
 
 ## 4. Labels
 
-Taxonomie canonique : `templates/.github/labels.json` (vendorisée en `.harness/labels.json`) ; le projet ajoute les
-siens dans `.github/labels.local.json` ; le workflow réutilisable `labels-sync.yml` synchronise les deux.
+Canonical taxonomy: `templates/.github/labels.json` (vendored as `.harness/labels.json`); the project adds its own
+in `.github/labels.local.json`; the reusable workflow `labels-sync.yml` syncs both.
 
-| Axe | Labels | Obligatoire |
+Format: `axis: value`, lowercase ASCII, no emoji.
+
+| Axis | Labels | Rule |
 |---|---|---|
-| Type | `bug`, `ux`, `feature`, `docs`, `ci`, `sécurité`, `release` (+ types métier du projet) | oui |
-| Priorité | `P1 🔴` bloquant ou faux · `P2 🟠` prochaine itération · `P3 🟢` plus tard | oui |
-| Modèle | `modèle: haiku` · `sonnet` · `opus` · `fable` ([ORCHESTRATION](ORCHESTRATION.md) §2) | oui |
-| Taille | `taille: S` < 1 h, un fichier · `M` quelques fichiers · `L` à découper | oui |
-| Statut | `à clarifier` (décision produit) · `bloqué` (prérequis externe) · `pris en charge` | selon le cas |
-| Conformité | `conformité: <id>` force la revue du référentiel ([COMPLIANCE](COMPLIANCE.md)) · `revue: aucune` saute le service de revue | selon le cas |
-| Suivi | `leçon` (proposition au tableau des leçons) · `tableau de bord` (issue tenue par `flow-report.yml`) | selon le cas |
-| Hôte | `hôte: mac` : demande le Mac ; les sessions cloud n'y touchent pas | selon le cas |
-| Projet | ex. `onglet: …`, `area: …` (dans `labels.local.json`) | selon le projet |
+| `type:` | `type: bug` · `type: feature` · `type: docs` · `type: chore` · `type: security` · `type: epic` (umbrella or lot) | exactly one on every open issue |
+| `priority:` | `priority: critical` data loss or crash · `priority: high` blocking or wrong · `priority: medium` next iteration · `priority: low` later | exactly one after triage |
+| `difficulty:` | `difficulty: trivial` fast tier · `difficulty: easy` solid tier · `difficulty: medium` strong tier · `difficulty: hard` frontier tier, reviewed by another model ([ORCHESTRATION](ORCHESTRATION.md) §2) | exactly one after triage |
+| `status:` | `status: needs-triage` · `status: ready` · `status: claimed` · `status: blocked` (external prerequisite) · `status: needs-decision` (product decision) | exactly one on every open issue; removed on close |
+| `needs:` | `needs: host` requires the Mac, cloud sessions do not touch it · `needs: info` · `needs: review` | as needed |
+| Other | `direct-pr` · `dependencies` | as needed |
+| Project | in `labels.local.json`, e.g. `area: ux`, `type: lot`, `dashboard` (issue kept by `flow-report.yml`), `review: skip` (skips the review service), `compliance` (forces the compliance framework review, [COMPLIANCE](COMPLIANCE.md)) | per project |
 
-Les parapluies portent seulement `feedback` + priorité. Ajouter un label au fichier **avant** de l'utiliser.
-`issue-hygiene.yml` signale (un seul commentaire, mis à jour) l'axe manquant.
+`lesson` (proposal for the lessons table) exists only in the harness repository's own `.github/labels.local.json`.
 
-**Ordre de prise** : `sécurité` d'abord, puis `P1` → `P3` ; parmi les lots, le chemin critique et ceux qui en
-débloquent d'autres ; à priorité égale, choisir une issue dont le label `modèle:` correspond au modèle de la session.
+A milestone is a GitHub milestone. A lot is a `type: epic` issue with sub-issues and `LOT-NNN` in its title.
+Umbrellas carry only `type: epic`, their `status:` and a priority. Add a label to the file **before** using it.
+`issue-hygiene.yml` reports (a single comment, kept up to date) the missing axis.
+
+**Read the state of a project** (GitHub issue search):
+
+| Question | Query |
+|---|---|
+| In progress | `is:issue is:open label:"status: claimed"` + open PRs (`is:pr is:open`) |
+| Ready to take | `is:issue is:open label:"status: ready"`, sorted by priority (`priority: critical` → `priority: low`) |
+| Blocked | `is:issue is:open label:"status: blocked"` |
+| Needs a human decision | `is:issue is:open label:"status: needs-decision"` |
+| To triage | `is:issue is:open label:"status: needs-triage"` |
+| Out of reach of a cloud session | `is:issue is:open label:"needs: host"` |
+| By milestone | `is:issue milestone:"<name>"` |
+| By lot | the sub-issues of the lot's `type: epic` issue (`label:"type: epic" LOT-NNN in:title`) |
+
+**Order of taking**: `type: security` first, then `priority: critical` → `priority: low`; among lots, the critical
+path and those that unblock others; at equal priority, choose an issue whose `difficulty:` label matches the model
+tier of the session.
 
 ## 5. Lots
 
-Un **lot** est l'unité de travail d'une session : une PR, relue d'un coup, à périmètre net. Taille L = à découper.
-- Le plan (`docs/LOTS.md`) liste chaque lot : périmètre, module, taille, modèle auteur → relecteur, dépendances,
-  priorité, issue. Marquer le chemin critique (★). Il ne change que si le plan change (nouveau lot, dépendance,
-  routage), jamais pour un avancement.
-- Les dépendances respectent le sens des modules (un lot de la couche basse ne dépend pas d'une couche haute) ; un
-  script de CI peut le vérifier (HFRnow : `scripts/check-lot-deps.py`).
-- Une branche de lot regroupe les issues d'un même lot : `claude/<lot>` ; une PR par lot avec un `Closes #n` par issue.
-- **Débloquer en fermant** : qui ferme un lot liste les lots qui en dépendaient, vérifie qu'aucun autre prérequis ne
-  les bloque (capture, ADR, décision), retire `bloqué` et commente « Débloqué par #PR ». Sinon dire ce qui bloque encore.
-- Lots parallèles qui écrivent la même section d'un doc partagé : créer d'abord le titre commun, chaque lot n'ajoute
-  que sa sous-section (LESSONS L41).
+A **lot** is the unit of work of a session: one PR, reviewed in one go, with a clear scope. `difficulty: hard`
+spanning several layers must be split into lots.
+- The plan (`docs/LOTS.md`) lists each lot: scope, module, difficulty, author model → reviewer, dependencies,
+  priority, issue. Mark the critical path (★). It changes only if the plan changes (new lot, dependency,
+  routing), never to record progress.
+- Dependencies follow the direction of the modules (a lot of the low layer does not depend on a high layer); a
+  CI script can check it (HFRnow: `scripts/check-lot-deps.py`).
+- A lot branch groups the issues of one lot: `claude/<lot>`; one PR per lot with one `Closes #n` per issue.
+- **Unblock when closing**: whoever closes a lot lists the lots that depended on it, checks that no other
+  prerequisite blocks them (screenshot, ADR, decision), replaces `status: blocked` with `status: ready` and comments
+  "Unblocked by #PR". Otherwise say what still blocks.
+- Parallel lots that write the same section of a shared doc: create the common heading first, each lot adds only
+  its sub-section (LESSONS L41).
 
-## 6. Travail découvert en route
+## 6. Work discovered along the way
 
-TODO, décision en attente, dette, bug vu dans un autre lot : **une issue labellisée**, jamais seulement une ligne dans un
-`.md`, ni seulement un message de session. Un problème dans le lot d'un autre se signale sur son issue ou sa PR.
+TODO, pending decision, debt, bug seen in another lot: **a labelled issue**, never only a line in a `.md`, nor
+only a session message. A problem in someone else's lot is reported on their issue or PR.
 
-## 7. Contributions extérieures
+## 7. External contributions
 
-Un contributeur externe (humain ou agent) suit la même boucle. Ce qui marche (HFRnow, `EXTERNAL-AGENTS.md`) :
-une file `external: ready` d'issues autonomes ; la prise en charge demandée par commentaire quand il n'a pas les droits ;
-une limite de PR ouvertes par contributeur ; un code UI arrivé sans spec ni tests se **porte** par lots, il ne se merge
-pas tel quel (LESSONS L44). Le modèle des droits et du merge relève d'un ADR du projet.
+An external contributor (human or agent) follows the same loop. What works (HFRnow, `EXTERNAL-AGENTS.md`):
+a queue `external: ready` of self-contained issues; the claim requested by comment when they lack the rights;
+a limit on open PRs per contributor; UI code that arrived without spec or tests is **ported** lot by lot, it is not
+merged as is (LESSONS L44). The model for rights and merging belongs in a project ADR.

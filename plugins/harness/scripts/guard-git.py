@@ -1,14 +1,14 @@
 #!/usr/bin/env python3
-"""Garde-fou git (hook PreToolUse sur Bash) du cadre agentic-harness.
+"""Git guardrail (PreToolUse hook on Bash) of the agentic-harness harness.
 
-Refuse, avant exécution, les commandes qui cassent les règles communes (docs/BRANCHING-RELEASE.md, docs/ESSENTIEL.md) :
-  - un `git push` forcé (`--force`, `-f`, `--force-with-lease`, refspec `+…`) ;
-  - un `git push` vers une branche protégée (liste dans `.harness/config.json`, clé `protected_branches`) ;
-  - `--no-verify` sur `git commit` ou `git push` (contourne gitleaks et les hooks pre-commit).
-Une commande refusée sort en code 2 : Claude Code bloque l'appel et montre le message à l'agent.
-L'opérateur reste libre de lancer la commande lui-même s'il le décide.
-Bibliothèque standard uniquement ; toute erreur interne laisse passer la commande (le hook ne doit jamais bloquer
-le travail par sa propre faute).
+Refuses, before execution, the commands that break the shared rules (docs/BRANCHING-RELEASE.md, docs/ESSENTIALS.md):
+  - a forced `git push` (`--force`, `-f`, `--force-with-lease`, refspec `+…`);
+  - a `git push` to a protected branch (list in `.harness/config.json`, key `protected_branches`);
+  - `--no-verify` on `git commit` or `git push` (bypasses gitleaks and the pre-commit hooks).
+A refused command exits with code 2: Claude Code blocks the call and shows the message to the agent.
+The operator remains free to run the command themselves if they decide to.
+Standard library only; any internal error lets the command through (the hook must never block
+work through its own fault).
 """
 from __future__ import annotations
 
@@ -25,7 +25,7 @@ GIT_GLOBAL_WITH_VALUE = {"-C", "-c", "--git-dir", "--work-tree", "--namespace"}
 
 
 def protected_branches(project_dir: str) -> list[str]:
-    """Branches protégées : `.harness/config.json` du projet, sinon la liste par défaut."""
+    """Protected branches: the project's `.harness/config.json`, otherwise the default list."""
     try:
         with open(os.path.join(project_dir, ".harness", "config.json"), encoding="utf-8") as handle:
             value = json.load(handle).get("protected_branches")
@@ -37,7 +37,7 @@ def protected_branches(project_dir: str) -> list[str]:
 
 
 def git_subcommand(tokens: list[str]) -> tuple[str | None, list[str], str | None]:
-    """(sous-commande, arguments, dossier -C) d'une commande `git …`, ou (None, [], None)."""
+    """(subcommand, arguments, -C directory) of a `git …` command, or (None, [], None)."""
     if not tokens or os.path.basename(tokens[0]) != "git":
         return None, [], None
     index, workdir = 1, None
@@ -55,7 +55,7 @@ def git_subcommand(tokens: list[str]) -> tuple[str | None, list[str], str | None
 
 
 def current_branch(cwd: str) -> str | None:
-    """Branche courante de `cwd`, ou None si elle ne se lit pas."""
+    """Current branch of `cwd`, or None if it cannot be read."""
     try:
         out = subprocess.run(["git", "-C", cwd, "symbolic-ref", "--short", "-q", "HEAD"],
                              capture_output=True, text=True, timeout=5, check=False)
@@ -65,41 +65,41 @@ def current_branch(cwd: str) -> str | None:
 
 
 def check_push(args: list[str], protected: list[str], cwd: str) -> str | None:
-    """Motif de refus d'un `git push`, ou None."""
+    """Reason for refusing a `git push`, or None."""
     positional = []
     for arg in args:
         if arg in ("--force", "-f", "--force-if-includes") or arg.startswith("--force-with-lease"):
-            return "push forcé interdit (jamais de force-push sur une branche partagée)"
+            return "forced push forbidden (never force-push a shared branch)"
         if arg == "--no-verify":
-            return "`--no-verify` interdit (gitleaks et les hooks pre-commit doivent tourner)"
+            return "`--no-verify` forbidden (gitleaks and the pre-commit hooks must run)"
         if arg in ("--mirror", "--all"):
-            return f"`git push {arg}` interdit (pousse aussi les branches protégées)"
+            return f"`git push {arg}` forbidden (it also pushes the protected branches)"
         if not arg.startswith("-"):
             positional.append(arg)
     refspecs = positional[1:]
     for refspec in refspecs:
         if refspec.startswith("+"):
-            return f"refspec forcée `{refspec}` interdite"
+            return f"forced refspec `{refspec}` forbidden"
         destination = refspec.split(":", 1)[-1]
         destination = destination.removeprefix("refs/heads/")
         if destination in protected:
-            return f"push direct vers la branche protégée `{destination}` interdit : passer par une PR"
+            return f"direct push to the protected branch `{destination}` forbidden: go through a PR"
     if not refspecs:
         branch = current_branch(cwd)
         if branch in protected:
-            return f"push depuis la branche protégée `{branch}` interdit : créer une branche `claude/<lot>` et une PR"
+            return f"push from the protected branch `{branch}` forbidden: create a `claude/<lot>` branch and a PR"
     return None
 
 
 def reason_for(command: str, protected: list[str], cwd: str) -> str | None:
-    """Motif de refus de la première sous-commande fautive de `command`, ou None."""
+    """Reason for refusing the first offending subcommand of `command`, or None."""
     for part in SEPARATORS.split(command):
         try:
             tokens = shlex.split(part, comments=True)
         except ValueError:
             continue
         while tokens and re.fullmatch(r"[A-Za-z_][A-Za-z0-9_]*=.*", tokens[0]):
-            tokens = tokens[1:]  # affectations VAR=… en tête
+            tokens = tokens[1:]  # leading VAR=… assignments
         sub, args, workdir = git_subcommand(tokens)
         where = os.path.join(cwd, workdir) if workdir else cwd
         if sub == "push":
@@ -107,7 +107,7 @@ def reason_for(command: str, protected: list[str], cwd: str) -> str | None:
             if reason:
                 return reason
         elif sub == "commit" and ("--no-verify" in args or "-n" in args):
-            return "`git commit --no-verify` interdit (gitleaks et les hooks pre-commit doivent tourner)"
+            return "`git commit --no-verify` forbidden (gitleaks and the pre-commit hooks must run)"
     return None
 
 
@@ -120,10 +120,10 @@ def main() -> int:
         if not isinstance(command, str) or "git" not in command:
             return 0
         reason = reason_for(command, protected_branches(project_dir), cwd)
-    except Exception:  # noqa: BLE001 — un hook en panne ne bloque jamais le travail
+    except Exception:  # noqa: BLE001 (a broken hook never blocks work)
         return 0
     if reason:
-        print(f"agentic-harness : {reason}. Si c'est vraiment voulu, l'opérateur lance la commande lui-même "
+        print(f"agentic-harness: {reason}. If this is really intended, the operator runs the command themselves "
               "(docs/BRANCHING-RELEASE.md).", file=sys.stderr)
         return 2
     return 0

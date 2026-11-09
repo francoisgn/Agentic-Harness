@@ -1,58 +1,58 @@
-# Utiliser le harnais sur un projet : guide pas à pas (exemple SwiftHFR)
+# Using the harness on a project: step-by-step guide (SwiftHFR example)
 
-TL;DR : on **adopte** une fois (vendorisation, [ADOPTION](ADOPTION.md)), on **règle** `.harness/config.json`, puis
-chaque besoin suit le même chemin : intention → issue prête → lot en TDD → revues → PR → tableau de bord. L'opérateur
-ne parle qu'à l'orchestrateur.
+TL;DR: you **adopt** once (vendoring, [ADOPTION](ADOPTION.md)), you **configure** `.harness/config.json`, then
+every need follows the same path: intent → ready issue → lot in TDD → reviews → PR → dashboard. The operator only
+talks to the orchestrator.
 
-## 1. Vue d'ensemble
+## 1. Overview
 
 ```mermaid
 flowchart TD
-  A["Besoin (opérateur, retour de test, bug)"] -->|/intent ou /feedback-triage| B["Issue : user story, erreurs,<br/>critères, définition de fini, labels"]
-  B -->|issue-steward| C{Prête ?}
-  C -- "à clarifier / bloqué" --> OP([Opérateur décide]) --> B
-  C -- oui --> D["Orchestrateur : route vers un agent lot<br/>du modèle du label (/lot-start)"]
-  D --> E["TDD : test rouge → code → vert<br/>commits atomiques, local-check"]
-  E --> F["/lessons-check + adversarial-reviewer<br/>(+ /compliance-review si activé)"]
-  F --> G["PR brouillon → un push → Ready<br/>CI + sécurité + revue IA"]
-  G -->|/review-round, ≤ 3 cycles| H["Merge (politique du projet)<br/>/lot-finish : issues, déblocages"]
+  A["Need (operator, test feedback, bug)"] -->|/intent or /feedback-triage| B["Issue: user story, errors,<br/>criteria, definition of done, labels"]
+  B -->|issue-steward| C{Ready?}
+  C -- "needs-decision / blocked" --> OP([Operator decides]) --> B
+  C -- yes --> D["Orchestrator: routes to a lot agent<br/>of the label's model tier (/lot-start)"]
+  D --> E["TDD: red test → code → green<br/>atomic commits, local-check"]
+  E --> F["/lessons-check + adversarial-reviewer<br/>(+ /compliance-review if enabled)"]
+  F --> G["Draft PR → one push → Ready<br/>CI + security + AI review"]
+  G -->|/review-round, ≤ 3 cycles| H["Merge (project policy)<br/>/lot-finish: issues, unblocking"]
   H --> I["doc-steward, /lesson-propose"]
-  H --> J["flow-report : tableau de bord quotidien<br/>/status-report hebdomadaire"]
+  H --> J["flow-report: daily dashboard<br/>/status-report weekly"]
 ```
 
-## 2. Mise en place (une fois)
+## 2. Setup (once)
 
-| Étape | Commande / fichier | Résultat |
+| Step | Command / file | Result |
 |---|---|---|
-| 1. Adopter | `harness-sync.sh --target .` ([ADOPTION](ADOPTION.md)) | `.harness/`, `.claude/skills/`, `.claude/agents/`, bloc `CLAUDE.md` |
-| 2. Régler | `.harness/config.json` : branches, langue, exclusions, `compliance` (agent du cadre, agent de l'entreprise ou spec) | Règles et relecteurs adaptés au projet ; toute brique remplaçable ([ADOPTION](ADOPTION.md) §Remplacer) |
-| 3. Labels | `.github/labels.local.json` + job `labels` de `harness.yml` | Taxonomie commune + labels du projet |
-| 4. CI | `harness.yml` : jobs `flow`, `security`, `review` à activer | Tableau de bord, SAST/SCA/secrets, revue IA |
-| 5. Secrets | `ANTHROPIC_API_KEY` (revue IA), `REPO_ADMIN_TOKEN` (réglages du dépôt), en secrets GitHub ; rien en dur ([CI-BUDGET](CI-BUDGET.md) §3) | — |
-| 6. Jalons | Milestones GitHub (« Jalon 1 : … », échéance) | Avancement lisible dans le tableau de bord |
+| 1. Adopt | `harness-sync.sh --target .` ([ADOPTION](ADOPTION.md)) | `.harness/`, `.claude/skills/`, `.claude/agents/`, `CLAUDE.md` block |
+| 2. Configure | `.harness/config.json`: branches, language, exclusions, `compliance` (harness agent, company agent or spec) | Rules and reviewers fitted to the project; every building block is replaceable ([ADOPTION](ADOPTION.md) §Replace) |
+| 3. Labels | `.github/labels.local.json` + `labels` job of `harness.yml` | Shared taxonomy + project labels |
+| 4. CI | `harness.yml`: jobs `flow`, `security`, `review` to enable | Dashboard, SAST/SCA/secrets, AI review |
+| 5. Secrets | `ANTHROPIC_API_KEY` (AI review), `REPO_ADMIN_TOKEN` (repository settings), as GitHub secrets; nothing hard-coded ([CI-BUDGET](CI-BUDGET.md) §3) | — |
+| 6. Milestones | GitHub milestones ("Milestone 1: …", due date) | Progress readable in the dashboard |
 
-## 3. Au quotidien
+## 3. Day to day
 
-| Je veux… | Je dis à l'orchestrateur | Ce qui se passe |
+| I want… | I tell the orchestrator | What happens |
 |---|---|---|
-| Une nouvelle fonctionnalité | « /intent le fil se recharge seul toutes les 2 min » | Issue rédigée, montrée, créée après accord |
-| Traiter des retours de test | « /feedback-triage » + les notes | Parapluie + une issue par point, regroupés en lots |
-| Faire avancer le projet | « prends les issues prêtes » | Lots lancés en parallèle dans les bornes du système ([FINOPS](FINOPS.md) §3), agents nommés (`<projet>.<orc>.lot.<cible>`) |
-| Savoir où on en est | « /status-report » | Rapport non technique : TL;DR RAG, jalons, blocages, décisions attendues |
-| Une PR a des retours de bot | « /review-round #231 » | Un cycle complet, un push, une réponse par fil |
-| Capitaliser une erreur | « /lesson-propose <constat> » | Leçon du projet, ou issue « Leçon » sur le cadre |
-| Passer à la version suivante du cadre | « /harness-update » | PR de synchro en brouillon |
+| A new feature | "/intent the thread reloads by itself every 2 min" | Issue written, shown, created after agreement |
+| To process test feedback | "/feedback-triage" + the notes | Umbrella + one issue per point, grouped into lots |
+| To move the project forward | "take the ready issues" | Lots started in parallel within the system's limits ([FINOPS](FINOPS.md) §3), named agents (`<project>.<orc>.lot.<target>`) |
+| To know where we stand | "/status-report" | Non-technical report: RAG TL;DR, milestones, blockers, decisions needed |
+| A PR has bot feedback | "/review-round #231" | One full cycle, one push, one reply per thread |
+| To learn from a mistake | "/lesson-propose <finding>" | Project lesson, or a "Lesson" issue on the harness |
+| To move to the next harness version | "/harness-update" | Draft sync PR |
 
-Quota atteint en cours de route : l'orchestrateur écrit l'état sur les issues, programme sa reprise à la remise à zéro
-et repart de l'état du dépôt ([FINOPS](FINOPS.md) §3).
+Quota reached along the way: the orchestrator writes the state on the issues, schedules its resumption at the reset
+and restarts from the state of the repository ([FINOPS](FINOPS.md) §3).
 
-## 4. Exemple : SwiftHFR (`ezzz/HFRnow`, branche `dev-swift`)
+## 4. Example: SwiftHFR (`ezzz/HFRnow`, branch `dev-swift`)
 
-Client iOS SwiftUI du forum HFR ; docs en anglais ; ses propres leçons (`docs/agents/LESSONS.md`), lots
-(`docs/LOTS.md`) et labels (`type:`, `priority:`, `difficulty:`). Dépôt hors du compte `francoisgn` : pas d'appel aux
-workflows réutilisables d'un cadre privé (ADR 0001) ; la vendorisation suffit.
+SwiftUI iOS client for the HFR forum; docs in English; its own lessons (`docs/agents/LESSONS.md`), lots
+(`docs/LOTS.md`) and labels (`type:`, `priority:`, `difficulty:`). Repository outside the `francoisgn` account: no
+calls to the reusable workflows of a private harness (ADR 0001); vendoring is enough.
 
-**Configuration** (`.harness/config.json`, créée avant la première synchro) :
+**Configuration** (`.harness/config.json`, created before the first sync):
 ```json
 {
   "language": "en",
@@ -66,34 +66,34 @@ workflows réutilisables d'un cadre privé (ADR 0001) ; la vendorisation suffit.
   "compliance": ["gdpr"]
 }
 ```
-`gdpr` : l'app manipule un compte, des cookies de session et des messages privés (données personnelles) ; c'est une
-proposition à confirmer par le mainteneur, pas une qualification juridique.
+`gdpr`: the app handles an account, session cookies and private messages (personal data); this is a proposal for
+the maintainer to confirm, not a legal qualification.
 
-**Adoption** (session cloud avec `ezzz/HFRnow` et `francoisgn/agentic-harness` attachés, ou Mac) :
+**Adoption** (cloud session with `ezzz/HFRnow` and `francoisgn/agentic-harness` attached, or Mac):
 ```bash
 git fetch origin && git switch -c claude/adoption-harness origin/dev-swift
 git clone --depth 1 --branch v0.2.0 https://github.com/francoisgn/agentic-harness.git ../agentic-harness
 ../agentic-harness/scripts/harness-sync.sh --target . --dry-run && ../agentic-harness/scripts/harness-sync.sh --target .
 ```
 
-**Un lot de bout en bout** (issue #312, `LOT-082`, label `modèle: sonnet`) :
-1. L'orchestrateur `hfrnow.orc-0711.orc.dev-swift` lit le tableau de bord, voit #312 prête, lance la session enfant
-   `[hfrnow] lot LOT-082 #312 · sonnet ← orc-0711` (tags `projet:hfrnow`, `orc:orc-0711`, `issue:312`).
-2. L'enfant (`hfrnow.orc-0711.lot.LOT-082`) lance `/lot-start 312 LOT-082` : commentaire de prise en charge avec sa
-   ligne `Agent :`, branche `claude/lot-082` depuis `dev-swift`.
-3. TDD dans `HFRKit` (moteur, testable sous Linux) : tests Swift Testing rouges, puis code, puis verts
-   (`swift test --filter`, en vérifiant que des tests ont tourné : L01). L'UI SwiftUI se relit avec une rigueur de
-   compilateur (L58) ; le build Xcode se fait sur Mac ([MAC-HANDOFF](MAC-HANDOFF.md)).
-4. `/lessons-check` (leçons du cadre **et** de HFRnow), puis sous-agent `adversarial-reviewer` en Opus
-   (`hfrnow.orc-0711.rev.pr340`), puis `/compliance-review` : le diff touche le stockage des cookies → `compliance-gdpr`
+**One lot end to end** (issue #312, `LOT-082`, label `difficulty: easy`):
+1. The orchestrator `hfrnow.orc-0711.orc.dev-swift` reads the dashboard, sees #312 ready, starts the child session
+   `[hfrnow] lot LOT-082 #312 · sonnet ← orc-0711` (tags `project:hfrnow`, `orc:orc-0711`, `issue:312`).
+2. The child (`hfrnow.orc-0711.lot.LOT-082`) runs `/lot-start 312 LOT-082`: claim comment with its `Agent:` line,
+   branch `claude/lot-082` from `dev-swift`.
+3. TDD in `HFRKit` (engine, testable on Linux): red Swift Testing tests, then code, then green
+   (`swift test --filter`, checking that tests did run: L01). The SwiftUI UI is reviewed with a compiler's rigour
+   (L58); the Xcode build is done on a Mac ([MAC-HANDOFF](MAC-HANDOFF.md)).
+4. `/lessons-check` (lessons of the harness **and** of HFRnow), then the `adversarial-reviewer` subagent on Opus
+   (`hfrnow.orc-0711.rev.pr340`), then `/compliance-review`: the diff touches cookie storage → `compliance-gdpr`
    (`hfrnow.orc-0711.conf-gdpr.pr340`).
-5. PR brouillon, un push, « Ready » : CI macOS de HFRnow, CodeRabbit (déjà installé sur HFRnow) ; `/review-round`
-   pour ses constats, au plus 3 cycles.
-6. Merge selon la politique de HFRnow ; `/lot-finish` débloque les lots dépendants ; une leçon générique née ici
-   → `/lesson-propose` (issue « Leçon » sur le cadre).
+5. Draft PR, one push, "Ready": HFRnow's macOS CI, CodeRabbit (already installed on HFRnow); `/review-round`
+   for its findings, at most 3 cycles.
+6. Merge according to HFRnow's policy; `/lot-finish` unblocks the dependent lots; a generic lesson born here
+   → `/lesson-propose` ("Lesson" issue on the harness).
 
-## 5. Projet neuf (sans historique)
-1. Créer le dépôt, `main` + `develop` (modèle A) ou une seule branche (modèle B) ; adopter le cadre (§2).
-2. Premier lot : `docs/LOTS.md` (plan) et ADR 0001 du projet (architecture), produits par un agent `plan` de niveau
-   frontière et relus par un autre modèle.
-3. Activer `security` dès le premier commit de code : un secret ou une dépendance vulnérable coûte moins cher tôt.
+## 5. New project (no history)
+1. Create the repository, `main` + `develop` (model A) or a single branch (model B); adopt the harness (§2).
+2. First lot: `docs/LOTS.md` (plan) and the project's ADR 0001 (architecture), produced by a frontier-tier `plan`
+   agent and reviewed by another model.
+3. Enable `security` from the first commit of code: a secret or a vulnerable dependency costs less early.

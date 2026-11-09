@@ -1,34 +1,34 @@
-# 0002 — Agents spécialisés vendorisés, service de revue et tableau de bord du flux
+# 0002 — Vendored specialised agents, review service and flow dashboard
 
-**Statut :** Proposé — 2026-11-07 (le mainteneur décide)
+**Status:** Proposed — 2026-11-07 (the maintainer decides)
 
-## Contexte
-Le volume de commits agentiques dépasse de loin celui d'un humain ; les cycles de revue et de CI deviennent le coût
-principal (CI-BUDGET.md §5). Les projets ont besoin de relecteurs de conformité (RGPD, AI Act, NIS2, ISO 27001, SOC 2,
-TISAX, PCI, HDS) lancés seulement quand le diff les concerne, de rôles d'entretien (issues, docs, flux) et d'un état
-lisible par des non-techniciens. Le cadre 0.1.0 décrivait la revue adversariale en prose, sans agent réutilisable, et
-n'avait aucune mesure du flux. OpenHarness (HKUDS, MIT) montre une machine d'états de tâches persistée dans le dépôt,
-une boucle de réparation bornée et un tableau de bord exporté ([`src/openharness/autopilot/service.py`](https://github.com/HKUDS/OpenHarness/blob/main/src/openharness/autopilot/service.py), branche `main` lue le 2026-11-07, dernier commit du 2026-06-04).
+## Context
+The volume of agentic commits far exceeds that of a human; review and CI cycles become the main cost
+(CI-BUDGET.md §5). Projects need compliance reviewers (GDPR, AI Act, NIS2, ISO 27001, SOC 2, TISAX, PCI, HDS) run
+only when the diff concerns them, upkeep roles (issues, docs, flow) and a status that non-technical people can read.
+Harness 0.1.0 described adversarial review in prose, with no reusable agent, and had no flow measurement at all.
+OpenHarness (HKUDS, MIT) shows a task state machine persisted in the repository, a bounded repair loop and an
+exported dashboard ([`src/openharness/autopilot/service.py`](https://github.com/HKUDS/OpenHarness/blob/main/src/openharness/autopilot/service.py), branch `main` read on 2026-11-07, last commit dated 2026-06-04).
 
 ## Options
-1. **Prose seulement** : chaque projet écrit ses prompts. Gratuit, mais divergent et non testable.
-2. **Agents Claude Code vendorisés** (`.claude/agents/*.md`) + workflows réutilisables + script de mesure en
-   bibliothèque standard. Fonctionne en cloud et en local, versionné avec le cadre, contrôlé par la CI.
-3. **Service externe** (CodeRabbit, outil de conformité, tableau de bord SaaS) : moins de code, mais comptes tiers,
-   coût par siège, et nos règles (leçons, conventions) non appliquées.
+1. **Prose only**: each project writes its own prompts. Free, but divergent and not testable.
+2. **Vendored Claude Code agents** (`.claude/agents/*.md`) + reusable workflows + measurement script using the
+   standard library. Works in the cloud and locally, versioned with the harness, checked by the CI.
+3. **External service** (CodeRabbit, compliance tool, SaaS dashboard): less code, but third-party accounts, cost per
+   seat, and our rules (lessons, conventions) not applied.
 
-## Décision
-Option 2 :
-- agents `adversarial-reviewer`, `issue-steward`, `doc-steward`, `flow-monitor`, `compliance-<id>` dans
-  `plugins/harness/agents/`, vendorisés en `.claude/agents/` (manifeste, mode `tree`) ; conformité activée par
-  `.harness/config.json` → `compliance` ;
-- convention de nommage des agents `<projet>.<orchestrateur>.<rôle>.<cible>` (ORCHESTRATION.md §7), vérifiée en CI ;
-- service de revue `ai-review.yml` (claude-code-action épinglée), jamais contrôle requis ;
-- pipeline `security.yml` (Semgrep, Trivy, gitleaks) ; tableau de bord `flow-metrics.py` + `flow-report.yml` ;
-- boucles bornées : 3 cycles de revue, 6 pushes testés par la CI par PR (FINOPS.md §3).
+## Decision
+Option 2:
+- agents `adversarial-reviewer`, `issue-steward`, `doc-steward`, `flow-monitor`, `compliance-<id>` in
+  `plugins/harness/agents/`, vendored into `.claude/agents/` (manifest, `tree` mode); compliance enabled by
+  `.harness/config.json` → `compliance`;
+- agent naming convention `<project>.<orchestrator>.<role>.<target>` (ORCHESTRATION.md §7), checked in CI;
+- review service `ai-review.yml` (pinned claude-code-action), never a required check;
+- `security.yml` pipeline (Semgrep, Trivy, gitleaks); dashboard `flow-metrics.py` + `flow-report.yml`;
+- bounded loops: 3 review cycles, 6 pushes tested by the CI per PR (FINOPS.md §3).
 
-## Conséquences
-- Plus facile : ajouter un référentiel = un fichier d'agent + une ligne de catalogue ; rapport d'état automatique.
-- Plus difficile : les agents de conformité vieillissent avec les textes ; une revue annuelle par référentiel est
-  nécessaire, et leurs identifiants « (à vérifier) » doivent être confirmés sur les textes officiels.
-- À surveiller : coût de la revue IA par PR, pertinence de ses constats face à CodeRabbit (comparaison sur 10 PR).
+## Consequences
+- Easier: adding a compliance framework = one agent file + one catalogue line; automatic status report.
+- Harder: compliance agents age with the texts; a yearly review per compliance framework is needed, and their
+  "(to verify)" identifiers must be confirmed against the official texts.
+- To watch: cost of the AI review per PR, relevance of its findings compared with CodeRabbit (comparison over 10 PRs).

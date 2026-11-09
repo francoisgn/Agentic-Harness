@@ -1,67 +1,68 @@
-# Stewards : rôles d'entretien et rapport d'état
+# Stewards: upkeep roles and status report
 
-Un **steward** est un agent jetable, spécialisé, qui entretient un bien commun du projet pour que les agents de lot
-travaillent vite : la file d'issues, la documentation, le flux. Il est lancé par l'orchestrateur ou par un workflow
-planifié, fait une passe, rend compte, et s'arrête ([FINOPS](FINOPS.md) §1). Définitions vendorisées dans
-`.claude/agents/` ; appel : « utilise le sous-agent `issue-steward` sur … ».
+A **steward** is a disposable, specialised agent that maintains a shared asset of the project so that lot agents
+work fast: the issue queue, the documentation, the flow. It is started by the orchestrator or by a scheduled
+workflow, does one pass, reports, and stops ([FINOPS](FINOPS.md) §1). Definitions vendored in
+`.claude/agents/`; call: "use the `issue-steward` subagent on …".
 
-| Rôle | Agent | Niveau | Quand | Peut écrire |
+| Role | Agent | Tier | When | May write |
 |---|---|---|---|---|
-| Orchestrateur (SPOC) | session principale | solide | toujours | issues, commentaires, sessions enfants |
-| Issue steward | `issue-steward` | rapide | nouvelle issue, chaque jour, avant une vague de lots | labels, commentaires de tri ; **propose** fusions et fermetures |
-| Doc steward | `doc-steward` | solide | après un merge qui touche le comportement, chaque semaine | une PR de docs (brouillon) |
-| Flow monitor | `flow-monitor` (lecture seule) ; `flow-report.yml` écrit l'issue | rapide | chaque jour | rien (le workflow tient l'issue « Tableau de bord ») |
-| Relecteur adversarial | `adversarial-reviewer` | ≥ auteur, autre modèle | avant « Ready for review » | rien (lecture seule) |
-| Service de revue | `ai-review.yml` | solide / frontière | chaque PR prête | une revue de PR ([REVIEW-SERVICE](REVIEW-SERVICE.md)) |
-| Relecteurs conformité | `compliance-*` | frontière | diff dans leur périmètre | rien ([COMPLIANCE](COMPLIANCE.md)) |
+| Orchestrator (SPOC) | main session | solid | always | issues, comments, child sessions |
+| Issue steward | `issue-steward` | fast | new issue, every day, before a wave of lots | labels, triage comments; **proposes** merges and closures |
+| Doc steward | `doc-steward` | solid | after a merge that touches behaviour, every week | a docs PR (draft) |
+| Flow monitor | `flow-monitor` (read-only); `flow-report.yml` writes the issue | fast | every day | nothing (the workflow maintains the "Project dashboard" issue) |
+| Adversarial reviewer | `adversarial-reviewer` | ≥ author, other model | before "Ready for review" | nothing (read-only) |
+| Review service | `ai-review.yml` | solid / frontier | every ready PR | a PR review ([REVIEW-SERVICE](REVIEW-SERVICE.md)) |
+| Compliance reviewers | `compliance-*` | frontier | diff in their scope | nothing ([COMPLIANCE](COMPLIANCE.md)) |
 
-## 1. Issue steward : une file prête à être prise
+## 1. Issue steward: a queue ready to be claimed
 
-Objectif : qu'un agent de lot puisse prendre une issue **sans poser de question**.
-- Labels d'axe complets (type, priorité, modèle, taille) ; `à clarifier` avec la question exacte quand une décision
-  manque ; `bloqué` avec le prérequis ; `hôte: mac` si besoin.
-- Intention exploitable : user story, comportements d'erreur, définition de fini ([METHODOLOGY](METHODOLOGY.md) §2) ;
-  sinon un commentaire qui liste ce qui manque.
-- Doublons : propose la fusion (la plus ancienne gagne), ne ferme jamais seul ce qu'un autre a écrit.
-- Routage : jalon, lot, dépendances (`Dépend de #n`), sous-issues du parapluie ; taille L → proposition de découpe.
-- Prises en charge abandonnées (> 24 h sans activité) : les signale à l'orchestrateur, ne les reprend pas.
+Goal: a lot agent can claim an issue **without asking a question**.
+- Complete axis labels (type, priority, difficulty, status); `status: needs-decision` with the exact question when a
+  decision is missing; `status: blocked` with the prerequisite; `needs: host` if needed.
+- Usable intent: user story, error behaviours, definition of done ([METHODOLOGY](METHODOLOGY.md) §2);
+  otherwise a comment that lists what is missing.
+- Duplicates: proposes the merge (the oldest wins), never closes on its own what someone else wrote.
+- Routing: milestone, lot, dependencies (`Depends on #n`), sub-issues of the umbrella issue; `difficulty: hard`
+  spanning several layers → proposes a split into lots.
+- Abandoned claims (> 24 h with no activity): reports them to the orchestrator, does not take them over.
 
-## 2. Doc steward : des docs toujours vraies et lisibles
+## 2. Doc steward: docs that stay true and readable
 
-- Compare les docs au code mergé : comportement décrit = comportement livré (LESSONS L08), liens et ancres vivants,
-  tableaux non cassés (L07). Ce qui a dérivé : une PR de docs, une issue si le code est en cause.
-- Lisible par un humain : un fichier un rôle (L10), titres stables, TL;DR en tête des docs longs, **un schéma** quand
-  un flux ou une architecture se décrit mieux en image (Excalidraw pour le README et les vues d'ensemble, source
-  versionnée et rendu contrôlé en CI ; Mermaid dans le Markdown pour un flux court).
-- Tient à jour les vues d'ensemble : README au standard ([README-STANDARD](README-STANDARD.md) : tuiles, image,
-  schéma d'architecture Excalidraw, avancement des lots, Contribuer), plan des lots, index des ADR.
+- Compares the docs with the merged code: described behaviour = delivered behaviour (LESSONS L08), live links and
+  anchors, unbroken tables (L07). What has drifted: a docs PR, an issue if the code is at fault.
+- Readable by a human: one file one role (L10), stable headings, TL;DR at the top of long docs, **a diagram** when
+  a flow or an architecture is better described as a picture (Excalidraw for the README and overviews, versioned
+  source and render checked in CI; Mermaid in Markdown for a short flow).
+- Keeps the overviews up to date: README to the standard ([README-STANDARD](README-STANDARD.md): badges, image,
+  Excalidraw architecture diagram, lot progress, Contributing), lot plan, ADR index.
 
-## 3. Flow monitor : voir les dérives tôt
+## 3. Flow monitor: see drift early
 
-Lit le tableau de bord ([FINOPS](FINOPS.md) §4), et pour chaque 🔴 ou 🟠 nomme l'action et son responsable. Il ne
-corrige rien lui-même : il alerte l'orchestrateur, qui arrête une boucle, relance une PR en panne ou remonte un goulot.
+Reads the dashboard ([FINOPS](FINOPS.md) §4), and for each 🔴 or 🟠 names the action and its owner. It
+fixes nothing itself: it alerts the orchestrator, which stops a loop, nudges a stalled PR or escalates a bottleneck.
 
-## 4. Rapport d'état pour un public non technique
+## 4. Status report for a non-technical audience
 
-Produit par l'orchestrateur (skill `/status-report`), à partir du tableau de bord et des issues. Pas de jargon, pas
-de SHA, des liens cliquables.
+Produced by the orchestrator (skill `/status-report`), from the dashboard and the issues. No jargon, no
+SHAs, clickable links.
 
 ```text
-# État du projet <nom> — semaine du <date>
+# Status of project <name> — week of <date>
 
-TL;DR : 🟢|🟠|🔴 <une phrase : où on en est, ce qui compte>
+TL;DR: 🟢|🟠|🔴 <one sentence: where we are, what matters>
 
-| Jalon | Avancement | Échéance | État |
+| Milestone | Progress | Due date | State |
 |---|---|---|---|
-| Jalon 1 : <nom lisible> | ███████░░░ 70 % (7/10) | <date> | 🟢 dans les temps |
+| Milestone 1: <readable name> | ███████░░░ 70 % (7/10) | <date> | 🟢 on time |
 
-Livré cette semaine : <3 à 5 puces orientées utilisateur, avec liens>
-Prochaine étape : <3 puces>
-Blocages et décisions attendues : <qui doit décider quoi, avant quand>
-Risques : 🔴/🟠 <risque> → <mesure>
-Qualité : <x> % de PR avec constat en revue (agents <a> %, humains <h> %), <n> commits de correction en moyenne
-Coût : <minutes CI, tendance jetons> (FINOPS)
+Delivered this week: <3 to 5 user-oriented bullets, with links>
+Next step: <3 bullets>
+Blockers and pending decisions: <who must decide what, by when>
+Risks: 🔴/🟠 <risk> → <measure>
+Quality: <x> % of PRs with a review finding (agents <a> %, humans <h> %), <n> fix commits on average
+Cost: <CI minutes, token trend> (FINOPS)
 ```
 
-Catégories reprises des labels (type, priorité, zone du projet), des jalons GitHub (milestones), des assignés et des
-lots ; un goulot est toujours formulé comme « qui doit faire quoi ».
+Categories taken from the labels (type, priority, project area), GitHub milestones, assignees and
+lots; a bottleneck is always worded as "who must do what".
