@@ -21,8 +21,11 @@ import subprocess
 import sys
 import time
 
+# PR d'agent : `Claim: <id>` d'un agent (un humain prend avec `human/<login>`, CONVENTIONS.md §PR), pied de génération,
+# ou ancienne branche `claude/…` (convention d'avant 0.3.0, gardée pour l'historique).
 AGENT_PREFIXES = ("claude/",)
-LABEL_CLAIMED = "pris en charge"
+AGENT_BODY_RE = re.compile(r"^Claim:[ \t]*(?!human/)\S+|Generated with \[Claude Code\]", re.M)
+LABELS_CLAIMED = ("pris en charge", "status: claimed")
 BOTTLENECK_LABELS = ("bloqué", "à clarifier")
 P1_PREFIX = "P1"
 
@@ -79,7 +82,7 @@ def quality(merged):
         if not events:
             q["untraced"] += 1
             continue
-        side = q["agent"] if p["head"]["ref"].startswith(AGENT_PREFIXES) else q["human"]
+        side = q["agent"] if is_agent(p) else q["human"]
         q["reviewed"] += 1
         side["reviewed"] += 1
         problems = [e for e in events if e["problem"]]
@@ -101,6 +104,11 @@ def quality(merged):
     q["fix_commits_mean"] = round(sum(fix_commits) / len(fix_commits), 1) if fix_commits else None
     q["fix_hours_median"] = round(statistics.median(fix_hours), 1) if fix_hours else None
     return q
+
+
+def is_agent(pull):
+    """PR écrite par un agent (AGENT_BODY_RE), plutôt que par un humain."""
+    return pull["head"]["ref"].startswith(AGENT_PREFIXES) or bool(AGENT_BODY_RE.search(pull.get("body") or ""))
 
 
 def parse_time(value):
@@ -132,7 +140,7 @@ def analyse(data, now, stall_hours=24, draft_stall_hours=120, max_ci_runs=6, max
     stalled = []
     for i in open_issues:
         idle = _hours(now - parse_time(i["updated_at"]))
-        if LABEL_CLAIMED in _labels(i) and idle > stall_hours:
+        if any(lb in LABELS_CLAIMED for lb in _labels(i)) and idle > stall_hours:
             stalled.append({"kind": "issue", "number": i["number"], "title": i["title"], "idle_hours": round(idle),
                             "p1": any(lb.startswith(P1_PREFIX) for lb in _labels(i)), "url": i.get("html_url")})
     for p in open_pulls:
@@ -142,10 +150,11 @@ def analyse(data, now, stall_hours=24, draft_stall_hours=120, max_ci_runs=6, max
                             "p1": False, "url": p.get("html_url")})
 
     # Un passage de CI = un push testé sur la PR : SHA distincts des runs `pull_request` de sa branche. Ni le nombre de
-    # workflows par push, ni les runs push/schedule d'une branche de promotion (develop) ne comptent.
+    # workflows par push, ni les runs push/schedule d'une branche de promotion (develop) ne comptent, ni les runs
+    # entièrement sautés ou annulés : pousser souvent sur un brouillon ne coûte rien et n'est pas une boucle (CI-BUDGET §2).
     pushes_by_branch = {}
     for r in runs:
-        if r.get("event") == "pull_request":
+        if r.get("event") == "pull_request" and r.get("conclusion") not in ("skipped", "cancelled"):
             pushes_by_branch.setdefault(r.get("head_branch"), set()).add(r.get("head_sha"))
     loops = []
     for p in open_pulls:
@@ -185,7 +194,7 @@ def analyse(data, now, stall_hours=24, draft_stall_hours=120, max_ci_runs=6, max
 
     window_start = now - window_days * 86400
     merged = [p for p in pulls if p.get("merged_at") and parse_time(p["merged_at"]) >= window_start]
-    agent = [p for p in merged if p["head"]["ref"].startswith(AGENT_PREFIXES)]
+    agent = [p for p in merged if is_agent(p)]
     leads = [_hours(parse_time(p["merged_at"]) - parse_time(p["created_at"])) for p in merged]
 
     durations = []
