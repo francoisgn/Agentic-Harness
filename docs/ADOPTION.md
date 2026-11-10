@@ -94,8 +94,10 @@ ignores it), add to `.claude/settings.json`, with `ref` set to a harness tag:
   "enabledPlugins": { "belayline@belayline": true }
 }
 ```
-The plugin is named `belayline` from the first release after v0.3.0 ([ADR 0004](adr/0004-plugin-named-belayline.md));
-up to v0.3.0 it is `belay@belayline` and its skills are `/belay:<skill>`.
+The plugin is named `belayline` on `master` and in every tag after v0.3.0
+([ADR 0004](adr/0004-plugin-named-belayline.md)). With `ref` v0.3.0 or earlier it is `belay@belayline`, with skills
+`/belay:<skill>`. A marketplace added without `ref` follows `master`; refresh it with
+`claude plugin marketplace update belayline`.
 In an adopted repository, prefer **not** to enable it (the skills would exist twice, `/lot-start` and
 `/belayline:lot-start`).
 
