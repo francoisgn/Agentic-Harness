@@ -51,6 +51,13 @@ Rules:
 3. **A stronger model reviews, a fitting model writes.** Measure: if a fast tier needs more than two review
    rounds on a type of task, raise the label for that type; if a frontier tier never finds anything to fix
    in a solid author's work, the review can go down one notch for that type.
+   **This moves with the models.** The working hypothesis, which §5 lets each project check, is that as models
+   improve the adversarial review finds fewer real defects and a lower tier can take it over. Lowering the reviewer
+   tier is the operator's decision, never an automatic rule, and it reads two signals together over the same period:
+   few `[fixed]` findings **and** few defects `Introduced by` a PR the review approved (few findings alone is also
+   what a weak reviewer produces). The floor stays: another model, a tier at least that of the author, the highest
+   tier for security, authentication and flows that write (ORCHESTRATION §2). Raise it back when escaped defects
+   come back.
 
 ## 3. Quotas, parallelism and resuming
 
@@ -94,3 +101,34 @@ The problem-PR ratio also feeds routing (§2 rule 3): a model tier whose PRs oft
 findings is under-assigned for that type of task. What the script does not
 see (tokens consumed per session) is read by hand in the provider's console and carried into the
 orchestrator's weekly report.
+
+## 5. What reviews are worth: the data, not a metric
+
+Does the adversarial review prevent real defects, or does it cost tokens and rounds for little? The harness does not
+compute an answer: it keeps the data readable, and the operator draws the conclusion for their own project.
+
+The data, written as part of the normal flow:
+- **Outcome of each finding**: the settled findings listed in the PR start with `[fixed]`,
+  `[declined: false positive]` or `[declined: not worth it]` ([REVIEW-ROUNDS](REVIEW-ROUNDS.md), convergence).
+- **Defects that got through**: a `type: bug` or `type: security` issue found after a merge carries the line
+  `Introduced by #NNN` (the PR that brought it, when known; [METHODOLOGY](METHODOLOGY.md) §6).
+- **Context**: the verdict line names the reviewer's model, the PR's model line names the author's
+  ([REVIEW-ROUNDS](REVIEW-ROUNDS.md), traceability).
+
+Reading it (GitHub CLI; replace `OWNER/REPO`, `N` and the model name). Search only shortlists: it drops brackets and
+colons, so `[fixed]` cannot be searched on its own, and `gh search` re-quotes phrases. Use the search API directly,
+then read the tags in each PR:
+
+```bash
+q() { gh api -X GET search/issues -f q="repo:OWNER/REPO $1" --paginate --jq '.items[] | "#\(.number) \(.title)"'; }
+q 'is:pr is:merged "declined false positive"'      # shortlist: PRs with a finding declined as a false positive
+q 'is:pr is:merged "declined not worth it"'        # shortlist: PRs with a finding declined as not worth it
+q 'is:issue "Introduced by"'                       # defects that got through (then check the type: label)
+q 'is:pr is:merged "Adversarial review (fable)"'   # PRs reviewed by a model: write the name the verdicts use
+# The settled findings of one PR (body and comments): a tag counts only at the start of a line
+{ gh api repos/OWNER/REPO/pulls/N --jq .body; gh api repos/OWNER/REPO/issues/N/comments --paginate --jq '.[].body'; } |
+  grep -oE '^[[:space:]]*([-*] )?\[(fixed|declined: false positive|declined: not worth it)\]' |
+  sed 's/^[-* ]*//' | sort | uniq -c
+```
+
+Compare periods (before and after a model change) rather than reading one number. The trend feeds §2 rule 3.

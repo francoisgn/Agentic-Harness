@@ -16,7 +16,9 @@ Claim: <!-- identifier of the active /claim of the issue -->
      validate on the device (e.g. app not buildable in the Linux container). -->
 
 <!-- Reviews: each verdict (adversarial, compliance) is posted as a comment, the first negative one included
-     (REVIEW-ROUNDS.md §Traceability). -->
+     (REVIEW-ROUNDS.md §Traceability). Settled findings, one per line, starting with [fixed],
+     [declined: false positive] or [declined: not worth it] (REVIEW-ROUNDS.md §Convergence). A lot that stays big
+     says why in one line (METHODOLOGY.md §5). -->
 
 <!-- Doc impact (CONVENTIONS.md §Ledger): the doc files this change makes untrue, or "none (<reason>)". With a
      ledger (.harness/config.json → ledger.enabled), this line goes in the "### Ledger" section instead, and the

@@ -23,6 +23,11 @@ body:
     validations:
       required: true
   - type: input
+    id: introduced
+    attributes:
+      label: Origin (PR)
+      description: 'When known, write "Introduced by #NNN" with the PR that brought the defect (METHODOLOGY.md §6).'
+  - type: input
     id: version
     attributes:
       label: Version, commit, device

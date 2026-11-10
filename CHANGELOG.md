@@ -5,6 +5,17 @@ moving to this version.
 
 ## Unreleased
 
+- **What reviews are worth, readable without a metric**, and **lot size as a recommendation**
+  ([FINOPS](docs/FINOPS.md) §2 and §5, [REVIEW-ROUNDS](docs/REVIEW-ROUNDS.md), [METHODOLOGY](docs/METHODOLOGY.md)
+  §5 and §6):
+  - each settled finding listed in a PR starts with `[fixed]`, `[declined: false positive]` or
+    `[declined: not worth it]`; a bug found after a merge carries `Introduced by #NNN`; FINOPS §5 gives the GitHub API
+    queries to read them. The harness computes nothing: lowering the reviewer tier as models improve stays the
+    operator's decision;
+  - no cap on lot size (recorded in `.out-of-scope/`): split as much as possible, an issue (the lot's epic, or an
+    umbrella over related lots) heads the work, never a long-lived agent; a disposable `plan` agent splits; a lot
+    that stays big says why in its PR. The bug template and the PR template ask for the new lines.
+
 - **Review rounds tightened from what the reviews of this release showed**
   ([REVIEW-ROUNDS](docs/REVIEW-ROUNDS.md), [ORCHESTRATION](docs/ORCHESTRATION.md) §3):
   - a verdict lists the claims the reviewer could not check under **Unverified**, its first line ends with

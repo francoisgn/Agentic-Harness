@@ -22,3 +22,4 @@ Before proposing something, search this folder. Reopening a declined idea is wel
 | [Token and spend accounting per run or per PR in the dashboard](token-cost-accounting.md) | 2026-11-10 |
 | [Guard hooks that fail closed](guard-fail-closed.md) | 2026-11-10 |
 | [A "runtime guardrail" building block in ADOPTION](runtime-guardrail-block.md) | 2026-11-10 |
+| [A hard cap on lot size](lot-size-hard-cap.md) | 2026-11-10 |
