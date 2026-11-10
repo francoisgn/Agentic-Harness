@@ -9,6 +9,19 @@ body:
         Skill `/lesson-propose`. First check that it is not already in `docs/LESSONS.md` (if it is, the self-review
         missed it: say so here). The `L..` number is assigned by the PR that integrates it.
   - type: dropdown
+    id: class
+    attributes:
+      label: Class
+      description: "mechanical: a rule can verify it (give the check below, no LESSONS line). judgment: only a reviewer can tell (a lesson line). one-off: do not file it. Unsure: pick judgment."
+      options: [judgment, mechanical]
+    validations:
+      required: true
+  - type: textarea
+    id: check
+    attributes:
+      label: Check (mechanical only)
+      description: The deterministic check that would catch it (lint rule, hook, CI step, test), and why it costs less than the failure.
+  - type: dropdown
     id: scope
     attributes:
       label: Scope
