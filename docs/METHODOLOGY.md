@@ -156,25 +156,30 @@ spanning several layers must be split into lots.
 - Parallel lots that write the same section of a shared doc: create the common heading first, each lot adds only
   its sub-section (LESSONS L41).
 
-**Size: split as much as possible, no cap.** Lots legitimately differ in size (a migration, a rename across the
-repository), so there is no line or file limit. The rule is a recommendation:
+**Size: split as much as possible, no cap.** Lots legitimately differ in size (a schema migration, a
+repository-wide rename are sometimes not worth splitting), so there is no line or file limit. The rule is a
+recommendation:
 - **Split as much as possible**: a lot that a reviewer cannot read in one sitting, or that mixes layers, becomes
   several lots.
-- **A stream has a head, and the head is an issue**: related lots are sub-issues of one `type: epic` issue, which
-  holds the plan, the order, the dependencies and the progress. Not an agent: an agent kept alive to "own" a stream
-  goes stale, costs context and has to be watched. The only long-lived agents are the orchestrator and the stewards
-  ([ORCHESTRATION](ORCHESTRATION.md)).
-- **Splitting is done by a disposable agent**: a `plan` agent splits at the start of a stream, or when it must be
-  re-planned, writes the result in the epic issue and its sub-issues, then stops.
-- **A lot that stays big says why**, in one line of the PR (e.g. "one atomic rename, cannot be split"); its review
-  can then go area by area or commit by commit.
+- **Related work has a head, and the head is an issue**: the issues of a lot are the sub-issues of its `type: epic`
+  issue (§4); several related lots sit under one umbrella issue (§3). `docs/LOTS.md`, when the project has one, keeps
+  the plan (scope, dependencies, routing); the epic or umbrella keeps the order of taking and the progress. Without
+  `docs/LOTS.md`, the umbrella holds the plan too. The head is never an agent kept alive to "own" the work: it goes
+  stale, costs context and has to be watched. The only long-lived agent is the orchestrator; stewards come back on
+  a schedule, but each run is a fresh agent ([FINOPS](FINOPS.md) §1).
+- **Splitting is done by a disposable agent**: a `plan` agent splits at the start, or when the work must be
+  re-planned, writes the result in the issues (and `docs/LOTS.md`), then stops.
+- **A lot that stays big says why**, in one line of the PR (e.g. "one atomic rename, splitting would leave the build
+  red in between"). Its reviewers may read it area by area or commit by commit, but a verdict still covers the whole
+  head ([REVIEW-ROUNDS](REVIEW-ROUNDS.md)).
 
 ## 6. Work discovered along the way
 
 TODO, pending decision, debt, bug seen in another lot: **a labelled issue**, never only a line in a `.md`, nor
 only a session message. A problem in someone else's lot is reported on their issue or PR.
-A bug found in merged work names its origin when it is known: the line `Introduced by #NNN` (the PR) in the
-`type: bug` issue. It is how a project later sees which defects got through review ([FINOPS](FINOPS.md) §5).
+A defect found in merged work names its origin when it is known: the line `Introduced by #NNN` (the PR) in its
+`type: bug` or `type: security` issue. It is how a project later sees which defects got through review
+([FINOPS](FINOPS.md) §5).
 
 ## 7. External contributions
 

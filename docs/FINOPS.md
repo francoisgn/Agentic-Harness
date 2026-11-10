@@ -51,10 +51,13 @@ Rules:
 3. **A stronger model reviews, a fitting model writes.** Measure: if a fast tier needs more than two review
    rounds on a type of task, raise the label for that type; if a frontier tier never finds anything to fix
    in a solid author's work, the review can go down one notch for that type.
-   **This moves with the models.** As models improve, the adversarial review should find fewer real defects, and a
-   lower tier can take it over. Lowering the reviewer tier is the operator's decision, taken on the data of §5 (few
-   `[fixed]` findings, few bugs `Introduced by` a PR the review approved), never an automatic rule. Raise it back
-   when post-merge bugs come back.
+   **This moves with the models.** The working hypothesis, which §5 lets each project check, is that as models
+   improve the adversarial review finds fewer real defects and a lower tier can take it over. Lowering the reviewer
+   tier is the operator's decision, never an automatic rule, and it reads two signals together over the same period:
+   few `[fixed]` findings **and** few defects `Introduced by` a PR the review approved (few findings alone is also
+   what a weak reviewer produces). The floor stays: another model, a tier at least that of the author, the highest
+   tier for security, authentication and flows that write (ORCHESTRATION §2). Raise it back when escaped defects
+   come back.
 
 ## 3. Quotas, parallelism and resuming
 
@@ -107,22 +110,24 @@ compute an answer: it keeps the data readable, and the operator draws the conclu
 The data, written as part of the normal flow:
 - **Outcome of each finding**: the settled findings listed in the PR start with `[fixed]`,
   `[declined: false positive]` or `[declined: not worth it]` ([REVIEW-ROUNDS](REVIEW-ROUNDS.md), convergence).
-- **Defects that got through**: a bug found after a merge carries the line `Introduced by #NNN` (the PR that brought
-  it, when known; [METHODOLOGY](METHODOLOGY.md) §6).
+- **Defects that got through**: a `type: bug` or `type: security` issue found after a merge carries the line
+  `Introduced by #NNN` (the PR that brought it, when known; [METHODOLOGY](METHODOLOGY.md) §6).
 - **Context**: the verdict line names the reviewer's model, the PR's model line names the author's
   ([REVIEW-ROUNDS](REVIEW-ROUNDS.md), traceability).
 
-Reading it (GitHub CLI; replace `OWNER/REPO`):
+Reading it (GitHub CLI; replace `OWNER/REPO`, `N` and the model name). Search only shortlists: it drops brackets and
+colons, so `[fixed]` cannot be searched on its own, and `gh search` re-quotes phrases. Use the search API directly,
+then read the tags in each PR:
 
 ```bash
-# Merged PRs where a review finding was fixed, or declined as a false positive
-gh search prs --repo OWNER/REPO --merged '"[fixed]"' --json number,title,closedAt
-gh search prs --repo OWNER/REPO --merged '"declined: false positive"' --json number,title,closedAt
-# Bugs that got through, and the PR that introduced them
-gh search issues --repo OWNER/REPO --label "type: bug" '"Introduced by"' --json number,title,createdAt
-# Reviews done by a given model
-gh search prs --repo OWNER/REPO --merged '"Adversarial review (sonnet)"' --json number,title
+q() { gh api -X GET search/issues -f q="repo:OWNER/REPO $1" --paginate --jq '.items[] | "#\(.number) \(.title)"'; }
+q 'is:pr is:merged "declined false positive"'      # shortlist: PRs with a finding declined as a false positive
+q 'is:pr is:merged "declined not worth it"'        # shortlist: PRs with a finding declined as not worth it
+q 'is:issue "Introduced by"'                       # defects that got through (then check the type: label)
+q 'is:pr is:merged "Adversarial review (fable)"'   # PRs reviewed by a model: write the name the verdicts use
+# The tags of one PR (body and comments)
+{ gh api repos/OWNER/REPO/pulls/N --jq .body; gh api repos/OWNER/REPO/issues/N/comments --paginate --jq '.[].body'; } |
+  grep -oE '\[(fixed|declined: false positive|declined: not worth it)\]' | sort | uniq -c
 ```
 
-Search matches words, not exact punctuation: open the PRs found to count findings, and compare periods (before and
-after a model change) rather than reading one number. The trend feeds §2 rule 3.
+Compare periods (before and after a model change) rather than reading one number. The trend feeds §2 rule 3.

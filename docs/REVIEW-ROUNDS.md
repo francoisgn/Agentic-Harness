@@ -37,7 +37,9 @@ checks the change against the **intent**, the second checks the **code** on its 
   tests, configuration, a sourced fact, anything security-related) gets a full re-review.
 - **Settled findings are listed in the PR**, each with its recorded reason and an **outcome tag** at the start of the
   line: `[fixed]` (fixed in a commit, cite it), `[declined: false positive]` (the claim does not hold, say why) or
-  `[declined: not worth it]` (real but not worth the change, say why). The tags make the value of reviews searchable
+  `[declined: not worth it]` (real but not worth the change, say why), e.g. `- [fixed] unanchored regex (abc1234)`.
+  No colon right after the tag: `[fixed]: …` at the start of a line is a Markdown link definition and disappears
+  from the rendered page. The tags make the value of reviews searchable
   later ([FINOPS](FINOPS.md) §5); the harness computes nothing from them. A reviewer that reopens one is answered
   by pointing to that record: it counts as a new finding only with **new evidence** (a new failure path, a changed
   head, a new input). A security finding is never settled this way: it stays open until the maintainer decides.

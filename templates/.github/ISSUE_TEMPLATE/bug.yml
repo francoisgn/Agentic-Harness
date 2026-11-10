@@ -23,6 +23,11 @@ body:
     validations:
       required: true
   - type: input
+    id: introduced
+    attributes:
+      label: Introduced by
+      description: 'The PR that brought the defect, when known: "Introduced by #NNN" (METHODOLOGY.md §6, FINOPS.md §5).'
+  - type: input
     id: version
     attributes:
       label: Version, commit, device

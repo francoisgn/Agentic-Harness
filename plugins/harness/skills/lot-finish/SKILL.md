@@ -26,8 +26,8 @@ References: `.harness/docs/CONVENTIONS.md` (§Pull requests, §Ledger, §GitHub 
    Ready. Post its verdict on the PR. Fix each High/Medium finding in **one** commit, have it rechecked: a round
    with no finding on the current head ends the loop (one clean round, within 3 cycles); list settled findings in
    the PR with their outcome tag (`[fixed]`, `[declined: false positive]`, `[declined: not worth it]`), not reopened
-   without new evidence. A lot that stays big says why in one line of the PR. The code review (diff only) is the review service's, on the ready PR;
-   without one, the AI review workflow or a human does it and the PR says which.
+   without new evidence. A lot that stays big says why in one line of the PR. The code review (diff only) is the
+   review service's, on the ready PR; without one, the AI review workflow or a human does it and the PR says which.
 4. **Commits**: atomic per issue, in the project's language and style (`git log`), session attribution at the end of
    the message, trailer `Agent: <identifier>`.
 5. **Push and PR**: the work has already been pushed often to the draft PR (otherwise: push and open it as a draft to
