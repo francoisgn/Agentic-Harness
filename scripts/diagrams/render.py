@@ -10,9 +10,9 @@
 
 Usage: render.py [--check] [--engine auto|excalidraw|builtin] [--dir <directory>] [name...]
   --check:  exits 1 if a scene or an SVG is not up to date, or if a text overflows. Python only: an exported SVG is
-            checked through the scene hash it carries, a built-in one by drawing it again.
-  --engine: auto (default) exports with Excalidraw when available, else draws; excalidraw requires the export
-            (and replaces a built-in SVG); builtin always draws.
+            checked through the hashes it carries (its scene, its own body), a built-in one by drawing it again.
+  --engine: auto (default) exports with Excalidraw when available, else (or if the export fails) draws;
+            excalidraw requires the export (and replaces a built-in SVG); builtin always draws.
   --dir:    directory of the diagrams (default: docs/diagrams of the current repository, otherwise the harness's).
             Vendored into a project as .harness/scripts/diagrams-render.py (README-STANDARD.md §4).
 Changing a diagram: edit the .json (or the .excalidraw, then carry it over), run render.py again, commit all three.
@@ -33,11 +33,13 @@ ROOT = pathlib.Path(__file__).resolve().parents[2]
 DIR = ROOT / "docs" / "diagrams"
 FONT = "Segoe UI, Helvetica, Arial, sans-serif"
 CHAR_W = 0.52      # mean width of a character, in em (estimate for the font above)
+FIT_CHAR_W = 0.58  # widest line width per character measured in Excalifont, the font of the scene and of the export
 LINE_H = 1.25
 PAD = 24
 EXCALIFONT = 5   # Excalidraw font family id of Excalifont, the hand-drawn font of excalidraw.com
 EXPORTER = pathlib.Path(__file__).resolve().parent / "export-svg.cjs"
-STAMP = re.compile(r"<!-- belayline-scene-sha256:([0-9a-f]{64}) -->")
+STAMP = re.compile(r"<!-- belayline-scene-sha256:([0-9a-f]{64}) svg-sha256:([0-9a-f]{64}) -->")
+ANY_STAMP = re.compile(r"<!-- belayline-scene-sha256:[^>]*-->")
 
 
 def _rng(eid):
@@ -164,7 +166,7 @@ def overflows(source):
         label = e.get("label")
         if label and e["type"] in ("rectangle", "ellipse", "diamond"):
             size = label.get("fontSize", 20)
-            need_w = text_width(label["text"], size) * (1.25 if e["type"] == "ellipse" else 1) + 20
+            need_w = text_width(label["text"], size) / CHAR_W * FIT_CHAR_W * (1.25 if e["type"] == "ellipse" else 1) + 20
             need_h = len(label["text"].split("\n")) * size * LINE_H + 12
             if need_w > e["width"] or need_h > e["height"]:
                 issues.append(f"{e['id']}: \"{label['text'].splitlines()[0]}…\" overflows "
@@ -244,10 +246,8 @@ def to_scene(source):
             lines = label["text"].split("\n")
             tw, th = text_width(label["text"], size), len(lines) * size * LINE_H
             if e["type"] == "arrow":
-                # Middle of the longest segment, as the built-in renderer draws it
-                pts = e["points"]
-                i = max(range(len(pts) - 1), key=lambda k: math.dist(pts[k], pts[k + 1]))
-                cx, cy = e["x"] + (pts[i][0] + pts[i + 1][0]) / 2, e["y"] + (pts[i][1] + pts[i + 1][1]) / 2
+                p = e["points"][len(e["points"]) // 2]
+                cx, cy = e["x"] + p[0], e["y"] + p[1]
             else:
                 cx, cy = e["x"] + e["width"] / 2, e["y"] + e["height"] / 2
             el["boundElements"] = [{"type": "text", "id": tid}]
@@ -264,15 +264,28 @@ def scene_hash(scene):
     return hashlib.sha256(scene.encode("utf-8")).hexdigest()
 
 
+def body_hash(svg):
+    """Hash of an exported SVG without its stamp: the stamp is the only part not written by Excalidraw."""
+    return hashlib.sha256(ANY_STAMP.sub("", svg, count=1).encode("utf-8")).hexdigest()
+
+
 def svg_is_current(svg, source):
     """An exported SVG is current if it was exported from the scene the source produces; a built-in one if it is
     the drawing of the source."""
     if svg is None:
         return False
-    stamp = STAMP.search(svg)
-    if stamp:
-        return stamp.group(1) == scene_hash(to_scene(source))
+    if ANY_STAMP.search(svg):
+        stamp = STAMP.search(svg)
+        return bool(stamp) and stamp.group(1) == scene_hash(to_scene(source)) and stamp.group(2) == body_hash(svg)
     return svg == render_svg(source)
+
+
+def export_hint():
+    """How to enable the Excalidraw export; empty where the exporter is not shipped (a vendored copy)."""
+    if not EXPORTER.is_file():
+        return ""
+    d = EXPORTER.parent
+    return (f"Excalidraw export: npm ci --prefix {d} && npx --prefix {d} playwright install chromium")
 
 
 def exporter_available():
@@ -293,7 +306,7 @@ def main():
     names = a.names or sorted(p.stem for p in ddir.glob("*.json"))
     export = not a.check and a.engine != "builtin" and exporter_available()
     if a.engine == "excalidraw" and not a.check and not export:
-        print("✘ the Excalidraw export needs node and `npm ci --prefix scripts/diagrams`")
+        print(f"✘ the Excalidraw export is not available. {export_hint() or 'export-svg.cjs is not shipped here.'}")
         return 1
     problems, to_export = [], []
     for name in names:
@@ -319,19 +332,28 @@ def main():
         if current_scene != scene:
             scene_path.write_text(scene, encoding="utf-8")
             print(f"✔ {shown(scene_path)}")
-        builtin_svg = current_svg is not None and not STAMP.search(current_svg)
+        builtin_svg = current_svg is not None and not ANY_STAMP.search(current_svg)
         if export and (not svg_ok or (a.engine == "excalidraw" and builtin_svg)):
-            to_export.append(svg_path)
+            to_export.append((svg_path, source))
         elif not svg_ok:
             svg_path.write_text(render_svg(source), encoding="utf-8")
-            print(f"✔ {shown(svg_path)} (built-in renderer; Excalidraw export: npm ci --prefix scripts/diagrams)")
+            hint = export_hint()
+            print(f"✔ {shown(svg_path)} (built-in renderer{'; ' + hint if hint else ''})")
     if to_export:
-        done = subprocess.run(["node", str(EXPORTER)] + [str(p.with_suffix(".excalidraw")) for p in to_export])
-        if done.returncode:
-            problems.append("Excalidraw export failed (see above)")
-        else:
-            for p in to_export:
-                print(f"✔ {shown(p)} (Excalidraw)")
+        done = subprocess.run(["node", str(EXPORTER)] + [str(p.with_suffix(".excalidraw")) for p, _ in to_export])
+        if done.returncode and a.engine == "excalidraw":
+            problems.append(f"Excalidraw export failed (see above). {export_hint()}")
+        elif done.returncode:
+            print(f"⚠ Excalidraw export failed (see above): built-in renderer used. {export_hint()}")
+        for path, source in to_export:
+            current = path.read_text(encoding="utf-8") if path.exists() else None
+            if svg_is_current(current, source):
+                print(f"✔ {shown(path)} (Excalidraw)")
+            elif a.engine != "excalidraw":
+                path.write_text(render_svg(source), encoding="utf-8")
+                print(f"✔ {shown(path)} (built-in renderer)")
+            elif not done.returncode:
+                problems.append(f"{shown(path)}: the export did not produce an up-to-date SVG")
     for p in problems:
         print(f"✘ {p}")
     return 1 if problems else 0

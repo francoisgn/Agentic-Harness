@@ -1,8 +1,16 @@
 """Tests of scripts/diagrams/render.py: deterministic rendering, valid Excalidraw scene, overflows detected."""
+import contextlib
+import hashlib
 import importlib.util
+import io
 import json
 import pathlib
+import shutil
+import subprocess
+import sys
+import tempfile
 import unittest
+from unittest import mock
 import xml.dom.minidom
 
 ROOT = pathlib.Path(__file__).resolve().parents[2]
@@ -63,24 +71,94 @@ class RenderTests(unittest.TestCase):
             self.assertEqual(rd.overflows(source), [], src.name)
             self.assertTrue(rd.svg_is_current(src.with_suffix(".svg").read_text(encoding="utf-8"), source), src.name)
 
-    def test_exported_svg_is_checked_through_its_scene_hash(self):
+    def exported(self, src, body='<svg viewBox="0 0 10 10"><text>Short</text></svg>'):
+        """An SVG stamped the way export-svg.cjs stamps it."""
+        body += "\n"
+        stamp = (f"<!-- belayline-scene-sha256:{rd.scene_hash(rd.to_scene(src))} "
+                 f"svg-sha256:{hashlib.sha256(body.encode()).hexdigest()} -->")
+        end = body.index(">") + 1
+        return body[:end] + stamp + body[end:]
+
+    def test_exported_svg_is_checked_through_its_scene_and_body_hashes(self):
         src = [BOX, ARROW]
-        exported = f'<svg><!-- belayline-scene-sha256:{rd.scene_hash(rd.to_scene(src))} --></svg>\n'
-        self.assertTrue(rd.svg_is_current(exported, src))
-        moved = [dict(BOX, x=10), ARROW]
-        self.assertFalse(rd.svg_is_current(exported, moved))
+        svg = self.exported(src)
+        self.assertTrue(rd.svg_is_current(svg, src))
+        self.assertFalse(rd.svg_is_current(svg, [dict(BOX, x=10), ARROW]), "source moved")
+        self.assertFalse(rd.svg_is_current(svg.replace(">Short<", ">Edited<"), src), "body edited by hand")
+        bare = f"<svg><!-- belayline-scene-sha256:{rd.scene_hash(rd.to_scene(src))} --></svg>\n"
+        self.assertFalse(rd.svg_is_current(bare, src), "stamp without a body hash")
         self.assertTrue(rd.svg_is_current(rd.render_svg(src), src))
-        self.assertFalse(rd.svg_is_current(rd.render_svg(src), moved))
+        self.assertFalse(rd.svg_is_current(rd.render_svg(src), [dict(BOX, x=10), ARROW]))
         self.assertFalse(rd.svg_is_current(None, src))
 
-    def test_scene_uses_excalifont_and_centres_arrow_labels_on_the_longest_segment(self):
-        bent = dict(ARROW, points=[[0, 0], [0, 20], [200, 20]])
-        scene = json.loads(rd.to_scene([BOX, bent]))
-        self.assertTrue(all(e["fontFamily"] == rd.EXCALIFONT for e in scene["elements"] if e["type"] == "text"))
-        label = next(e for e in scene["elements"] if e["id"] == "a-label")
-        self.assertAlmostEqual(label["x"] + label["width"] / 2, 300)
-        self.assertAlmostEqual(label["y"] + label["height"] / 2, 60)
+    def test_scene_texts_use_excalifont(self):
+        scene = json.loads(rd.to_scene([BOX, ARROW, {"type": "text", "id": "t", "x": 0, "y": 0, "text": "T"}]))
+        self.assertEqual({e["fontFamily"] for e in scene["elements"] if e["type"] == "text"}, {5})
 
+    def test_overflow_uses_the_excalifont_width(self):
+        # 20 characters at 20 px: 228 px with the built-in estimate, 252 px in Excalifont
+        tight = dict(BOX, width=240, label={"text": "x" * 20, "fontSize": 20})
+        self.assertTrue(rd.overflows([tight]))
+        self.assertEqual(rd.overflows([dict(tight, width=260)]), [])
+
+
+class EngineTests(unittest.TestCase):
+    """main(): built-in fallback, required export, staleness through the command line."""
+
+    def setUp(self):
+        self.tmp = pathlib.Path(tempfile.mkdtemp())
+        self.addCleanup(shutil.rmtree, self.tmp)
+        (self.tmp / "d.json").write_text(json.dumps([BOX, ARROW]), encoding="utf-8")
+
+    def run_main(self, *args, available=False, export_rc=None):
+        calls = []
+
+        def fake_run(cmd, **kw):
+            calls.append(cmd)
+            return subprocess.CompletedProcess(cmd, export_rc)
+
+        out = io.StringIO()
+        with mock.patch.object(rd, "exporter_available", return_value=available), \
+                mock.patch.object(rd.subprocess, "run", side_effect=fake_run), \
+                mock.patch.object(sys, "argv", ["render.py", "--dir", str(self.tmp), *args]), \
+                contextlib.redirect_stdout(out):
+            rc = rd.main()
+        return rc, out.getvalue(), calls
+
+    def test_without_the_exporter_the_svg_is_drawn_and_checks(self):
+        rc, out, calls = self.run_main()
+        self.assertEqual((rc, calls), (0, []))
+        self.assertEqual((self.tmp / "d.svg").read_text(encoding="utf-8"), rd.render_svg([BOX, ARROW]))
+        self.assertEqual(self.run_main("--check")[0], 0)
+
+    def test_a_failed_export_falls_back_to_the_built_in_renderer(self):
+        rc, out, calls = self.run_main(available=True, export_rc=1)
+        self.assertEqual(rc, 0)
+        self.assertEqual(len(calls), 1)
+        self.assertIn("built-in renderer used", out)
+        self.assertEqual(self.run_main("--check")[0], 0)
+
+    def test_a_required_export_that_fails_or_is_missing_exits_1(self):
+        self.assertEqual(self.run_main("--engine", "excalidraw", available=True, export_rc=1)[0], 1)
+        rc, out, _ = self.run_main("--engine", "excalidraw")
+        self.assertEqual(rc, 1)
+        self.assertIn("not available", out)
+
+    def test_a_changed_source_makes_check_fail(self):
+        self.run_main()
+        (self.tmp / "d.json").write_text(json.dumps([dict(BOX, x=10), ARROW]), encoding="utf-8")
+        rc, out, _ = self.run_main("--check")
+        self.assertEqual(rc, 1)
+        self.assertIn("d.svg: not up to date", out)
+        self.assertIn("d.excalidraw: not up to date", out)
+
+    def test_no_install_hint_where_the_exporter_is_not_shipped(self):
+        with mock.patch.object(rd, "EXPORTER", self.tmp / "absent.cjs"):
+            self.assertEqual(rd.export_hint(), "")
+            rc, out, _ = self.run_main()
+        self.assertEqual(rc, 0)
+        self.assertNotIn("npm", out)
+        self.assertIn("playwright install chromium", rd.export_hint())
 
 if __name__ == "__main__":
     unittest.main()

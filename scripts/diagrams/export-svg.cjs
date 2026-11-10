@@ -4,8 +4,9 @@
   node scripts/diagrams/export-svg.cjs <name>.excalidraw...   → <name>.svg next to each scene
 
 Called by render.py when the dependencies are installed (`npm ci --prefix scripts/diagrams`); never needed to check.
-The SVG carries `<!-- belayline-scene-sha256:<hash> -->`, the hash of the scene it was exported from: render.py
---check compares it with the scene the .json produces, in Python, without Node.
+The SVG carries `<!-- belayline-scene-sha256:<scene> svg-sha256:<body> -->`: the hash of the scene it was exported
+from and the hash of the SVG without that comment. render.py --check verifies both, in Python, without Node.
+Needs a Chromium for Playwright: `npx --prefix scripts/diagrams playwright install chromium` if none is installed.
 Runs offline: the page loads only local files (bundle, fonts); any other request is refused. Same scene, same SVG.
 */
 const crypto = require("crypto");
@@ -28,20 +29,26 @@ window.exportScene = async (scene) => (await exportToSvg({
 })).outerHTML;
 `;
 
-function stamp(svg, hash) {
-  const end = svg.indexOf(">") + 1;
-  return `${svg.slice(0, end)}<!-- belayline-scene-sha256:${hash} -->${svg.slice(end)}\n`;
+const sha256 = (data) => crypto.createHash("sha256").update(data).digest("hex");
+
+function stamp(svg, sceneHash) {
+  const body = `${svg}\n`;
+  const end = body.indexOf(">") + 1;
+  return `${body.slice(0, end)}<!-- belayline-scene-sha256:${sceneHash} svg-sha256:${sha256(body)} -->${body.slice(end)}`;
 }
 
 function bundle() {
-  const lock = path.join(HERE, "package-lock.json");
-  if (fs.existsSync(BUNDLE) && fs.statSync(BUNDLE).mtimeMs >= fs.statSync(lock).mtimeMs) return;
+  // Rebuilt whenever the entry point or the locked dependencies change
+  const key = sha256(ENTRY + fs.readFileSync(path.join(HERE, "package-lock.json"), "utf8"));
+  const keyFile = `${BUNDLE}.key`;
+  if (fs.existsSync(BUNDLE) && fs.existsSync(keyFile) && fs.readFileSync(keyFile, "utf8") === key) return;
   fs.mkdirSync(path.dirname(BUNDLE), { recursive: true });
   require(path.join(MODULES, "esbuild")).buildSync({
     stdin: { contents: ENTRY, resolveDir: HERE, loader: "js" }, bundle: true, format: "iife", outfile: BUNDLE,
     define: { "process.env.NODE_ENV": '"production"' }, loader: { ".woff2": "file", ".ttf": "file" },
     logLevel: "error",
   });
+  fs.writeFileSync(keyFile, key);
 }
 
 async function main(scenes) {
@@ -52,7 +59,13 @@ async function main(scenes) {
   bundle();
   const types = { ".js": "text/javascript", ".woff2": "font/woff2", ".ttf": "font/ttf" };
   const server = http.createServer((req, res) => {
-    const url = decodeURIComponent(req.url.split("?")[0]);
+    let url;
+    try {
+      url = decodeURIComponent(req.url.split("?")[0]);
+    } catch {
+      res.statusCode = 400;
+      return res.end();
+    }
     if (url === "/") {
       res.setHeader("content-type", "text/html");
       return res.end(`<!doctype html><meta charset="utf-8"><script>window.EXCALIDRAW_ASSET_PATH=${JSON.stringify(ASSETS)}`
@@ -72,14 +85,13 @@ async function main(scenes) {
   const browser = await chromium.launch();
   try {
     const page = await browser.newPage();
-    await page.route("**/*", (r) => (r.request().url().startsWith(origin) ? r.continue() : r.abort()));
+    await page.route("**/*", (r) => (r.request().url().startsWith(`${origin}/`) ? r.continue() : r.abort()));
     await page.goto(origin + "/");
     await page.waitForFunction(() => typeof window.exportScene === "function");
     for (const scenePath of scenes) {
       const raw = fs.readFileSync(scenePath);
       const svg = await page.evaluate((s) => window.exportScene(s), JSON.parse(raw.toString("utf8")));
-      const hash = crypto.createHash("sha256").update(raw).digest("hex");
-      fs.writeFileSync(scenePath.replace(/\.excalidraw$/, ".svg"), stamp(svg, hash));
+      fs.writeFileSync(scenePath.replace(/\.excalidraw$/, ".svg"), stamp(svg, sha256(raw)));
     }
   } finally {
     await browser.close();

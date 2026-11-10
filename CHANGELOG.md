@@ -11,7 +11,9 @@ moving to this version.
   pushes, one clean round ends the loop; four short callouts instead of one long note), one grid and one palette.
   `render.py` writes scenes in Excalifont and, when `npm ci --prefix scripts/diagrams` has been run, exports the SVG
   with Excalidraw itself (`export-svg.cjs`: hand-drawn strokes, hachure fills, embedded font subset); `--check`
-  verifies the scene hash the SVG carries, still without Node. Vendored projects keep the built-in renderer.
+  verifies the two hashes the SVG carries (its scene, its own body), still without Node. A failed export falls back
+  to the built-in renderer. Vendored projects keep the built-in renderer. The overflow estimate now uses the
+  Excalifont width (0.58 em per character instead of 0.52).
 
 - **Doc steward at merge, weekly safety net** ([STEWARDS](docs/STEWARDS.md) §2): new reusable `doc-steward.yml`, opt-in
   `steward` job in `harness.yml` (it adds `closed` to the `pull_request` types; the `pr` job skips it). After each
@@ -110,6 +112,9 @@ Add a `Docs:` line to `.github/pull_request_template.md` (a project file, not re
 what it lists, or `doc-links: false`; `docs-code-paths: ""` in the `pr` job silences the doc impact warning.
 The next sync also seeds `scripts/local-check.sh`, which reports INCOMPLETE until `/local-check` fills in its steps
 (a project with its own command names it in `CLAUDE.md` and adds `scripts/local-check.sh` to `exclude`).
+After the sync, run `python3 .harness/scripts/diagrams-render.py` and commit the regenerated `docs/diagrams/*.excalidraw`
+(their texts move to Excalifont); until then `diagrams-render.py --check` reports them stale. A label it now reports
+as overflowing (Excalifont is wider): shorten it or widen its shape.
 
 ## 0.3.0 — 2026-11-09
 

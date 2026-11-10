@@ -416,6 +416,10 @@
    ],
    [
     0,
+    -50
+   ],
+   [
+    0,
     -135
    ],
    [
@@ -444,7 +448,7 @@
   "fillStyle": "hachure",
   "strokeColor": "#495057",
   "label": {
-   "text": "Versioned harness\nvX.Y.Z: rules, skills,\nagents, CI",
+   "text": "Versioned harness\nvX.Y.Z: rules,\nskills, agents, CI",
    "fontSize": 20
   },
   "roundness": {
@@ -495,5 +499,166 @@
    "type": 3
   },
   "strokeStyle": "dashed"
+ },
+ {
+  "type": "rectangle",
+  "id": "lg0",
+  "x": 40,
+  "y": 860,
+  "width": 28,
+  "height": 20,
+  "strokeWidth": 2,
+  "roundness": {
+   "type": 3
+  },
+  "backgroundColor": "#fff3bf",
+  "fillStyle": "hachure",
+  "strokeColor": "#f08c00"
+ },
+ {
+  "type": "text",
+  "id": "lgt0",
+  "x": 78,
+  "y": 860,
+  "text": "operator",
+  "fontSize": 16
+ },
+ {
+  "type": "rectangle",
+  "id": "lg1",
+  "x": 181,
+  "y": 860,
+  "width": 28,
+  "height": 20,
+  "strokeWidth": 2,
+  "roundness": {
+   "type": 3
+  },
+  "backgroundColor": "#d0bfff",
+  "fillStyle": "hachure",
+  "strokeColor": "#6741d9"
+ },
+ {
+  "type": "text",
+  "id": "lgt1",
+  "x": 219,
+  "y": 860,
+  "text": "orchestrator",
+  "fontSize": 16
+ },
+ {
+  "type": "rectangle",
+  "id": "lg2",
+  "x": 355,
+  "y": 860,
+  "width": 28,
+  "height": 20,
+  "strokeWidth": 2,
+  "roundness": {
+   "type": 3
+  },
+  "backgroundColor": "#a5d8ff",
+  "fillStyle": "hachure",
+  "strokeColor": "#1971c2"
+ },
+ {
+  "type": "text",
+  "id": "lgt2",
+  "x": 393,
+  "y": 860,
+  "text": "agents",
+  "fontSize": 16
+ },
+ {
+  "type": "rectangle",
+  "id": "lg3",
+  "x": 479,
+  "y": 860,
+  "width": 28,
+  "height": 20,
+  "strokeWidth": 2,
+  "roundness": {
+   "type": 3
+  },
+  "backgroundColor": "#b2f2bb",
+  "fillStyle": "hachure",
+  "strokeColor": "#2f9e44"
+ },
+ {
+  "type": "text",
+  "id": "lgt3",
+  "x": 517,
+  "y": 860,
+  "text": "repository",
+  "fontSize": 16
+ },
+ {
+  "type": "rectangle",
+  "id": "lg4",
+  "x": 636,
+  "y": 860,
+  "width": 28,
+  "height": 20,
+  "strokeWidth": 2,
+  "roundness": {
+   "type": 3
+  },
+  "backgroundColor": "#ffd8a8",
+  "fillStyle": "hachure",
+  "strokeColor": "#e8590c"
+ },
+ {
+  "type": "text",
+  "id": "lgt4",
+  "x": 674,
+  "y": 860,
+  "text": "automation",
+  "fontSize": 16
+ },
+ {
+  "type": "rectangle",
+  "id": "lg5",
+  "x": 793,
+  "y": 860,
+  "width": 28,
+  "height": 20,
+  "strokeWidth": 2,
+  "roundness": {
+   "type": 3
+  },
+  "backgroundColor": "#e9ecef",
+  "fillStyle": "hachure",
+  "strokeColor": "#495057"
+ },
+ {
+  "type": "text",
+  "id": "lgt5",
+  "x": 831,
+  "y": 860,
+  "text": "harness",
+  "fontSize": 16
+ },
+ {
+  "type": "rectangle",
+  "id": "lg6",
+  "x": 925,
+  "y": 860,
+  "width": 28,
+  "height": 20,
+  "strokeWidth": 2,
+  "roundness": {
+   "type": 3
+  },
+  "backgroundColor": "#ffc9c9",
+  "fillStyle": "hachure",
+  "strokeColor": "#e03131"
+ },
+ {
+  "type": "text",
+  "id": "lgt6",
+  "x": 963,
+  "y": 860,
+  "text": "guardrails",
+  "fontSize": 16
  }
 ]
