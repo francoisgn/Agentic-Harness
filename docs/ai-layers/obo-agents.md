@@ -37,17 +37,18 @@ permissions.
 
 ## 2. The four layers
 
-![The four layers of an AI coding agent: presentation (where do I talk to it), agent (who decides and acts), execution (where do tools act), inference (where does the model run); an OBO agent is layers 2 and 3 acting in your files with your rights, a chatbot only has layers 1 and 4](../diagrams/ai-layers.svg)
+![The four layers of an AI coding agent: presentation (where do I talk to it), agent (what decides and acts), execution (where do tools act), inference (where does the model run); an OBO agent is layers 2 and 3 acting in your files with your rights, a chatbot only has layers 1 and 4](../diagrams/ai-layers.svg)
 
 | Layer | Question | Typical answers | What changes for you |
 |---|---|---|---|
 | 1. Presentation | Where do I talk to it? | Terminal (CLI), IDE extension, desktop app, web app, mobile app, a mention in GitHub, Slack or Linear | Comfort and reach: a phone can start work that runs elsewhere |
 | 2. Agent | What decides and acts? | Claude Code, Codex, Antigravity CLI, Gemini CLI, Copilot agent, Cursor agent | Which tools exist, how permissions work, which models it can use |
 | 3. Execution | Where do the tools act? | Your machine, or a vendor's cloud container or VM; sometimes split between the two | What the agent can touch: your laptop and everything logged in on it, or only what a cloud box was given |
-| 4. Inference | Where does the model run, and who bills it? | Vendor subscription, vendor API key, or a cloud platform (Amazon Bedrock, Google's Gemini Enterprise Agent Platform, Microsoft Foundry) | The contract that governs your data, the price model, the models on offer, the region |
+| 4. Inference | Where does the model run, and who sells it? | The model vendor (subscription or API key), a cloud platform (Amazon Bedrock, Google's Gemini Enterprise Agent Platform, Microsoft Foundry), or a tool vendor that resells models (Copilot, Cursor) | The contract that governs your data, the price model, the models on offer, the region |
 
 A product name rarely names a single layer. "Claude Code" is an agent (layer 2) with several screens (layer 1). It
-runs on your machine or in Anthropic's cloud (layer 3), and its inference can be paid in four ways (layer 4)
+runs on your machine or in Anthropic's cloud (layer 3), and its inference can be bought from Anthropic or through
+several cloud platforms (layer 4)
 ([Claude Code overview](https://code.claude.com/docs/en/overview), [third-party integrations](https://code.claude.com/docs/en/third-party-integrations)).
 
 ## 3. Layer 3: where the agent acts
@@ -58,28 +59,34 @@ runs on your machine or in Anthropic's cloud (layer 3), and its inference can be
 | **A vendor's cloud** | A container or VM with a copy of the repository, plus only what it was given: a repository token, allowed hosts, secrets. It keeps working while you are away | Claude Code on the web; Copilot cloud agent; Cursor cloud agents |
 | **Split** | The loop runs in the vendor's cloud, while the tools run on a machine you provide, or the other way round | Cursor self-hosted machines (tools on your hardware, loop in Cursor's cloud); Claude Code Remote Control (runs on your machine, steered from a phone or browser) |
 
-Inference is almost never local. Even when the agent runs on your laptop, every prompt, and the file extracts it
-reads, is sent to the model provider. "It runs locally" describes layer 3, never layer 4.
+Inference is rarely local. When the agent runs on your laptop, every prompt and every file extract it reads is
+still sent to the model provider, unless you explicitly configure a model that runs on your own hardware. Some tools
+allow that, such as Copilot CLI with locally running models
+([Copilot CLI](https://docs.github.com/en/copilot/concepts/agents/about-copilot-cli)). "It runs locally" describes
+layer 3; it says nothing about layer 4.
 
 ## 4. Layer 4: paying for the model, and the contract that comes with it
 
-### Three ways to pay
+### Three ways to buy the model
 
 ![Same model, three ways to buy it, three contracts: a coding agent calls a model through the model vendor (subscription or API key, vendor terms), a cloud platform (Bedrock, Agent Platform, Foundry: cloud terms plus model terms) or a tool vendor plan (Copilot, Cursor: the tool vendor's terms)](../diagrams/ai-contracts.svg)
 
-| Way | Who bills | Price model | Contract that governs your data |
-|---|---|---|---|
-| **Vendor subscription** | The vendor (Anthropic, OpenAI, Google, GitHub, Cursor) | Per seat, with usage limits | **Consumer** terms for individual plans (Free, Pro, Max, Plus…); **commercial** terms for business plans (Team, Business, Enterprise) |
-| **Vendor API key** | The vendor | Per token | The vendor's commercial or API terms |
-| **Cloud platform** | Your cloud provider (AWS, Google Cloud, Microsoft) | Per token, on your cloud bill | The cloud's terms, plus the model provider's terms. **How they combine depends on the platform** (below) |
+| Who sells the inference | How you pay | Contract that governs your data |
+|---|---|---|
+| **The model vendor** (Anthropic, OpenAI, Google) | A subscription (per seat, with usage limits) or an API key (per token) | **Consumer** terms for individual plans (Free, Pro, Max, Plus…); **commercial** terms for business plans (Team, Business, Enterprise) and the API |
+| **A cloud platform** (Amazon Bedrock, Google's Gemini Enterprise Agent Platform, Microsoft Foundry) | Per token, on your cloud bill | The cloud's terms, the model provider's terms, or both. **Which one applies depends on the platform** (below) |
+| **A tool vendor** that resells models (GitHub Copilot, Cursor) | The tool's plan, sometimes plus usage at API price | The tool vendor's terms for that plan, consumer or business |
+
+Who sends the invoice is not always who governs the data. On Microsoft Foundry, Microsoft bills while Anthropic's
+terms govern (below). Ask who **sells and operates** the inference, and under which plan.
 
 ### Same vendor, different plan: different terms
 
 | Vendor | Individual plans | Business plans and API | Source |
 |---|---|---|---|
-| Anthropic | Consumer Terms (Free, Pro, Max, Ultra, and Claude Code used on those accounts). Data is used for training only if you allow it. Retention is 5 years if you allow it, 30 days if not | Commercial Terms (Team, Enterprise, API). No training by default. Retention is 30 days. Zero data retention is available on approval | [Claude Code data usage](https://code.claude.com/docs/en/data-usage), [Privacy Center](https://privacy.claude.com/en/articles/10023580-is-my-data-used-for-model-training) |
+| Anthropic | Consumer Terms (Free, Pro, Max, Ultra, and Claude Code used on those accounts). Data is used for training if you allow it, and for conversations flagged for safety review. Retention is 5 years if you allow training, 30 days if not | Commercial Terms (Team, Enterprise, API). No training by default. Retention is 30 days. Zero data retention is available on approval | [Claude Code data usage](https://code.claude.com/docs/en/data-usage), [Privacy Center](https://privacy.claude.com/en/articles/10023580-is-my-data-used-for-model-training) |
 | GitHub Copilot | Free, Pro, Pro+: from 2026-04-24, interaction data may be used for training unless you opt out | Business, Enterprise: not used for training (Data Protection Agreement) | [GitHub changelog 2026-03-25](https://github.blog/changelog/2026-03-25-updates-to-our-privacy-statement-and-terms-of-service-how-we-use-your-data/) |
-| Google | Code Assist for individuals, Google AI Pro, Google AI Ultra: these stopped serving IDE and Gemini CLI requests on 2026-06-18 (users are sent to Antigravity) | Gemini Code Assist Standard and Enterprise: prompts and responses are not used for training | [Privacy notice, individuals](https://developers.google.com/gemini-code-assist/resources/privacy-notice-gemini-code-assist-individuals), [Gemini for Google Cloud data governance](https://docs.cloud.google.com/gemini/docs/discover/data-governance) |
+| Google | Code Assist for individuals, Google AI Pro, Google AI Ultra: these stopped serving IDE and Gemini CLI requests on 2026-06-18 (users are sent to Antigravity) | Gemini Code Assist Standard and Enterprise (on a separate deprecation schedule): prompts and responses are not used for training | [Code Assist for individuals: deprecation notice](https://developers.google.com/gemini-code-assist/resources/privacy-notice-gemini-code-assist-individuals), [Gemini for Google Cloud data governance](https://docs.cloud.google.com/gemini/docs/discover/data-governance) |
 | OpenAI | ChatGPT Free, Go, Plus, Pro: training default *not verified* (the help pages could not be read) | Business, Edu, Enterprise: no training on business data by default. API: not used for training unless you opt in. Codex follows the workspace settings with ChatGPT sign-in, the API organisation's with a key | [Codex pricing](https://learn.chatgpt.com/docs/pricing), [Codex sign-in](https://learn.chatgpt.com/docs/auth), [OpenAI API: your data](https://developers.openai.com/api/docs/guides/your-data) |
 
 ### One model, three platforms, three arrangements
@@ -89,22 +96,22 @@ The cloud platforms do not treat a partner model the same way. Taking Claude as 
 | Platform | Arrangement | Source |
 |---|---|---|
 | Amazon Bedrock | Model providers have no access to customer prompts and completions. Content is not shared with them and is not used to improve the base models | [Bedrock data protection](https://docs.aws.amazon.com/bedrock/latest/userguide/data-protection.html), [Bedrock FAQ](https://aws.amazon.com/bedrock/faqs/) |
-| Google Cloud, Google-managed Claude (Model Garden) | "Not a Google product". It falls under the "Separate Offerings" terms of Google's Service Specific Terms, plus the model card's own terms. Google's general "no training on customer data" statement does not name Claude | [Claude on Google Cloud](https://docs.cloud.google.com/vertex-ai/generative-ai/docs/partner-models/claude), [data governance](https://docs.cloud.google.com/vertex-ai/generative-ai/docs/data-governance) |
+| Google Cloud, Google-managed Claude (Model Garden) | Google operates the inference and is the sole data processor, inside Google Cloud's security boundary. Google's training restriction "applies to all managed models" on the platform. Claude is still "not a Google product": the "Separate Offerings" terms of Google's Service Specific Terms and the model card's terms apply on top | [Claude on Google Cloud](https://docs.cloud.google.com/vertex-ai/generative-ai/docs/partner-models/claude), [Anthropic-managed vs Google-managed](https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/partner-models/claude/anthropic-managed), [data governance](https://docs.cloud.google.com/vertex-ai/generative-ai/docs/data-governance) |
 | Google Cloud, Anthropic-managed Claude | Needs an account with Anthropic. Anthropic's Commercial Terms apply in a **separate** Anthropic organisation: the settings of an existing Anthropic contract (zero retention, HIPAA) do not carry over | [Anthropic-managed Claude](https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/partner-models/claude/anthropic-managed) |
 | Microsoft Foundry | Anthropic sells and operates the model, as an independent data processor under its own DPA and Commercial Terms. Hosting is either on Azure (data stays on Azure) or on Anthropic's infrastructure (data may leave Azure) | [Claude in Foundry: data privacy](https://learn.microsoft.com/en-us/azure/ai-foundry/responsible-ai/claude-models/data-privacy) |
 
 Google renamed Vertex AI to **Gemini Enterprise Agent Platform**
-([Google Cloud docs](https://docs.cloud.google.com/vertex-ai/docs/start/introduction-unified-platform)). Anthropic's
+([Vertex AI name changes](https://docs.cloud.google.com/gemini-enterprise-agent-platform/vertex-ai-name-changes)). Anthropic's
 docs call it "Google Cloud's Agent Platform" ([Claude Code on Google Cloud](https://code.claude.com/docs/en/google-vertex-ai)).
 Older material, and some settings such as `CLAUDE_CODE_USE_VERTEX`, still say Vertex.
 
 **Worked example.** "Our Google Cloud agreement says our data is not used for training, so it covers Claude through
-Vertex AI." That is only partly true:
+Vertex AI." That is true for one of the two ways Google offers Claude:
 
-- The general statement covers the models Google manages. Its page does not name Claude, and Claude comes with
-  separate terms.
-- Read the "Separate Offerings" terms and the model card. If you use Anthropic-managed Claude, read Anthropic's
-  Commercial Terms.
+- **Google-managed Claude**: yes. Google operates the inference, is the sole processor, and its training restriction
+  covers all managed models. Read the "Separate Offerings" terms and the model card as well.
+- **Anthropic-managed Claude** on Google Cloud: no. Anthropic's Commercial Terms apply, in a separate Anthropic
+  organisation.
 - A Claude **Pro or Max** subscription, by contrast, falls under Anthropic's Consumer Terms. No cloud agreement
   covers it.
 - A company that wants an Anthropic contract signs up for Team or Enterprise, or uses the API with a commercial key.
@@ -113,18 +120,18 @@ Vertex AI." That is only partly true:
 
 | Tool | Layer 1: screens | Layer 3: where tools act | Layer 4: how inference is bought | Models |
 |---|---|---|---|---|
-| **Claude Code** (Anthropic) | Terminal, VS Code and JetBrains, desktop app, web, mobile | Your machine (terminal, IDE, desktop); Anthropic's cloud for web sessions. Remote Control runs on your machine and is steered from elsewhere | Claude subscription (Pro, Max, Team, Enterprise), Console API key, Amazon Bedrock, Google Cloud Agent Platform, Microsoft Foundry, an LLM gateway. Web sessions need a Claude subscription | Claude only |
-| **Codex** (OpenAI) | CLI, IDE extension, ChatGPT desktop app, web, iOS | Your machine (CLI, IDE, desktop); Codex Cloud: a cloud workspace per task, which keeps working while your computer sleeps | Sign in with ChatGPT (plans from Free to Enterprise), or an API key (no cloud features). Codex Cloud requires ChatGPT sign-in | OpenAI |
-| **Gemini CLI** (Google) | Terminal; behind Gemini Code Assist agent mode in VS Code | Your machine | Gemini Code Assist Standard or Enterprise, Gemini API key, Google Cloud Agent Platform. Individual plans were moved to Antigravity CLI on 2026-06-18 | Gemini |
-| **Antigravity** (Google: app, CLI, IDE, SDK) | Desktop app, terminal, IDE, remote control | Local agents (app); the CLI runs in local shells, remote cloud environments and SSH sessions | Free individual tier, Google AI Pro and Ultra, a Google Cloud business plan, API pay-as-you-go | Gemini, plus Claude and an open GPT model in the model picker (separate usage limits) |
+| **Claude Code** (Anthropic) | Terminal, VS Code and JetBrains, desktop app, web, mobile | Your machine (terminal, IDE, desktop); Anthropic's cloud for web sessions. Remote Control runs on your machine and is steered from elsewhere | Claude subscription (Pro, Max, Team, Enterprise), Console API key, Amazon Bedrock, Claude Platform on AWS, Google Cloud's Agent Platform, Microsoft Foundry, an LLM gateway. Web sessions need a Claude subscription | Claude only |
+| **Codex** (OpenAI) | CLI, IDE extension, ChatGPT desktop app, web, iOS | Your machine (CLI, IDE, desktop); Codex Cloud: a cloud workspace per task, which keeps working while your computer sleeps | Sign in with ChatGPT (plans from Free to Enterprise), or an API key (no cloud features). Local surfaces can also use OpenAI models through Amazon Bedrock or a model gateway. Codex Cloud requires ChatGPT sign-in | OpenAI |
+| **Gemini CLI** (Google) | Terminal; behind Gemini Code Assist agent mode in VS Code | Your machine | Gemini Code Assist Standard or Enterprise, Gemini API key, Google Cloud Agent Platform. Individual plans were moved to Antigravity CLI on 2026-06-18; Standard and Enterprise follow a separate deprecation schedule | Gemini |
+| **Antigravity** (Google: app, CLI, IDE, SDK) | Desktop app, terminal, IDE, remote control | Local agents (app); remote agents also exist (*details to verify*) | Free individual tier, Google AI Pro and Ultra, a Google Cloud business plan, API pay-as-you-go | Gemini, plus Claude and an open GPT model in the model picker (separate usage limits) |
 | **Gemini Code Assist** (Google) | VS Code, IntelliJ | Your machine: agent mode uses the IDE's tools (files, terminal) and asks before changes unless always-allow is set | Standard or Enterprise edition | Gemini |
 | **GitHub Copilot** | VS Code and other IDEs, Copilot CLI, github.com, the Copilot app | Your machine (agent mode, CLI). Cloud agent: a GitHub cloud sandbox, a GitHub Actions runner, or a remote environment you connect | Copilot plan; bring your own key in some surfaces. Claude and Codex agents on github.com run on the Copilot plan (public preview) | Several vendors |
-| **Cursor** | Desktop editor, web, iOS, Slack, GitHub, Linear, API | Your machine (editor agent). Cloud agents: an isolated cloud VM. Self-hosted machines: tools on your hardware, loop in Cursor's cloud | Cursor plans. On Premium and above, cloud agents and third-party models are billed at API list price | Several vendors, plus Cursor's own |
+| **Cursor** | Desktop editor, web, iOS, Slack, GitHub, Linear, API | Your machine (editor agent). Cloud agents: an isolated cloud VM. Self-hosted machines: tools on your hardware, loop in Cursor's cloud | Cursor plans: Premium and above add cloud agents. Third-party models are paid at API list price from prepaid credit (Teams and Enterprise add a Cursor token rate) | Several vendors, plus Cursor's own |
 
 Sources, read 2026-11-10:
 
 - **Claude Code:** [overview](https://code.claude.com/docs/en/overview), [third-party integrations](https://code.claude.com/docs/en/third-party-integrations).
-- **Codex:** [Codex Cloud](https://learn.chatgpt.com/docs/cloud), [pricing](https://learn.chatgpt.com/docs/pricing), [sign-in](https://learn.chatgpt.com/docs/auth).
+- **Codex:** [Codex Cloud](https://learn.chatgpt.com/docs/cloud), [pricing](https://learn.chatgpt.com/docs/pricing), [sign-in](https://learn.chatgpt.com/docs/auth), [Amazon Bedrock](https://learn.chatgpt.com/docs/amazon-bedrock.md), [gateway](https://learn.chatgpt.com/docs/enterprise/connect-to-a-gateway.md).
 - **Gemini CLI and Antigravity:**
   - [Gemini CLI README](https://github.com/google-gemini/gemini-cli)
   - [Gemini CLI → Antigravity CLI](https://developers.googleblog.com/an-important-update-transitioning-gemini-cli-to-antigravity-cli/)
@@ -141,8 +148,9 @@ Sources, read 2026-11-10:
 
 ## 6. What does not combine
 
-- **A subscription belongs to its vendor's tools.** Anthropic's subscription sign-in is "intended exclusively" for
-  Claude Code and Anthropic's own apps. A third-party tool must use an API key or a cloud platform
+- **A subscription belongs to its vendor's tools.** Anthropic's subscription sign-in (OAuth) is intended for purchasers of
+  its subscription plans, using Claude Code and Anthropic's own apps; third-party developers may not route requests
+  through those credentials and should use an API key or a supported cloud platform
   ([Claude Code legal and compliance](https://code.claude.com/docs/en/legal-and-compliance)).
 - **An agent is tied to its model family.**
   - Claude Code calls Claude models: from Anthropic, Bedrock, Google Cloud or Foundry, or through a gateway that
@@ -153,13 +161,13 @@ Sources, read 2026-11-10:
   - Google's newer agent, Antigravity, does offer Claude models in its own model picker, under Google's plan and
     limits ([Antigravity models](https://antigravity.google/docs/models)). Whether a tool can use a model is a
     property of the tool, not of the model's family.
-- **Multi-vendor tools resell the models under their own contract.** Claude and Codex agents in GitHub Copilot run
-  on the Copilot plan, not on your Anthropic or OpenAI account
+- **Multi-vendor tools resell the models under their own contract.** Claude and Codex agents in GitHub Copilot "can
+  be powered by your existing Copilot subscription", not by your Anthropic or OpenAI account
   ([third-party agents](https://docs.github.com/en/copilot/concepts/agents/about-third-party-agents)). Cursor bills
   third-party models itself ([models and pricing](https://cursor.com/docs/models-and-pricing)).
 - **Same model, different contract.** Claude through a Max subscription, through Copilot Business and through
-  Bedrock is the same family of models. The three contracts behind them differ: Anthropic consumer, GitHub business,
-  AWS.
+  Bedrock is the same family of models. The contracts behind them differ: your Anthropic consumer plan, your Copilot
+  plan, your AWS account.
 
 ## 7. "We approved X": why the sentence says nothing
 
@@ -175,7 +183,7 @@ not say:
 Two teams can both "use the approved tool" while one runs it on personal Pro accounts, under consumer terms that may
 allow training, and the other runs it through the company's cloud contract.
 
-An approval that means something answers one question per layer, plus two about people:
+An approval that means something answers one question per layer, plus three about data and people:
 
 | Layer | Question to settle | Examples of answers |
 |---|---|---|
@@ -183,7 +191,8 @@ An approval that means something answers one question per layer, plus two about 
 | 2. Agent | What may it do on its own? | Edits: yes; shell commands: on approval; network: these hosts; connectors (MCP): this list |
 | 3. Execution | Where may it run? | Company laptops only; vendor cloud allowed for these repositories, with these secrets and this network allowlist |
 | 4. Inference | Through which contract, which models, which region? | Company Enterprise plan or cloud platform, never a personal subscription; models on this list; this region; zero retention if available |
-| Identity | Whose account? | Company account with SSO, never a personal login |
+| Data | What is kept, where, and who can see it? | Retention and training settings; data residency, including for vendor-cloud sessions; audit logs of what the agent did and who started it |
+| Identity | Whose account, and how is access removed? | Company account with SSO, never a personal login; offboarding revokes the seat, the API keys and the repository tokens |
 | Accountability | Who answers for a change? | The person on whose behalf the agent worked; the usual review before merge |
 
 Rewritten, the sentence becomes:
@@ -200,7 +209,7 @@ Rewritten, the sentence becomes:
 | "It runs locally, so our code stays here" | The tools run locally. The prompts and the file extracts the agent reads go to the model provider |
 | "Through Vertex, Claude Code can use Gemini" | No. Claude Code calls Claude models, wherever they are hosted |
 | "A Google tool cannot use Claude" | It depends on the tool. Gemini CLI cannot; Antigravity offers Claude in its model picker, under Google's plan |
-| "Our Google contract covers Claude on Vertex" | Partly at most. Google-managed Claude has its own terms, and Anthropic-managed Claude is under Anthropic's |
+| "Our Google contract covers Claude on Vertex" | For Google-managed Claude, mostly yes (Google processes, no training), plus the model's own terms. For Anthropic-managed Claude, no: Anthropic's terms apply |
 | "My Claude Max subscription can power any tool" | No. A subscription is for the vendor's own apps; other tools need an API key or a cloud platform |
-| "Copilot with Claude falls under our Anthropic contract" | No. It runs on the Copilot plan, under GitHub's terms |
+| "Copilot with Claude falls under our Anthropic contract" | No. It runs on your Copilot plan, not on your Anthropic account |
 | "Same model, same privacy" | No. The contract follows whoever sells and operates the inference, and the type of plan |

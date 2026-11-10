@@ -94,7 +94,7 @@
   "fillStyle": "hachure",
   "strokeColor": "#1971c2",
   "label": {
-   "text": "2. Agent\nwho decides and acts?",
+   "text": "2. Agent\nwhat decides and acts?",
    "fontSize": 20
   },
   "roundness": {
@@ -140,27 +140,6 @@
   "strokeColor": "#1971c2",
   "strokeWidth": 2,
   "endArrowhead": null
- },
- {
-  "type": "arrow",
-  "id": "d1",
-  "x": 205,
-  "y": 230,
-  "width": 0,
-  "height": 30,
-  "points": [
-   [
-    0,
-    0
-   ],
-   [
-    0,
-    30
-   ]
-  ],
-  "strokeColor": "#1e1e1e",
-  "strokeWidth": 2,
-  "endArrowhead": "arrow"
  },
  {
   "type": "rectangle",
@@ -222,27 +201,6 @@
   "endArrowhead": null
  },
  {
-  "type": "arrow",
-  "id": "d2",
-  "x": 205,
-  "y": 370,
-  "width": 0,
-  "height": 30,
-  "points": [
-   [
-    0,
-    0
-   ],
-   [
-    0,
-    30
-   ]
-  ],
-  "strokeColor": "#1e1e1e",
-  "strokeWidth": 2,
-  "endArrowhead": "arrow"
- },
- {
   "type": "rectangle",
   "id": "l4",
   "x": 40,
@@ -273,7 +231,7 @@
   "fillStyle": "hachure",
   "strokeColor": "#0c8599",
   "label": {
-   "text": "vendor subscription (seat price)\nvendor API key (pay per token)\ncloud platform (Bedrock, Agent Platform)",
+   "text": "model vendor: subscription or API key\ncloud platform (Bedrock, Agent Platform)\ntool vendor plan (Copilot, Cursor)",
    "fontSize": 20
   },
   "roundness": {
@@ -300,27 +258,6 @@
   "strokeColor": "#0c8599",
   "strokeWidth": 2,
   "endArrowhead": null
- },
- {
-  "type": "arrow",
-  "id": "d3",
-  "x": 205,
-  "y": 510,
-  "width": 0,
-  "height": 30,
-  "points": [
-   [
-    0,
-    0
-   ],
-   [
-    0,
-    30
-   ]
-  ],
-  "strokeColor": "#1e1e1e",
-  "strokeWidth": 2,
-  "endArrowhead": "arrow"
  },
  {
   "type": "rectangle",
@@ -354,7 +291,7 @@
   "strokeColor": "#868e96",
   "strokeStyle": "dashed",
   "label": {
-   "text": "who bills decides\nwhich terms apply\nto your data",
+   "text": "who sells and operates\nthe inference decides\nwhich terms apply",
    "fontSize": 20
   }
  },
