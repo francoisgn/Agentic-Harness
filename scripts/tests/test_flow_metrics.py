@@ -299,6 +299,22 @@ class UnverifiedTests(unittest.TestCase):
         self.assertIn("approved with unverified points", fm.render_markdown(report, "o/r"))
 
 
+class UnverifiedOrderTests(unittest.TestCase):
+    def test_last_verdict_per_source_in_time_order_decides(self):
+        def merged(n):
+            return pull(n, state="closed", created="2026-11-05T00:00:00Z", merged="2026-11-06T00:00:00Z")
+        # Another source's later verdict does not clear the adversarial review's unverified points
+        p1 = merged(1)
+        p1["comments"] = [comment("c", ADV_OK + " · unverified: 2", "2026-11-05T01:00:00Z"),
+                          comment("c", "**AI review (sonnet): APPROVED** head y", "2026-11-05T02:00:00Z")]
+        # A verdict posted as a GitHub review after a comment verdict is the later one, whatever the list order
+        p2 = merged(2)
+        p2["comments"] = [comment("c", ADV_OK + " · unverified: 1", "2026-11-05T01:00:00Z")]
+        p2["reviews"] = [review("claude", "COMMENTED", ADV_OK, "2026-11-05T03:00:00Z")]
+        self.assertEqual(fm.quality([p1])["unverified"], 1)
+        self.assertEqual(fm.quality([p2])["unverified"], 0)
+
+
 class SkippedRunTests(unittest.TestCase):
     def test_skipped_runs_cost_no_minutes(self):
         runs = [run("x", conclusion="skipped", minutes=0), run("x", conclusion="success", minutes=2.5)]

@@ -91,8 +91,11 @@ def quality(merged):
             continue
         side = q["agent"] if is_agent(p) else q["human"]
         q["reviewed"] += 1
-        harness = [e for e in events if "unverified" in e]
-        if harness and harness[-1]["unverified"]:
+        # Last harness verdict of each source, in time order: does any still list unverified points?
+        last = {}
+        for e in sorted((e for e in events if "unverified" in e), key=lambda e: e.get("at") or ""):
+            last[e["source"]] = e["unverified"]
+        if any(last.values()):
             q["unverified"] += 1
         side["reviewed"] += 1
         problems = [e for e in events if e["problem"]]
@@ -347,7 +350,8 @@ def render_markdown(r, repo):
         out.append(f"\n🟠 {q['untraced']} merged PR(s) without any traced verdict: the measure ignores them "
                    "(REVIEW-ROUNDS.md, traceability section).")
     if q.get("unverified"):
-        out.append(f"\n🟠 {q['unverified']} merged PR(s) approved with unverified points still open in the last verdict "
+        out.append(f"\n🟠 {q['unverified']} merged PR(s) approved with unverified points: the last verdict of a "
+                   "review still lists them; check that each was verified or accepted on the PR "
                    "(REVIEW-ROUNDS.md, traceability section).")
     if r["labels"]:
         out += ["", "## Open issues by label", "", "| Label | Count |", "|---|---|"]

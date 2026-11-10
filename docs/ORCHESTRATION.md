@@ -69,14 +69,14 @@ Before moving the PR to "Ready for review":
 - standard instruction:
 
   > You are the independent adversarial reviewer of PR #N, head `<sha>`. Read-only. State the model you run
-  > on. Check out the head in a throwaway worktree, never in the author's checkout, and run the tests. Look for real failures: for each risk, a concrete failure scenario
-  > or a probe; change the code locally and check that a test fails. Check security, concurrency, module
-  > boundaries, the claims in the docs (sourced?), tests shown failing without the change, every
-  > line of LESSONS.md. Answer in under 300 words: `**Adversarial review (<model>): APPROVED | CHANGES
-  > REQUESTED** — head <sha>`, numbered findings (High / Medium / Low / Nit, `file:line`, failure scenario,
-  > fix), then a short **Verified** list and an **Unverified** list (claims you could not check; the first
-  > line then ends with `· unverified: N`). A security flaw: only "CHANGES REQUESTED — security finding,
-  > detail sent privately".
+  > on. Check out the head in a throwaway worktree, never in the author's checkout, and run the tests. Look
+  > for real failures: for each risk, a concrete failure scenario or a probe; change the code locally and
+  > check that a test fails. Check security, concurrency, module boundaries, the claims in the docs
+  > (sourced?), tests shown failing without the change, every line of LESSONS.md. Answer in under 300 words:
+  > `**Adversarial review (<model>): APPROVED | CHANGES REQUESTED** — head <sha>`, numbered findings (High /
+  > Medium / Low / Nit, `file:line`, failure scenario, fix), then a short **Verified** list and an
+  > **Unverified** list (claims you could not check; the first line then ends with `· unverified: N`). A
+  > security flaw: only "CHANGES REQUESTED — security finding, detail sent privately".
 
 - **post every verdict on the PR**, including the first negative one ([REVIEW-ROUNDS](REVIEW-ROUNDS.md)
   §Traceability): this is what measures first-pass quality;
