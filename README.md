@@ -8,7 +8,7 @@
 ![AGENTS.md](https://img.shields.io/badge/AGENTS.md-any_agent-111111)
 ![Excalidraw](https://img.shields.io/badge/Excalidraw-diagrams-6965DB?logo=excalidraw&logoColor=white)
 
-![agentic-harness, "Keep agents on track": a compass whose needle holds its heading while a dashed agent trajectory crosses its rings from one waypoint to the next; intent, execution, control](docs/assets/banner.png)
+![Belayline, "Keep coding agents on track": a compass whose needle holds its heading while a dashed agent trajectory crosses its rings from one waypoint to the next; intent, TDD, review, merge](docs/assets/banner.png)
 
 > **Belayline: the open harness for agentic development.** Versioned skills, tools and method: intent and TDD, issues → lots → PRs, adversarial
 > reviews, pluggable compliance, stewards, FinOps and a flow dashboard. For any GitHub repository, any agent (Claude
@@ -121,7 +121,7 @@ Knowledge flows both ways: propose a lesson born in your project through the "Le
 | [`docs/LESSONS.md`](docs/LESSONS.md) | Lessons by scope, sources cited; how to propose one |
 | [`docs/CONVENTIONS.md`](docs/CONVENTIONS.md), [`docs/BRANCHING-RELEASE.md`](docs/BRANCHING-RELEASE.md), [`docs/MAC-HANDOFF.md`](docs/MAC-HANDOFF.md) | Commits and PRs, repository identity (description, topics, banner, social preview), branches and versions, split between cloud and local machine |
 | [`docs/adr/`](docs/adr/README.md) | Decisions of the harness |
-| [`docs/assets/`](docs/assets) | Visual identity: README banner (`banner.png`), social preview (`social-preview.png`, 1280×640) |
+| [`docs/assets/`](docs/assets) | Visual identity: README banner (`banner.svg` → `.png`), social preview (`social-preview.svg` → `.png`, 1280×640) |
 | [`docs/diagrams/`](docs/diagrams) | Diagrams: `.json` source, `.excalidraw` scene (editable on excalidraw.com), `.svg` image |
 | `plugins/harness/` | Claude Code adapter: 11 skills, 13 agents, hooks, plugin |
 | `templates/` | Vendored templates |
