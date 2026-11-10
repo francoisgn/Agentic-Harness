@@ -86,7 +86,8 @@ for a short flow in an internal doc; for the README, `"architecture": "any"` acc
 |---|---|---|
 | Adoption | `harness-sync.sh` | Creates `README.md`, `CONTRIBUTING.md` and `docs/diagrams/architecture.*` **if they do not exist**; never rewrites them afterwards |
 | End of lot | the lot's agent (`/lot-finish`, step 2) | `/readme-update`: the lot's row, badges, diagram if the architecture moved |
-| After a merge, every week | `doc-steward` | Compares the README with the merged code, opens a docs PR |
+| After each merge | `doc-steward.yml` (opt-in, [STEWARDS](STEWARDS.md) §2) | Rewrites the progress block (`readme-progress.py`) and the files the `Docs:` lines name, in one draft docs PR |
+| Every week | `doc-steward.yml`, mode `audit` | `readme-check.py`, `doc-links.py`, `diagrams-render.py --check`, `readme-progress.py --check`: one issue per gap |
 | Every ready PR | CI (`docs-security.yml`, input `readme`) | `readme-check.py` + `diagrams-render.py --check` |
 
 ## 6. Tune or switch off

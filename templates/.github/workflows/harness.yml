@@ -12,12 +12,12 @@ on:
   issues:
     types: [opened, edited, labeled, unlabeled, reopened, closed]
   schedule:
-    # These two strings are repeated verbatim in the conditions of the `flow` and `settings`/`security` jobs
+    # These two strings are repeated verbatim in the conditions of the `flow`, `settings`/`security` and `steward` jobs
     # (github.event.schedule): changing one here without changing it there silently disables the job.
     - cron: "17 5 * * *"   # daily dashboard
-    - cron: "47 5 * * 1"   # weekly: settings drift, security (CVE without a commit) if the security job is enabled
+    - cron: "47 5 * * 1"   # weekly: settings drift, security (CVE without a commit), doc audit, if those jobs are enabled
   pull_request:
-    types: [opened, edited, reopened, synchronize, ready_for_review, labeled, unlabeled]   # labels: ledger check
+    types: [opened, edited, reopened, synchronize, ready_for_review, labeled, unlabeled, closed]   # labels: ledger check; closed: doc steward
   workflow_dispatch:
 
 permissions: {}
@@ -40,7 +40,7 @@ jobs:
     uses: francoisgn/belayline-agentic-harness/.github/workflows/issue-hygiene.yml@v0.3.0
 
   pr:
-    if: github.event_name == 'pull_request'
+    if: github.event_name == 'pull_request' && github.event.action != 'closed'
     permissions:
       contents: read
       issues: write
@@ -79,14 +79,14 @@ jobs:
 
   # Docs + security baseline, if the project does not have it already (otherwise delete these jobs: do not pay twice).
   # docs:
-  #   if: github.event_name == 'pull_request' && !contains(fromJSON('["edited", "labeled", "unlabeled"]'), github.event.action)
+  #   if: github.event_name == 'pull_request' && !contains(fromJSON('["edited", "labeled", "unlabeled", "closed"]'), github.event.action)
   #   permissions:
   #     contents: read
   #   uses: francoisgn/belayline-agentic-harness/.github/workflows/docs-security.yml@v0.3.0
   #   with:
   #     gitleaks: false   # already in the security job
   # security:   # SAST (Semgrep) + SCA (Trivy) + secrets (gitleaks), CI-BUDGET.md §3
-  #   if: (github.event_name == 'pull_request' && !contains(fromJSON('["edited", "labeled", "unlabeled"]'), github.event.action)) || (github.event_name == 'schedule' && github.event.schedule == '47 5 * * 1')
+  #   if: (github.event_name == 'pull_request' && !contains(fromJSON('["edited", "labeled", "unlabeled", "closed"]'), github.event.action)) || (github.event_name == 'schedule' && github.event.schedule == '47 5 * * 1')
   #   permissions:
   #     contents: read
   #   uses: francoisgn/belayline-agentic-harness/.github/workflows/security.yml@v0.3.0
@@ -95,7 +95,7 @@ jobs:
 
   # AI review service (REVIEW-SERVICE.md): secret ANTHROPIC_API_KEY or CLAUDE_CODE_OAUTH_TOKEN; never required.
   # review:
-  #   if: github.event_name == 'pull_request' && !contains(fromJSON('["edited", "labeled", "unlabeled"]'), github.event.action)
+  #   if: github.event_name == 'pull_request' && !contains(fromJSON('["edited", "labeled", "unlabeled", "closed"]'), github.event.action)
   #   permissions:
   #     contents: read
   #     pull-requests: write
@@ -106,3 +106,23 @@ jobs:
   #     ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
   #   with:
   #     model: claude-sonnet-5-5
+
+  # Doc steward (STEWARDS.md §2; needs a harness version that has doc-steward.yml): after each merge into the
+  # integration branch, ONE draft docs PR (branch docs/steward) that folds the ledger and updates the files the merged
+  # PRs' `Docs:` lines name; nothing to fold → one short job, no agent. Monday: audit only (README, links, diagrams,
+  # progress block), one issue per gap. Merge pass: secret ANTHROPIC_API_KEY or CLAUDE_CODE_OAUTH_TOKEN, skipped with
+  # a notice without it; the audit needs none. Never required. Settings → Actions → General: "Allow GitHub Actions to
+  # create and approve pull requests".
+  # steward:
+  #   if: (github.event_name == 'pull_request' && github.event.action == 'closed' && github.event.pull_request.merged) || github.event_name == 'workflow_dispatch' || (github.event_name == 'schedule' && github.event.schedule == '47 5 * * 1')
+  #   permissions:
+  #     contents: write
+  #     pull-requests: write
+  #     issues: write
+  #     id-token: write
+  #   uses: francoisgn/belayline-agentic-harness/.github/workflows/doc-steward.yml@v0.3.0
+  #   with:
+  #     mode: ${{ github.event_name == 'schedule' && 'audit' || 'merge' }}
+  #     model: claude-sonnet-5-5
+  #   secrets:
+  #     ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}

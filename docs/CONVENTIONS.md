@@ -61,11 +61,14 @@ table) that many PRs would want to modify at the same time.
   fails, when a ready PR changes code paths (input `docs-code-paths`, default every file but `.md`; empty switches it
   off) and has no `Docs:` line, when `none` has no reason, or when a listed file does not exist on the PR head.
   Without a ledger, the same line lives in the PR body; nothing else changes.
-- After the merges, a **steward** (upkeep role, [STEWARDS](STEWARDS.md)) runs the project's script that reads the
-  merged PRs labelled `ledger`, **folds** their entries into the files and opens **a single docs PR**, which
-  touches only these files; then it replaces `ledger` with `ledger: done` on each folded PR.
-- This PR is verified without an adversarial review: **the script must reproduce it** (on its base, the command
-  written in its description, then `git diff --exit-code <head>`, shows no difference); it is merged on green CI.
+- After each merge, a **steward** (upkeep role, [STEWARDS](STEWARDS.md) §2, `doc-steward.yml`) runs the project's
+  script that reads the merged PRs labelled `ledger` and **folds** their entries into the files, in **a single draft
+  docs PR**; once that PR is merged, the next pass replaces `ledger` with `ledger: done` on each folded PR. The
+  script gets the pending PR numbers in `STEWARD_LEDGER_PRS` and may write the ones it folded to the file
+  `$STEWARD_FOLDED` (otherwise all count as folded); the others stay in their PR and are listed in the docs PR.
+- The fold is that PR's **"Fold the ledger" commit**, verified without an adversarial review: **the script must
+  reproduce it** (on its base, the command written in the commit message, then `git diff --exit-code <commit>`, shows
+  no difference). The PR's other commits (docs named by the `Docs:` lines) are reviewed like any change.
 - No lock, no conflict, no late push to rebase a log, no CI rerun for one line.
 - The adversarial reviewer reviews the `### Ledger` section like code. A malformed entry is reported and skipped by
   the steward (the others are folded): the author fixes the PR body, not the files.

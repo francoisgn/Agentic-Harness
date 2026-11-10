@@ -16,6 +16,7 @@ Why this mechanism (vendoring + plugin + reusable workflows) and its limits: [AD
 | `.claude/agents/*.md` | copy | Harness: `adversarial-reviewer`, `issue-steward`, `doc-steward`, `flow-monitor`, `compliance-*` (exclude the compliance frameworks you do not need) |
 | `.harness/scripts/flow-metrics.py` | copy | Harness: flow dashboard (`flow-report.yml`, `/status-report`) |
 | `.harness/scripts/readme-progress.py` | copy | Harness: README progress table generated from the issues (`/readme-update`) |
+| `.harness/scripts/doc-steward.py` | copy | Harness: doc steward's "anything to fold?" decision, docs PR body and weekly audit issues (`doc-steward.yml`) |
 | `.claude/settings.json` | merge | Project; the harness only **adds** its two hooks if they are missing |
 | `CLAUDE.md`, `AGENTS.md` | marked block | Project, except the block `<!-- harness:begin harness -->…<!-- harness:end harness -->` |
 | `.harness/config.json`, `.github/labels.local.json`, issue and PR templates, `docs/lots/TEMPLATE.md`, `.markdownlint-cli2.jsonc`, `.github/workflows/harness.yml`, `.github/workflows/harness-sync.yml` | seed | Project: created if missing, never rewritten (except the `@vX.Y.Z` references of `harness.yml`) |
@@ -52,7 +53,7 @@ to the session; on the Mac: `gh auth login && gh auth setup-git`).
    - `.github/labels.local.json`: the project's own labels (e.g. `area: …`, `calculation`, `regulatory`), in the same
      format as `.harness/labels.json` (`axis` optional, useful for issue hygiene). Remove the old labels file
      and its workflow if it duplicates the `labels` job of `harness.yml`.
-   - `.github/workflows/harness.yml`: `push` branch, `flow` (model A or empty), jobs `docs`, `security` and `review`
+   - `.github/workflows/harness.yml`: `push` branch, `flow` (model A or empty), jobs `docs`, `security`, `review` and `steward`
      to enable only if the project does not already have the equivalent; the `flow` job (dashboard) is on by default.
    - `.harness/config.json` → `compliance`: compliance frameworks whose reviewers are run ([COMPLIANCE](COMPLIANCE.md)). Delete the workflows it replaces (e.g. `branch-flow.yml`).
    - **Repository identity** ([CONVENTIONS](CONVENTIONS.md) §Repository identity): in `.github/repo-settings.json`,
@@ -208,6 +209,7 @@ The harness is a **framework**: every building block has an extension point, non
 | Adversarial reviewer, stewards | vendored `.claude/agents/<name>.md` | Exclude the file (`exclude`) and put your own under the same name | A project agent under another name |
 | Skills | vendored `.claude/skills/<name>/` | Exclude and put your own | Project skills under other names |
 | Review service | `review` job (`ai-review.yml`) | CodeRabbit or another bot: do not enable `review` | `.harness/review-instructions.md` |
+| Doc steward | `steward` job (`doc-steward.yml`) | Your own docs bot: do not enable `steward` | `.harness/steward-instructions.md`; inputs (`branch`, `since-days`, `audit-label`) |
 | Security | `security.yml`, `docs-security.yml` | Company tools (GHAS, SonarQube, Snyk): do not enable these jobs | Inputs (`semgrep-configs`, `trivy-severity`) |
 | Repository settings | `settings` job + `.github/repo-settings.json` | Company Terraform / Safe-settings: delete `settings` | Sections of the file |
 | Dashboard | `flow` job | In-house steering tool: delete `flow` | Thresholds as inputs (`stall-hours`, `max-ci-runs`…) |

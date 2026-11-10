@@ -33,13 +33,13 @@ grep -q '@.harness/docs/ESSENTIALS.md' "$T/CLAUDE.md" || fail "ESSENTIALS import
 [ -f "$T/.harness/scripts/flow-metrics.py" ] && [ -f "$T/.harness/scripts/compliance-plan.py" ] \
   && cmp -s "$ROOT/LICENSE" "$T/.harness/LICENSE" \
   && [ -f "$T/.harness/scripts/repo-settings.py" ] && [ -f "$T/.github/repo-settings.json" ] \
-  && [ -f "$T/.harness/scripts/readme-progress.py" ] || fail "scripts, settings or licence missing"
+  && [ -f "$T/.harness/scripts/readme-progress.py" ] && [ -f "$T/.harness/scripts/doc-steward.py" ] || fail "scripts, settings or licence missing"
 [ -f "$T/docs/compliance/TEMPLATE.md" ] && [ -f "$T/.claude/agents/compliance-reviewer.md" ] || fail "spec template or generic reviewer missing"
 jq -e '.permissions.allow[0] == "Bash(swift test:*)" and (.hooks.PreToolUse | length) == 1' "$T/.claude/settings.json" >/dev/null \
   || fail "settings.json merge"
 PIN="$(git -C "$ROOT" rev-parse HEAD 2>/dev/null) # v$(cat "$ROOT/VERSION")"
 if [ -n "$(git -C "$ROOT" status --porcelain 2>/dev/null)" ] || ! git -C "$ROOT" rev-parse HEAD >/dev/null 2>&1; then PIN="v$(cat "$ROOT/VERSION")"; fi
-[ "$(grep -c "belayline-agentic-harness/.github/workflows/.*@$PIN\$" "$T/.github/workflows/harness.yml")" = 8 ] || fail "refbump ($PIN)"
+[ "$(grep -c "belayline-agentic-harness/.github/workflows/.*@$PIN\$" "$T/.github/workflows/harness.yml")" = 9 ] || fail "refbump ($PIN)"
 ok "first sync: block, docs, skills, hooks, JSON merge, refbump"
 
 [ "$(run)" = 0 ] && grep -q 'Up to date' "$WORK/out" || fail "second sync not idempotent: $(cat "$WORK/out")"
