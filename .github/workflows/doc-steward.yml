@@ -13,6 +13,7 @@ name: Doc steward (reusable)
 #     one issue per gap (doc-steward.py audit), docs are never rewritten. No agent, no secret.
 # Security (CI-BASELINE.md §2): the agent job has a read-only token; only the `publish` job can write, and it runs no
 # agent and no PR code: it applies the steward's commits (never under `.github/` or `.harness/`) on the steward branch.
+# The agent never commits: the run stops if HEAD moved during its step, and its commit holds Markdown files only.
 # The merge pass needs ANTHROPIC_API_KEY or CLAUDE_CODE_OAUTH_TOKEN: without it, skipped with a notice. It is never a
 # required check. Merges queue in one concurrency group: several merges give one pass.
 # Settings → Actions → General: "Allow GitHub Actions to create and approve pull requests". A PR opened with the
@@ -246,6 +247,10 @@ jobs:
           } >"$RUNNER_TEMP/prompt.md"
           { echo "run=true"; echo "text<<HARNESS_EOF"; cat "$RUNNER_TEMP/prompt.md"; echo "HARNESS_EOF"; } >>"$GITHUB_OUTPUT"
 
+      - id: before
+        name: Commit before the agent
+        run: echo "sha=$(git rev-parse HEAD)" >>"$GITHUB_OUTPUT"
+
       - name: Update the declared docs
         if: steps.prompt.outputs.run == 'true'
         uses: anthropics/claude-code-action@61a9c274fa7110a66dfafc1bbbced03833eb25fe # v1.0.269
@@ -262,15 +267,23 @@ jobs:
         name: Collect the commits
         env:
           BASE_SHA: ${{ steps.start.outputs.sha }}
+          BEFORE_AGENT: ${{ steps.before.outputs.sha }}
         run: |
           set -euo pipefail
           OUT="$RUNNER_TEMP/steward"; mkdir -p "$OUT/patches"
+          # The agent edits files; it never commits. A moved HEAD means history was written behind the workflow's
+          # back: nothing is published.
+          if [ "$(git rev-parse HEAD)" != "$BEFORE_AGENT" ]; then
+            echo "::error::Doc steward: HEAD moved during the agent step ($BEFORE_AGENT expected): nothing published."; exit 1
+          fi
           if [ -f .steward-unplaced.md ]; then cp .steward-unplaced.md "$OUT/unplaced.md"; fi
           cp "$RUNNER_TEMP/pending.json" "$RUNNER_TEMP/fold.log" "$OUT/"
           if [ -f "$RUNNER_TEMP/folded.txt" ]; then cp "$RUNNER_TEMP/folded.txt" "$OUT/"; fi
           # The agent's commit keeps Markdown files only; anything else it changed is reported, not published
           git add -A -- '*.md' ':(exclude).harness' ':(exclude).github' ':(exclude).steward-unplaced.md'
           git diff --cached --quiet || git -c core.hooksPath=/dev/null commit -q -m "Update the docs named by the merged PRs' Docs: lines"
+          NOT_MD=$(git diff --name-only "$BEFORE_AGENT" HEAD | grep -v '\.md$' || true)
+          if [ -n "$NOT_MD" ]; then echo "::error::Doc steward: the agent's commit holds non-Markdown files: nothing published."; exit 1; fi
           OTHER=$(git status --porcelain -- . ':(exclude).steward-unplaced.md')
           if [ -n "$OTHER" ]; then echo "::warning::Doc steward: changes outside Markdown not published: $(echo "$OTHER" | tr '\n' ' ')"; fi
           git format-patch -q --binary -o "$OUT/patches" "$BASE_SHA..HEAD"
