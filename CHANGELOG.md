@@ -5,6 +5,13 @@ moving to this version.
 
 ## Unreleased
 
+- **Lesson classes**: `/lesson-propose` classifies each item as mechanical (proposed check as an issue, no line),
+  judgment (a lesson line) or one-off (nothing); the "Lesson" form asks for the class and the check; header of
+  `docs/LESSONS.md` explains them. Existing lessons are not yet sorted.
+- **Two explicit reviews** ([REVIEW-ROUNDS](docs/REVIEW-ROUNDS.md) §The two reviews): the adversarial review
+  (intent: issue + diff + lessons, isolated fresh sub-agent that refuses to give a verdict if it cannot be isolated)
+  and the code review (diff only, by the review service) are named separately; one clean round on the current head
+  ends the loop (within 3 cycles) and settled findings are listed in the PR, not reopened without new evidence.
 - **Renamed to Belayline** (formerly agentic-harness): repository `francoisgn/belayline-agentic-harness`, plugin
   `belay` in marketplace `belayline` (`claude plugin install belay@belayline`). The vendored folder `.harness/`,
   `harness-sync.sh`, `harness.yml` and the `harness:` markers keep their names.
@@ -27,6 +34,9 @@ moving to this version.
   `.harness/config.json`.
 - **Tiered CI baseline** ([CI-BASELINE](docs/CI-BASELINE.md)): hygiene, quality (one local command = the CI),
   expensive, heavy security, process; six workflow invariants; survey of three real projects.
+- **Anti-bloat checks** (`check-framework.py`): size limits on skills, agents and `docs/ESSENTIALS.md` (listed
+  exceptions only), skill and agent doc links must resolve, README counts and the `CLAUDE.md.block` skill list must
+  match `plugins/harness/` ([CONTRIBUTING](CONTRIBUTING.md) §Size limits).
 - The harness applies its own standard: README with badges and progress block, `CONTRIBUTING.md`, checked in CI.
 - `scripts/diagrams/render.py`: `--dir` option.
 - **Repository identity** (CONVENTIONS §Repository identity): every repository that follows the harness carries a
@@ -45,6 +55,7 @@ moving to this version.
   vendored files.
 - **`SECURITY.md`**: versions covered, private report (never a public issue), response times, scope; direct link
   from the issue template chooser.
+- **Declined ideas recorded** (`.out-of-scope/`): skills invoked only by the human (`disable-model-invocation`) and one source compiled into per-tool skill formats (Cursor, Codex, Gemini CLI), each with the change that would reopen it (#19).
 
 **Action**: point `uses:` references and the clone URL at `francoisgn/belayline-agentic-harness` (the sync rewrites
 `harness.yml`); reinstall the plugin as `belay@belayline`. Then run `harness-sync.sh` again; rename the markers `harness:begin cadre`/`harness:end cadre` to `harness`,

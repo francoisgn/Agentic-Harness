@@ -4,6 +4,30 @@ Source: `docs/agents/REVIEW-ROUNDS.md` of HFRnow, generalised. Skill: `/review-r
 
 Each round costs a CI run, a new review and tokens. Do it **once, completely**.
 
+## The two reviews
+
+Two distinct reviews answer two distinct questions from two distinct inputs. They are never blended: the first
+checks the change against the **intent**, the second checks the **code** on its own.
+
+| Review | Question | Input | Who | When |
+|---|---|---|---|---|
+| Adversarial | Does the change do what the issue asks? | Issue intent (spec, error behaviours, definition of done) + diff + LESSONS | A fresh sub-agent of another model than the author, read-only, isolated from the author's context (`adversarial-reviewer`) | Before "Ready for review" |
+| Code | Is the code correct and clean? | The diff only | The review service on the PR (CodeRabbit or [the in-house service](REVIEW-SERVICE.md)) | On the ready PR, once per head |
+
+- **Isolation.** An adversarial reviewer that cannot be isolated from the author's context (same session, no
+  sub-agent tool) says so and gives **no verdict**: a review in the author's context is not an adversarial review.
+- **No review service.** A project without one has the code review done by the AI review workflow or by a human, and
+  the PR says which.
+
+## Convergence: a settled finding stays settled
+
+- **One clean round ends the loop**: a round with no finding on the current head is the last one. It stays within the
+  bound of 3 cycles ([FINOPS](FINOPS.md) §3); two clean rounds are never required.
+- **Settled findings are listed in the PR**, each with its recorded reason (fixed in a commit, or not fixed and why).
+  A reviewer that reopens one is answered by pointing to that record: it counts as a new finding only with **new
+  evidence** (a new failure path, a changed head, a new input). A security finding is never settled this way: it
+  stays open until the maintainer decides.
+
 1. **Read everything first**: inline comments, "Outside diff range", details, the "Prompt for AI agents" block, every
    open thread of the PR.
 2. **A finding is a claim to verify, not an order.** Follow a real path (input or caller → failure).
@@ -14,8 +38,9 @@ Each round costs a CI run, a new review and tokens. Do it **once, completely**.
    queries of the same pattern, reverse order, other limits) and fix them all, one test per case.
 4. **Every test is shown failing without the fix** (revert the core of the change, see red) and goes through the real
    entry point. A filtered run must report executed tests (LESSONS L01).
-5. **Cross-check before pushing**: a separate agent receives the finding, the diff and LESSONS.md, **not** the
-   author's conclusion, with the instruction to find what the fix misses or breaks. Integrate its findings.
+5. **Cross-check before pushing**: a separate agent, isolated from your context, receives the finding, the diff and
+   LESSONS.md, **not** the author's conclusion, with the instruction to find what the fix misses or breaks.
+   Integrate its findings.
 6. **One commit + one push per round**, all findings handled. Never one push per finding.
 7. **Then one reply per thread** (fixing commit, or why not), in the same unit of work as the push; a push
    alone is not a reply. Findings outside the diff: a PR comment addressed to the bot. Resolve every handled thread.
@@ -33,7 +58,7 @@ unavailable, runner never acquired) is not "CI red": say so and point to the rea
 not a cause: one re-run at most, then investigate.
 
 **Ready to merge** = required checks green **and** zero open threads **and** the bot has reviewed the head **and** an
-adversarial review APPROVED on that head (and the project's merge policy).
+adversarial review APPROVED on that head, with settled findings listed in the PR (and the project's merge policy).
 
 ## Traceability: every verdict on the PR
 

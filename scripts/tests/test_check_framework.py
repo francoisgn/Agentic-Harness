@@ -205,6 +205,47 @@ class CheckFrameworkTests(unittest.TestCase):
         p.write_text(p.read_text().replace("`hfrnow.orc-0711.rev.pr231`", "`hfrnow.rev.pr231`", 1))
         self.assertIn("hfrnow.rev.pr231", run(self.tmp).stdout)
 
+    def append(self, rel, text):
+        with open(self.tmp / rel, "a") as f:
+            f.write(text)
+
+    def test_oversized_skill_is_a_gap_naming_file_size_and_limit(self):
+        self.append("plugins/harness/skills/intent/SKILL.md", "\nfiller line\n" * 600)
+        out = run(self.tmp).stdout
+        self.assertIn("plugins/harness/skills/intent/SKILL.md", out)
+        self.assertRegex(out, r"\d+ characters.*limit \d+")
+
+    def test_oversized_agent_is_a_gap(self):
+        self.append("plugins/harness/agents/flow-monitor.md", "\nfiller line\n" * 600)
+        self.assertIn("plugins/harness/agents/flow-monitor.md: body", run(self.tmp).stdout)
+
+    def test_essentials_has_its_own_tighter_limit(self):
+        self.append("docs/ESSENTIALS.md", "\nfiller line\n" * 100)  # ~1.4 kB over: passes a skill-sized limit, not the tighter one
+        out = run(self.tmp).stdout
+        self.assertIn("docs/ESSENTIALS.md: body", out)
+        self.assertNotIn("SKILL.md: body", out)
+
+    def test_skill_or_agent_linking_a_missing_doc_is_a_gap(self):
+        self.append("plugins/harness/skills/intent/SKILL.md", "\nSee `.harness/docs/ABSENT.md`.\n")
+        self.append("plugins/harness/agents/flow-monitor.md", "\nSee `${CLAUDE_PLUGIN_ROOT}/docs/GONE.md`.\n")
+        out = run(self.tmp).stdout
+        self.assertIn("ABSENT.md", out)
+        self.assertIn("GONE.md", out)
+
+    def test_readme_counts_must_match_the_plugin(self):
+        p = self.tmp / "README.md"
+        p.write_text(p.read_text().replace("11 skills, 13 agents", "12 skills, 14 agents", 1))
+        out = run(self.tmp).stdout
+        self.assertIn("12 skills", out)
+        self.assertIn("14 agents", out)
+
+    def test_block_skill_list_must_match_the_plugin(self):
+        p = self.tmp / "templates/CLAUDE.md.block"
+        p.write_text(p.read_text().replace(", `/lesson-propose`", "", 1))
+        self.assertIn("lesson-propose", run(self.tmp).stdout)
+        shutil.rmtree(self.tmp / "plugins/harness/skills/status-report")
+        self.assertIn("status-report", run(self.tmp).stdout)
+
 
 if __name__ == "__main__":
     unittest.main()

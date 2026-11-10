@@ -1,7 +1,8 @@
 # Review service: the in-house equivalent of CodeRabbit
 
-Definition of the harness's automatic PR review service. It **complements** the session's adversarial review
-([ORCHESTRATION](ORCHESTRATION.md) §3) and does not replace it. Implementation: reusable workflow
+Definition of the harness's automatic PR review service: the **code** review ("is the code correct and clean?",
+input = the diff). It **complements** the session's adversarial review, the **intent** review
+([ORCHESTRATION](ORCHESTRATION.md) §3, [REVIEW-ROUNDS](REVIEW-ROUNDS.md) §The two reviews), and does not replace it. Implementation: reusable workflow
 `.github/workflows/ai-review.yml` (action `anthropics/claude-code-action`, pinned by SHA).
 
 ## 1. Service contract
@@ -9,7 +10,7 @@ Definition of the harness's automatic PR review service. It **complements** the 
 | Item | Definition |
 |---|---|
 | Trigger | **Ready** PR (`ready_for_review`, then `synchronize`); never a draft; project-local label `review: skip` → skipped |
-| Inputs | Diff `base...head`, linked spec (`Closes`/`Refs`), `CLAUDE.md`, `ESSENTIALS.md`, `LESSONS.md`, project instructions (`.harness/review-instructions.md`) |
+| Inputs | Diff `base...head`, `CLAUDE.md`, `ESSENTIALS.md`, `LESSONS.md`, project instructions (`.harness/review-instructions.md`); the issue intent is the adversarial review's input, not this one's |
 | Output | **One** review comment per head: verdict `APPROVED` / `CHANGES REQUESTED`, numbered findings (High / Medium / Low / Nit, `file:line`, failure scenario, fix), "Verified" list |
 | Rights | Read the code; a PR **comment** only (`gh pr comment`), never a GitHub review: it cannot approve, even under prompt injection. No commit, no push, no merge |
 | Model | Tier ≥ the issue's, **other** than the author if possible; default: solid; frontier for risky flows |
@@ -32,7 +33,8 @@ A repository where agents push most of the commits multiplies reviews. Levers, f
    round once it is ready.
 3. **Incremental review**: on the next round, instruct it to review only `last-reviewed-sha...head` (the service reads
    its previous review).
-4. **Bound**: beyond 3 rounds, the orchestrator stops the loop ([FINOPS](FINOPS.md) §3).
+4. **Bound**: a round with no finding on the current head ends the loop; beyond 3 rounds, the orchestrator stops it
+   ([FINOPS](FINOPS.md) §3). Settled findings are listed in the PR and not reopened without new evidence.
 5. **Grade**: project-local label `review: skip` for trivial PRs (patch Dependabot, typo), frontier model only
    on the labels `type: security`, `difficulty: medium` or `difficulty: hard`.
 

@@ -10,6 +10,11 @@ otherwise kept in the project's own lessons.
 sentence, source at a SHA, counter-example. The harness steward merges it into this table by PR (next number, MINOR
 in the CHANGELOG); projects receive it at the next sync.
 
+**Class** (decided by `/lesson-propose`, rule in the harness `SCOPE.md`): **mechanical** = a rule can verify it, so it
+becomes a deterministic check (lint rule, hook, CI step, test) filed as an issue and gets no line here; **judgment** =
+only a reviewer can tell, so it gets a line here; **one-off** = will not recur, nothing is added. Unclear, or a check
+that costs more than the failure it prevents: judgment.
+
 **Scope**: `general` (any project) · `swift` · `ios` · `linux-cloud` (sessions in a Linux container) · `ci` · `docs`.
 A project without Swift ignores `swift` and `ios`. Domain lessons (a site's protocol, a financial rule) stay in the
 project.
