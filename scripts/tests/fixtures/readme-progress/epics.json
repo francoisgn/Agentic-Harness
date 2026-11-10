@@ -1,0 +1,552 @@
+{
+ "$comment": "Trimmed from a real response of GET /repos/{owner}/{repo}/issues/{n}/sub_issues (francoisgn/belayline-agentic-harness, 2026-11-10); numbers, titles and labels changed for the scenario.",
+ "responses": {
+  "/repos/acme/app/issues?labels=type%3A%20epic&state=all&per_page=100&page=1": [
+   {
+    "number": 1,
+    "title": "LOT-001 Calculation engine",
+    "state": "closed",
+    "labels": [
+     {
+      "name": "type: epic",
+      "url": "https://api.github.com/repos/acme/app/labels/type:%20epic",
+      "color": "0e8a16",
+      "default": false
+     },
+     {
+      "name": "priority: high",
+      "url": "https://api.github.com/repos/acme/app/labels/priority:%20high",
+      "color": "0e8a16",
+      "default": false
+     }
+    ],
+    "html_url": "https://github.com/acme/app/issues/1",
+    "url": "https://api.github.com/repos/acme/app/issues/1",
+    "sub_issues_summary": {
+     "total": 2,
+     "completed": 2,
+     "percent_completed": 100
+    }
+   },
+   {
+    "number": 2,
+    "title": "LOT-002 Input screen",
+    "state": "open",
+    "labels": [
+     {
+      "name": "type: epic",
+      "url": "https://api.github.com/repos/acme/app/labels/type:%20epic",
+      "color": "0e8a16",
+      "default": false
+     },
+     {
+      "name": "status: claimed",
+      "url": "https://api.github.com/repos/acme/app/labels/status:%20claimed",
+      "color": "0e8a16",
+      "default": false
+     }
+    ],
+    "html_url": "https://github.com/acme/app/issues/2",
+    "url": "https://api.github.com/repos/acme/app/issues/2",
+    "sub_issues_summary": {
+     "total": 2,
+     "completed": 1,
+     "percent_completed": 50
+    }
+   },
+   {
+    "number": 3,
+    "title": "LOT-003 Export | share",
+    "state": "open",
+    "labels": [
+     {
+      "name": "type: epic",
+      "url": "https://api.github.com/repos/acme/app/labels/type:%20epic",
+      "color": "0e8a16",
+      "default": false
+     },
+     {
+      "name": "status: claimed",
+      "url": "https://api.github.com/repos/acme/app/labels/status:%20claimed",
+      "color": "0e8a16",
+      "default": false
+     }
+    ],
+    "html_url": "https://github.com/acme/app/issues/3",
+    "url": "https://api.github.com/repos/acme/app/issues/3",
+    "sub_issues_summary": {
+     "total": 1,
+     "completed": 0,
+     "percent_completed": 0
+    }
+   },
+   {
+    "number": 4,
+    "title": "LOT-004 Sync",
+    "state": "open",
+    "labels": [
+     {
+      "name": "type: epic",
+      "url": "https://api.github.com/repos/acme/app/labels/type:%20epic",
+      "color": "0e8a16",
+      "default": false
+     },
+     {
+      "name": "status: blocked",
+      "url": "https://api.github.com/repos/acme/app/labels/status:%20blocked",
+      "color": "0e8a16",
+      "default": false
+     }
+    ],
+    "html_url": "https://github.com/acme/app/issues/4",
+    "url": "https://api.github.com/repos/acme/app/issues/4",
+    "sub_issues_summary": {
+     "total": 1,
+     "completed": 0,
+     "percent_completed": 0
+    }
+   },
+   {
+    "number": 5,
+    "title": "LOT-005 Settings",
+    "state": "open",
+    "labels": [
+     {
+      "name": "type: epic",
+      "url": "https://api.github.com/repos/acme/app/labels/type:%20epic",
+      "color": "0e8a16",
+      "default": false
+     },
+     {
+      "name": "status: ready",
+      "url": "https://api.github.com/repos/acme/app/labels/status:%20ready",
+      "color": "0e8a16",
+      "default": false
+     }
+    ],
+    "html_url": "https://github.com/acme/app/issues/5",
+    "url": "https://api.github.com/repos/acme/app/issues/5",
+    "sub_issues_summary": {
+     "total": 1,
+     "completed": 0,
+     "percent_completed": 0
+    }
+   },
+   {
+    "number": 6,
+    "title": "LOT-006 Help",
+    "state": "open",
+    "labels": [
+     {
+      "name": "type: epic",
+      "url": "https://api.github.com/repos/acme/app/labels/type:%20epic",
+      "color": "0e8a16",
+      "default": false
+     },
+     {
+      "name": "status: ready",
+      "url": "https://api.github.com/repos/acme/app/labels/status:%20ready",
+      "color": "0e8a16",
+      "default": false
+     }
+    ],
+    "html_url": "https://github.com/acme/app/issues/6",
+    "url": "https://api.github.com/repos/acme/app/issues/6",
+    "sub_issues_summary": {
+     "total": 1,
+     "completed": 0,
+     "percent_completed": 0
+    }
+   },
+   {
+    "number": 7,
+    "title": "LOT-007 Empty lot",
+    "state": "open",
+    "labels": [
+     {
+      "name": "type: epic",
+      "url": "https://api.github.com/repos/acme/app/labels/type:%20epic",
+      "color": "0e8a16",
+      "default": false
+     },
+     {
+      "name": "status: ready",
+      "url": "https://api.github.com/repos/acme/app/labels/status:%20ready",
+      "color": "0e8a16",
+      "default": false
+     }
+    ],
+    "html_url": "https://github.com/acme/app/issues/7",
+    "url": "https://api.github.com/repos/acme/app/issues/7",
+    "sub_issues_summary": {
+     "total": 0,
+     "completed": 0,
+     "percent_completed": 0
+    }
+   },
+   {
+    "number": 8,
+    "title": "LOT-008 Labels",
+    "state": "open",
+    "labels": [
+     {
+      "name": "type: epic",
+      "url": "https://api.github.com/repos/acme/app/labels/type:%20epic",
+      "color": "0e8a16",
+      "default": false
+     },
+     {
+      "name": "status: ready",
+      "url": "https://api.github.com/repos/acme/app/labels/status:%20ready",
+      "color": "0e8a16",
+      "default": false
+     }
+    ],
+    "html_url": "https://github.com/acme/app/issues/8",
+    "url": "https://api.github.com/repos/acme/app/issues/8",
+    "sub_issues_summary": {
+     "total": 2,
+     "completed": 0,
+     "percent_completed": 0
+    }
+   },
+   {
+    "number": 40,
+    "title": "A PR labelled epic",
+    "state": "open",
+    "labels": [
+     {
+      "name": "type: epic",
+      "url": "https://api.github.com/repos/acme/app/labels/type:%20epic",
+      "color": "0e8a16",
+      "default": false
+     }
+    ],
+    "html_url": "https://github.com/acme/app/issues/40",
+    "url": "https://api.github.com/repos/acme/app/issues/40",
+    "sub_issues_summary": {
+     "total": 0,
+     "completed": 0,
+     "percent_completed": 0
+    },
+    "pull_request": {
+     "url": "https://api.github.com/repos/acme/app/pulls/40"
+    }
+   }
+  ],
+  "/repos/acme/app/pulls?state=all&per_page=100&page=1": [
+   {
+    "number": 31,
+    "state": "closed",
+    "draft": false,
+    "body": "Closes #11\nCloses #12\nClaim: app.x.lot.1",
+    "html_url": "https://github.com/acme/app/pull/31",
+    "merged_at": "2026-11-08T10:00:00Z",
+    "title": "PR 31"
+   },
+   {
+    "number": 32,
+    "state": "open",
+    "draft": false,
+    "body": "Closes #13",
+    "html_url": "https://github.com/acme/app/pull/32",
+    "merged_at": null,
+    "title": "PR 32"
+   },
+   {
+    "number": 33,
+    "state": "open",
+    "draft": true,
+    "body": "Refs #15 (export started)",
+    "html_url": "https://github.com/acme/app/pull/33",
+    "merged_at": null,
+    "title": "PR 33"
+   },
+   {
+    "number": 34,
+    "state": "closed",
+    "draft": false,
+    "body": "Fixes #18",
+    "html_url": "https://github.com/acme/app/pull/34",
+    "merged_at": null,
+    "title": "PR 34"
+   },
+   {
+    "number": 35,
+    "state": "open",
+    "draft": false,
+    "body": "Mentions #130 and LOT-006, closes nothing",
+    "html_url": "https://github.com/acme/app/pull/35",
+    "merged_at": null,
+    "title": "PR 35"
+   }
+  ],
+  "/repos/acme/app/issues/1/sub_issues?per_page=100&page=1": [
+   {
+    "number": 11,
+    "title": "Parser",
+    "state": "closed",
+    "labels": [
+     {
+      "name": "type: feature",
+      "url": "https://api.github.com/repos/acme/app/labels/type:%20feature",
+      "color": "0e8a16",
+      "default": false
+     }
+    ],
+    "html_url": "https://github.com/acme/app/issues/11",
+    "url": "https://api.github.com/repos/acme/app/issues/11",
+    "sub_issues_summary": {
+     "total": 0,
+     "completed": 0,
+     "percent_completed": 0
+    },
+    "parent_issue_url": "https://api.github.com/repos/acme/app/issues/1"
+   },
+   {
+    "number": 12,
+    "title": "Rounding",
+    "state": "closed",
+    "labels": [
+     {
+      "name": "type: feature",
+      "url": "https://api.github.com/repos/acme/app/labels/type:%20feature",
+      "color": "0e8a16",
+      "default": false
+     }
+    ],
+    "html_url": "https://github.com/acme/app/issues/12",
+    "url": "https://api.github.com/repos/acme/app/issues/12",
+    "sub_issues_summary": {
+     "total": 0,
+     "completed": 0,
+     "percent_completed": 0
+    },
+    "parent_issue_url": "https://api.github.com/repos/acme/app/issues/1"
+   }
+  ],
+  "/repos/acme/app/issues/2/sub_issues?per_page=100&page=1": [
+   {
+    "number": 13,
+    "title": "Form",
+    "state": "open",
+    "labels": [
+     {
+      "name": "type: feature",
+      "url": "https://api.github.com/repos/acme/app/labels/type:%20feature",
+      "color": "0e8a16",
+      "default": false
+     },
+     {
+      "name": "status: claimed",
+      "url": "https://api.github.com/repos/acme/app/labels/status:%20claimed",
+      "color": "0e8a16",
+      "default": false
+     }
+    ],
+    "html_url": "https://github.com/acme/app/issues/13",
+    "url": "https://api.github.com/repos/acme/app/issues/13",
+    "sub_issues_summary": {
+     "total": 0,
+     "completed": 0,
+     "percent_completed": 0
+    },
+    "parent_issue_url": "https://api.github.com/repos/acme/app/issues/2"
+   },
+   {
+    "number": 14,
+    "title": "Validation",
+    "state": "closed",
+    "labels": [
+     {
+      "name": "type: feature",
+      "url": "https://api.github.com/repos/acme/app/labels/type:%20feature",
+      "color": "0e8a16",
+      "default": false
+     }
+    ],
+    "html_url": "https://github.com/acme/app/issues/14",
+    "url": "https://api.github.com/repos/acme/app/issues/14",
+    "sub_issues_summary": {
+     "total": 0,
+     "completed": 0,
+     "percent_completed": 0
+    },
+    "parent_issue_url": "https://api.github.com/repos/acme/app/issues/2"
+   }
+  ],
+  "/repos/acme/app/issues/3/sub_issues?per_page=100&page=1": [
+   {
+    "number": 15,
+    "title": "CSV",
+    "state": "open",
+    "labels": [
+     {
+      "name": "type: feature",
+      "url": "https://api.github.com/repos/acme/app/labels/type:%20feature",
+      "color": "0e8a16",
+      "default": false
+     },
+     {
+      "name": "status: claimed",
+      "url": "https://api.github.com/repos/acme/app/labels/status:%20claimed",
+      "color": "0e8a16",
+      "default": false
+     }
+    ],
+    "html_url": "https://github.com/acme/app/issues/15",
+    "url": "https://api.github.com/repos/acme/app/issues/15",
+    "sub_issues_summary": {
+     "total": 0,
+     "completed": 0,
+     "percent_completed": 0
+    },
+    "parent_issue_url": "https://api.github.com/repos/acme/app/issues/3"
+   }
+  ],
+  "/repos/acme/app/issues/4/sub_issues?per_page=100&page=1": [
+   {
+    "number": 16,
+    "title": "Conflict rules",
+    "state": "open",
+    "labels": [
+     {
+      "name": "type: feature",
+      "url": "https://api.github.com/repos/acme/app/labels/type:%20feature",
+      "color": "0e8a16",
+      "default": false
+     },
+     {
+      "name": "status: blocked",
+      "url": "https://api.github.com/repos/acme/app/labels/status:%20blocked",
+      "color": "0e8a16",
+      "default": false
+     }
+    ],
+    "html_url": "https://github.com/acme/app/issues/16",
+    "url": "https://api.github.com/repos/acme/app/issues/16",
+    "sub_issues_summary": {
+     "total": 0,
+     "completed": 0,
+     "percent_completed": 0
+    },
+    "parent_issue_url": "https://api.github.com/repos/acme/app/issues/4"
+   }
+  ],
+  "/repos/acme/app/issues/5/sub_issues?per_page=100&page=1": [
+   {
+    "number": 17,
+    "title": "Units",
+    "state": "open",
+    "labels": [
+     {
+      "name": "type: feature",
+      "url": "https://api.github.com/repos/acme/app/labels/type:%20feature",
+      "color": "0e8a16",
+      "default": false
+     },
+     {
+      "name": "status: needs-decision",
+      "url": "https://api.github.com/repos/acme/app/labels/status:%20needs-decision",
+      "color": "0e8a16",
+      "default": false
+     }
+    ],
+    "html_url": "https://github.com/acme/app/issues/17",
+    "url": "https://api.github.com/repos/acme/app/issues/17",
+    "sub_issues_summary": {
+     "total": 0,
+     "completed": 0,
+     "percent_completed": 0
+    },
+    "parent_issue_url": "https://api.github.com/repos/acme/app/issues/5"
+   }
+  ],
+  "/repos/acme/app/issues/6/sub_issues?per_page=100&page=1": [
+   {
+    "number": 18,
+    "title": "Help page",
+    "state": "open",
+    "labels": [
+     {
+      "name": "type: docs",
+      "url": "https://api.github.com/repos/acme/app/labels/type:%20docs",
+      "color": "0e8a16",
+      "default": false
+     },
+     {
+      "name": "status: ready",
+      "url": "https://api.github.com/repos/acme/app/labels/status:%20ready",
+      "color": "0e8a16",
+      "default": false
+     }
+    ],
+    "html_url": "https://github.com/acme/app/issues/18",
+    "url": "https://api.github.com/repos/acme/app/issues/18",
+    "sub_issues_summary": {
+     "total": 0,
+     "completed": 0,
+     "percent_completed": 0
+    },
+    "parent_issue_url": "https://api.github.com/repos/acme/app/issues/6"
+   }
+  ],
+  "/repos/acme/app/issues/7/sub_issues?per_page=100&page=1": [],
+  "/repos/acme/app/issues/8/sub_issues?per_page=100&page=1": [
+   {
+    "number": 19,
+    "title": "No status",
+    "state": "open",
+    "labels": [
+     {
+      "name": "type: chore",
+      "url": "https://api.github.com/repos/acme/app/labels/type:%20chore",
+      "color": "0e8a16",
+      "default": false
+     }
+    ],
+    "html_url": "https://github.com/acme/app/issues/19",
+    "url": "https://api.github.com/repos/acme/app/issues/19",
+    "sub_issues_summary": {
+     "total": 0,
+     "completed": 0,
+     "percent_completed": 0
+    },
+    "parent_issue_url": "https://api.github.com/repos/acme/app/issues/8"
+   },
+   {
+    "number": 20,
+    "title": "Two statuses",
+    "state": "open",
+    "labels": [
+     {
+      "name": "type: chore",
+      "url": "https://api.github.com/repos/acme/app/labels/type:%20chore",
+      "color": "0e8a16",
+      "default": false
+     },
+     {
+      "name": "status: claimed",
+      "url": "https://api.github.com/repos/acme/app/labels/status:%20claimed",
+      "color": "0e8a16",
+      "default": false
+     },
+     {
+      "name": "status: blocked",
+      "url": "https://api.github.com/repos/acme/app/labels/status:%20blocked",
+      "color": "0e8a16",
+      "default": false
+     }
+    ],
+    "html_url": "https://github.com/acme/app/issues/20",
+    "url": "https://api.github.com/repos/acme/app/issues/20",
+    "sub_issues_summary": {
+     "total": 0,
+     "completed": 0,
+     "percent_completed": 0
+    },
+    "parent_issue_url": "https://api.github.com/repos/acme/app/issues/8"
+   }
+  ]
+ }
+}
