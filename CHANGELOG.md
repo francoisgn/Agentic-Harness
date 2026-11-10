@@ -5,6 +5,9 @@ moving to this version.
 
 ## Unreleased
 
+- **Lesson classes**: `/lesson-propose` classifies each item as mechanical (proposed check as an issue, no line),
+  judgment (a lesson line) or one-off (nothing); the "Lesson" form asks for the class and the check; header of
+  `docs/LESSONS.md` explains them. Existing lessons are not yet sorted.
 - **Renamed to Belayline** (formerly agentic-harness): repository `francoisgn/belayline-agentic-harness`, plugin
   `belay` in marketplace `belayline` (`claude plugin install belay@belayline`). The vendored folder `.harness/`,
   `harness-sync.sh`, `harness.yml` and the `harness:` markers keep their names.
