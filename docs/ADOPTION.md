@@ -81,21 +81,25 @@ In a repository that has adopted the harness, the vendored skills and hooks are 
 plugin is useful on the Mac for repositories **not yet** adopted:
 ```bash
 claude plugin marketplace add francoisgn/belayline-agentic-harness
-claude plugin install belay@belayline            # user scope
+claude plugin install belayline@belayline        # user scope
 ```
-Its skills are then called `/belay:lot-start`, etc. Automatic update: `/plugin` → Marketplaces →
+Its skills are then called `/belayline:lot-start`, etc. Automatic update: `/plugin` → Marketplaces →
 Belayline → Enable auto-update. To declare it in a repository (local sessions only; a cloud session
-ignores it), add to `.claude/settings.json`:
+ignores it), add to `.claude/settings.json`, with `ref` set to a harness tag:
 ```json
 {
   "extraKnownMarketplaces": {
-    "Belayline": { "source": { "source": "github", "repo": "francoisgn/belayline-agentic-harness", "ref": "v0.3.0" } }
+    "belayline": { "source": { "source": "github", "repo": "francoisgn/belayline-agentic-harness", "ref": "vX.Y.Z" } }
   },
-  "enabledPlugins": { "belay@belayline": true }
+  "enabledPlugins": { "belayline@belayline": true }
 }
 ```
+The plugin is named `belayline` on `master` and in every tag after v0.3.0
+([ADR 0004](adr/0004-plugin-named-belayline.md)). With `ref` v0.3.0 or earlier it is `belay@belayline`, with skills
+`/belay:<skill>`. A marketplace added without `ref` follows `master`; refresh it with
+`claude plugin marketplace update belayline`.
 In an adopted repository, prefer **not** to enable it (the skills would exist twice, `/lot-start` and
-`/belay:lot-start`).
+`/belayline:lot-start`).
 
 ## Updates
 - Skill `/harness-update` (step-by-step guide), or by hand:

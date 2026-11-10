@@ -7,7 +7,7 @@
   },
   "plugins": [
     {
-      "name": "belay",
+      "name": "belayline",
       "source": "./plugins/harness",
       "description": "Skills (intent, lot-start, lot-finish, review-round, feedback-triage, lessons-check, lesson-propose, compliance-review, status-report, harness-update), agents (adversarial reviewer, stewards, compliance) and hooks of the Belayline harness (Claude Code adapter).",
       "category": "workflow",
