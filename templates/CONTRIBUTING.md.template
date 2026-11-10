@@ -1,0 +1,35 @@
+# Contributing
+
+Humans and coding agents follow the same path. The agents' rules are in `AGENTS.md` / `CLAUDE.md`; this
+file is the way in for everyone.
+
+## In short
+
+1. **An issue first**: look for a duplicate, then describe the intent (what the user gets, the error
+   cases, the definition of done). A small fix can do without one (`Direct-PR: <reason>` in the PR).
+2. **Claim the issue**: a comment "Claimed: branch `<branch>`" followed by a 3 to 5 bullet plan. Do not take over an
+   issue that is already claimed.
+3. **A branch** from the up-to-date integration branch; atomic commits, one per issue.
+4. **Local checks before pushing**:
+   ```bash
+   # Exact commands of the project: tests, lint, build.
+   ```
+5. **A draft PR**, `Closes #n` per issue, what was verified, what was not. "Ready for review"
+   when everything is done and reviewed.
+6. **Review**: a reviewer different from the author (a human, or another model for an agent). Answer every finding.
+
+## What a PR must keep true
+
+- The tests pass, and each new test fails without the change.
+- The README stays up to date: badges, architecture diagram, progress table (`/readme-update`, or by hand).
+- No secret, no personal data in the code, the tests, the logs or the PR.
+
+## Reading the project state
+
+The labels say where each issue stands: type, priority, difficulty, status (`status: needs-triage`,
+`status: needs-decision`, `status: ready`, `status: claimed`, `status: blocked`). The
+progress table of the [README](README.md#progress) gives the view per lot; GitHub milestones, the view per version.
+
+## Reporting a flaw
+
+Never in a public issue: <private channel, e.g. Security tab › Report a vulnerability>.

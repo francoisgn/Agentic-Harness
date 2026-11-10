@@ -1,26 +1,26 @@
-<!-- Titre dans le style des PR précédentes. PR ouverte en brouillon dès le premier push, poussée souvent ; « Ready for
-     review » quand tout est fini et relu : la CI coûteuse tourne alors (CONVENTIONS.md §PR, CI-BUDGET.md §2). -->
-<!-- LOT-XXX (pour un lot du plan seulement) -->
+<!-- Title in the style of the previous PRs. PR opened as a draft from the first push, pushed often; "Ready for
+     review" when everything is done and reviewed: the expensive CI runs then (CONVENTIONS.md §PR, CI-BUDGET.md §2). -->
+<!-- LOT-XXX (only for a lot of the plan) -->
 Closes #
-<!-- Une ligne par issue fermée. Travail partiel : « Refs #n — reste : … ». Petit correctif sans issue : Direct-PR: <raison>. -->
-Claim: <!-- identifiant du /claim actif de l'issue -->
+<!-- One line per closed issue. Partial work: "Refs #n, left: …". Small fix without an issue: Direct-PR: <reason>. -->
+Claim: <!-- identifier of the active /claim of the issue -->
 
-**Problème** :
+**Problem**:
 
-**Cause** :
+**Cause**:
 
-**Changement** (et pourquoi si large, pas plus) :
+**Change** (and why this wide, no wider):
 
-**Tests** :
-<!-- Noms, ce qu'ils vérifient, montrés en échec sans le changement ; commandes lancées ; build Mac ; non testé / à
-     valider sur l'appareil (ex. app non compilable dans le conteneur Linux). -->
+**Tests**:
+<!-- Names, what they check, shown failing without the change; commands run; Mac build; not tested / to
+     validate on the device (e.g. app not buildable in the Linux container). -->
 
-<!-- Revues : chaque verdict (adversarial, conformité) est posté en commentaire, le premier négatif compris
-     (REVIEW-ROUNDS.md §Traçabilité). -->
+<!-- Reviews: each verdict (adversarial, compliance) is posted as a comment, the first negative one included
+     (REVIEW-ROUNDS.md §Traceability). -->
 
-<!-- Registre (seulement si .harness/config.json → ledger.enabled, CONVENTIONS.md §Registre) : une section
-     « ### Ledger » avec un bloc par entrée, au format du script du projet, et le label `ledger`. Aucune entrée :
-     ni section, ni label. Ne jamais modifier directement les fichiers du registre. -->
+<!-- Ledger (only if .harness/config.json → ledger.enabled, CONVENTIONS.md §Ledger): a "### Ledger" section
+     with one block per entry, in the format of the project's script, and the `ledger` label. No entry:
+     neither section nor label. Never edit the ledger files directly. -->
 
-<!-- Modèle auteur / relecteur (doivent différer), avec l'identifiant de chaque agent (ORCHESTRATION.md §7) : -->
-Modèle auteur : … (<projet>.<orc>.lot.<cible>) · relecteur : … (<projet>.<orc>.rev.<cible>)
+<!-- Author / reviewer model (must differ), with the identifier of each agent (ORCHESTRATION.md §7): -->
+Author model: … (<project>.<orc>.lot.<target>) · reviewer: … (<project>.<orc>.rev.<target>)

@@ -1,95 +1,96 @@
-# FinOps agentique : orchestrateur, routage des modèles, quotas, dérives
+# Agentic FinOps: orchestrator, model routing, quotas, drift
 
-Comment dépenser les jetons et les minutes de CI là où ils produisent de la valeur. Complète
-[ORCHESTRATION](ORCHESTRATION.md) (qui fait quoi) et [CI-BUDGET](CI-BUDGET.md) (minutes de CI). Tableau de bord :
+How to spend tokens and CI minutes where they produce value. Complements
+[ORCHESTRATION](ORCHESTRATION.md) (who does what) and [CI-BUDGET](CI-BUDGET.md) (CI minutes). Dashboard:
 `flow-metrics.py` / `flow-report.yml` (§4).
 
-## 1. Topologie : un seul agent long, des agents jetables
+## 1. Topology: one long-lived agent, disposable agents
 
 ```mermaid
 flowchart LR
-  OP([Opérateur]) <--> ORC["Orchestrateur (SPOC)<br/>seul agent long<br/>contexte compressé"]
-  ORC -->|issue prête| W1["Session de lot<br/>(modèle du label)"]
-  ORC -->|issue prête| W2["Session de lot"]
-  ORC -.->|à la demande| IS["Issue steward<br/>(rapide)"]
-  ORC -.->|à la demande| DS["Doc steward<br/>(solide)"]
-  ORC -.->|planifié| FM["Flow monitor<br/>(rapide)"]
-  W1 -->|diff + spec| R1["Relecteur adversarial<br/>(autre modèle, niveau ≥)"]
-  W1 -->|si le diff touche| C1["Relecteurs conformité<br/>(COMPLIANCE.md)"]
-  W1 & W2 & IS & DS & FM <-->|état partagé| REPO[("Dépôt : issues, PR,<br/>docs, ADR, LESSONS")]
+  OP([Operator]) <--> ORC["Orchestrator (SPOC)<br/>only long-lived agent<br/>compressed context"]
+  ORC -->|ready issue| W1["Lot session<br/>(model from the label)"]
+  ORC -->|ready issue| W2["Lot session"]
+  ORC -.->|on demand| IS["Issue steward<br/>(fast)"]
+  ORC -.->|on demand| DS["Doc steward<br/>(solid)"]
+  ORC -.->|scheduled| FM["Flow monitor<br/>(fast)"]
+  W1 -->|diff + spec| R1["Adversarial reviewer<br/>(other model, tier ≥)"]
+  W1 -->|if the diff touches| C1["Compliance reviewers<br/>(COMPLIANCE.md)"]
+  W1 & W2 & IS & DS & FM <-->|shared state| REPO[("Repository: issues, PRs,<br/>docs, ADRs, LESSONS")]
 ```
 
-- **L'orchestrateur est le point de contact unique (SPOC)** de l'opérateur et le **seul** agent à longue durée de vie.
-  Il ne code pas : il route, suit, relance, rend compte. Son contexte est **compressé** (résumés, liens vers l'état) et
-  il tourne sur un modèle solide, pas forcément le plus cher : router demande du jugement, pas de la génération.
-- **Le contexte vit dans le dépôt, pas dans l'agent.** Ce qu'un agent doit savoir pour reprendre (plan, décisions,
-  avancement, blocages) est dans une issue, une PR, un ADR, `LESSONS.md` ou une spec de lot. Un agent qu'on tue ne
-  perd donc rien ; un agent qu'on lance lit l'état et repart. Corollaire : toute connaissance acquise en session qui
-  vaut au-delà d'elle est écrite **avant** la fin de session (sinon elle est perdue et sera repayée).
-- **Les stewards et les relecteurs sont jetables** : lancés pour une tâche, tués après, relancés au besoin
-  ([STEWARDS](STEWARDS.md)). Un contexte frais coûte moins cher qu'un contexte long qui traîne ses vieux tours et dérive.
-- **Éviter le contexte froid** : un agent relancé ne relit pas tout le dépôt. Son prompt lui donne exactement les
-  fichiers et issues utiles (le brief, ORCHESTRATION §4) ; les docs restent courts et structurés pour être lus vite
-  (ESSENTIEL.md d'abord, le détail sur demande).
+- **The orchestrator is the operator's single point of contact (SPOC)** and the **only** long-lived agent.
+  It does not code: it routes, tracks, restarts, reports. Its context is **compressed** (summaries, links to state) and
+  it runs on a solid model, not necessarily the most expensive: routing takes judgement, not generation.
+- **Context lives in the repository, not in the agent.** What an agent must know to resume (plan, decisions,
+  progress, blockers) is in an issue, a PR, an ADR, `LESSONS.md` or a lot spec. An agent you kill therefore
+  loses nothing; an agent you start reads the state and carries on. Corollary: any knowledge gained in a session that
+  is worth more than the session is written down **before** the session ends (otherwise it is lost and paid for again).
+- **Stewards and reviewers are disposable**: started for one task, killed after, restarted when needed
+  ([STEWARDS](STEWARDS.md)). A fresh context costs less than a long one that drags its old turns along and drifts.
+- **Avoid cold context**: a restarted agent does not reread the whole repository. Its prompt gives it exactly the
+  useful files and issues (the brief, ORCHESTRATION §4); docs stay short and structured so they read fast
+  (ESSENTIALS.md first, detail on demand).
 
-## 2. Routage des modèles : ni sur- ni sous-affectation
+## 2. Model routing: neither over- nor under-assignment
 
-| Travail | Niveau | Pourquoi |
+| Work | Tier | Why |
 |---|---|---|
-| Tri d'issues, labels, hygiène de docs, rapport d'état, contrôle de conventions | rapide (Haiku) | Règles explicites, sortie vérifiable |
-| Lot bien spécifié, plusieurs fichiers, CI, tests | solide (Sonnet) | Le gros du volume : le meilleur rapport qualité / coût |
-| Moteur, sécurité, réglementaire, architecture, flux qui écrivent | frontière (Opus) | Une erreur coûte plus qu'un jeton |
-| **Revue** d'un lot solide ou frontière | niveau ≥ auteur, **autre modèle** | Relire coûte beaucoup moins que coder : y mettre le meilleur modèle est le placement le plus rentable |
-| Décision structurante, ADR difficile | Fable / frontière + revue | Rare, à fort effet de levier |
+| Issue triage, labels, docs hygiene, status report, conventions check | fast (Haiku) | Explicit rules, verifiable output |
+| Well-specified lot, several files, CI, tests | solid (Sonnet) | The bulk of the volume: the best quality / cost ratio |
+| Engine, security, regulatory, architecture, flows that write | frontier (Opus) | A mistake costs more than a token |
+| **Review** of a solid or frontier lot | tier ≥ author, **other model** | Reviewing costs far less than coding: putting the best model there is the best-paying investment |
+| Structural decision, hard ADR | Fable / frontier + review | Rare, high leverage |
 
-Règles :
-1. **La valeur du label `modèle:` fait foi** (ORCHESTRATION §2). Sous-affecter (Haiku sur une règle financière) coûte
-   des cycles de revue et des bugs ; sur-affecter (Opus sur un renommage) coûte des jetons sans gain mesurable.
-2. **Déléguer tôt** : dès qu'une tâche se découpe (y compris la planification initiale, la recherche, la lecture d'un
-   gros fichier), un sous-agent du bon niveau la prend ; l'agent principal garde la conclusion, pas les fichiers lus.
-   Ne pas déléguer ce qui tient en quelques appels d'outils (le brief coûterait plus que le travail).
-3. **Un modèle plus fort relit, un modèle adapté écrit.** Mesurer : si un niveau rapide demande plus de deux cycles de
-   revue sur un type de tâche, remonter le label de ce type ; si un niveau frontière ne trouve jamais rien à corriger
-   chez un auteur solide, la revue peut descendre d'un cran sur ce type.
+Rules:
+1. **The value of the `difficulty:` label is authoritative** (ORCHESTRATION §2). Under-assigning (Haiku on a financial
+   rule) costs review rounds and bugs; over-assigning (Opus on a rename) costs tokens with no measurable gain.
+2. **Delegate early**: as soon as a task can be split (including initial planning, research, reading a
+   large file), a subagent of the right tier takes it; the main agent keeps the conclusion, not the files read.
+   Do not delegate what fits in a few tool calls (the brief would cost more than the work).
+3. **A stronger model reviews, a fitting model writes.** Measure: if a fast tier needs more than two review
+   rounds on a type of task, raise the label for that type; if a frontier tier never finds anything to fix
+   in a solid author's work, the review can go down one notch for that type.
 
-## 3. Quotas, parallélisme et reprise
+## 3. Quotas, parallelism and resuming
 
-- **Le parallélisme est borné par le système, pas par le calendrier** : runners CI simultanés, PR ouvertes par
-  contributeur, sessions autorisées, fichiers partagés (on sérialise ce qui touche les mêmes fichiers), capacité de
-  relecture de l'opérateur. Dans ces bornes, on lance tout ce qui est prêt.
-- **Pas de rétention par biais de quota** : retarder une livraison pour « finir le quota » le dernier jour avant la
-  remise à zéro, ou à l'inverse étaler pour « garder du quota », est un biais humain, pas de l'efficience. Le quota est
-  une contrainte d'ordonnancement : on livre dès que c'est prêt, on priorise (sécurité, P1, chemin critique) quand il
-  se raréfie.
-- **Quota atteint (jetons ou minutes)** : l'orchestrateur écrit l'état sur chaque issue en cours (« Passation : … »),
-  programme sa reprise à l'heure de remise à zéro (ex. Claude Code : `send_later` ; ou tâche planifiée, jamais une boucle d'attente) et
-  s'arrête proprement. À la reprise : relire l'état du dépôt (L18, L19), pas sa mémoire.
-- **Minutes de CI épuisées** : contrôles locaux avant chaque merge (`local-check.sh` qui dit « INCOMPLET » s'il manque
-  un outil), CI-BUDGET §2.
-- **Boucles bornées** (d'après la boucle de réparation d'OpenHarness, [`autopilot/service.py`](https://github.com/HKUDS/OpenHarness/blob/main/src/openharness/autopilot/service.py), `repair max_rounds`, lu le 2026-11-07) :
-  au plus **3 cycles de revue** et **6 pushes testés par la CI** par PR ; au-delà, l'orchestrateur arrête l'auteur, écrit le
-  diagnostic sur l'issue et réaffecte (modèle au-dessus, spec à clarifier, ou humain).
+- **Parallelism is bounded by the system, not by the calendar**: concurrent CI runners, open PRs per
+  contributor, allowed sessions, shared files (serialise what touches the same files), the operator's review
+  capacity. Within these bounds, start everything that is ready.
+- **No holding back out of quota bias**: delaying a delivery to "use up the quota" on the last day before the
+  reset, or spreading work out to "keep some quota", is a human bias, not efficiency. The quota is
+  a scheduling constraint: deliver as soon as it is ready, prioritise (security, `priority: high`, critical path)
+  when it runs low.
+- **Quota reached (tokens or minutes)**: the orchestrator writes the state on every issue in progress ("Handoff: …"),
+  schedules its resumption at the reset time (e.g. Claude Code: `send_later`; or a scheduled task, never a wait loop)
+  and stops cleanly. On resuming: reread the repository state (L18, L19), not its memory.
+- **CI minutes exhausted**: local checks before every merge (`local-check.sh`, which says "INCOMPLETE" when a tool is
+  missing), CI-BUDGET §2.
+- **Bounded loops** (after the repair loop of OpenHarness, [`autopilot/service.py`](https://github.com/HKUDS/OpenHarness/blob/main/src/openharness/autopilot/service.py), `repair max_rounds`, read on 2026-11-07):
+  at most **3 review rounds** and **6 CI-tested pushes** per PR; beyond that, the orchestrator stops the author, writes
+  the diagnosis on the issue and reassigns (model above, spec to clarify, or a human).
 
-## 4. Surveiller les dérives
+## 4. Watching for drift
 
-Le tableau de bord (`flow-report.yml`, script `flow-metrics.py`) calcule chaque jour, depuis l'API GitHub :
+The dashboard (`flow-report.yml`, script `flow-metrics.py`) computes every day, from the GitHub API:
 
-| Signal | Seuil par défaut | Lecture | Action |
+| Signal | Default threshold | Reading | Action |
 |---|---|---|---|
-| Issue prise en charge (`/claim`, label `pris en charge`) sans activité | 24 h | Session morte ou bloquée en silence | Watchdog : arrêter, noter l'état, rendre l'issue |
-| PR prête sans activité / brouillon | 24 h / 120 h | Revue ou auteur en panne | Relancer le bon acteur |
-| Pushes testés par la CI sur une PR (SHA distincts, runs sautés ou annulés exclus) | > 6 | Boucle de push d'essai | Arrêt, diagnostic local, un commit par cycle |
-| Revues sur une PR | > 3 | Boucle de revue (correctifs à l'instance, pas à la classe) | Contre-vérification, REVIEW-ROUNDS §3 |
-| `bloqué`, `à clarifier` | tout | Goulot externe ou décision produit | Remonter à l'opérateur, avec la question exacte |
-| Délai médian ouverture → merge | tendance | Fluidité | Comparer semaine à semaine |
-| PR mergées agents / humains | tendance | Volume agentique | Calibrer CI et revue (CI-BUDGET §5) |
-| Minutes facturées, taux d'échec CI | tendance | Surconsommation | Une hausse sans hausse du volume = dérive |
-| **PR à problème** (≥ 1 constat en revue : adversariale, IA, conformité, CodeRabbit, humain), agents / humains | > 50 % dès 3 PR | Qualité initiale insuffisante | Resserrer `/lessons-check`, la spec (intention), ou monter le label `modèle:` |
-| Effort de correction : commits après le 1er constat, délai 1er constat → merge | tendance | Coût de la seconde passe | Comparer par source et par niveau de modèle |
-| PR mergées sans verdict tracé | tout | Mesure aveugle | Appliquer REVIEW-ROUNDS §Traçabilité |
+| Claimed issue (`/claim`, label `status: claimed`) with no activity | 24 h | Session dead or silently blocked | Watchdog: stop, note the state, release the issue |
+| Ready PR with no activity / draft | 24 h / 120 h | Review or author stalled | Nudge the right actor |
+| CI-tested pushes on a PR (distinct SHAs, skipped or cancelled runs excluded) | > 6 | Trial-push loop | Stop, local diagnosis, one commit per round |
+| Reviews on a PR | > 3 | Review loop (fixes to the instance, not the class) | Cross-check, REVIEW-ROUNDS §3 |
+| `status: blocked`, `status: needs-decision` | any | External bottleneck or product decision | Escalate to the operator, with the exact question |
+| Median time from open to merge | trend | Flow | Compare week over week |
+| Merged PRs, agents / humans | trend | Agentic volume | Calibrate CI and review (CI-BUDGET §5) |
+| Billed minutes, CI failure rate | trend | Overconsumption | A rise without a rise in volume = drift |
+| **Problem PRs** (≥ 1 review finding: adversarial, AI, compliance, CodeRabbit, human), agents / humans | > 50 % from 3 PRs | Insufficient initial quality | Tighten `/lessons-check`, the spec (intent), or raise the `difficulty:` label |
+| Fix effort: commits after the 1st finding, time from 1st finding to merge | trend | Cost of the second pass | Compare by source and by model tier |
+| Merged PRs with no traced verdict | any | Blind measurement | Apply REVIEW-ROUNDS §Traceability |
 
-Statut global : 🔴 une boucle ou une issue P1 en panne ; 🟠 une panne, un goulot ou trop de PR à problème ; 🟢 sinon.
-Le ratio de PR à problème sert aussi au routage (§2 règle 3) : un niveau de modèle dont les PR reviennent souvent avec
-des constats est sous-affecté pour ce type de tâche. Ce que le script ne
-voit pas (jetons consommés par session) se relève à la main dans la console du fournisseur et se reporte dans le
-compte rendu hebdomadaire de l'orchestrateur.
+Overall status: 🔴 a loop or a stalled `priority: high` issue; 🟠 a stall, a bottleneck or too many problem PRs;
+🟢 otherwise.
+The problem-PR ratio also feeds routing (§2 rule 3): a model tier whose PRs often come back with
+findings is under-assigned for that type of task. What the script does not
+see (tokens consumed per session) is read by hand in the provider's console and carried into the
+orchestrator's weekly report.

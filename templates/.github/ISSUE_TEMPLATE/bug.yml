@@ -1,35 +1,36 @@
 name: Bug
-description: Quelque chose ne marche pas comme prévu
-labels: [bug]
+description: Something does not work as expected
+labels: ["type: bug", "status: needs-triage"]
 body:
   - type: textarea
-    id: resume
+    id: summary
     attributes:
-      label: Résumé
-      description: "Première chose qu'un humain lit : une user story (« En tant que …, je veux …, pour … ») ou deux lignes."
+      label: Summary
+      description: 'First thing a human reads: a user story ("As a …, I want …, so that …") or two lines.'
     validations:
       required: true
   - type: textarea
-    id: constat
+    id: behaviour
     attributes:
-      label: Comportement constaté et attendu
+      label: Observed and expected behaviour
     validations:
       required: true
   - type: textarea
-    id: etapes
+    id: steps
     attributes:
-      label: Étapes pour reproduire
-      description: Elles deviennent le premier test (rouge) du correctif (METHODOLOGY.md §2 ter).
+      label: Steps to reproduce
+      description: They become the first (red) test of the fix (METHODOLOGY.md §2 ter).
     validations:
       required: true
   - type: input
     id: version
     attributes:
-      label: Version, commit, appareil
+      label: Version, commit, device
   - type: dropdown
-    id: priorite
+    id: priority
     attributes:
-      label: Priorité
-      options: ["P1 🔴", "P2 🟠", "P3 🟢"]
+      label: Priority
+      description: Triage sets the matching `priority:` label.
+      options: [critical (data loss or crash), high, medium, low]
     validations:
       required: true

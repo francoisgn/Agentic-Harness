@@ -1,3 +1,3 @@
 [
-  { "name": "onglet: exemple", "color": "1d76db", "axis": "onglet", "description": "À remplacer : labels propres au projet (onglet, zone, module…). Un label du cadre redéfini ici prend ces valeurs." }
+  { "name": "area: example", "color": "1d76db", "axis": "area", "description": "Replace: project labels (area, module, tab…). A harness label redefined here takes these values." }
 ]

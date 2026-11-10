@@ -1,109 +1,157 @@
-# agentic-harness
+# Belayline
 
-![agentic-harness, « the versioned framework that keeps your coding agents on track, from intent to merge » : des trajectoires d'agents emmêlées passent dans la boucle du harnais et ressortent en voies tenues, jalon après jalon (intention, TDD, revue adversariale, CI), jusqu'au merge ; les leçons reviennent au harnais](docs/assets/banner.svg)
+[![CI](https://github.com/francoisgn/belayline-agentic-harness/actions/workflows/ci.yml/badge.svg)](https://github.com/francoisgn/belayline-agentic-harness/actions/workflows/ci.yml)
+![Python, standard library only](https://img.shields.io/badge/Python-3_stdlib-3776AB?logo=python&logoColor=white)
+![Bash](https://img.shields.io/badge/Bash-ShellCheck-4EAA25?logo=gnubash&logoColor=white)
+![GitHub Actions](https://img.shields.io/badge/GitHub_Actions-reusable_workflows-2088FF?logo=githubactions&logoColor=white)
+![Claude Code](https://img.shields.io/badge/Claude_Code-plugin-D97757?logo=claude&logoColor=white)
+![AGENTS.md](https://img.shields.io/badge/AGENTS.md-any_agent-111111)
+![Excalidraw](https://img.shields.io/badge/Excalidraw-diagrams-6965DB?logo=excalidraw&logoColor=white)
 
-> Un harnais versionné et ouvert pour développer avec des agents de code : intention et TDD, issues → lots → PR,
-> revues adversariales, conformité branchable, stewards, FinOps et tableau de bord du flux. Pour tout dépôt GitHub,
-> tout agent (Claude Code, Codex, Cursor, Gemini CLI, Copilot, Aider…) et toute équipe.
+![Belayline, "the versioned framework that keeps your coding agents on track, from intent to merge": tangled agent trajectories pass through the loop of the harness and come out as held lines, milestone after milestone (intent, TDD, adversarial review, CI), up to the merge; the lessons come back to the harness](docs/assets/banner.svg)
 
-**TL;DR** : les agents écrivent vite, mais sans cadre ils dérivent (contexte perdu, revues en boucle, CI qui brûle des
-minutes, qualité inégale). Le harnais donne à chaque projet **la même méthode, les mêmes garde-fous, les mêmes leçons
-et les mêmes contrôles**, récupérés à une version donnée et mis à jour par PR. Le contexte vit dans le dépôt, pas
-dans l'agent. L'opérateur parle à un seul orchestrateur, qui délègue chaque tâche au bon niveau de modèle et la fait
-relire par un modèle plus fort. Chaque brique se garde, se remplace ou se complète.
+> **Belayline: the open harness for agentic development.** Versioned skills, tools and method: intent and TDD, issues → lots → PRs, adversarial
+> reviews, pluggable compliance, stewards, FinOps and a flow dashboard. For any GitHub repository, any agent (Claude
+> Code, Codex, Cursor, Gemini CLI, Copilot, Aider…) and any team.
 
-![Les mécanismes du harnais : un opérateur, un orchestrateur, des agents jetables, un dépôt qui porte l'état, une CI et un tableau de bord qui bouclent](docs/diagrams/mecanismes.svg)
+**TL;DR**: agents write fast, but without a harness they drift (lost context, review loops, CI that burns minutes,
+uneven quality). The harness gives every project **the same method, the same guardrails, the same lessons and the
+same checks**, fetched at a given version and updated by PR. The context lives in the repository, not in the agent.
+The operator talks to a single orchestrator, which delegates each task to the right model tier and has it reviewed by
+a stronger model. Each building block can be kept, replaced or extended.
 
-## Ce que ça change, concrètement
+![The mechanisms of the harness: one operator, one orchestrator, disposable agents, a repository that holds the state, a CI and a dashboard that close the loop](docs/diagrams/mechanisms.svg)
 
-| Sans harnais | Avec |
+## What it changes, concretely
+
+| Without a harness | With it |
 |---|---|
-| L'agent devine l'intention | Chaque issue porte user story, comportements d'erreur, définition de fini (`/intent`) |
-| Des tests écrits après coup, parfois verts sans le changement | TDD : test vu rouge, puis vert ; prouvé dans la PR |
-| L'auteur se relit lui-même | Revue adversariale par un autre modèle, verdicts tracés sur la PR |
-| Un push par idée, une CI coûteuse par push | Pushes fréquents sur un brouillon sans CI coûteuse, CI complète au passage « Ready », un commit par cycle de revue, boucles bornées (3 cycles, 6 pushes testés) |
-| Conformité oubliée ou manuelle | Relecteurs RGPD, AI Act, NIS2, ISO 27001, SOC 2, TISAX, PCI, HDS, ou les vôtres, lancés seulement si le diff les concerne |
-| « Où en est-on ? » | Tableau de bord quotidien : jalons, goulots, pannes, boucles, **ratio de PR à problème**, coût |
-| Les mêmes erreurs d'un projet à l'autre | 82 leçons sourcées, enrichies par issue « Leçon » |
+| The agent guesses the intent | Each issue carries a user story, error behaviours and a definition of done (`/intent`) |
+| Tests written afterwards, sometimes green without the change | TDD: test seen red, then green; proven in the PR |
+| The author reviews their own work | Adversarial review by another model, verdicts recorded on the PR |
+| One push per idea, one expensive CI run per push | Frequent pushes on a draft without the expensive CI, full CI on the switch to "Ready", one commit per review cycle, bounded loops (3 cycles, 6 tested pushes) |
+| Compliance forgotten or manual | Reviewers for GDPR, AI Act, NIS2, ISO 27001, SOC 2, TISAX, PCI, HDS, or your own, run only when the diff concerns them |
+| A stale README, with no diagram and no progress | README maintained at the end of each lot: badges, Excalidraw diagram, lot table, checked in CI (`/readme-update`) |
+| "Where are we?" | Daily dashboard: milestones, bottlenecks, stalled work, loops, **ratio of PRs with a problem**, cost |
+| The same mistakes from one project to the next | 82 sourced lessons, extended through "Lesson" issues |
 
-## Le cycle d'un changement
+## The cycle of a change
 
-![Le cycle : intention, issue prête, lot en TDD, revues, PR prête, CI, merge, mesure, puis leçons qui reviennent à l'intention](docs/diagrams/cycle.svg)
+![The cycle: intent, ready issue, lot in TDD, reviews, ready PR, CI, merge, measurement, then lessons that feed back into the intent](docs/diagrams/cycle.svg)
 
-## Tirer parti du harnais dans votre projet
+## Quick start: using the harness in your project
 
-![Six étapes : récupérer, synchroniser, régler, travailler, piloter, mettre à jour ; avec n'importe quel agent ; chaque brique remplaçable](docs/diagrams/tirer-parti.svg)
+![Six steps: fetch, sync, configure, work, steer, update; with any agent; each building block replaceable](docs/diagrams/leverage.svg)
 
 ```bash
-git clone --depth 1 --branch v0.3.0 https://github.com/francoisgn/agentic-harness.git ../agentic-harness
-../agentic-harness/scripts/harness-sync.sh --target . --dry-run   # voir avant d'écrire
-../agentic-harness/scripts/harness-sync.sh --target .
+git clone --depth 1 --branch v0.3.0 https://github.com/francoisgn/belayline-agentic-harness.git ../belayline
+../belayline/scripts/harness-sync.sh --target . --dry-run   # look before writing
+../belayline/scripts/harness-sync.sh --target .
 ```
 
-Ensuite : régler `.harness/config.json` (branches, langue, exclusions, `compliance`) et `.github/workflows/harness.yml`
-([ADOPTION](docs/ADOPTION.md)), puis travailler au quotidien ([UTILISATION](docs/UTILISATION.md), exemple complet sur
-un client iOS).
+Then: configure `.harness/config.json` (branches, language, exclusions, `compliance`) and
+`.github/workflows/harness.yml` ([ADOPTION](docs/ADOPTION.md)), then work day to day ([USAGE](docs/USAGE.md), full
+example on an iOS client).
 
-| Votre agent | Ce qu'il reçoit |
+| Your agent | What it receives |
 |---|---|
-| **Claude Code** (adaptateur fourni) | Bloc `CLAUDE.md`, skills (`/intent`, `/lot-start`, `/review-round`…), agents (`adversarial-reviewer`, stewards, conformité), hooks garde-fous ; ou le plugin : `claude plugin marketplace add francoisgn/agentic-harness && claude plugin install harness@agentic-harness` |
-| **Autres agents** (Codex, Cursor, Copilot, Gemini CLI, Aider…) | Bloc `AGENTS.md` ([format ouvert](https://agents.md)) qui pointe vers les règles (`.harness/docs/ESSENTIEL.md`) ; lu nativement ou à activer selon l'outil ([ADOPTION](docs/ADOPTION.md) §Brancher votre agent) ; méthode, labels, gabarits, CI et tableau de bord identiques |
-| **Équipe humaine** | Les mêmes issues, labels, PR, CI et tableau de bord ; rapport d'état lisible par un non-technicien |
+| **Claude Code** (adapter provided) | `CLAUDE.md` block, skills (`/intent`, `/lot-start`, `/review-round`…), agents (`adversarial-reviewer`, stewards, compliance), guardrail hooks; or the plugin: `claude plugin marketplace add francoisgn/belayline-agentic-harness && claude plugin install belay@belayline` |
+| **Other agents** (Codex, Cursor, Copilot, Gemini CLI, Aider…) | `AGENTS.md` block ([open format](https://agents.md)) that points to the rules (`.harness/docs/ESSENTIALS.md`); read natively or to be enabled, depending on the tool ([ADOPTION](docs/ADOPTION.md) §Connect your coding agent); same method, labels, templates, CI and dashboard |
+| **Human team** | The same issues, labels, PRs, CI and dashboard; status report readable by a non-technical person |
 
-## État
+## How to leverage the knowledge in this repo
 
-| Capacité | État | Où |
+The repository can be read and picked from without installing anything: each file stands alone, cites its sources,
+and can be taken without the rest.
+
+| You want to | Read | Or ask your agent |
 |---|---|---|
-| Méthode, conventions, leçons, branches, budget CI | 🟢 en service | `docs/` |
-| Vendorisation, plugin, workflows de labels et d'hygiène | 🟢 en service, testés en CI | `scripts/harness-sync.sh`, `.github/workflows/` |
-| Intention, TDD, FinOps, stewards, nommage des agents | 🟢 0.2.0 | METHODOLOGY, FINOPS, STEWARDS, ORCHESTRATION §7 |
-| Tableau de bord du flux, ratio de PR à problème | 🟢 testé hors ligne ; 🟠 premier passage réel à observer | `flow-metrics.py`, `flow-report.yml` |
-| Conformité branchable (agent du cadre, de l'entreprise, ou spec seule) | 🟢 résolution testée | COMPLIANCE §2 |
-| Agents de conformité intégrés | 🟠 fondation : identifiants « (à vérifier) » à confirmer sur les textes officiels | `plugins/harness/agents/compliance-*.md` |
-| Pipeline sécurité, revue IA, réglages du dépôt « as code » | 🟠 à valider sur un premier projet | `security.yml`, `ai-review.yml`, `repo-settings.yml` |
+| Understand the method in 5 minutes | [ESSENTIALS](docs/ESSENTIALS.md), then the three diagrams above | "Read `docs/ESSENTIALS.md` and tell me what my project is missing" |
+| Avoid mistakes already made | [LESSONS](docs/LESSONS.md): 82 lessons sorted by scope, each one sourced | "Review my diff against `docs/LESSONS.md`" (skill `/lessons-check`) |
+| Set up a lean, safe CI | [CI-BASELINE](docs/CI-BASELINE.md) (tiers, invariants), [CI-BUDGET](docs/CI-BUDGET.md) (costs, tools) | "Compare my workflows with the six invariants of `docs/CI-BASELINE.md`" |
+| A README that stays true | [README-STANDARD](docs/README-STANDARD.md) | `/readme-update`, or `python3 scripts/readme-check.py --root <project>` |
+| Have an agent's work reviewed | [REVIEW-ROUNDS](docs/REVIEW-ROUNDS.md), [ORCHESTRATION](docs/ORCHESTRATION.md) §3 | Agent `adversarial-reviewer`, skill `/review-round` |
+| Frame an issue before coding | [METHODOLOGY](docs/METHODOLOGY.md) §2 bis | Skill `/intent` |
+| Control cost (models, loops, minutes) | [FINOPS](docs/FINOPS.md) | Agent `flow-monitor`, skill `/status-report` |
+| Know why the harness is built this way | [ADR](docs/adr/README.md): context, rejected options, consequences | "Summarise the ADRs and what they rule out" |
 
-## Contenu
+Three ways to use it, from the lightest to the most complete:
 
-| Chemin | Rôle |
+1. **Read**: point an agent at this repository (clone or URL) and ask it the question; nothing is written on your
+   side.
+2. **Pick**: copy a skill (`plugins/harness/skills/<name>/`), an agent, a workflow or a script. The scripts use only
+   the Python standard library; the skills cite the docs they assume.
+3. **Adopt**: the versioned sync of the previous section, one building block at a time
+   ([ADOPTION](docs/ADOPTION.md) §Partial adoption, §Replace or extend a building block).
+
+Knowledge flows both ways: propose a lesson born in your project through the "Lesson" issue form (skill
+`/lesson-propose`), with its source.
+
+## Status
+
+<!-- harness:begin progress -->
+| Capability | Status | Where |
+|---|---|---|
+| Method, conventions, lessons, branches, CI budget | 🟢 in service | `docs/` |
+| Vendoring, plugin, label and hygiene workflows | 🟢 in service, tested in CI | `scripts/harness-sync.sh`, `.github/workflows/` |
+| Intent, TDD, FinOps, stewards, agent naming | 🟢 0.2.0 | METHODOLOGY, FINOPS, STEWARDS, ORCHESTRATION §7 |
+| Flow dashboard, ratio of PRs with a problem | 🟢 tested offline; 🟠 first real run to observe | `flow-metrics.py`, `flow-report.yml` |
+| Pluggable compliance (agent from the harness, from the company, or spec only) | 🟢 resolution tested | COMPLIANCE §2 |
+| Built-in compliance agents | 🟠 foundation: "(to verify)" identifiers to confirm against the official texts | `plugins/harness/agents/compliance-*.md` |
+| Security pipeline, AI review, repository settings "as code" | 🟠 to validate on a first project | `security.yml`, `ai-review.yml`, `repo-settings.yml` |
+| Living README: badges, Excalidraw diagram, lot progress, Contributing | 🟢 checked in CI; 🟠 to validate on a first project | [README-STANDARD](docs/README-STANDARD.md), `readme-check.py`, `/readme-update` |
+| Tiered CI baseline | 🟢 documented | [CI-BASELINE](docs/CI-BASELINE.md) |
+<!-- harness:end progress -->
+
+## Contents
+
+| Path | Role |
 |---|---|
-| [`docs/ESSENTIEL.md`](docs/ESSENTIEL.md) | Les règles chargées à chaque session |
-| [`docs/UTILISATION.md`](docs/UTILISATION.md) | **Guide pas à pas** pour un projet, avec un exemple complet |
-| [`docs/ADOPTION.md`](docs/ADOPTION.md) | Adopter, régler, remplacer une brique, mettre à jour, retirer ; réglages du dépôt « as code » |
-| [`docs/METHODOLOGY.md`](docs/METHODOLOGY.md) | Boucle pilotée par les issues, intention, TDD, lots, labels |
-| [`docs/ORCHESTRATION.md`](docs/ORCHESTRATION.md) | Orchestrateur, sous-agents, niveaux de modèle, revue adversariale, nommage des agents |
-| [`docs/FINOPS.md`](docs/FINOPS.md) | Routage des modèles, quotas et reprise, boucles bornées, signaux de dérive |
-| [`docs/STEWARDS.md`](docs/STEWARDS.md) | Rôles d'entretien (issues, docs, flux) et rapport d'état non technique |
-| [`docs/REVIEW-ROUNDS.md`](docs/REVIEW-ROUNDS.md), [`docs/REVIEW-SERVICE.md`](docs/REVIEW-SERVICE.md) | Cycles de revue, traçabilité des verdicts, service de revue IA |
-| [`docs/COMPLIANCE.md`](docs/COMPLIANCE.md) | Relecteurs de conformité : catalogue, trois modes de branchement |
-| [`docs/CI-BUDGET.md`](docs/CI-BUDGET.md) | Minutes de CI, sécurité (SAST, SCA, secrets), variables, volume agentique |
-| [`docs/LESSONS.md`](docs/LESSONS.md) | Leçons par portée, sources citées ; comment en proposer |
-| [`docs/CONVENTIONS.md`](docs/CONVENTIONS.md), [`docs/BRANCHING-RELEASE.md`](docs/BRANCHING-RELEASE.md), [`docs/MAC-HANDOFF.md`](docs/MAC-HANDOFF.md) | Commits et PR, identité du dépôt (description, topics, bannière, social preview), branches et versions, partage cloud / poste local |
-| [`docs/adr/`](docs/adr/README.md) | Décisions du cadre |
-| [`docs/assets/`](docs/assets) | Identité visuelle : bannière du README (`banner.svg`), social preview (`social-preview.svg` → `.png`, 1280×640) |
-| [`docs/diagrams/`](docs/diagrams) | Schémas : source `.json`, scène `.excalidraw` (modifiable sur excalidraw.com), image `.svg` |
-| `plugins/harness/` | Adaptateur Claude Code : 10 skills, 13 agents, hooks, plugin |
-| `templates/`, `i18n/en/` | Gabarits vendorisés ; édition anglaise des fichiers chargés à chaque session |
-| `.github/workflows/` | Workflows réutilisables (labels, hygiène, sécurité, revue IA, tableau de bord, réglages) et CI du cadre |
-| `scripts/` | Synchro, tableau de bord, conformité, réglages, rendu des schémas, contrôles de cohérence, tests |
+| [`docs/ESSENTIALS.md`](docs/ESSENTIALS.md) | The rules loaded in every session |
+| [`docs/USAGE.md`](docs/USAGE.md) | **Step-by-step guide** for a project, with a full example |
+| [`docs/ADOPTION.md`](docs/ADOPTION.md) | Adopt, configure, replace a building block, update, remove; repository settings "as code" |
+| [`docs/METHODOLOGY.md`](docs/METHODOLOGY.md) | Issue-driven loop, intent, TDD, lots, labels |
+| [`docs/ORCHESTRATION.md`](docs/ORCHESTRATION.md) | Orchestrator, sub-agents, model tiers, adversarial review, agent naming |
+| [`docs/FINOPS.md`](docs/FINOPS.md) | Model routing, quotas and resuming, bounded loops, drift signals |
+| [`docs/STEWARDS.md`](docs/STEWARDS.md) | Upkeep roles (issues, docs, flow) and non-technical status report |
+| [`docs/REVIEW-ROUNDS.md`](docs/REVIEW-ROUNDS.md), [`docs/REVIEW-SERVICE.md`](docs/REVIEW-SERVICE.md) | Review cycles, traceability of verdicts, AI review service |
+| [`docs/COMPLIANCE.md`](docs/COMPLIANCE.md) | Compliance reviewers: catalogue, three ways to plug them in |
+| [`docs/README-STANDARD.md`](docs/README-STANDARD.md) | The README that agents maintain by default: badges, image, Excalidraw diagram, progress, Contributing |
+| [`docs/CI-BASELINE.md`](docs/CI-BASELINE.md), [`docs/CI-BUDGET.md`](docs/CI-BUDGET.md) | Tiered CI baseline; CI minutes, security (SAST, SCA, secrets), variables, agentic volume |
+| [`docs/LESSONS.md`](docs/LESSONS.md) | Lessons by scope, sources cited; how to propose one |
+| [`docs/CONVENTIONS.md`](docs/CONVENTIONS.md), [`docs/BRANCHING-RELEASE.md`](docs/BRANCHING-RELEASE.md), [`docs/MAC-HANDOFF.md`](docs/MAC-HANDOFF.md) | Commits and PRs, repository identity (description, topics, banner, social preview), branches and versions, split between cloud and local machine |
+| [`docs/adr/`](docs/adr/README.md) | Decisions of the harness |
+| [`docs/assets/`](docs/assets) | Visual identity: README banner (`banner.svg`), social preview (`social-preview.svg` → `.png`, 1280×640) |
+| [`docs/diagrams/`](docs/diagrams) | Diagrams: `.json` source, `.excalidraw` scene (editable on excalidraw.com), `.svg` image |
+| `plugins/harness/` | Claude Code adapter: 11 skills, 13 agents, hooks, plugin |
+| `templates/` | Vendored templates |
+| `.github/workflows/` | Reusable workflows (labels, hygiene, security, AI review, dashboard, settings) and the harness CI |
+| `scripts/` | Sync, dashboard, compliance, settings, diagram rendering, README check, consistency checks, tests |
 
-## Qualité du harnais lui-même
+## Quality of the harness itself
 
-Un job de CI (`ci.yml`), chaque étape lancée même si la précédente échoue : cohérence du cadre (skills, agents,
-manifeste, labels, nommage, contrôles requis, description, topics, bannière et social preview), tests (vendorisation, hooks, tableau de bord, conformité, réglages,
-schémas), ShellCheck, versions, actionlint, zizmor, markdownlint, gitleaks. En local :
+One CI job (`ci.yml`), each step run even if the previous one fails: harness consistency (skills, agents, manifest,
+labels, naming, required checks, description, topics, banner and social preview), tests (vendoring, hooks, dashboard,
+compliance, settings, diagrams), ShellCheck, versions, actionlint, zizmor, markdownlint, gitleaks. Locally:
 ```bash
 python3 scripts/check-framework.py && python3 -m unittest discover -s scripts/tests -p 'test_*.py' \
   && scripts/tests/test-harness-sync.sh && python3 scripts/diagrams/render.py --check
 ```
 
-## Versions et contributions
-- Licence : [MIT](LICENSE). `harness-sync.sh` la copie dans `.harness/LICENSE` du projet, avec les fichiers du cadre.
-- Sécurité : une faille se signale en privé, jamais dans une issue ([SECURITY](SECURITY.md)).
-- Semver, tags `vX.Y.Z` sur `master`, [CHANGELOG](CHANGELOG.md) à chaque version (section « Action » pour les
-  projets). Avant 1.0.0, un MINEUR peut casser : le CHANGELOG le dit.
-- Contribuer : une issue avec son intention, une branche, une PR en brouillon, la CI verte, une revue par un autre
-  modèle. Une leçon née dans votre projet : formulaire « Leçon ». Un schéma : modifier `docs/diagrams/<nom>.json`,
-  lancer `scripts/diagrams/render.py`, commiter les trois fichiers.
-- Origines : distillé de projets réels (dont un client iOS de forum, exemple public d'[UTILISATION](docs/UTILISATION.md)) ;
-  inspirations citées : [OpenHarness](https://github.com/HKUDS/OpenHarness) (MIT) pour la boucle de réparation bornée
-  et le tableau de bord ([ADR 0002](docs/adr/0002-agents-specialises-et-tableau-de-bord.md)).
+## Versions
+- Security: report a flaw privately, never in an issue ([SECURITY](SECURITY.md)).
+- Semver, tags `vX.Y.Z` on `master`, [CHANGELOG](CHANGELOG.md) at each version ("Action" section for projects).
+  Before 1.0.0, a MINOR may break: the CHANGELOG says so.
+- Origins: distilled from real projects (including an iOS forum client, the public example of [USAGE](docs/USAGE.md));
+  inspirations cited:
+  [OpenHarness](https://github.com/HKUDS/OpenHarness) (MIT) for the bounded repair loop and the dashboard
+  ([ADR 0002](docs/adr/0002-specialised-agents-and-dashboard.md)).
+
+## Contributing
+
+See [CONTRIBUTING.md](CONTRIBUTING.md): an issue with its intent, a branch, a draft PR, green CI, a review by another
+model. A lesson born in your project: "Lesson" form.
+
+## License
+
+[MIT](LICENSE). `harness-sync.sh` copies it into the project's `.harness/LICENSE`, with the harness files.

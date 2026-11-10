@@ -1,90 +1,90 @@
-# Conformité : relecteurs spécialisés
+# Compliance: specialised reviewers
 
-Fondation pour ajouter des exigences de conformité à la boucle de revue sans alourdir chaque PR. Un relecteur de
-conformité est un **sous-agent en lecture seule**, lancé seulement quand le diff touche son périmètre. Il produit des
-**hypothèses d'écart** sourcées, jamais une certification, un audit ou un avis juridique : le DPO, le RSSI, le QSA ou
-l'auditeur tranche.
+Foundation for adding compliance requirements to the review loop without weighing down every PR. A compliance
+reviewer is a **read-only subagent**, started only when the diff touches its scope. It produces sourced
+**gap hypotheses**, never a certification, an audit or legal advice: the DPO, the CISO, the QSA or
+the auditor decides.
 
 ## 1. Catalogue
 
-| Agent | Référentiel | Déclencheurs typiques dans un diff | Qui confirme |
+| Agent | Compliance framework | Typical triggers in a diff | Who confirms |
 |---|---|---|---|
-| `compliance-gdpr` | RGPD (UE) 2016/679 | données personnelles, consentement, conservation, transfert hors UE, logs | DPO |
-| `compliance-eu-ai-act` | AI Act (UE) 2024/1689 | appel de modèle, contenu généré, scoring, biométrie | Référent IA, juriste |
-| `compliance-nis2` | Directive (UE) 2022/2555 | gestion d'incident, journalisation, chaîne d'approvisionnement, chiffrement | RSSI |
-| `compliance-iso27001` | ISO/IEC 27001:2022 (annexe A) | contrôle d'accès, journalisation, développement sécurisé, fournisseurs | RSSI, auditeur |
-| `compliance-soc2` | AICPA TSC 2017 (points of focus 2022) | gestion des changements, accès logiques, surveillance | Auditeur SOC 2 |
-| `compliance-tisax` | ENX TISAX / VDA ISA | protection des prototypes, données de constructeur, accès | Responsable TISAX |
-| `compliance-pci` | PCI DSS v4.0.1, PCI PIN, PCI P2PE | PAN, CVV, page de paiement, scripts tiers, clés, HSM, terminal | QSA |
-| `compliance-hds` | Hébergement de données de santé (CSP L.1111-8, référentiel HDS) | données de santé, hébergeur, sauvegardes, localisation | Responsable HDS |
+| `compliance-gdpr` | GDPR (EU) 2016/679 | personal data, consent, retention, transfer outside the EU, logs | DPO |
+| `compliance-eu-ai-act` | AI Act (EU) 2024/1689 | model call, generated content, scoring, biometrics | AI lead, legal counsel |
+| `compliance-nis2` | Directive (EU) 2022/2555 | incident handling, logging, supply chain, encryption | CISO |
+| `compliance-iso27001` | ISO/IEC 27001:2022 (Annex A) | access control, logging, secure development, suppliers | CISO, auditor |
+| `compliance-soc2` | AICPA TSC 2017 (points of focus 2022) | change management, logical access, monitoring | SOC 2 auditor |
+| `compliance-tisax` | ENX TISAX / VDA ISA | prototype protection, manufacturer data, access | TISAX officer |
+| `compliance-pci` | PCI DSS v4.0.1, PCI PIN, PCI P2PE | PAN, CVV, payment page, third-party scripts, keys, HSM, terminal | QSA |
+| `compliance-hds` | Hébergement de données de santé (French health data hosting; CSP L.1111-8, HDS framework) | health data, hosting provider, backups, location | HDS officer |
 
-Agents intégrés : `plugins/harness/agents/compliance-*.md` (vendorisés en `.claude/agents/`), plus le relecteur
-générique `compliance-reviewer` pour les specs du projet (§2). Chaque agent porte ses
-déclencheurs, sa liste de vérification (exigence → source), les preuves attendues dans le dépôt et un format de
-réponse fixe. Les identifiants non vérifiés sur le texte officiel sont marqués « (à vérifier) » ; les sources
-indiquent leur date de consultation. **Les référentiels évoluent** (versions, actes modificatifs, transpositions) :
-la revue annuelle d'un agent est une issue du cadre.
+Built-in agents: `plugins/harness/agents/compliance-*.md` (vendored into `.claude/agents/`), plus the generic
+reviewer `compliance-reviewer` for the project's specs (§2). Each agent carries its
+triggers, its checklist (requirement → source), the evidence expected in the repository and a fixed response
+format. Identifiers not verified against the official text are marked "(to verify)"; sources
+state the date they were consulted. **Frameworks change** (versions, amending acts, transpositions):
+the yearly review of an agent is an issue on the harness.
 
-## 2. Brancher un référentiel : trois modes
+## 2. Plugging in a framework: three modes
 
-Le cadre fournit des agents, il ne les impose pas. Chaque entreprise choisit, référentiel par référentiel :
+The harness provides agents, it does not impose them. Each company chooses, framework by framework:
 
-| Mode | Quand | Déclaration dans `.harness/config.json` → `compliance` | Ce qui tourne |
+| Mode | When | Declaration in `.harness/config.json` → `compliance` | What runs |
 |---|---|---|---|
-| **Intégré** | Le référentiel est au catalogue (§1) et l'agent du cadre convient | `"gdpr"` | `compliance-gdpr` du cadre |
-| **Agent de l'entreprise** | L'entreprise a déjà son relecteur (prompts internes, contrôles maison, outillage QSA) | `{"id": "pci", "agent": ".claude/agents/acme-pci.md"}` | Son agent, à la place de l'intégré |
-| **Spec seule** | L'entreprise veut juste décrire ses exigences (référentiel absent du catalogue, ou politique interne) | `{"id": "dora", "spec": "docs/compliance/dora.md"}` | Le relecteur générique `compliance-reviewer`, qui applique la spec et rien d'autre |
+| **Built-in** | The framework is in the catalogue (§1) and the harness agent fits | `"gdpr"` | The harness's `compliance-gdpr` |
+| **Company agent** | The company already has its reviewer (internal prompts, in-house controls, QSA tooling) | `{"id": "pci", "agent": ".claude/agents/acme-pci.md"}` | Its agent, in place of the built-in one |
+| **Spec only** | The company just wants to describe its requirements (framework not in the catalogue, or internal policy) | `{"id": "dora", "spec": "docs/compliance/dora.md"}` | The generic reviewer `compliance-reviewer`, which applies the spec and nothing else |
 
-Options communes à chaque entrée :
-- `"paths"` (globs : `*` et `?` restent dans un dossier, `**/` couvre zéro ou plusieurs dossiers, `src/**` tout le
-  dessous) et `"keywords"` (mots entiers, sans casse, cherchés dans les lignes ajoutées ou retirées du diff, hors
-  en-têtes de fichier) : le périmètre se décide **sans lancer d'agent** (aucun jeton dépensé pour un diff hors périmètre) ; sans eux, l'agent en juge ;
-- `"confirme"` : qui tranche (DPO, RSSI, QSA) ; `"enabled": false` : désactive sans supprimer.
+Options common to every entry:
+- `"paths"` (globs: `*` and `?` stay within one directory, `**/` covers zero or more directories, `src/**` everything
+  below) and `"keywords"` (whole words, case-insensitive, searched in the added or removed lines of the diff, file
+  headers excluded): the scope is decided **without starting an agent** (no token spent on an out-of-scope diff); without them, the agent judges;
+- `"confirmed_by"`: who decides (DPO, CISO, QSA); `"enabled": false`: disables without deleting.
 
-Exemple complet :
+Full example:
 ```json
 {
   "compliance": [
     "gdpr",
-    { "id": "pci", "agent": ".claude/agents/acme-pci-qsa.md", "paths": ["src/paiement/**"], "confirme": "QSA ACME" },
-    { "id": "dora", "spec": "docs/compliance/dora.md", "keywords": ["incident", "ict"], "confirme": "RSSI" },
+    { "id": "pci", "agent": ".claude/agents/acme-pci-qsa.md", "paths": ["src/paiement/**"], "confirmed_by": "QSA ACME" },
+    { "id": "dora", "spec": "docs/compliance/dora.md", "keywords": ["incident", "ict"], "confirmed_by": "CISO" },
     { "id": "iso27001", "enabled": false }
   ],
   "exclude": [".claude/agents/compliance-tisax.md", ".claude/agents/compliance-hds.md"]
 }
 ```
 
-- **Résolution** déterministe : `.harness/scripts/compliance-plan.py --base origin/<intégration>` (appelé par
-  `/compliance-review`) dit, pour chaque entrée, quel agent tourne, sur quel fichier, et si le diff est dans son
-  périmètre ; une entrée invalide (agent introuvable, spec incomplète, id inconnu, doublon) fait échouer le plan.
-- **Spec** : gabarit `docs/compliance/TEMPLATE.md` (créé à l'adoption, appartient au projet) : en-tête `id`,
-  `référentiel`, `confirme`, puis « Quand intervenir », « Ce que je vérifie », « Preuves attendues », « Sources ».
-  Le relecteur générique ne cite que ce que la spec cite ; une lacune de la spec est signalée, pas inventée.
-- **Agent de l'entreprise** : un fichier d'agent (adaptateur Claude Code : en-tête `name`, `description`, `tools`, `model`) dans
-  le dépôt ; le cadre ne le synchronise jamais. Garder le format de réponse du §3 pour que les verdicts se
-  consolident ; le mettre en lecture seule.
-- Un label `conformité: <id>` sur une issue force la revue correspondante, même hors périmètre. Ces labels sont
-  propres au projet (`.github/labels.local.json` ; le cadre ne fournit que `conformité`).
+- Deterministic **resolution**: `.harness/scripts/compliance-plan.py --base origin/<integration>` (called by
+  `/compliance-review`) says, for each entry, which agent runs, on which file, and whether the diff is in its
+  scope; an invalid entry (agent not found, incomplete spec, unknown id, duplicate) makes the plan fail.
+- **Spec**: template `docs/compliance/TEMPLATE.md` (created at adoption, owned by the project): header `id`,
+  `framework`, `confirmed_by`, then "When to step in", "What I check", "Expected evidence", "Sources".
+  The generic reviewer cites only what the spec cites; a gap in the spec is reported, not invented.
+- **Company agent**: an agent file (Claude Code adapter: header `name`, `description`, `tools`, `model`) in
+  the repository; the harness never syncs it. Keep the response format of §3 so that verdicts can be
+  consolidated; make it read-only.
+- A `compliance: <id>` label on an issue forces the matching review, even out of scope. These labels are
+  project-local (`.github/labels.local.json`, like `compliance` itself: the harness base set has no compliance label).
 
-## 3. Place dans la boucle
+## 3. Place in the loop
 
 ```mermaid
 flowchart LR
-  D[Diff prêt] --> L["/lessons-check"] --> A[Revue adversariale]
-  A --> Q{"Diff dans un périmètre<br/>activé ?"}
-  Q -- non --> R[Ready for review]
-  Q -- oui --> C["/compliance-review<br/>(agents concernés, en parallèle)"]
-  C -->|ÉCARTS Haute/Moyenne| F[Corriger en un commit<br/>ou issue + décision du responsable]
+  D[Diff ready] --> L["/lessons-check"] --> A[Adversarial review]
+  A --> Q{"Diff in an enabled<br/>scope?"}
+  Q -- no --> R[Ready for review]
+  Q -- yes --> C["/compliance-review<br/>(agents concerned, in parallel)"]
+  C -->|GAPS High/Medium| F[Fix in one commit<br/>or issue + owner's decision]
   F --> C
-  C -->|CONFORME / HORS PÉRIMÈTRE| R
+  C -->|COMPLIANT / OUT OF SCOPE| R
 ```
 
-- Les verdicts vont dans la PR (section « Conformité ») : agent, verdict, tête relue, constats ouverts.
-- Un écart que l'équipe accepte (risque assumé) se trace dans un ADR signé par le responsable, jamais en silence.
-- Une faille de sécurité ne se détaille jamais publiquement.
+- Verdicts go in the PR ("Compliance" section): agent, verdict, head reviewed, open findings.
+- A gap the team accepts (accepted risk) is traced in an ADR signed by the owner, never silently.
+- A security flaw is never detailed publicly.
 
-## 4. Ajouter un référentiel
-1. Issue sur le cadre (type `feature`, label `conformité`), avec les sources officielles.
-2. Copier un agent existant, garder ses sections ; ne citer que des identifiants vérifiés sur le texte officiel.
-3. Ajouter la ligne au §1 ; MINEUR au CHANGELOG. Un référentiel propre à une entreprise ne vient pas au cadre : il
-   reste une spec ou un agent du projet (§2).
+## 4. Adding a framework
+1. Issue on the harness (`type: feature`), with the official sources.
+2. Copy an existing agent, keep its sections; cite only identifiers verified against the official text.
+3. Add the row to §1; MINOR in the CHANGELOG. A framework specific to one company does not come to the harness: it
+   stays a spec or an agent of the project (§2).

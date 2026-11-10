@@ -1,6 +1,6 @@
-# Les failles de sécurité ne passent jamais par une issue publique (SECURITY.md, signalement privé).
+# Security flaws never go through a public issue (SECURITY.md, private report).
 blank_issues_enabled: true
 contact_links:
-  - name: Signaler une faille de sécurité (privé)
-    url: https://github.com/francoisgn/agentic-harness/security/advisories/new
-    about: Ne jamais publier une faille dans une issue (SECURITY.md).
+  - name: Report a security flaw (private)
+    url: https://github.com/francoisgn/belayline-agentic-harness/security/advisories/new
+    about: Never publish a flaw in an issue (SECURITY.md).

@@ -1,32 +1,32 @@
-# Sécurité
+# Security
 
-## Versions couvertes
-La dernière version taguée (`vX.Y.Z`, voir [CHANGELOG](CHANGELOG.md)) et la branche `master`. Les versions
-antérieures ne reçoivent pas de correctif : la réponse est de passer à la dernière ([ADOPTION](docs/ADOPTION.md)
-§Mises à jour).
+## Supported versions
+The latest tagged version (`vX.Y.Z`, see [CHANGELOG](CHANGELOG.md)) and the `master` branch. Earlier versions get
+no fix: the answer is to move to the latest ([ADOPTION](docs/ADOPTION.md) §Updates).
 
-## Signaler une faille
-**En privé, jamais dans une issue, une PR ou une discussion publique.**
+## Reporting a vulnerability
+**In private, never in an issue, a PR or a public discussion.**
 
-- [Ouvrir un signalement privé](https://github.com/francoisgn/agentic-harness/security/advisories/new) (onglet
-  Security du dépôt → « Report a vulnerability » ;
-  [doc GitHub](https://docs.github.com/fr/code-security/security-advisories/guidance-on-reporting-and-writing-information-about-vulnerabilities/privately-reporting-a-security-vulnerability)).
-- Y mettre : la version ou le commit, le fichier concerné, les étapes pour reproduire, l'effet (ce qu'un attaquant
-  obtient), et un correctif si vous en avez un. Aucun secret réel dans le signalement.
+- [Open a private report](https://github.com/francoisgn/belayline-agentic-harness/security/advisories/new) (the
+  repository's Security tab → "Report a vulnerability";
+  [GitHub docs](https://docs.github.com/en/code-security/security-advisories/guidance-on-reporting-and-writing-information-about-vulnerabilities/privately-reporting-a-security-vulnerability)).
+- Include: the version or the commit, the file concerned, the steps to reproduce, the effect (what an attacker
+  gets), and a fix if you have one. No real secret in the report.
 
-## Ce à quoi s'attendre
-- Accusé de réception sous **7 jours**.
-- Ensuite : confirmation ou refus motivé, puis correctif dans une nouvelle version et avis publié, avec votre nom
-  si vous le souhaitez. Projet maintenu sur le temps libre : pas de délai garanti pour le correctif.
-- Merci de ne rien divulguer avant la publication du correctif.
+## What to expect
+- Acknowledgement within **7 days**.
+- Then: confirmation or a reasoned refusal, then a fix in a new version and a published advisory, with your name
+  if you wish. The project is maintained in spare time: no guaranteed delay for the fix.
+- Please disclose nothing before the fix is published.
 
-## Périmètre
-| Dans le périmètre | Exemples |
+## Scope
+| In scope | Examples |
 |---|---|
-| Garde-fous | `plugins/harness/scripts/guard-git.py` contourné (push direct ou force-push sur une branche protégée) |
-| Scripts | `scripts/harness-sync.sh` qui écrit hors du dépôt cible ; `scripts/repo-settings.py` qui applique plus que le fichier |
-| Workflows réutilisables | `.github/workflows/*.yml` : injection par un titre, un corps ou un commentaire ; jeton trop large ; fuite de secret |
-| Skills, agents, gabarits | consigne qui fait suivre à un agent le texte d'une issue, d'une PR ou d'un journal comme une instruction |
+| Guardrails | `plugins/harness/scripts/guard-git.py` bypassed (direct push or force-push to a protected branch) |
+| Scripts | `scripts/harness-sync.sh` writing outside the target repository; `scripts/repo-settings.py` applying more than the file |
+| Reusable workflows | `.github/workflows/*.yml`: injection through a title, a body or a comment; token too broad; secret leak |
+| Skills, agents, templates | an instruction that makes an agent follow the text of an issue, a PR or a log as an instruction |
 
-Hors périmètre : les projets qui utilisent le cadre (les signaler à leurs mainteneurs), les agents de code et les
-services tiers eux-mêmes (les signaler à leur éditeur), les rapports d'outils automatiques sans scénario d'exploitation.
+Out of scope: the projects that use the harness (report them to their maintainers), the coding agents and
+third-party services themselves (report them to their vendor), reports from automatic tools without an exploitation
+scenario.

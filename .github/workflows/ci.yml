@@ -1,9 +1,9 @@
 name: CI
 
-# CI du cadre lui-même, en UN job Linux (budget : CI-BUDGET.md §2, §5) : cohérence du cadre (skills, agents,
-# manifeste, labels, nommage), tests (harness-sync.sh, hooks, flow-metrics, contrôles), scripts, workflows, JSON et
-# versions, markdown, secrets. Chaque étape tourne même si la précédente échoue : un passage donne tous les constats.
-# Rien sur un brouillon ; une PR de docs ne coûte qu'une minute.
+# CI of the harness itself, in ONE Linux job (budget: CI-BUDGET.md §2, §5): harness consistency (skills, agents,
+# manifest, labels, naming), tests (harness-sync.sh, hooks, flow-metrics, checks), scripts, workflows, JSON and
+# versions, markdown, secrets. Each step runs even if the previous one fails: one run gives every finding.
+# Nothing on a draft; a docs PR costs only one minute.
 on:
   push:
     branches: [master]
@@ -28,37 +28,41 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-          fetch-depth: 0   # gitleaks lit l'historique de la PR
+          fetch-depth: 0   # gitleaks reads the PR history
 
-      - name: Cohérence du cadre (skills, agents, manifeste, labels, nommage)
+      - name: Harness consistency (skills, agents, manifest, labels, naming)
         if: ${{ !cancelled() }}
         run: python3 scripts/check-framework.py
 
-      - name: Tests Python (flow-metrics, contrôles)
+      - name: Python tests (flow-metrics, checks)
         if: ${{ !cancelled() }}
         run: python3 -m unittest discover -s scripts/tests -p 'test_*.py' -v
 
-      - name: Schémas à jour avec leurs sources (docs/diagrams)
+      - name: Diagrams up to date with their sources (docs/diagrams)
         if: ${{ !cancelled() }}
-        run: python3 scripts/diagrams/render.py --check
+        run: python3 scripts/diagrams/render.py --check && python3 scripts/diagrams/render.py --check --dir templates/docs/diagrams
+
+      - name: Harness README meets the standard it asks for (README-STANDARD.md)
+        if: ${{ !cancelled() }}
+        run: python3 scripts/readme-check.py
 
       - name: ShellCheck
         if: ${{ !cancelled() }}
         run: shellcheck scripts/*.sh scripts/tests/*.sh plugins/harness/scripts/*.sh
 
-      - name: Python (syntaxe des hooks)
+      - name: Python (hook syntax)
         if: ${{ !cancelled() }}
         run: python3 -m py_compile plugins/harness/scripts/guard-git.py scripts/*.py scripts/diagrams/*.py
 
-      - name: JSON valides et versions cohérentes
+      - name: Valid JSON and consistent versions
         if: ${{ !cancelled() }}
         run: |
           for f in $(git ls-files '*.json'); do jq empty "$f" || exit 1; done
           V=$(cat VERSION); P=$(jq -r .version plugins/harness/.claude-plugin/plugin.json)
           [ "$V" = "$P" ] || { echo "::error::VERSION ($V) ≠ plugin.json ($P)"; exit 1; }
-          grep -q "^## $V " CHANGELOG.md || { echo "::error::CHANGELOG.md sans section $V"; exit 1; }
+          grep -q "^## $V " CHANGELOG.md || { echo "::error::CHANGELOG.md has no section $V"; exit 1; }
 
-      - name: Tests de harness-sync.sh et des hooks
+      - name: Tests of harness-sync.sh and the hooks
         if: ${{ !cancelled() }}
         run: scripts/tests/test-harness-sync.sh
 
@@ -68,10 +72,10 @@ jobs:
 
       - name: Workflows · zizmor
         if: ${{ !cancelled() }}
-        # Les gabarits référencent le cadre par tag ; harness-sync.sh les épingle par SHA chez le consommateur (testé).
+        # The templates reference the harness by tag; harness-sync.sh pins them by SHA in the consumer project (tested).
         run: pipx run zizmor==1.31.1 --offline --min-severity low .github/workflows
 
-      - name: Markdown (tableaux, ancres)
+      - name: Markdown (tables, anchors)
         if: ${{ !cancelled() }}
         run: npx --yes markdownlint-cli2@0.18.1
 

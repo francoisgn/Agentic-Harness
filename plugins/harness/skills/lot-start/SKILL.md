@@ -1,56 +1,58 @@
 ---
 name: lot-start
-description: Démarre un lot ou une issue selon le cadre agentic-harness — vérifie que l'issue est prête, la prend en charge (`/claim <id>` + plan), crée la branche `<type>/<nom-court>` depuis la branche d'intégration à jour. À utiliser au début de tout travail sur une ou plusieurs issues.
-argument-hint: "<n° d'issue>[,<n°>…] [nom-du-lot]"
+description: Starts a lot or an issue following the Belayline harness (checks that the issue is ready, claims it with `/claim <id>` and a plan, creates the `<type>/<short-name>` branch from the up-to-date integration branch). Use at the start of any work on one or more issues.
+argument-hint: "<issue number>[,<number>…] [lot-name]"
 ---
 
-# Démarrer un lot
+# Start a lot
 
-Issues visées : $ARGUMENTS
+Target issues: $ARGUMENTS
 
-Règles de référence : `.harness/docs/METHODOLOGY.md` §2 et §4, `.harness/docs/CONVENTIONS.md` §Commentaires (sinon
-les mêmes fichiers sous `${CLAUDE_PLUGIN_ROOT}/docs/`) et les règles du projet (`AGENTS.md`, `CLAUDE.md`, leur
-section « Harness overrides »), qui l'emportent.
+Reference rules: `.harness/docs/METHODOLOGY.md` §2 and §4, `.harness/docs/CONVENTIONS.md` §GitHub comments (otherwise
+the same files under `${CLAUDE_PLUGIN_ROOT}/docs/`) and the project's rules (`AGENTS.md`, `CLAUDE.md`, their
+"Harness overrides" section), which take precedence.
 
-1. **État réel d'abord** : `git fetch origin`, lire la branche d'intégration (`.harness/config.json` →
-   `integration_branch`, sinon `CLAUDE.md`). Lire chaque issue **et tous ses commentaires** (outil GitHub).
-2. **Prise en charge active** : rejouer les commentaires de l'issue dans l'ordre, en ne comptant que ceux des membres
-   du dépôt (association `OWNER`, `MEMBER`, `COLLABORATOR`) dont la première ligne est `/claim <id>` ou
-   `/release [<id>]`. Le premier `/claim` tient jusqu'à un `/release` ; les `/claim` suivants sont refusés. Tenue par
-   un autre identifiant (ou label `pris en charge` / `status: claimed` sans `/claim` de notre identifiant) →
-   s'arrêter et le dire. Tenue par notre identifiant (l'orchestrateur a pris pour nous) → continuer sans reprendre.
-3. **Prête ?** Pour chaque issue, s'arrêter et le dire si :
-   - elle porte `à clarifier` ou `bloqué`, ou une dépendance (`Dépend de`, plan des lots) n'est pas fermée ;
-   - elle porte `hôte: mac` et la session tourne en cloud (`CLAUDE_CODE_REMOTE=true`) ;
-   - ses entrées n'existent pas (données, captures, sources réglementaires, accès).
-   **Labels de niveau de modèle et de taille** : préfixes lus dans `.harness/config.json` → `labels.model_prefixes`
-   (défaut `["modèle:"]`) et `labels.size_prefixes` (défaut `["taille:"]`) ; liste vide = axe absent du projet. Un
-   label manquant **n'arrête pas** le travail : déduire le niveau et la taille du texte de l'issue et du tableau de
-   routage du projet (`AGENTS.md`, sinon `.harness/docs/ORCHESTRATION.md` §2), le dire dans la prise en charge
-   (« niveau déduit : … ») et proposer le label. Niveau demandé plus exigeant que le modèle de la session → le
-   signaler à l'opérateur avant de commencer. Il manque le type ou la priorité : le proposer, et continuer.
-4. **Doublons et chevauchements** : chercher les issues et PR (ouvertes et fermées) sur le même sujet, et les PR
-   ouvertes qui touchent les mêmes fichiers.
-5. **Prise en charge** (sauf si l'orchestrateur l'a déjà faite pour notre identifiant) : sur chaque issue, un
-   commentaire dont la **première ligne** est la commande, seule :
+1. **Real state first**: `git fetch origin`, read the integration branch (`.harness/config.json` →
+   `integration_branch`, otherwise `CLAUDE.md`). Read each issue **and all its comments** (GitHub tool).
+2. **Active claim**: replay the issue's comments in order, counting only those from repository members (association
+   `OWNER`, `MEMBER`, `COLLABORATOR`) whose first line is `/claim <id>` or `/release [<id>]`. The first `/claim` holds
+   until a `/release`; later `/claim`s are refused. Held by another identifier (or label `status: claimed` without a
+   `/claim` from our identifier) → stop and say so. Held by our identifier (the orchestrator claimed for us) →
+   continue without claiming again.
+3. **Ready?** For each issue, stop and say so if:
+   - it carries `status: needs-decision` or `status: blocked`, or a dependency (`Depends on`, lot plan) is not
+     closed;
+   - it carries `needs: host` and the session runs in the cloud (`CLAUDE_CODE_REMOTE=true`);
+   - its inputs do not exist (data, screenshots, regulatory sources, access).
+   **Model tier and size labels**: prefixes read from `.harness/config.json` → `labels.model_prefixes` (default `["difficulty:"]`)
+   and `labels.size_prefixes` (default `[]`); an empty list = the project does not have that axis. A
+   missing label **does not stop** the work: infer the tier and the size from the issue text and the project's
+   routing table (`AGENTS.md`, otherwise `.harness/docs/ORCHESTRATION.md` §2), say so in the claim
+   ("inferred tier: …") and propose the label. Requested tier more demanding than the session's model → tell the
+   operator before starting. The type or the priority is missing: propose it, and continue.
+4. **Duplicates and overlaps**: search issues and PRs (open and closed) on the same subject, and open PRs that
+   touch the same files.
+5. **Claim** (unless the orchestrator already did it for our identifier): on each issue, a comment whose **first
+   line** is the command, alone:
    ```
-   /claim <identifiant>
-   Agent : <identifiant> (<modèle>) · branche `<type>/<nom-court>`
-   - <plan en 3 à 5 puces : quoi, où, comment c'est testé>
+   /claim <identifier>
+   Agent: <identifier> (<model>) · branch `<type>/<short-name>`
+   - <plan in 3 to 5 bullets: what, where, how it is tested>
 
    ---
    _Generated by [Claude Code](https://claude.ai/code)_
    ```
-   `<identifiant>` : celui donné par l'orchestrateur, sinon `<projet>.solo.lot.<cible>`
-   (`.harness/docs/ORCHESTRATION.md` §7) ; un humain prend avec `human/<login>`. Relire ensuite les commentaires :
-   un `/claim` arrivé avant le nôtre gagne, et l'on s'arrête. Poser le label `pris en charge` si le projet le suit et
-   qu'aucun workflow ne le fait.
-6. **Branche** `<type>/<nom-court>` : types de `.harness/config.json` → `branch_types` (défaut `lot`, `fix`, `feat`,
-   `chore`, `docs`) ; `lot/<nom-court>` pour un lot du plan. `git switch -c <type>/<nom-court> origin/<intégration>`
-   (ou un worktree si d'autres lots tournent en parallèle :
-   `git worktree add ../<projet>-<nom-court> -b <type>/<nom-court> origin/<intégration>`).
-7. **Spec** : un lot a sa spec `docs/lots/LOT-XXX-*.md` (gabarit `docs/lots/TEMPLATE.md`) ; un bug ou une tâche
-   s'appuie sur l'issue. Relever les leçons de `LESSONS.md` qui s'appliquent (portée du projet) et les garder en tête.
-8. Reprendre l'identifiant dans les commits (trailer `Agent:`) et la PR (`Claim: <identifiant>`). Pousser tôt sur une
-   PR en brouillon (`.harness/docs/CI-BUDGET.md` §2).
-9. Rendre compte en 5 lignes : issues prises, branche, plan, niveau retenu (label ou déduit), ce qui sera à valider sur Mac.
+   `<identifier>`: the one given by the orchestrator, otherwise `<project>.solo.lot.<target>`
+   (`.harness/docs/ORCHESTRATION.md` §7); a human claims with `human/<login>`. Then reread the comments: a `/claim`
+   that arrived before ours wins, and we stop. Replace the issue's `status:` label with `status: claimed` if the
+   project tracks it and no workflow does it.
+6. **Branch** `<type>/<short-name>`: types from `.harness/config.json` → `branch_types` (default `lot`, `fix`, `feat`,
+   `chore`, `docs`); `lot/<short-name>` for a lot of the plan. `git switch -c <type>/<short-name> origin/<integration>`
+   (or a worktree if other lots run in parallel:
+   `git worktree add ../<project>-<short-name> -b <type>/<short-name> origin/<integration>`).
+7. **Spec**: a lot has its spec `docs/lots/LOT-XXX-*.md` (template `docs/lots/TEMPLATE.md`); a bug or a task relies
+   on the issue. Note the lessons in `LESSONS.md` that apply (project scope) and keep them in mind.
+8. Reuse the identifier in the commits (`Agent:` trailer) and the PR (`Claim: <identifier>`). Push early to a draft
+   PR (`.harness/docs/CI-BUDGET.md` §2).
+9. Report in 5 lines: issues claimed, branch, plan, tier used (label or inferred), what will have to be validated on
+   the Mac.

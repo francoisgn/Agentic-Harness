@@ -1,153 +1,152 @@
-# Conventions : commits, PR, commentaires, persistance
+# Conventions: commits, PRs, comments, persistence
 
-Sources : `AGENTS.md` §5, §8 de HFRnow (PR, merge, doublons, prises en charge, registre #620) ; pratique éprouvée
-sur d'autres projets (conventions de commit, version et Nouveautés, compatibilité des sauvegardes).
+Sources: `AGENTS.md` §5, §8 of HFRnow (PRs, merge, duplicates, claims, ledger #620); practice proven on other
+projects (commit conventions, version and What's New, save compatibility).
 
-## Langue
-Français partout : interface, code (commentaires, noms métier), commits, issues, PR, docs. Un projet peut décider
-autrement (projet ouvert à des contributeurs anglophones) : il l'écrit dans son `CLAUDE.md`, qui l'emporte.
+## Language
+Project language: write the interface, code comments and domain names, commits, issues, PRs and docs in the
+project's language (`.harness/config.json` › `language`, default English). The harness itself is in English. A
+project can decide otherwise: it writes it in its `CLAUDE.md`, which wins.
 
 ## Branches
-`<type>/<nom-court>` pour tout le monde, agent ou humain : `lot/` (un lot du plan, ex. `lot/082-reader-links`),
-`fix/`, `feat/`, `chore/`, `docs/` ; `hotfix/<sujet>` depuis la branche de production (modèle A). Les types se
-règlent dans `.harness/config.json` (`branch_types`). Le nom ne dit pas qui travaille : c'est la prise en charge
-(`/claim`) et la ligne `Claim:` de la PR qui le disent. Une branche part de la branche d'intégration **à jour**.
-Détail et promotions : [BRANCHING-RELEASE](BRANCHING-RELEASE.md).
+`<type>/<short-name>` for everyone, agent or human: `lot/` (a lot of the plan, e.g. `lot/082-reader-links`),
+`fix/`, `feat/`, `chore/`, `docs/`; `hotfix/<subject>` from the production branch (model A). The types are set in
+`.harness/config.json` (`branch_types`). The name does not say who is working: the claim (`/claim`) and the PR's
+`Claim:` line say it. A branch starts from the **up-to-date** integration branch.
+Detail and promotions: [BRANCHING-RELEASE](BRANCHING-RELEASE.md).
 
 ## Commits
-- Un commit **atomique par issue** (ou par étape logique d'une issue), message en français, au présent, dans le style
-  des commits existants (`git log`) : `Onglet : ce qui change (#n)` ou `Zone : ce qui change`. Dire **pourquoi** quand ce
-  n'est pas évident.
-- Attribution en fin de message selon la consigne de la session, par exemple :
+- One **atomic commit per issue** (or per logical step of an issue), message in the project's language, present
+  tense, in the style of the existing commits (`git log`): `Tab: what changes (#n)` or `Area: what changes`. Say
+  **why** when it is not obvious.
+- Attribution at the end of the message as the session instructs, for example:
   ```
-  Co-Authored-By: Claude <modèle> <noreply@anthropic.com>
+  Co-Authored-By: Claude <model> <noreply@anthropic.com>
   Claude-Session: https://claude.ai/code/session_…
   ```
-- Jamais d'artefact généré, de `DerivedData`, `.build`, ni de fichier ignoré par `.gitignore`.
-- Commits petits, **poussés souvent** sur la PR en brouillon (un plantage perd des minutes, pas des heures) ; rien de
-  coûteux ne tourne sur un brouillon ([CI-BUDGET](CI-BUDGET.md) §2). Une fois la PR prête : un commit par cycle de
-  revue.
+- Never a generated artefact, `DerivedData`, `.build`, or a file ignored by `.gitignore`.
+- Small commits, **pushed often** to the draft PR (a crash loses minutes, not hours); nothing costly runs on a
+  draft ([CI-BUDGET](CI-BUDGET.md) §2). Once the PR is ready: one commit per review round.
 
 ## Pull requests
-- Ouverte **en brouillon** dès le premier push (rien de coûteux ne tourne), passée « Ready for review » quand tout est
-  fini, relu, compilé.
-- **Titre** dans le style des PR précédentes : `Zone : résumé (#n)`, `Relecture 0.6.0 (3) : …`, `LOT-012 : …`.
-- **Corps**, court, dans cet ordre (gabarit `templates/.github/pull_request_template.md`) :
-  1. `LOT-XXX` pour une PR de lot ;
-  2. `Closes #n`, **une ligne par issue** (`Refs #n` pour un travail partiel, en disant ce qui reste ; `Direct-PR: <raison>`
-     pour un petit correctif sans issue, jamais pour un lot) ;
-  3. `Claim: <id>` sur sa propre ligne, égal à la prise en charge active de l'issue (§Commentaires) ;
-  4. le problème, la cause, ce qui change et pourquoi si large et pas plus ;
-  5. les tests : noms, ce qu'ils vérifient, montrés en échec sans le changement ; commandes lancées ; points de
-     vigilance / non testé (ex. app non compilée dans le conteneur Linux, à valider sur iPhone) ;
-  6. section **`### Ledger`** seulement si le projet tient un registre (§Registre) ; sinon rien ;
-  7. modèles auteur et relecteur ; la ligne de génération en dernier.
-- On ne merge pas soi-même sauf politique contraire du projet (selon le projet : le mainteneur merge, ou l'auteur
-  merge une PR prête et approuvée, sauf flux à risque).
-- Pas de nouvelle PR tant qu'une des siennes a un commentaire de revue sans réponse.
-- Avant d'ouvrir : chercher les doublons (issues et PR, ouvertes et fermées) et les PR qui touchent les mêmes fichiers.
+- Opened **as a draft** from the first push (nothing costly runs), moved to "Ready for review" when everything is
+  finished, reviewed, compiled.
+- **Title** in the style of the previous PRs: `Area: summary (#n)`, `Review 0.6.0 (3): …`, `LOT-012: …`.
+- **Body**, short, in this order (template `templates/.github/pull_request_template.md`):
+  1. `LOT-XXX` for a lot PR;
+  2. `Closes #n`, **one line per issue** (`Refs #n` for partial work, saying what is left; `Direct-PR: <reason>`
+     for a small fix without an issue, never for a lot);
+  3. `Claim: <id>` on its own line, equal to the issue's active claim (§GitHub comments);
+  4. the problem, the cause, what changes and why this wide and no wider;
+  5. the tests: names, what they check, shown failing without the change; commands run; watch points / not tested
+     (e.g. app not compiled in the Linux container, to validate on iPhone);
+  6. a **`### Ledger`** section only if the project keeps a ledger (§Ledger); otherwise nothing;
+  7. author and reviewer models; the generation line last.
+- Do not merge yourself unless the project's policy says otherwise (depending on the project: the maintainer merges,
+  or the author merges a ready and approved PR, except for risky flows).
+- No new PR while one of your own has a review comment without a reply.
+- Before opening: search for duplicates (issues and PRs, open and closed) and for PRs that touch the same files.
 
-## Registre (« ledger ») : jamais de conflit sur un fichier partagé
-Brique facultative, pour les projets qui tiennent un fichier partagé de type journal (CHANGELOG, Nouveautés, rapport
-d'écarts, tableau de suivi) que beaucoup de PR voudraient modifier en même temps.
-- Une PR de travail **ne touche jamais** ces fichiers. Ses entrées vont dans une section `### Ledger` du **corps de la
-  PR**, en blocs délimités dont le type d'entrée est le langage (ex. ` ```changelog `, ` ```gap-new `), et la PR porte
-  le label `ledger`. Pas d'entrée : ni section, ni label.
-- Après les merges, un **steward** (rôle d'entretien, [STEWARDS](STEWARDS.md)) lance le script du projet qui lit les
-  PR mergées labellisées `ledger`, **replie** leurs entrées dans les fichiers et ouvre **une seule PR de docs**, qui
-  ne touche que ces fichiers ; puis il remplace `ledger` par `ledger: done` sur chaque PR repliée.
-- Cette PR se vérifie sans revue adversariale : **le script doit la reproduire** (sur sa base, la commande inscrite
-  dans sa description, puis `git diff --exit-code <tête>`, ne montre aucune différence) ; elle se merge sur CI verte.
-- Pas de verrou, pas de conflit, pas de push tardif pour rebaser un journal, pas de CI relancée pour une ligne.
-- Le relecteur adversarial relit la section `### Ledger` comme le code. Une entrée mal formée est signalée et sautée
-  par le steward (les autres se replient) : l'auteur corrige le corps de la PR, pas les fichiers.
+## Ledger: never a conflict on a shared file
+Optional building block, for projects that keep a shared log-like file (CHANGELOG, What's New, gap report, tracking
+table) that many PRs would want to modify at the same time.
+- A work PR **never touches** these files. Its entries go in a `### Ledger` section of the **PR body**, in fenced
+  blocks whose language is the entry type (e.g. ` ```changelog `, ` ```gap-new `), and the PR carries the `ledger`
+  label. No entry: no section, no label.
+- After the merges, a **steward** (upkeep role, [STEWARDS](STEWARDS.md)) runs the project's script that reads the
+  merged PRs labelled `ledger`, **folds** their entries into the files and opens **a single docs PR**, which
+  touches only these files; then it replaces `ledger` with `ledger: done` on each folded PR.
+- This PR is verified without an adversarial review: **the script must reproduce it** (on its base, the command
+  written in its description, then `git diff --exit-code <head>`, shows no difference); it is merged on green CI.
+- No lock, no conflict, no late push to rebase a log, no CI rerun for one line.
+- The adversarial reviewer reviews the `### Ledger` section like code. A malformed entry is reported and skipped by
+  the steward (the others are folded): the author fixes the PR body, not the files.
 
-Brancher la brique : le cadre fournit la convention et les contrôles de corps de PR (`pr-hygiene.yml`, entrée
-`ledger-label`) ; le projet fournit son script de repli (format des blocs, fichiers cibles, ordre, idempotence),
-déclaré dans `.harness/config.json` → `ledger` (`enabled`, `label`, `fold_command`), et un contrôle de CI qui refuse
-qu'une PR hors branche du steward touche les fichiers du registre. Les labels `ledger` et `ledger: done` vont dans
-`.github/labels.local.json`. Exemple complet (format des blocs, script, contrôle) : `tooling/docs/README.md` de HFRnow
-(branche `dev-swift`, #620). Sans registre (`ledger.enabled` absent ou faux),
-rien de tout cela ne s'applique.
+Wiring the block in: the harness provides the convention and the PR body checks (`pr-hygiene.yml`, input
+`ledger-label`); the project provides its fold script (block format, target files, order, idempotence), declared in
+`.harness/config.json` → `ledger` (`enabled`, `label`, `fold_command`), and a CI check that refuses a PR outside
+the steward's branch touching the ledger files. The labels `ledger` and `ledger: done` go in
+`.github/labels.local.json`. Full example (block format, script, check): `tooling/docs/README.md` of HFRnow
+(branch `dev-swift`, #620). Without a ledger (`ledger.enabled` missing or false), none of this applies.
 
-## Commentaires GitHub
-- **Prise en charge** : un commentaire dont la **première ligne** est `/claim <id>`, suivie du plan en 3 à 5 puces.
-  `<id>` est l'identifiant de l'agent ([ORCHESTRATION](ORCHESTRATION.md) §7), ou `human/<login>` pour un humain ; il
-  ne change pas jusqu'à la fin du travail. Les commentaires de l'issue se **rejouent dans l'ordre** : la première prise
-  gagne, une autre `/claim` est refusée tant que la première tient ; `/release` (ou `/release <id>`) la rend. Seuls
-  les commentaires des membres du dépôt (propriétaire, membres, collaborateurs) comptent : un contributeur sans droits
-  demande à un membre de prendre pour lui. Un projet peut automatiser le rejeu (workflow qui pose et retire le label
-  de statut, et répond à une prise refusée) ; sans automatisation, l'orchestrateur ou le mainteneur pose le label.
-- Fin : fait, lien de la PR, ce qui reste, décisions prises, à valider sur l'appareil.
-- Issue résolue sans `Closes` : « Résolu par #PR ». Merge sur une branche qui ne ferme pas les issues : « Fait dans
-  #PR (mergée en `<sha>`) », puis vérifier qu'elle est fermée.
-- Blocage : commentaire qui commence par `BLOQUÉ :` avec la question exacte ou la liste de ce qui manque.
-- Décision attendue de l'opérateur, en session autonome : une ligne finissant par « Décision attendue (opérateur) »,
-  puis passer au point suivant.
-- Ne jamais `@mentionner` une personne ou un bot sans raison (cela envoie des e-mails) ; depuis le cloud, les mentions
-  sont altérées (LESSONS L46).
-- **Tout commentaire écrit par un agent se termine par un pied d'attribution qui nomme l'agent.** Claude Code :
+## GitHub comments
+- **Claim**: a comment whose **first line** is `/claim <id>`, followed by the plan in 3 to 5 bullets. `<id>` is the
+  agent's id ([ORCHESTRATION](ORCHESTRATION.md) §7), or `human/<login>` for a human; it does not change until the
+  end of the work. The issue's comments are **replayed in order**: the first claim wins, another `/claim` is
+  refused while the first holds; `/release` (or `/release <id>`) hands it back. Only the comments of repository
+  members (owner, members, collaborators) count: a contributor without rights asks a member to claim for them. A
+  project can automate the replay (a workflow that sets and removes the status label, and replies to a refused
+  claim); without automation, the orchestrator or the maintainer sets the label.
+- End: done, PR link, what is left, decisions taken, to validate on the device.
+- Issue resolved without `Closes`: "Resolved by #PR". Merge into a branch that does not close issues: "Done in
+  #PR (merged as `<sha>`)", then check that it is closed.
+- Blocker: a comment that starts with `BLOCKED:` with the exact question or the list of what is missing.
+- Decision needed from the operator, in an autonomous session: a line ending with "Decision needed (operator)",
+  then move on to the next item.
+- Never `@mention` a person or a bot without a reason (it sends emails); from the cloud, mentions are
+  altered (LESSONS L46).
+- **Every comment written by an agent ends with an attribution footer that names the agent.** Claude Code:
   ```
   ---
   _Generated by [Claude Code](https://claude.ai/code)_
   ```
 
-## Persistance : compatibilité ascendante
-**Une sauvegarde écrite par une version publiée doit rester lisible par toutes les versions suivantes.**
-- Nouveau champ → optionnel ou avec une valeur par défaut, décodé de façon tolérante (`decodeIfPresent`).
-- Champ renommé ou supprimé → migration à la lecture (ancienne clé lue puis convertie, fonction dédiée du type
-  `migrate(legacy:)`), testée avec une sauvegarde réelle de l'ancienne version (fichier de test figé).
-- La version de format (`payloadVersion`) ne s'incrémente que pour un changement impossible à migrer, et cela demande
-  une décision produit (issue `à clarifier`).
-- Contrepartie acceptée : une version plus ancienne peut ne pas relire une sauvegarde plus récente (appareils non à jour
-  qui partagent iCloud).
-- SwiftData + CloudKit : jamais `@Attribute(.unique)`, propriétés optionnelles ou par défaut, relations optionnelles.
+## Persistence: backward compatibility
+**A save written by a published version must stay readable by every later version.**
+- New field → optional or with a default value, decoded tolerantly (`decodeIfPresent`).
+- Renamed or removed field → migration on read (old key read then converted, dedicated function such as
+  `migrate(legacy:)`), tested with a real save from the old version (frozen test file).
+- The format version (`payloadVersion`) is incremented only for a change that cannot be migrated, and that needs
+  a product decision (`status: needs-decision` issue).
+- Accepted trade-off: an older version may not be able to read a more recent save (devices not up to date that
+  share iCloud).
+- SwiftData + CloudKit: never `@Attribute(.unique)`, optional or defaulted properties, optional relationships.
 
-## Version et « Nouveautés »
-Les PR de lot ne touchent **ni** la version (`MARKETING_VERSION` ou équivalent) **ni** le fichier des Nouveautés : ils
-sont gérés à l'intégration (version posée sur la branche d'intégration par une PR dédiée, Nouveautés repliées depuis
-les sections `### Ledger` des PR par le steward, ou rédigées depuis leurs descriptions sans registre), puis tag
-`vX.Y.Z` après la promotion. Détail : [BRANCHING-RELEASE](BRANCHING-RELEASE.md).
+## Version and "What's New"
+Lot PRs touch **neither** the version (`MARKETING_VERSION` or equivalent) **nor** the What's New file: both are
+handled at integration (version set on the integration branch by a dedicated PR, What's New folded from the
+`### Ledger` sections of the PRs by the steward, or written from their descriptions without a ledger), then tag
+`vX.Y.Z` after the promotion. Detail: [BRANCHING-RELEASE](BRANCHING-RELEASE.md).
 
 ## Docs
-- Un fichier, un rôle ; `CLAUDE.md` (ou `AGENTS.md`) est l'entrée unique, tout le reste s'y rattache.
-- Les `.md` portent le contexte durable et renvoient aux issues `#n` ; un TODO vit dans une issue.
-- Les règles métier se sourcent (fichier de réglementation ou de protocole tenu à jour, faits datés).
-- Une décision structurante = un ADR (`docs/adr/NNNN-titre.md`, gabarit [adr/TEMPLATE.md](adr/TEMPLATE.md)). Un ADR
-  accepté ne se réécrit pas : il est remplacé par un autre.
-- Les instructions personnelles d'un opérateur vont dans un `CLAUDE.local.md` non versionné, pas dans le dépôt.
+- One file, one role; `CLAUDE.md` (or `AGENTS.md`) is the single entry point, everything else hangs off it.
+- The `.md` files carry the durable context and point to issues `#n`; a TODO lives in an issue.
+- Domain rules are sourced (regulation or protocol file kept up to date, dated facts).
+- A structuring decision = an ADR (`docs/adr/NNNN-title.md`, template [adr/TEMPLATE.md](adr/TEMPLATE.md)). An
+  accepted ADR is not rewritten: it is superseded by another.
+- An operator's personal instructions go in an unversioned `CLAUDE.local.md`, not in the repository.
 
-## Identité du dépôt
-Tout dépôt qui suit le cadre dit ce qu'il est sans qu'on ouvre un fichier : une **description**, des **topics**, une
-**bannière** et une **social preview**.
+## Repository identity
+Every repository that follows the harness says what it is without anyone opening a file: a **description**,
+**topics**, a **banner** and a **social preview**.
 
-| Élément | Où il vit | Règle |
+| Item | Where it lives | Rule |
 |---|---|---|
-| **Description** | `.github/repo-settings.json` → `repository.description` | une phrase : ce que fait le projet, pour qui ; pas le texte du gabarit, pas une liste de fonctionnalités ; tenue vraie quand le périmètre change |
-| **Topics** | `.github/repo-settings.json` → `topics` | 5 à 15 mots-clés qu'un visiteur chercherait : domaine, technologie, usage ; minuscules, chiffres et tirets, 50 caractères au plus, 20 topics au plus ([doc GitHub](https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/classifying-your-repository-with-topics)) ; préférer un topic déjà répandu à un mot inventé |
+| **Description** | `.github/repo-settings.json` → `repository.description` | one sentence: what the project does, for whom; not the template's text, not a feature list; kept true when the scope changes |
+| **Topics** | `.github/repo-settings.json` → `topics` | 5 to 15 keywords a visitor would search for: domain, technology, use; lowercase, digits and hyphens, 50 characters at most, 20 topics at most ([GitHub docs](https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/classifying-your-repository-with-topics)); prefer a topic already in wide use to an invented word |
 
-Les deux se modifient par PR et s'appliquent au merge ([ADOPTION](ADOPTION.md) §Réglages du dépôt « as code ») ;
-`repo-settings.py` avertit s'ils manquent ou sont mal formés, et n'envoie jamais la description du gabarit.
+Both are changed by PR and applied at merge ([ADOPTION](ADOPTION.md) §Repository settings "as code");
+`repo-settings.py` warns if they are missing or malformed, and never sends the template's description.
 
-Les **deux images** disent l'intention au premier regard (ce que le projet fait et pour qui, pas un logo décoratif
-ni une capture) :
+The **two images** state the intent at first glance (what the project does and for whom, not a decorative logo
+or a screenshot):
 
-| Image | Fichier | Format | Où elle sert |
+| Image | File | Format | Where it is used |
 |---|---|---|---|
-| **Bannière** | `docs/assets/banner.svg` (ou `.png`) | large (environ 3:1), lisible à 800 px de large, fond propre (thèmes clair et sombre), texte alternatif qui la décrit | première image du `README.md`, sous le titre |
-| **Social preview** | `docs/assets/social-preview.png`, sa source à côté (`.svg` ou autre) | PNG **1280×640**, moins de 1 Mo, l'essentiel à plus de 40 px des bords | aperçu du lien du dépôt (réseaux, messageries) |
+| **Banner** | `docs/assets/banner.svg` (or `.png`) | wide (about 3:1), readable at 800 px wide, clean background (light and dark themes), alt text that describes it | first image of `README.md`, under the title |
+| **Social preview** | `docs/assets/social-preview.png`, its source next to it (`.svg` or other) | PNG **1280×640**, under 1 MB, the essentials more than 40 px from the edges | preview of the repository link (social networks, messaging apps) |
 
-- Les deux partagent le même motif et le même nom de projet ; une phrase d'intention au plus, pas de liste de
-  fonctionnalités. Leur texte est en **anglais** (un aperçu de lien circule hors du public du projet), sauf projet
-  dont le public est seulement francophone. Aucun secret, aucune donnée personnelle, aucune marque tierce.
-- La social preview **se dépose à la main** : dépôt → Settings → General → Social preview
-  ([doc GitHub](https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/customizing-your-repositorys-social-media-preview),
-  qui donne aussi la taille et le poids). C'est un réglage du dépôt : l'agent prépare le fichier et le signale,
-  l'opérateur le dépose (ESSENTIEL §Garde-fous). `repo-settings.py` ne le couvre pas.
-- Elles changent quand l'intention du projet change, pas à chaque version. Le doc steward vérifie les quatre
-  éléments ([STEWARDS](STEWARDS.md) §2) ; absent ou périmé → une issue.
+- Both share the same motif and the same project name; one sentence of intent at most, no feature list. Their text
+  is in **English** (a link preview travels beyond the project's audience), unless the project's audience speaks
+  only one other language. No secret, no personal data, no third-party trademark.
+- The social preview **is uploaded by hand**: repository → Settings → General → Social preview
+  ([GitHub docs](https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/customizing-your-repositorys-social-media-preview),
+  which also gives the size and the weight). It is a repository setting: the agent prepares the file and reports
+  it, the operator uploads it (ESSENTIALS §Guardrails). `repo-settings.py` does not cover it.
+- They change when the project's intent changes, not at every version. The doc steward checks the four items
+  ([STEWARDS](STEWARDS.md) §2); missing or out of date → an issue.
 
 ## Secrets
-Aucun secret dans le dépôt. Secrets de CI dans les secrets GitHub ; en local, dans des fichiers de configuration
-ignorés par git ; clés d'API tierces injectées, jamais commitées. gitleaks et la protection au push bloquent : ne jamais
-les contourner. Une faille se signale en privé (SECURITY.md), jamais dans une issue publique.
+No secret in the repository. CI secrets in GitHub secrets; locally, in configuration files ignored by git;
+third-party API keys injected, never committed. gitleaks and push protection block: never bypass them. A
+vulnerability is reported privately (SECURITY.md), never in a public issue.

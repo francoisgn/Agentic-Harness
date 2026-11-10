@@ -1,145 +1,174 @@
 # Changelog
 
-Format : une section par version (semver), du plus récent au plus ancien. « Action » = ce qu'un projet consommateur doit
-faire en passant à cette version.
+Format: one section per version (semver), from newest to oldest. "Action" = what a consumer project must do when
+moving to this version.
 
-## Non publié
+## Unreleased
 
-- **Identité du dépôt** (CONVENTIONS §Identité du dépôt) : tout dépôt qui suit le cadre porte une description (une
-  phrase), des topics (5 à 15), une bannière en tête du README (`docs/assets/banner.svg`) et une social preview
-  (`docs/assets/social-preview.png`, 1280×640, texte en anglais, déposée à la main par l'opérateur). Le doc steward
-  vérifie les quatre (STEWARDS §2, agent `doc-steward`), ADOPTION le prévoit.
-- `repo-settings.py` : avertit (sans bloquer) si la description ou les topics manquent ou sont mal formés ; la
-  description restée celle du gabarit (`<…>`) n'est plus envoyée à GitHub.
-- Le cadre s'applique la règle : description réécrite en anglais (tout agent de code, plus seulement Claude Code),
-  topics élargis aux agents couverts, bannière et social preview ajoutées ; `check-framework.py` contrôle description,
-  topics et images.
-- **Licence MIT** (`LICENSE`) : le cadre n'en avait pas ; `harness-sync.sh` la copie dans `.harness/LICENSE` avec les
-  fichiers vendorisés.
-- **`SECURITY.md`** : versions couvertes, signalement privé (jamais d'issue publique), délais, périmètre ; lien direct
-  depuis le choix de gabarit d'issue.
+- **Renamed to Belayline** (formerly agentic-harness): repository `francoisgn/belayline-agentic-harness`, plugin
+  `belay` in marketplace `belayline` (`claude plugin install belay@belayline`). The vendored folder `.harness/`,
+  `harness-sync.sh`, `harness.yml` and the `harness:` markers keep their names.
+- **English**: the whole harness is now in English; `i18n/` removed; files renamed (ESSENTIEL → ESSENTIALS,
+  UTILISATION → USAGE, diagram and ADR names, issue forms `lesson.yml`, `task.yml`); managed block id `cadre` →
+  `harness`; README progress markers `avancement` → `progress`.
+- **Labels** ([ADR 0003](docs/adr/0003-labels-readable-by-axis.md), accepted): `axis: value` names (`status:`,
+  `type:`, `priority:`, `difficulty:`, `needs:`); new states `status: needs-triage` and `status: ready`; old names
+  kept as aliases.
+- **Living README, by default** ([README-STANDARD](docs/README-STANDARD.md)): agents maintain the project README as a
+  deliverable: technology badges in the header, image, Excalidraw architecture diagram, lot progress table, quick
+  start, Contributing section. Skill `/readme-update` (called by `/lot-finish`), `readme-check.py` and
+  `diagrams-render.py` vendored, templates `README.md`, `CONTRIBUTING.md` and `docs/diagrams/architecture.*` created
+  if missing; check in `docs-security.yml` (input `readme`). Each point can be switched off in
+  `.harness/config.json` › `readme`.
+- **Tiered CI baseline** ([CI-BASELINE](docs/CI-BASELINE.md)): hygiene, quality (one local command = the CI),
+  expensive, heavy security, process; six workflow invariants; survey of three real projects.
+- The harness applies its own standard: README with badges and progress block, `CONTRIBUTING.md`, checked in CI.
+- `scripts/diagrams/render.py`: `--dir` option.
+- **Repository identity** (CONVENTIONS §Repository identity): every repository that follows the harness carries a
+  description (one sentence), topics (5 to 15), a banner at the top of the README (`docs/assets/banner.svg`) and a
+  social preview (`docs/assets/social-preview.png`, 1280×640, text in English, uploaded by hand by the operator). The
+  doc steward checks all four (STEWARDS §2, agent `doc-steward`), ADOPTION plans for it.
+- `repo-settings.py`: warns (without blocking) if the description or the topics are missing or malformed; a
+  description left as the template's (`<…>`) is no longer sent to GitHub.
+- The harness applies the rule to itself: description rewritten (any coding agent, no longer only Claude Code),
+  topics widened to the agents covered, banner and social preview added; `check-framework.py` checks description,
+  topics and images.
+- **MIT licence** (`LICENSE`): the harness had none; `harness-sync.sh` copies it into `.harness/LICENSE` with the
+  vendored files.
+- **`SECURITY.md`**: versions covered, private report (never a public issue), response times, scope; direct link
+  from the issue template chooser.
 
-Action : remplir la description et les topics dans `.github/repo-settings.json`, ajouter les deux images (une issue
-suffit pour commencer) ; l'opérateur dépose la social preview dans les réglages du dépôt. La prochaine synchro
-ajoute `.harness/LICENSE`.
+**Action**: point `uses:` references and the clone URL at `francoisgn/belayline-agentic-harness` (the sync rewrites
+`harness.yml`); reinstall the plugin as `belay@belayline`. Then run `harness-sync.sh` again; rename the markers `harness:begin cadre`/`harness:end cadre` to `harness`,
+and `avancement` to `progress` in README; run the label sync once with `apply-aliases: true`;
+`.harness/docs/ESSENTIEL.md` import in CLAUDE.md becomes `.harness/docs/ESSENTIALS.md` (rewritten by the sync).
+An existing README is not touched: `python3 .harness/scripts/readme-check.py` lists the gaps; to switch it off,
+`"readme": false` in `.harness/config.json`. The `docs` job of `harness.yml`, if enabled, now checks the README
+(`readme: false` to avoid it).
+Fill in the description and the topics in `.github/repo-settings.json`, add the two images (an issue is enough to
+start); the operator uploads the social preview in the repository settings. The next sync adds `.harness/LICENSE`.
 
 ## 0.3.0 — 2026-11-09
 
-Retours du premier projet consommateur : un cadre neutre, des règles qui ne se contredisent plus. **Rupture de
-convention** (avant 1.0.0, un MINEUR peut casser) : branches, prise en charge et corps de PR changent.
+Feedback from the first consumer project: a neutral harness, rules that no longer contradict each other. **Breaking
+convention change** (before 1.0.0, a MINOR may break): branches, claims and PR bodies change.
 
-- **Neutre** : plus aucune référence aux autres projets du mainteneur (noms, numéros de décision, coûts mesurés,
-  anecdotes) ; leurs leçons restent, reformulées pour valoir partout (source « terrain » dans LESSONS).
-- **Pousser souvent, payer au « Ready »** (CI-BUDGET §2) : remplace « un push par lot, pas de push d'essai ». On pousse
-  tôt et souvent sur une PR en brouillon (sauvegarde, visibilité) ; la CI coûteuse ne tourne qu'au passage « Ready »
-  ou sur un label explicite (motif de workflow fourni) ; un commit par cycle de revue ; jamais de push « pour voir »
-  sur une PR prête. Le tableau de bord ne compte plus les runs sautés ou annulés comme des pushes testés.
-- **Prise en charge** = commentaire `/claim <id>` (première ligne), rejoué dans l'ordre : la première prise gagne,
-  seuls les membres du dépôt comptent, `/release [<id>]` la rend ; la PR porte `Claim: <id>`. Remplace « Pris en
-  charge — branche … » (ESSENTIEL, METHODOLOGY, CONVENTIONS, ORCHESTRATION, skills, label, session-start).
-- **Axes de labels réglables** : `.harness/config.json` → `labels.model_prefixes`, `labels.size_prefixes` ;
-  `/lot-start` ne s'arrête plus sur un label de niveau ou de taille manquant (déduit du texte et du routage, dit dans
-  la prise en charge).
-- **Registre (« ledger »)**, brique facultative (CONVENTIONS §Registre) : les PR ne touchent plus les journaux
-  partagés, leurs entrées vont dans une section `### Ledger` du corps (label `ledger`), qu'un steward replie après le
-  merge dans une PR de docs reproduite par le script du projet. `pr-hygiene.yml` : entrée `ledger-label` (contrôle
-  section ↔ label). `/lot-finish` et le gabarit de PR : ligne d'issue, `Claim:`, lot, problème / cause / changement /
-  tests, `### Ledger` seulement si le projet en tient un, au lieu de `## Changelog`.
-- **Branches** `<type>/<nom-court>` (`lot`, `fix`, `feat`, `chore`, `docs` ; `branch_types` dans `config.json`) au
-  lieu de `claude/<lot>`, partout (skills, docs, gabarits, workflow de synchro, message du hook). Le tableau de bord
-  reconnaît une PR d'agent à sa ligne `Claim:` ou à son pied de génération.
-- **guard-git** durci : options groupées (`-fu`, `-uf`, `-nm`), abréviations, `--force-with-lease`, `+refspec`,
-  `--mirror`, `--all`, suppression d'une branche protégée (`--delete`, `-d`, `:branche`), `git -C`, `git -c`,
-  enveloppes (`env`, `command`, `exec`, `sudo`, `xargs`, `eval`, `bash -c`, `sh -c`…), sous-shells, groupes,
-  substitutions, here-documents, tous les séparateurs ; `git push` nu, `git push origin` et `HEAD` résolus contre la
-  branche courante (`rev-parse`, ou la branche choisie plus tôt dans la ligne par `git switch` / `git checkout`),
-  `@` comme `HEAD`, `--tags` seul permis, refspecs à joker couvrant une branche protégée refusées ; repli sur une expression prudente si la commande ne se découpe pas. Laisse passer
-  `--dry-run`, `--force-if-includes` seul et les branches non protégées ; reste ouvert sur une entrée illisible. Le
-  ruleset côté serveur reste la vraie protection (BRANCHING-RELEASE §Règles communes). Tests :
-  `scripts/tests/test_guard_git.py`.
-- **Blocs gérés** de `CLAUDE.md` / `AGENTS.md` (fr, en) : `harness-sync.sh` vit dans le dépôt du cadre (comment le
-  lancer depuis un projet) ; précédence explicite, dérogations du projet dans une section « Harness overrides » de son
-  `AGENTS.md` (ajoutée au gabarit).
+- **Neutral**: no more reference to the maintainer's other projects (names, decision numbers, measured costs,
+  anecdotes); their lessons stay, reworded to hold everywhere (source "field" in LESSONS).
+- **Push often, pay at "Ready"** (CI-BUDGET §2): replaces "one push per lot, no trial push". Push early and often on
+  a draft PR (backup, visibility); the expensive CI only runs on the switch to "Ready" or on an explicit label
+  (workflow pattern provided); one commit per review cycle; never a push "to see" on a ready PR. The dashboard no
+  longer counts skipped or cancelled runs as tested pushes.
+- **Claim** = comment `/claim <id>` (first line), replayed in order: the first claim wins, only repository members
+  count, `/release [<id>]` gives it back; the PR carries `Claim: <id>`. Replaces "Claimed: branch …" (ESSENTIALS,
+  METHODOLOGY, CONVENTIONS, ORCHESTRATION, skills, label, session-start).
+- **Configurable label axes**: `.harness/config.json` → `labels.model_prefixes`, `labels.size_prefixes`;
+  `/lot-start` no longer stops on a missing tier or size label (deduced from the text and the routing, stated in the
+  claim).
+- **Ledger**, optional building block (CONVENTIONS §Ledger): PRs no longer touch the shared logs, their entries go
+  in a `### Ledger` section of the body (label `ledger`), which a steward folds after the merge into a docs PR
+  reproduced by the project's script. `pr-hygiene.yml`: input `ledger-label` (section ↔ label check). `/lot-finish`
+  and the PR template: issue line, `Claim:`, lot, problem / cause / change / tests, `### Ledger` only if the project
+  keeps one, instead of `## Changelog`.
+- **Branches** `<type>/<short-name>` (`lot`, `fix`, `feat`, `chore`, `docs`; `branch_types` in `config.json`)
+  instead of `claude/<lot>`, everywhere (skills, docs, templates, sync workflow, hook message). The dashboard
+  recognises an agent PR by its `Claim:` line or its generation footer.
+- **guard-git** hardened: grouped options (`-fu`, `-uf`, `-nm`), abbreviations, `--force-with-lease`, `+refspec`,
+  `--mirror`, `--all`, deletion of a protected branch (`--delete`, `-d`, `:branch`), `git -C`, `git -c`,
+  wrappers (`env`, `command`, `exec`, `sudo`, `xargs`, `eval`, `bash -c`, `sh -c`…), subshells, groups,
+  substitutions, here-documents, every separator; bare `git push`, `git push origin` and `HEAD` resolved against the
+  current branch (`rev-parse`, or the branch chosen earlier on the line by `git switch` / `git checkout`), `@` as
+  `HEAD`, `--tags` alone allowed, wildcard refspecs covering a protected branch refused; falls back to a cautious
+  expression if the command cannot be split. Lets through `--dry-run`, `--force-if-includes` alone and unprotected
+  branches; stays open on unreadable input. The server-side ruleset remains the real protection (BRANCHING-RELEASE
+  §Common rules). Tests: `scripts/tests/test_guard_git.py`.
+- **Managed blocks** of `CLAUDE.md` / `AGENTS.md`: `harness-sync.sh` lives in the harness repository (how to run it
+  from a project); explicit precedence, project deviations in a "Harness overrides" section of its `AGENTS.md`
+  (added to the template).
 
-Action :
-- `/harness-update` vers v0.3.0 ; la PR de mise à jour montre les nouveaux blocs gérés.
-- Créer la section « Harness overrides » dans `AGENTS.md` et y écrire ce que le projet garde à sa façon (branches,
-  labels, prise en charge, politique de merge).
-- `.harness/config.json` (fichier du projet, non réécrit) : ajouter au besoin `branch_types`, `labels`
-  (`model_prefixes`, `size_prefixes` ; `[]` si l'axe n'existe pas), `ledger` (`enabled`, `label`, `fold_command`).
-- Branches et prises en charge : passer à `<type>/<nom-court>` et `/claim <id>` (ou consigner la dérogation).
-- `harness.yml` : retirer `require-changelog: true` du job `pr` (le gabarit de PR n'a plus de section « Changelog ») ;
-  poser `ledger-label: ledger` si le projet tient un registre, et créer les labels `ledger` et `ledger: done` dans
-  `.github/labels.local.json`. `.github/pull_request_template.md` (fichier du projet) : reprendre le nouveau gabarit
-  au besoin.
-- CI du projet : appliquer le motif de CI-BUDGET §2 (jobs coûteux sautés sur un brouillon, sauf label explicite).
+**Action**:
+- `/harness-update` to v0.3.0; the update PR shows the new managed blocks.
+- Create the "Harness overrides" section in `AGENTS.md` and write there what the project keeps its own way
+  (branches, labels, claims, merge policy).
+- `.harness/config.json` (project file, not rewritten): add as needed `branch_types`, `labels`
+  (`model_prefixes`, `size_prefixes`; `[]` if the axis does not exist), `ledger` (`enabled`, `label`,
+  `fold_command`).
+- Branches and claims: move to `<type>/<short-name>` and `/claim <id>` (or record the deviation).
+- `harness.yml`: remove `require-changelog: true` from the `pr` job (the PR template no longer has a "Changelog"
+  section); set `ledger-label: ledger` if the project keeps a ledger, and create the labels `ledger` and
+  `ledger: done` in `.github/labels.local.json`. `.github/pull_request_template.md` (project file): take over the
+  new template as needed.
+- Project CI: apply the pattern of CI-BUDGET §2 (expensive jobs skipped on a draft, unless an explicit label).
 
 ## 0.2.0 — 2026-11-07
 
-Intention, TDD, FinOps, stewards, conformité, sécurité et mesure du flux.
+Intent, TDD, FinOps, stewards, compliance, security and flow measurement.
 
-- **Ouvert à tous** : plus aucune référence nominative au créateur (rôles : mainteneur, opérateur ; auteur du plugin
-  « agentic-harness contributors ») ; le cadre vaut pour tout agent de code (Claude Code, Codex CLI, Cursor, Gemini CLI,
-  Copilot, Aider… ; chargement par `AGENTS.md`, natif ou à activer selon l'outil : ADOPTION §Brancher votre agent), Claude Code restant l'adaptateur fourni (plugin, hooks, `.claude/`) ; pied de commentaire nommant
-  l'agent ; niveaux de modèles par fournisseur (ORCHESTRATION §2).
-- **Méthode** : intention obligatoire des issues (user story, comportements d'erreur, critères Étant donné / Quand /
-  Alors, définition de fini : METHODOLOGY §2 bis) et TDD (§2 ter) ; formulaires d'issue enrichis ; ESSENTIEL (fr, en).
-- **Docs** : FINOPS (orchestrateur SPOC seul agent long, contexte dans le dépôt, routage des modèles, quotas et
-  reprise, boucles bornées, signaux de dérive), STEWARDS (rôles d'entretien, rapport non technique), REVIEW-SERVICE
-  (service de revue maison), COMPLIANCE (relecteurs de conformité), UTILISATION (guide pas à pas, exemple SwiftHFR),
-  ADR 0002 ; CI-BUDGET §3 (secrets et variables) et §5 (volume agentique) ; ORCHESTRATION §7 (**nommage des agents**
-  `<projet>.<orchestrateur>.<rôle>.<cible>`, vérifié en CI) ; LESSONS : remontée des leçons par issue.
-- **Agents** (vendorisés en `.claude/agents/`) : `adversarial-reviewer`, `issue-steward`, `doc-steward`,
+- **Open to all**: no more reference by name to the creator (roles: maintainer, operator; plugin author
+  "Belayline contributors"); the harness applies to any coding agent (Claude Code, Codex CLI, Cursor, Gemini
+  CLI, Copilot, Aider…; loaded through `AGENTS.md`, natively or to be enabled depending on the tool: ADOPTION
+  §Connect your coding agent), Claude Code remaining the adapter provided (plugin, hooks, `.claude/`); comment footer
+  naming the agent; model tiers per provider (ORCHESTRATION §2).
+- **Method**: mandatory intent for issues (user story, error behaviours, Given / When / Then criteria, definition of
+  done: METHODOLOGY §2 bis) and TDD (§2 ter); richer issue forms; ESSENTIALS (French, English).
+- **Docs**: FINOPS (SPOC orchestrator as the only long-lived agent, context in the repository, model routing, quotas
+  and resuming, bounded loops, drift signals), STEWARDS (upkeep roles, non-technical report), REVIEW-SERVICE
+  (in-house review service), COMPLIANCE (compliance reviewers), USAGE (step-by-step guide, SwiftHFR example),
+  ADR 0002; CI-BUDGET §3 (secrets and variables) and §5 (agentic volume); ORCHESTRATION §7 (**agent naming**
+  `<project>.<orchestrator>.<role>.<target>`, checked in CI); LESSONS: lessons reported through issues.
+- **Agents** (vendored into `.claude/agents/`): `adversarial-reviewer`, `issue-steward`, `doc-steward`,
   `flow-monitor`, `compliance-gdpr`, `-eu-ai-act`, `-nis2`, `-iso27001`, `-soc2`, `-tisax`, `-pci` (DSS, PIN, P2PE),
-  `-hds`, et le relecteur générique `compliance-reviewer`. Les identifiants d'exigence non vérifiés sur le texte
-  officiel sont marqués « (à vérifier) ».
-- **Conformité branchable** (COMPLIANCE §2) : par référentiel, agent intégré, agent de l'entreprise, ou spec seule
-  (`docs/compliance/<id>.md`, gabarit fourni) appliquée par le relecteur générique ; périmètre décidé sans jeton par
-  `paths` / `keywords` ; résolution et validation par `compliance-plan.py` (vendorisé, testé).
-- **Qualité au premier passage** : le tableau de bord mesure le ratio de PR à problème (constat en revue
-  adversariale, IA, conformité, CodeRabbit, humaine), agents / humains, et l'effort de correction (commits après le
-  premier constat, délai jusqu'au merge) ; règle de traçabilité de chaque verdict (REVIEW-ROUNDS §Traçabilité).
-- **Réglages du dépôt « as code »** : `.github/repo-settings.json` (description, topics, rulesets) appliqué au merge
-  par `repo-settings.yml` / `repo-settings.py` (secret `REPO_ADMIN_TOKEN`), dérive contrôlée chaque semaine ; le
-  cadre s'en sert pour lui-même (`settings.yml`). Contrôles requis vérifiés contre les noms de jobs réels.
-- **Schémas** : README illustré de trois schémas (mécanismes, cycle d'un changement, tirer parti du harnais), source
-  `docs/diagrams/*.json`, scène `.excalidraw` modifiable et SVG rendus par `scripts/diagrams/render.py` (contrôlés
-  en CI).
-- **Points d'extension** (ADOPTION §Remplacer ou étendre une brique) : chaque brique du cadre se garde, se remplace
-  par celle de l'entreprise ou se complète.
-- **Skills** : `/intent`, `/lesson-propose`, `/status-report`, `/compliance-review` ; `/lot-start` pose l'identifiant
-  d'agent.
-- **Workflows réutilisables** : `security.yml` (Semgrep CE, Trivy, gitleaks), `flow-report.yml` (issue « Tableau de
-  bord du projet »), `ai-review.yml` (revue IA, claude-code-action épinglée, jamais requise).
-- **Script** `flow-metrics.py` (vendorisé en `.harness/scripts/`) : jalons, goulots, travaux en panne, boucles de CI
-  et de revue, ratio agents / humains, délai de merge, minutes de CI ; tests unitaires.
-- **Labels** : `leçon`, `tableau de bord`, `revue: aucune`, `conformité`. `.harness/config.json` : clé `compliance`.
-- **CI du cadre** : contrôle de cohérence (`check-framework.py` : skills, agents, manifeste, labels, nommage), tests
-  Python, gitleaks ; Dependabot pour les actions ; formulaire d'issue « Leçon ».
+  `-hds`, and the generic reviewer `compliance-reviewer`. Requirement identifiers not verified against the official
+  text are marked "(to verify)".
+- **Pluggable compliance** (COMPLIANCE §2): per compliance framework, built-in agent, company agent, or spec only
+  (`docs/compliance/<id>.md`, template provided) applied by the generic reviewer; scope decided without tokens by
+  `paths` / `keywords`; resolution and validation by `compliance-plan.py` (vendored, tested).
+- **First-pass quality**: the dashboard measures the ratio of PRs with a problem (finding in adversarial, AI,
+  compliance, CodeRabbit or human review), agents / humans, and the correction effort (commits after the first
+  finding, time to merge); traceability rule for each verdict (REVIEW-ROUNDS §Traceability).
+- **Repository settings "as code"**: `.github/repo-settings.json` (description, topics, rulesets) applied on merge
+  by `repo-settings.yml` / `repo-settings.py` (secret `REPO_ADMIN_TOKEN`), drift checked every week; the harness
+  uses it for itself (`settings.yml`). Required checks verified against the real job names.
+- **Diagrams**: README illustrated with three diagrams (mechanisms, cycle of a change, leveraging the harness),
+  source `docs/diagrams/*.json`, editable `.excalidraw` scene and SVGs rendered by `scripts/diagrams/render.py`
+  (checked in CI).
+- **Extension points** (ADOPTION §Replace or extend a building block): each building block of the harness can be
+  kept, replaced by the company's own, or extended.
+- **Skills**: `/intent`, `/lesson-propose`, `/status-report`, `/compliance-review`; `/lot-start` sets the agent
+  identifier.
+- **Reusable workflows**: `security.yml` (Semgrep CE, Trivy, gitleaks), `flow-report.yml` ("Project dashboard"
+  issue), `ai-review.yml` (AI review, pinned claude-code-action, never required).
+- **Script** `flow-metrics.py` (vendored into `.harness/scripts/`): milestones, bottlenecks, stalled work, CI and
+  review loops, agents / humans ratio, time to merge, CI minutes; unit tests.
+- **Labels**: `leçon`, `tableau de bord`, `revue: aucune`, `conformité` (names at that version; renamed since, see
+  Unreleased). `.harness/config.json`: `compliance` key.
+- **Harness CI**: consistency check (`check-framework.py`: skills, agents, manifest, labels, naming), Python tests,
+  gitleaks; Dependabot for actions; "Lesson" issue form.
 
-Action supplémentaire : créer le secret `REPO_ADMIN_TOKEN` pour que le job `settings` applique
-`.github/repo-settings.json` (sinon il avertit seulement).
+Additional action: create the `REPO_ADMIN_TOKEN` secret so that the `settings` job applies
+`.github/repo-settings.json` (otherwise it only warns).
 
-Correctif : la CI du cadre écoutait `main`, la branche par défaut est `master`.
+Fix: the harness CI listened to `main`, the default branch is `master`.
 
-Action : `/harness-update` vers v0.2.0. Dans `harness.yml` (fichier du projet, non réécrit) : ajouter le
-déclencheur `schedule` et le job `flow` (voir le gabarit), activer au besoin `security` et `review`. Renseigner
-`compliance` dans `.harness/config.json` et exclure les agents de conformité inutiles.
+Action: `/harness-update` to v0.2.0. In `harness.yml` (project file, not rewritten): add the `schedule` trigger and
+the `flow` job (see the template), enable `security` and `review` as needed. Fill in `compliance` in
+`.harness/config.json` and exclude the compliance agents you do not need.
 
 ## 0.1.0 — 2026-11-07
 
-Première version, distillée de HFRnow (`dev-swift`) et d'un autre projet.
+First version, distilled from HFRnow (`dev-swift`) and another project.
 
-- Docs (français) : ESSENTIEL (règles chargées à chaque session), METHODOLOGY, CONVENTIONS, LESSONS (82 leçons à
-  portée, sources citées), ORCHESTRATION, REVIEW-ROUNDS, BRANCHING-RELEASE, CI-BUDGET, MAC-HANDOFF, ADOPTION, ADR 0001
-  et gabarit d'ADR. Édition anglaise d'ESSENTIEL et des blocs `CLAUDE.md`/`AGENTS.md` (`i18n/en/`).
-- Taxonomie de labels canonique (type, priorité, modèle, taille, statut, hôte) avec `axis` et `aliases`.
-- Gabarits : bloc `CLAUDE.md`/`AGENTS.md`, formulaires d'issue (retour de test, bug, fonctionnalité, tâche), PR, lot,
-  markdownlint, `.harness/config.json`, workflows appelants `harness.yml` et `harness-sync.yml`.
-- `scripts/harness-sync.sh` : vendorisation idempotente (modes copy, tree, block, seed, jsonmerge, refbump), verrou à
-  empreintes, `--check`, `--dry-run`, `--force`, `--skip-workflows`, `--skip-seed`, langue et exclusions par projet.
-- Plugin `harness` (marketplace `agentic-harness`) : six skills, hook `guard-git` (push forcé, push vers une branche
-  protégée, `--no-verify`), hook de rappel en début de session.
-- Workflows réutilisables : `labels-sync`, `issue-hygiene`, `pr-hygiene`, `docs-security`.
+- Docs (French): ESSENTIALS (rules loaded in every session), METHODOLOGY, CONVENTIONS, LESSONS (82 scoped lessons,
+  sources cited), ORCHESTRATION, REVIEW-ROUNDS, BRANCHING-RELEASE, CI-BUDGET, MAC-HANDOFF, ADOPTION, ADR 0001 and
+  ADR template. English edition of ESSENTIALS and of the `CLAUDE.md`/`AGENTS.md` blocks (`i18n/en/`).
+- Canonical label taxonomy (type, priority, model, size, status, host) with `axis` and `aliases`.
+- Templates: `CLAUDE.md`/`AGENTS.md` block, issue forms (test feedback, bug, feature, task), PR, lot, markdownlint,
+  `.harness/config.json`, calling workflows `harness.yml` and `harness-sync.yml`.
+- `scripts/harness-sync.sh`: idempotent vendoring (modes copy, tree, block, seed, jsonmerge, refbump), lock with
+  fingerprints, `--check`, `--dry-run`, `--force`, `--skip-workflows`, `--skip-seed`, per-project language and
+  exclusions.
+- Plugin `harness` (marketplace `Belayline`): six skills, `guard-git` hook (force push, push to a protected
+  branch, `--no-verify`), reminder hook at session start.
+- Reusable workflows: `labels-sync`, `issue-hygiene`, `pr-hygiene`, `docs-security`.
 
-Action : adoption, voir docs/ADOPTION.md.
+Action: adoption, see docs/ADOPTION.md.

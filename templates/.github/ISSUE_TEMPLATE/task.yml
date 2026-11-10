@@ -1,0 +1,38 @@
+name: Task or lot
+description: Planned work (lot, tooling, docs, CI, release)
+labels: ["status: needs-triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Set exactly one `type:` label at triage: `type: epic` for a lot (`LOT-NNN` in the title, sub-issues),
+        `type: chore` or `type: docs` for a task.
+  - type: textarea
+    id: summary
+    attributes:
+      label: Summary
+      description: Two summary lines readable at a glance.
+    validations:
+      required: true
+  - type: input
+    id: lot
+    attributes:
+      label: Lot
+      placeholder: "LOT-012 (if it is one: spec in docs/lots/)"
+  - type: textarea
+    id: scope
+    attributes:
+      label: Scope and acceptance criteria
+      description: What is in, what is out, how we will know it is done.
+    validations:
+      required: true
+  - type: textarea
+    id: errors
+    attributes:
+      label: Error behaviours and definition of done
+      description: "Expected failure cases; what must be true to close (tests, docs, review, compliance)."
+  - type: textarea
+    id: dependencies
+    attributes:
+      label: Depends on
+      description: "Prerequisite issues or lots (#n), captures, decisions. Empty if none."

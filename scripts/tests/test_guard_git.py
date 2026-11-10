@@ -1,4 +1,4 @@
-"""Tests du hook guard-git.py : chaque forme refusée l'est, chaque forme légitime passe, le hook échoue ouvert."""
+"""Tests of the guard-git.py hook: each refused form is refused, each legitimate form passes, the hook fails open."""
 import importlib.util
 import json
 import os
@@ -27,8 +27,8 @@ class GuardTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.tmp = pathlib.Path(tempfile.mkdtemp())
-        cls.on_protected = cls.tmp / "proj"       # dépôt sur `develop`
-        cls.on_feature = cls.tmp / "proj" / "wt"  # second dépôt, sur `fix/x`, sous le premier (pour -C et cd)
+        cls.on_protected = cls.tmp / "proj"       # repository on `develop`
+        cls.on_feature = cls.tmp / "proj" / "wt"  # second repository, on `fix/x`, under the first (for -C and cd)
         for repo, branch in ((cls.on_protected, "develop"), (cls.on_feature, "fix/x")):
             repo.mkdir(parents=True, exist_ok=True)
             git(repo, "init", "-q", "-b", branch)
@@ -43,12 +43,12 @@ class GuardTests(unittest.TestCase):
         return guard.reason_for(command, PROTECTED, str(cwd or self.on_feature))
 
     def assertBlocked(self, command, cwd=None):
-        self.assertIsNotNone(self.reason(command, cwd), f"aurait dû être refusé : {command!r}")
+        self.assertIsNotNone(self.reason(command, cwd), f"should have been refused: {command!r}")
 
     def assertAllowed(self, command, cwd=None):
-        self.assertIsNone(self.reason(command, cwd), f"aurait dû passer : {command!r}")
+        self.assertIsNone(self.reason(command, cwd), f"should have passed: {command!r}")
 
-    # --- Push forcé ------------------------------------------------------------------------------------------------
+    # --- Forced push -----------------------------------------------------------------------------------------------
     def test_force_forms_are_blocked(self):
         for command in ("git push --force origin fix/x", "git push -f origin fix/x", "git push -fu origin fix/x",
                         "git push -uf origin fix/x", "git push origin fix/x --force",
@@ -66,7 +66,7 @@ class GuardTests(unittest.TestCase):
             with self.subTest(command=command):
                 self.assertAllowed(command)
 
-    # --- Branches protégées -----------------------------------------------------------------------------------------
+    # --- Protected branches -----------------------------------------------------------------------------------------
     def test_push_to_protected_is_blocked(self):
         for command in ("git push origin develop", "git push origin HEAD:refs/heads/master", "git push origin x:main",
                         "git push origin refs/heads/beta", "git push --delete origin main", "git push -d origin main",
@@ -161,12 +161,12 @@ class GuardTests(unittest.TestCase):
 
     def test_mentions_and_harmless_commands_pass(self):
         for command in ("echo git push --force", "echo 'git push origin main'", "git log --grep='push --force'",
-                        "grep -rn 'git push -f' docs", "git commit -m 'interdit : git push --force sur main'",
+                        "grep -rn 'git push -f' docs", "git commit -m 'forbidden: git push --force on main'",
                         "command -v git", "git status && git diff", "git fetch origin main",
-                        "git pull --ff-only origin main", "git push origin fix/x # puis main",
+                        "git pull --ff-only origin main", "git push origin fix/x # then main",
                         "git push origin fix/x > /dev/null 2>&1", "git switch main",
-                        "git commit -F - <<'EOF'\nTitre : l'opérateur\n\ngit push --force origin main\nEOF\n",
-                        "git commit -m \"$(cat <<'EOF'\nTitre : l'opérateur (fin)\n\ngit push --force origin main\nEOF\n)\""):
+                        "git commit -F - <<'EOF'\nTitle: the operator's\n\ngit push --force origin main\nEOF\n",
+                        "git commit -m \"$(cat <<'EOF'\nTitle: the operator's (end)\n\ngit push --force origin main\nEOF\n)\""):
             with self.subTest(command=command):
                 self.assertAllowed(command)
 
@@ -179,7 +179,7 @@ class GuardTests(unittest.TestCase):
         self.assertAllowed("git push --dry-run --force origin main 'unterminated")
         self.assertBlocked("git push 'unterminated", cwd=self.on_protected)
 
-    # --- Hook de bout en bout ---------------------------------------------------------------------------------------
+    # --- Hook end to end --------------------------------------------------------------------------------------------
     def run_hook(self, stdin, project=None):
         env = {**os.environ, "CLAUDE_PROJECT_DIR": str(project or self.on_feature)}
         return subprocess.run([sys.executable, str(GUARD)], input=stdin, capture_output=True, text=True, env=env)
@@ -196,12 +196,12 @@ class GuardTests(unittest.TestCase):
         r = self.run_hook(self.payload("git push origin trunk"), project)
         self.assertEqual(r.returncode, 2)
         self.assertIn(".harness/docs/BRANCHING-RELEASE.md", r.stderr)
-        self.assertIn("`<type>/<nom-court>` (types : feat, fix)", r.stderr)
+        self.assertIn("`<type>/<short-name>` branch (types: feat, fix)", r.stderr)
         self.assertNotIn("claude/", r.stderr)
         self.assertEqual(self.run_hook(self.payload("git push origin main"), project).returncode, 0)
 
     def test_hook_fails_open_on_malformed_input(self):
-        for stdin in ("", "pas du json", "[]", '{"tool_input": "git push --force"}',
+        for stdin in ("", "not json", "[]", '{"tool_input": "git push --force"}',
                       '{"tool_input": {"command": ["git", "push", "--force"]}}'):
             with self.subTest(stdin=stdin):
                 self.assertEqual(self.run_hook(stdin).returncode, 0)

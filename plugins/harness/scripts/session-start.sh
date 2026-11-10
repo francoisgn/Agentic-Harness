@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
-# Hook SessionStart du cadre agentic-harness : quelques lignes de contexte ajoutées au début de chaque session.
-# Usage : session-start.sh plugin|vendored
-#   plugin    lancé par le plugin Claude Code (version dans ${CLAUDE_PLUGIN_ROOT}) ;
-#   vendored  lancé par la copie vendorisée dans .harness/hooks/ (déclarée dans .claude/settings.json).
-# Si le projet a les deux, seule la copie vendorisée parle (pas de doublon).
-# Ne fait que lire ; ne bloque jamais la session (toujours exit 0).
+# SessionStart hook of the Belayline harness: a few lines of context added at the start of each session.
+# Usage: session-start.sh plugin|vendored
+#   plugin    run by the Claude Code plugin (version in ${CLAUDE_PLUGIN_ROOT});
+#   vendored  run by the vendored copy in .harness/hooks/ (declared in .claude/settings.json).
+# If the project has both, only the vendored copy speaks (no duplicate).
+# Read-only; never blocks the session (always exit 0).
 set -u
 MODE="${1:-vendored}"
 PROJECT="${CLAUDE_PROJECT_DIR:-$PWD}"
@@ -23,18 +23,18 @@ if [ "$MODE" = plugin ] && [ -n "${CLAUDE_PLUGIN_ROOT:-}" ]; then
 fi
 BRANCH="$(git -C "$PROJECT" rev-parse --abbrev-ref HEAD 2>/dev/null || echo '?')"
 
-echo "## Cadre agentic-harness"
+echo "## Belayline"
 if [ -n "$VENDORED" ]; then
-  echo "- Version vendorisée : ${VENDORED} (.harness/VERSION)${PLUGIN:+ ; plugin : ${PLUGIN}}. Règles : .harness/docs/ESSENTIEL.md."
+  echo "- Vendored version: ${VENDORED} (.harness/VERSION)${PLUGIN:+; plugin: ${PLUGIN}}. Rules: .harness/docs/ESSENTIALS.md."
   if [ -n "$PLUGIN" ] && [ "$PLUGIN" != "$VENDORED" ]; then
-    echo "- 🟠 Plugin et copie vendorisée diffèrent : la copie du dépôt fait foi (mise à jour : skill harness-update)."
+    echo "- 🟠 Plugin and vendored copy differ: the copy in the repository is authoritative (update: skill harness-update)."
   fi
 else
-  echo "- Plugin ${PLUGIN:-?} ; ce dépôt n'a pas adopté le cadre (.harness/ absent) : voir docs/ADOPTION.md du cadre."
+  echo "- Plugin ${PLUGIN:-?}; this repository has not adopted the harness (.harness/ missing): see the harness's docs/ADOPTION.md."
 fi
-echo "- Branche courante : ${BRANCH}. Travail = une issue prise par \`/claim <id>\`, branche <type>/<nom-court> (lot, fix, feat, chore, docs) depuis la branche d'intégration à jour."
+echo "- Current branch: ${BRANCH}. Work = an issue claimed with \`/claim <id>\`, a <type>/<short-name> branch (lot, fix, feat, chore, docs) from the up-to-date integration branch."
 if [ "${CLAUDE_CODE_REMOTE:-}" = "true" ]; then
-  echo "- Session cloud (Linux) : pas de build Xcode ici ; relire le code app avec une rigueur de compilateur, reprise sur Mac (MAC-HANDOFF.md)."
+  echo "- Cloud session (Linux): no Xcode build here; reread app code with compiler-level rigour, handoff to the Mac (MAC-HANDOFF.md)."
 fi
-echo "- Pousser tôt et souvent sur une PR en brouillon (pas de CI coûteuse) ; « Ready » après auto-relecture (LESSONS.md) et revue par un autre modèle ; ensuite un commit par cycle de revue."
+echo "- Push early and often to a draft PR (no costly CI); \"Ready\" after self-review (LESSONS.md) and review by another model; then one commit per review round."
 exit 0

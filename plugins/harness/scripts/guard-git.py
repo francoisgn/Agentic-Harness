@@ -1,29 +1,30 @@
 #!/usr/bin/env python3
-"""Garde-fou git (hook PreToolUse sur Bash) du cadre agentic-harness.
+"""Git guardrail (PreToolUse hook on Bash) of the Belayline harness.
 
-Refuse, avant exécution, les commandes qui cassent les règles communes (BRANCHING-RELEASE.md, ESSENTIEL.md) :
-  - un `git push` forcé : `--force`, `-f` (aussi groupé : `-fu`, `-uf`), `--force-with-lease`, refspec `+…` ;
-  - `git push --mirror`, `--all` ou `--branches` (poussent aussi les branches protégées) ;
-  - un `git push` vers une branche protégée (`protected_branches` de `.harness/config.json`), y compris `HEAD`, un
-    `git push` nu ou `git push origin` quand la branche courante est protégée, et la suppression d'une branche
-    protégée (`--delete`, `-d`, refspec `:branche`) ;
-  - `--no-verify` sur `git commit` (aussi `-n`, groupé ou non) ou `git push` (contourne gitleaks et les hooks).
-La commande est découpée comme le ferait le shell : séparateurs `;` `&&` `||` `|` `&` et retours à la ligne,
-sous-shells `( … )`, groupes `{ …; }`, substitutions `$( … )` et `` `…` ``, here-documents, redirections,
-enveloppes `env`, `command`, `exec`, `nohup`, `time`, `nice`, `timeout`, `sudo`, `xargs`, `eval`, `bash -c` /
-`sh -c`, options globales `git -C <dir>` et `git -c k=v`, `cd <dir>` qui précède. Si la commande ne se découpe pas
-(guillemet non fermé…), une expression régulière prudente lit le texte brut au lieu de laisser passer.
-Ne sont pas refusés : `git push --dry-run` (`-n`), `--force-if-includes` seul, un push vers une branche non protégée.
+Refuses, before execution, the commands that break the shared rules (BRANCHING-RELEASE.md, ESSENTIALS.md):
+  - a forced `git push`: `--force`, `-f` (also grouped: `-fu`, `-uf`), `--force-with-lease`, refspec `+…`;
+  - `git push --mirror`, `--all` or `--branches` (they also push the protected branches);
+  - a `git push` to a protected branch (`protected_branches` in `.harness/config.json`), including `HEAD`, a bare
+    `git push` or `git push origin` when the current branch is protected, and the deletion of a protected branch
+    (`--delete`, `-d`, refspec `:branch`);
+  - `--no-verify` on `git commit` (also `-n`, grouped or not) or `git push` (bypasses gitleaks and the hooks).
+The command is split the way the shell would: separators `;` `&&` `||` `|` `&` and newlines, subshells `( … )`,
+groups `{ …; }`, substitutions `$( … )` and `` `…` ``, here-documents, redirections, wrappers `env`, `command`,
+`exec`, `nohup`, `time`, `nice`, `timeout`, `sudo`, `xargs`, `eval`, `bash -c` / `sh -c`, global options
+`git -C <dir>` and `git -c k=v`, a preceding `cd <dir>`. If the command cannot be split (unclosed quote…), a
+cautious regular expression reads the raw text instead of letting it through.
+Not refused: `git push --dry-run` (`-n`), `--force-if-includes` alone, a push to an unprotected branch.
 
-Une commande refusée sort en code 2 : Claude Code bloque l'appel et montre le message à l'agent. L'opérateur reste
-libre de lancer la commande lui-même s'il le décide.
-La branche courante est celle du dépôt, ou celle qu'une commande précédente de la même ligne vient de choisir
-(`git switch [-c] <b>`, `git checkout [-b] <b>`). Une refspec à joker (`refs/heads/*`) qui couvre une branche protégée
-est refusée.
-Limites assumées : un hook côté agent se contourne (alias git, script intermédiaire, script passé sur l'entrée
-standard d'un shell (`… | sh`, `bash <<EOF`), variable non résolue, push par l'API) ; la vraie protection reste le ruleset côté serveur (BRANCHING-RELEASE.md §Règles communes).
-Bibliothèque standard uniquement ; une entrée de hook illisible ou une erreur interne laisse passer la commande (le
-hook ne bloque jamais le travail par sa propre faute), comme l'absence de python3.
+A refused command exits with code 2: Claude Code blocks the call and shows the message to the agent. The operator
+remains free to run the command themselves if they decide to.
+The current branch is the repository's, or the one a previous command on the same line has just selected
+(`git switch [-c] <b>`, `git checkout [-b] <b>`). A wildcard refspec (`refs/heads/*`) that covers a protected branch
+is refused.
+Accepted limits: an agent-side hook can be bypassed (git alias, intermediate script, script passed on a shell's
+standard input (`… | sh`, `bash <<EOF`), unresolved variable, push through the API); the real protection remains the
+server-side ruleset (BRANCHING-RELEASE.md §Common rules).
+Standard library only; an unreadable hook input or an internal error lets the command through (the hook never blocks
+work through its own fault), as does a missing python3.
 """
 from __future__ import annotations
 
@@ -43,24 +44,24 @@ SHELLS = {"bash", "sh", "zsh", "dash", "ksh"}
 ASSIGNMENT = re.compile(r"[A-Za-z_][A-Za-z0-9_]*=.*", re.S)
 CURRENT_BRANCH_EXPR = re.compile(r"^\$\(\s*git\s+(branch\s+--show-current|rev-parse\s+--abbrev-ref\s+HEAD|"
                                  r"symbolic-ref\s+--short\s+HEAD)\s*\)$")
-# Options globales de git suivies d'une valeur séparée
+# Global git options followed by a separate value
 GIT_GLOBAL_WITH_VALUE = {"-C", "-c", "--git-dir", "--work-tree", "--namespace", "--exec-path", "--config-env",
                          "--super-prefix", "--list-cmds"}
-# Options de `git push` suivies d'une valeur séparée
+# `git push` options followed by a separate value
 PUSH_WITH_VALUE = {"-o", "--push-option", "--repo", "--receive-pack", "--exec"}
-# Options courtes de `git commit` dont la valeur suit (collée ou séparée) ; -u et -S n'acceptent qu'une valeur collée
+# Short `git commit` options whose value follows (attached or separate); -u and -S only take an attached value
 COMMIT_SHORT_VALUE = {"m", "F", "c", "C", "t"}
 COMMIT_SHORT_ATTACHED = {"u", "S"}
 
 
 class ParseError(ValueError):
-    """La commande ne se découpe pas (guillemet ou parenthèse non fermés)."""
+    """The command cannot be split (unclosed quote or parenthesis)."""
 
 
-# --- Découpage shell ------------------------------------------------------------------------------------------------
+# --- Shell splitting ------------------------------------------------------------------------------------------------
 
 def _heredoc_delimiter(text: str, i: int) -> tuple[str, bool, int]:
-    """(délimiteur, tabulations retirées, index après le mot) d'un here-document ; `i` pointe après `<<`."""
+    """(delimiter, tabs stripped, index after the word) of a here-document; `i` points after `<<`."""
     strip = text.startswith("-", i)
     i += 1 if strip else 0
     while i < len(text) and text[i] in " \t":
@@ -72,7 +73,7 @@ def _heredoc_delimiter(text: str, i: int) -> tuple[str, bool, int]:
 
 
 def _skip_heredocs(text: str, i: int, pending: list[tuple[str, bool]]) -> int:
-    """Index après les corps des here-documents en attente ; `i` pointe juste après le retour à la ligne."""
+    """Index after the bodies of the pending here-documents; `i` points just after the newline."""
     for delimiter, strip in pending:
         while i < len(text):
             end = text.find("\n", i)
@@ -85,7 +86,7 @@ def _skip_heredocs(text: str, i: int, pending: list[tuple[str, bool]]) -> int:
 
 
 def _substitution_end(text: str, start: int) -> int:
-    """Index juste après la `)` qui ferme la substitution `$(` ouverte avant `start` (qui pointe après `$(`)."""
+    """Index just after the `)` that closes the `$(` substitution opened before `start` (which points after `$(`)."""
     depth, i, quote = 1, start, None
     pending: list[tuple[str, bool]] = []
     while i < len(text):
@@ -113,13 +114,13 @@ def _substitution_end(text: str, start: int) -> int:
             if depth == 0:
                 return i + 1
         i += 1
-    raise ParseError("substitution non fermée")
+    raise ParseError("unclosed substitution")
 
 
 def tokenize(text: str) -> tuple[list[str], list[str]]:
-    """(jetons, scripts des substitutions) : mots sans guillemets et opérateurs, comme les découpe le shell.
+    """(tokens, substitution scripts): unquoted words and operators, split the way the shell does.
 
-    Les redirections (`>f`, `2>&1`, `<<EOF` et le corps du here-document) sont retirées."""
+    Redirections (`>f`, `2>&1`, `<<EOF` and the here-document body) are removed."""
     tokens: list[str] = []
     nested: list[str] = []
     word: list[str] = []
@@ -146,7 +147,7 @@ def tokenize(text: str) -> tuple[list[str], list[str]]:
     def backquote(at: int) -> int:
         end = text.find("`", at + 1)
         if end < 0:
-            raise ParseError("accent grave non fermé")
+            raise ParseError("unclosed backquote")
         nested.append(text[at + 1:end])
         word.append(text[at:end + 1])
         return end + 1
@@ -165,7 +166,7 @@ def tokenize(text: str) -> tuple[list[str], list[str]]:
         if c == "'":
             end = text.find("'", i + 1)
             if end < 0:
-                raise ParseError("apostrophe non fermée")
+                raise ParseError("unclosed single quote")
             word.append(text[i + 1:end])
             in_word, i = True, end + 1
             continue
@@ -174,7 +175,7 @@ def tokenize(text: str) -> tuple[list[str], list[str]]:
             in_word = True
             while True:
                 if i >= len(text):
-                    raise ParseError("guillemet non fermé")
+                    raise ParseError("unclosed double quote")
                 d = text[i]
                 if d == '"':
                     i += 1
@@ -204,7 +205,7 @@ def tokenize(text: str) -> tuple[list[str], list[str]]:
             continue
         if c in "<>":
             if in_word and "".join(word).isdigit():
-                word, in_word = [], False  # descripteur (`2>`)
+                word, in_word = [], False  # file descriptor (`2>`)
             flush()
             if text.startswith("<<", i) and not text.startswith("<<<", i):
                 delimiter, strip, i = _heredoc_delimiter(text, i + 2)
@@ -214,7 +215,7 @@ def tokenize(text: str) -> tuple[list[str], list[str]]:
                 i += 1
             if i < len(text) and (text[i].isdigit() or text[i] == "-") and text[i - 1] == "&":
                 while i < len(text) and (text[i].isdigit() or text[i] == "-"):
-                    i += 1  # `>&1`, `>&-` : pas de mot cible
+                    i += 1  # `>&1`, `>&-`: no target word
             else:
                 drop_next = True
             continue
@@ -238,7 +239,7 @@ def tokenize(text: str) -> tuple[list[str], list[str]]:
 
 
 def simple_commands(tokens: list[str]) -> list[list[str]]:
-    """Commandes simples (listes de mots) séparées par les opérateurs ; mots-clés du shell en tête retirés."""
+    """Simple commands (word lists) separated by the operators; leading shell keywords removed."""
     commands, current = [], []
     for token in tokens:
         if token in OPERATORS:
@@ -260,7 +261,7 @@ def simple_commands(tokens: list[str]) -> list[list[str]]:
     return cleaned
 
 
-# --- Enveloppes -----------------------------------------------------------------------------------------------------
+# --- Wrappers -------------------------------------------------------------------------------------------------------
 
 def _skip_options(words: list[str], with_value: set[str]) -> list[str]:
     i = 0
@@ -272,7 +273,7 @@ def _skip_options(words: list[str], with_value: set[str]) -> list[str]:
 
 
 def unwrap(words: list[str]) -> tuple[list[str], str | None]:
-    """(commande réelle, script à analyser) après les affectations et enveloppes ; script pour `eval`, `bash -c`."""
+    """(real command, script to analyse) after the assignments and wrappers; a script for `eval`, `bash -c`."""
     for _ in range(MAX_DEPTH * 2):
         while words and ASSIGNMENT.fullmatch(words[0]):
             words = words[1:]
@@ -284,7 +285,7 @@ def unwrap(words: list[str]) -> tuple[list[str], str | None]:
             words = _skip_options(rest, {"-u", "--unset", "-C", "--chdir"})
         elif head == "command":
             if rest[:1] and rest[0] in ("-v", "-V"):
-                return [], None  # simple recherche, rien n'est lancé
+                return [], None  # lookup only, nothing is run
             words = _skip_options(rest, set())
         elif head in ("exec", "nohup", "builtin"):
             words = _skip_options(rest, {"-a"})
@@ -293,7 +294,7 @@ def unwrap(words: list[str]) -> tuple[list[str], str | None]:
         elif head == "nice":
             words = _skip_options(rest, {"-n"})
         elif head == "timeout":
-            words = _skip_options(rest, {"-s", "--signal", "-k", "--kill-after"})[1:]  # puis la durée
+            words = _skip_options(rest, {"-s", "--signal", "-k", "--kill-after"})[1:]  # then the duration
         elif head == "sudo":
             words = _skip_options(rest, {"-u", "-g", "-C", "-D", "-h", "-p", "-r", "-t", "-U"})
         elif head == "xargs":
@@ -316,7 +317,7 @@ def unwrap(words: list[str]) -> tuple[list[str], str | None]:
 # --- git ------------------------------------------------------------------------------------------------------------
 
 def git_subcommand(words: list[str]) -> tuple[str | None, list[str], list[str]]:
-    """(sous-commande, arguments, dossiers -C) d'une commande `git …`, ou (None, [], [])."""
+    """(subcommand, arguments, -C directories) of a `git …` command, or (None, [], [])."""
     if not words or os.path.basename(words[0]) != "git":
         return None, [], []
     index, dirs = 1, []
@@ -334,14 +335,14 @@ def git_subcommand(words: list[str]) -> tuple[str | None, list[str], list[str]]:
 
 
 def _long(arg: str, full: str, minimum: int) -> bool:
-    """`arg` désigne l'option longue `full` (git accepte un préfixe non ambigu ; `minimum` le rend non ambigu)."""
+    """`arg` names the long option `full` (git accepts an unambiguous prefix; `minimum` makes it unambiguous)."""
     name = arg.split("=", 1)[0]
     return len(name) >= minimum and full.startswith(name)
 
 
 def current_branch(cwd: str) -> str | None:
-    """Branche courante de `cwd` (`git rev-parse --abbrev-ref HEAD`, ou `symbolic-ref` pour une branche encore sans
-    commit), ou None si elle ne se lit pas (HEAD détachée, pas un dépôt, git absent)."""
+    """Current branch of `cwd` (`git rev-parse --abbrev-ref HEAD`, or `symbolic-ref` for a branch with no commit
+    yet), or None if it cannot be read (detached HEAD, not a repository, git missing)."""
     for args in (["rev-parse", "--abbrev-ref", "HEAD"], ["symbolic-ref", "--short", "-q", "HEAD"]):
         try:
             out = subprocess.run(["git", "-C", cwd, *args], capture_output=True, text=True, timeout=5, check=False)
@@ -354,14 +355,14 @@ def current_branch(cwd: str) -> str | None:
 
 
 def _branch_of(ref: str, current) -> str | None:
-    """Branche que désigne `ref` ; `HEAD`, `@` et `$(git branch --show-current)` : la branche courante (`current()`)."""
+    """Branch that `ref` names; `HEAD`, `@` and `$(git branch --show-current)`: the current branch (`current()`)."""
     if ref in ("HEAD", "@") or CURRENT_BRANCH_EXPR.match(ref):
         return current()
     return ref.removeprefix("refs/heads/")
 
 
 def _protected_match(branch: str | None, protected: list[str]) -> str | None:
-    """La branche protégée que désigne `branch` (nom exact, ou motif à joker qui la couvre), sinon None."""
+    """The protected branch that `branch` names (exact name, or wildcard pattern that covers it), otherwise None."""
     if branch is None:
         return None
     if branch in protected:
@@ -372,8 +373,8 @@ def _protected_match(branch: str | None, protected: list[str]) -> str | None:
 
 
 def check_push(args: list[str], protected: list[str], cwd: str, advice: str, head: str | None = None) -> str | None:
-    """Motif de refus d'un `git push`, ou None. `head` : branche courante déjà connue par la ligne de commande (une
-    chaîne vide pour une HEAD détachée) ; None : la lire dans `cwd`."""
+    """Reason for refusing a `git push`, or None. `head`: current branch already known from the command line (an
+    empty string for a detached HEAD); None: read it in `cwd`."""
     def current() -> str | None:
         return (head or None) if head is not None else current_branch(cwd)
     positional: list[str] = []
@@ -419,7 +420,7 @@ def check_push(args: list[str], protected: list[str], cwd: str, advice: str, hea
                     delete = True
                 elif letter == "o":
                     if position == len(letters) - 1:
-                        index += 1  # valeur séparée
+                        index += 1  # separate value
                     break
             continue
         positional.append(arg)
@@ -427,29 +428,29 @@ def check_push(args: list[str], protected: list[str], cwd: str, advice: str, hea
     if dry_run:
         return None
     if force:
-        return "push forcé interdit (jamais de force-push sur une branche partagée)"
+        return "forced push forbidden (never force-push a shared branch)"
     if no_verify:
-        return "`git push --no-verify` interdit (gitleaks et les hooks pre-commit doivent tourner)"
+        return "`git push --no-verify` forbidden (gitleaks and the pre-commit hooks must run)"
     if wide:
-        return f"`git push {wide}` interdit (pousse aussi les branches protégées)"
+        return f"`git push {wide}` forbidden (it also pushes the protected branches)"
 
     refspecs = positional if repo_option else positional[1:]
     for refspec in refspecs:
         if refspec.startswith("+"):
-            return f"refspec forcée `{refspec}` interdite"
+            return f"forced refspec `{refspec}` forbidden"
         if delete or refspec.startswith(":"):
             branch = _protected_match(_branch_of(refspec.lstrip(":"), current), protected)
             if branch:
-                return f"suppression de la branche protégée `{branch}` interdite"
+                return f"deletion of the protected branch `{branch}` forbidden"
             continue
         source, _, destination = refspec.partition(":")
         branch = _protected_match(_branch_of(destination or source, current), protected)
         if branch:
-            return f"push direct vers la branche protégée `{branch}` interdit : {advice}"
-    if not refspecs and not delete and not tags:  # `--tags` seul ne pousse que les tags
+            return f"direct push to the protected branch `{branch}` forbidden: {advice}"
+    if not refspecs and not delete and not tags:  # `--tags` alone only pushes the tags
         branch = current()
         if branch in protected:
-            return f"push depuis la branche protégée `{branch}` interdit : {advice}"
+            return f"push from the protected branch `{branch}` forbidden: {advice}"
     return None
 
 
@@ -463,7 +464,7 @@ def local_branch_exists(cwd: str, name: str) -> bool:
 
 
 def switched_branch(sub: str, args: list[str]) -> str | None:
-    """Branche que `git switch|checkout <args>` rend courante ("" pour une HEAD détachée), ou None si on ne sait pas."""
+    """Branch that `git switch|checkout <args>` makes current ("" for a detached HEAD), or None if unknown."""
     create = {"-c", "-C", "--create", "--force-create"} if sub == "switch" else {"-b", "-B", "--orphan"}
     positional: list[str] = []
     for index, arg in enumerate(args):
@@ -478,13 +479,13 @@ def switched_branch(sub: str, args: list[str]) -> str | None:
         if not arg.startswith("-"):
             positional.append(arg)
     if sub == "checkout" and len(positional) != 1:
-        return None  # `checkout <commit> <fichiers>` ne change pas de branche
+        return None  # `checkout <commit> <files>` does not change branch
     return positional[0] if positional else None
 
 
 def check_commit(args: list[str]) -> str | None:
-    """Motif de refus d'un `git commit`, ou None."""
-    message = "`git commit --no-verify` (`-n`) interdit (gitleaks et les hooks pre-commit doivent tourner)"
+    """Reason for refusing a `git commit`, or None."""
+    message = "`git commit --no-verify` (`-n`) forbidden (gitleaks and the pre-commit hooks must run)"
     index = 0
     while index < len(args):
         arg = args[index]
@@ -504,43 +505,43 @@ def check_commit(args: list[str]) -> str | None:
                     break
                 if letter in COMMIT_SHORT_VALUE:
                     if position == len(letters) - 1:
-                        index += 1  # valeur séparée : dans `-m -n`, `-n` est le message
+                        index += 1  # separate value: in `-m -n`, `-n` is the message
                     break
     return None
 
 
-# --- Analyse --------------------------------------------------------------------------------------------------------
+# --- Analysis -------------------------------------------------------------------------------------------------------
 
 RAW_PUSH = re.compile(r"\bgit\b[^;&|\n]*?\bpush\b(?P<args>[^;&|\n]*)")
 RAW_COMMIT = re.compile(r"\bgit\b[^;&|\n]*?\bcommit\b(?P<args>[^;&|\n]*)")
 
 
 def raw_reason(command: str, protected: list[str], cwd: str, advice: str) -> str | None:
-    """Lecture prudente du texte brut quand la commande ne se découpe pas (préfère refuser à tort)."""
+    """Cautious reading of the raw text when the command cannot be split (prefers a wrong refusal)."""
     for match in RAW_PUSH.finditer(command):
         args = match.group("args")
         if re.search(r"(^|\s)(--dry-run|-[A-Za-z]*n[A-Za-z]*)(\s|$)", args):
             continue
         if re.search(r"(^|\s)(--force(?!-if-includes)|-[A-Za-z]*f[A-Za-z]*\b)|(^|\s)['\"]?\+\S", args):
-            return "push forcé interdit (jamais de force-push sur une branche partagée)"
+            return "forced push forbidden (never force-push a shared branch)"
         if re.search(r"--no-verify|--mirror|(^|\s)--(all|branches)\b", args):
-            return "push interdit (`--no-verify`, `--mirror`, `--all` ou `--branches`)"
+            return "push forbidden (`--no-verify`, `--mirror`, `--all` or `--branches`)"
         for branch in protected:
             if re.search(r"(^|[\s:'\"/])" + re.escape(branch) + r"(['\"]?(\s|$))", args):
-                return f"push direct vers la branche protégée `{branch}` interdit : {advice}"
+                return f"direct push to the protected branch `{branch}` forbidden: {advice}"
         if re.fullmatch(r"\s*(\S+\s*)?(HEAD\s*)?['\"]?\s*", args):
             branch = current_branch(cwd)
             if branch in protected:
-                return f"push depuis la branche protégée `{branch}` interdit : {advice}"
+                return f"push from the protected branch `{branch}` forbidden: {advice}"
     for match in RAW_COMMIT.finditer(command):
         if re.search(r"--no-verify|(^|\s)-[A-Za-z]*n", match.group("args")):
-            return "`git commit --no-verify` (`-n`) interdit (gitleaks et les hooks pre-commit doivent tourner)"
+            return "`git commit --no-verify` (`-n`) forbidden (gitleaks and the pre-commit hooks must run)"
     return None
 
 
-def reason_for(command: str, protected: list[str], cwd: str, advice: str = "passer par une branche et une PR",
+def reason_for(command: str, protected: list[str], cwd: str, advice: str = "go through a branch and a PR",
                depth: int = 0) -> str | None:
-    """Motif de refus de la première commande fautive de `command`, ou None."""
+    """Reason for refusing the first offending command of `command`, or None."""
     if depth > MAX_DEPTH or "git" not in re.sub(r"['\"\\]", "", command):
         return None
     try:
@@ -552,7 +553,7 @@ def reason_for(command: str, protected: list[str], cwd: str, advice: str = "pass
         if reason:
             return reason
     base = cwd
-    heads: dict[str, str] = {}  # dossier → branche choisie plus tôt dans la ligne ("" : HEAD détachée)
+    heads: dict[str, str] = {}  # directory → branch selected earlier on the line ("": detached HEAD)
     for words in simple_commands(tokens):
         words, script = unwrap(words)
         if script is not None:
@@ -571,7 +572,7 @@ def reason_for(command: str, protected: list[str], cwd: str, advice: str = "pass
             switched = switched_branch(sub, args)
             if sub == "checkout" and switched and not any(a in ("-b", "-B", "--orphan") or a.startswith("--orphan=")
                                                           for a in args):
-                # `checkout <nom>` change de branche seulement si <nom> en est une (sinon c'est un fichier)
+                # `checkout <name>` changes branch only if <name> is one (otherwise it is a file)
                 switched = switched if switched in protected or local_branch_exists(where, switched) else None
             if switched is not None:
                 heads[os.path.normpath(where)] = switched
@@ -590,7 +591,7 @@ def reason_for(command: str, protected: list[str], cwd: str, advice: str = "pass
 # --- Hook -----------------------------------------------------------------------------------------------------------
 
 def load_config(project_dir: str) -> dict:
-    """`.harness/config.json` du projet, ou {} s'il manque ou ne se lit pas."""
+    """The project's `.harness/config.json`, or {} if it is missing or unreadable."""
     try:
         with open(os.path.join(project_dir, ".harness", "config.json"), encoding="utf-8") as handle:
             value = json.load(handle)
@@ -606,10 +607,10 @@ def _string_list(value: object, default: list[str]) -> list[str]:
 
 
 def doc_path(project_dir: str) -> str:
-    """BRANCHING-RELEASE.md tel que l'agent le trouve : la copie vendorisée, sinon celle du cadre."""
+    """BRANCHING-RELEASE.md as the agent finds it: the vendored copy, otherwise the harness's."""
     if os.path.isfile(os.path.join(project_dir, ".harness", "docs", "BRANCHING-RELEASE.md")):
         return ".harness/docs/BRANCHING-RELEASE.md"
-    return "docs/BRANCHING-RELEASE.md du cadre agentic-harness"
+    return "docs/BRANCHING-RELEASE.md of the Belayline harness"
 
 
 def main() -> int:
@@ -623,13 +624,13 @@ def main() -> int:
         config = load_config(project_dir)
         protected = _string_list(config.get("protected_branches"), DEFAULT_PROTECTED)
         types = _string_list(config.get("branch_types"), DEFAULT_BRANCH_TYPES)
-        advice = f"créer une branche `<type>/<nom-court>` (types : {', '.join(types)}) et une PR"
+        advice = f"create a `<type>/<short-name>` branch (types: {', '.join(types)}) and a PR"
         reason = reason_for(command, protected, cwd, advice)
         doc = doc_path(project_dir)
-    except Exception:  # noqa: BLE001 — un hook en panne ne bloque jamais le travail
+    except Exception:  # noqa: BLE001 (a broken hook never blocks work)
         return 0
     if reason:
-        print(f"agentic-harness : {reason}. Si c'est vraiment voulu, l'opérateur lance la commande lui-même "
+        print(f"Belayline: {reason}. If this is really intended, the operator runs the command themselves "
               f"({doc}).", file=sys.stderr)
         return 2
     return 0

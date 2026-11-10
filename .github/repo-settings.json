@@ -1,14 +1,14 @@
 {
-  "$comment": "Réglages du dépôt du cadre, appliqués au merge par .github/workflows/settings.yml (scripts/repo-settings.py). Modifier par PR, jamais à la main dans Settings (la dérive est signalée chaque semaine).",
+  "$comment": "Repository settings of the harness, applied on merge by .github/workflows/settings.yml (scripts/repo-settings.py). Change them by PR, never by hand in Settings (drift is reported every week).",
   "repository": {
-    "description": "Versioned, open harness for building software with coding agents (Claude Code, Codex, Cursor, Gemini CLI, Copilot, Aider): intent and TDD, issues → batches → PRs, adversarial reviews, pluggable compliance, stewards, FinOps and a flow dashboard.",
+    "description": "Belayline: versioned, open harness for building software with coding agents (Claude Code, Codex, Cursor, Gemini CLI, Copilot, Aider): intent and TDD, issues → lots → PRs, adversarial reviews, pluggable compliance, stewards, FinOps and a flow dashboard.",
     "has_wiki": false,
     "delete_branch_on_merge": true
   },
   "topics": ["ai-agents", "coding-agents", "agentic-coding", "claude-code", "codex", "cursor", "gemini-cli", "github-copilot", "aider", "agents-md", "tdd", "code-review", "compliance", "finops", "github-actions"],
   "rulesets": [
     {
-      "name": "master protégée",
+      "name": "protected master",
       "target": "branch",
       "enforcement": "active",
       "conditions": { "ref_name": { "include": ["~DEFAULT_BRANCH"], "exclude": [] } },

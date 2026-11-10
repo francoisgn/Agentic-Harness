@@ -1,12 +1,13 @@
 #!/usr/bin/env python3
-"""Contrôles de cohérence du cadre, lancés par la CI (bibliothèque standard seulement).
+"""Consistency checks of the harness, run by CI (standard library only).
 
-- skills : `name` = nom du dossier, `description` présente ;
-- agents : `name` = nom du fichier, `description`, `tools`, `model` connu ; agents de conformité avec leurs sections ;
-- manifeste : chaque source existe ;
-- labels : noms uniques ;
-- nommage des agents (ORCHESTRATION.md §7) : chaque exemple respecte l'expression régulière publiée.
-Usage : check-framework.py [--root <dépôt>]   (sort en 1 au moindre écart, liste tous les écarts)
+- skills: `name` = directory name, `description` present;
+- agents: `name` = file name, `description`, `tools`, known `model`; compliance agents with their sections;
+- manifest: every source exists;
+- labels: unique names, `axis: value` format (or one of the plain names), the exclusive axes are all present;
+- repository identity (CONVENTIONS.md §Repository identity): description, topics, README banner, social preview;
+- agent naming (ORCHESTRATION.md §7): every example matches the published regular expression.
+Usage: check-framework.py [--root <repository>]   (exits 1 on any gap, lists every gap)
 """
 import argparse
 import importlib.util
@@ -17,8 +18,11 @@ import sys
 
 GENERIC_REVIEWER = "compliance-reviewer"
 MODELS = {"haiku", "sonnet", "opus", "fable", "inherit"}
-COMPLIANCE_SECTIONS = ("## Rôle et limites", "## Quand intervenir", "## Ce que je vérifie", "## Preuves attendues",
-                       "## Format de réponse", "## Sources")
+COMPLIANCE_SECTIONS = ("## Role and limits", "## When to step in", "## What I check", "## Expected evidence",
+                       "## Response format", "## Sources")
+LABEL_RE = re.compile(r"^[a-z]+: [a-z-]+$")
+PLAIN_LABELS = {"direct-pr", "dependencies"}
+EXCLUSIVE_AXES = ("status", "type", "priority", "difficulty")
 
 
 def frontmatter(path):
@@ -35,9 +39,9 @@ def frontmatter(path):
 
 
 def pull_request_job_names(text):
-    """Noms de checks qu'un workflow publie sur une PR : workflow déclenché par `pull_request` (pas `_target`),
-    jobs directs seulement (le check d'un job réutilisable s'appelle `appelant / appelé`)."""
-    # Clé `on` éventuellement entre guillemets ; commentaire de fin de ligne ignoré
+    """Check names a workflow publishes on a PR: workflow triggered by `pull_request` (not `_target`),
+    direct jobs only (the check of a reusable job is named `caller / called`)."""
+    # `on` key possibly quoted; trailing comment ignored
     on_key = r"^(?:on|'on'|\"on\"):"
     inline = re.search(on_key + r"[ \t]*([^#\s][^#\n]*)", text, re.M)  # `on: pull_request`, `on: [push, pull_request]`
     if inline:
@@ -47,7 +51,7 @@ def pull_request_job_names(text):
         on_block = re.search(on_key + r"[ \t]*(?:#.*)?\n((?:[ \t]+.*\n|\s*\n)*)", text, re.M)
         if not on_block:
             return set()
-        # Seules les clés enfants directes de `on` sont des événements (pas un input `pull_request` d'un dispatch)
+        # Only the direct child keys of `on` are events (not a `pull_request` input of a dispatch)
         lines = [ln for ln in on_block.group(1).splitlines() if ln.strip() and not ln.strip().startswith("#")]
         if not lines:
             return set()
@@ -71,43 +75,47 @@ def check(root):
         meta, _ = frontmatter(skill)
         rel = skill.relative_to(root)
         if meta is None or meta.get("name") != skill.parent.name:
-            errors.append(f"{rel} : `name` doit valoir {skill.parent.name}")
+            errors.append(f"{rel}: `name` must be {skill.parent.name}")
         if not (meta or {}).get("description"):
-            errors.append(f"{rel} : `description` manquante")
+            errors.append(f"{rel}: `description` missing")
 
     for agent in sorted((root / "plugins/harness/agents").glob("*.md")):
         meta, body = frontmatter(agent)
         rel = agent.relative_to(root)
         meta = meta or {}
         if meta.get("name") != agent.stem:
-            errors.append(f"{rel} : `name` doit valoir {agent.stem}")
+            errors.append(f"{rel}: `name` must be {agent.stem}")
         for key in ("description", "tools"):
             if not meta.get(key):
-                errors.append(f"{rel} : `{key}` manquant")
+                errors.append(f"{rel}: `{key}` missing")
         if meta.get("model") not in MODELS:
-            errors.append(f"{rel} : `model` doit être l'un de {sorted(MODELS)}")
+            errors.append(f"{rel}: `model` must be one of {sorted(MODELS)}")
         if agent.stem.startswith("compliance-"):
-            if agent.stem != GENERIC_REVIEWER:  # le générique tient ses sections de la spec du projet
-                errors += [f"{rel} : section « {s} » manquante" for s in COMPLIANCE_SECTIONS if s not in body]
+            if agent.stem != GENERIC_REVIEWER:  # the generic one takes its sections from the project spec
+                errors += [f"{rel}: section \"{s}\" missing" for s in COMPLIANCE_SECTIONS if s not in body]
             if "Edit" in meta.get("tools", "") or "Write" in meta.get("tools", ""):
-                errors.append(f"{rel} : un relecteur de conformité reste en lecture seule (ni Edit ni Write)")
+                errors.append(f"{rel}: a compliance reviewer stays read-only (neither Edit nor Write)")
 
     for n, line in enumerate((root / "harness.manifest").read_text(encoding="utf-8").splitlines(), 1):
         parts = line.split()
         if not parts or parts[0].startswith("#"):
             continue
         if len(parts) < 2:
-            errors.append(f"harness.manifest:{n} : ligne mal formée (MODE SOURCE DESTINATION attendu)")
+            errors.append(f"harness.manifest:{n}: malformed line (MODE SOURCE DESTINATION expected)")
             continue
         if parts[1] == "-":
             continue
         if not (root / parts[1]).exists():
-            errors.append(f"harness.manifest:{n} : source introuvable {parts[1]}")
+            errors.append(f"harness.manifest:{n}: source not found {parts[1]}")
 
     names = [label["name"] for label in json.loads((root / "templates/.github/labels.json").read_text(encoding="utf-8"))]
-    errors += [f"labels.json : label en double « {x} »" for x in sorted({x for x in names if names.count(x) > 1})]
+    errors += [f"labels.json: duplicate label \"{x}\"" for x in sorted({x for x in names if names.count(x) > 1})]
+    errors += [f"labels.json: label \"{x}\" is neither `axis: value` (lowercase ASCII) nor one of {sorted(PLAIN_LABELS)}"
+               for x in names if not LABEL_RE.match(x) and x not in PLAIN_LABELS]
+    axes = {x.split(":", 1)[0] for x in names if LABEL_RE.match(x)}
+    errors += [f"labels.json: no label on the exclusive axis `{axis}:`" for axis in EXCLUSIVE_AXES if axis not in axes]
 
-    # Contrôles requis du ruleset = noms de jobs réels, sinon plus aucune PR ne se merge (CI-BUDGET.md §4)
+    # Required checks of the ruleset = real job names, otherwise no PR merges any more (CI-BUDGET.md §4)
     settings = root / ".github/repo-settings.json"
     if settings.is_file():
         job_names = set()
@@ -117,43 +125,43 @@ def check(root):
             for rule in ruleset.get("rules", []):
                 for chk in (rule.get("parameters") or {}).get("required_status_checks", []):
                     if chk["context"] not in job_names:
-                        errors.append(f".github/repo-settings.json : contrôle requis « {chk['context']} » absent des "
-                                      f"jobs de .github/workflows ({sorted(job_names)})")
+                        errors.append(f".github/repo-settings.json: required check \"{chk['context']}\" is not among "
+                                      f"the jobs of .github/workflows ({sorted(job_names)})")
 
-    # Identité du dépôt (CONVENTIONS.md §Identité du dépôt) : le cadre s'applique sa propre règle
+    # Repository identity (CONVENTIONS.md §Repository identity): the harness applies its own rule
     if settings.is_file():
         spec = importlib.util.spec_from_file_location("repo_settings", root / "scripts/repo-settings.py")
         rs = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(rs)
-        errors += [f".github/repo-settings.json : {gap}"
+        errors += [f".github/repo-settings.json: {gap}"
                    for gap in rs.identity_gaps(json.loads(settings.read_text(encoding="utf-8")))]
     banner, social = root / "docs/assets/banner.svg", root / "docs/assets/social-preview.png"
     if not banner.is_file():
-        errors.append("docs/assets/banner.svg : bannière du README introuvable")
+        errors.append("docs/assets/banner.svg: README banner not found")
     readme = root / "README.md"
     if readme.is_file() and "docs/assets/banner.svg" not in readme.read_text(encoding="utf-8"):
-        errors.append("README.md : la bannière docs/assets/banner.svg n'y est pas affichée")
+        errors.append("README.md: the banner docs/assets/banner.svg is not shown in it")
     if not social.is_file():
-        errors.append("docs/assets/social-preview.png : social preview introuvable")
+        errors.append("docs/assets/social-preview.png: social preview not found")
     else:
-        head = social.read_bytes()[:24]  # signature PNG, puis IHDR : largeur et hauteur sur 4 octets chacune
+        head = social.read_bytes()[:24]  # PNG signature, then IHDR: width and height on 4 bytes each
         size = (int.from_bytes(head[16:20], "big"), int.from_bytes(head[20:24], "big"))
         if head[:8] != b"\x89PNG\r\n\x1a\n" or size != (1280, 640):
-            errors.append(f"docs/assets/social-preview.png : PNG de 1280×640 attendu (lu : {size[0]}×{size[1]})")
+            errors.append(f"docs/assets/social-preview.png: 1280×640 PNG expected (read: {size[0]}×{size[1]})")
         elif social.stat().st_size >= 1_000_000:
-            errors.append("docs/assets/social-preview.png : doit peser moins de 1 Mo (limite de GitHub)")
+            errors.append("docs/assets/social-preview.png: must weigh less than 1 MB (GitHub limit)")
 
     orch = (root / "docs/ORCHESTRATION.md").read_text(encoding="utf-8")
     section = orch[orch.find("## 7."):]
-    m = re.search(r"Contrôle : `(\^.+\$)`", section)
+    m = re.search(r"Check: `(\^.+\$)`", section)
     if not m:
-        errors.append("docs/ORCHESTRATION.md §7 : expression régulière de contrôle introuvable")
+        errors.append("docs/ORCHESTRATION.md §7: check regular expression not found")
     else:
         rx = re.compile(m.group(1))
-        examples = re.findall(r"`([a-z0-9-]+\.[^`\s]+)`", section[section.find("Exemples"):section.find("| Rôle")])
+        examples = re.findall(r"`([a-z0-9-]+\.[^`\s]+)`", section[section.find("Examples"):section.find("| Role")])
         if not examples:
-            errors.append("docs/ORCHESTRATION.md §7 : aucun exemple d'identifiant")
-        errors += [f"docs/ORCHESTRATION.md §7 : exemple non conforme « {e} »" for e in examples if not rx.match(e)]
+            errors.append("docs/ORCHESTRATION.md §7: no identifier example")
+        errors += [f"docs/ORCHESTRATION.md §7: non-matching example \"{e}\"" for e in examples if not rx.match(e)]
     return errors
 
 
@@ -163,7 +171,7 @@ def main():
     errors = check(ap.parse_args().root)
     for e in errors:
         print(f"✘ {e}")
-    print(f"{'🔴' if errors else '🟢'} {len(errors)} écart(s)")
+    print(f"{'🔴' if errors else '🟢'} {len(errors)} gap(s)")
     return 1 if errors else 0
 
 

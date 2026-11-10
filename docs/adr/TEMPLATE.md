@@ -1,18 +1,18 @@
-# NNNN — <Titre de la décision>
+# NNNN — <Title of the decision>
 
-**Statut :** Proposé | Accepté | Remplacé par NNNN — <date> (<qui décide>)
+**Status:** Proposed | Accepted | Superseded by NNNN — <date> (<who decides>)
 
-## Contexte
-Les faits, contraintes et forces en présence, avec leurs sources. Ce qui rend la décision nécessaire maintenant.
+## Context
+The facts, constraints and forces at play, with their sources. What makes the decision necessary now.
 
 ## Options
-1. **<Option>** — avantages, inconvénients, coût.
+1. **<Option>**: advantages, drawbacks, cost.
 2. …
 
-## Décision
-Ce qui est retenu, en phrases courtes et vérifiables.
+## Decision
+What is chosen, in short, verifiable sentences.
 
-## Conséquences
-Ce qui devient plus facile, plus difficile, ce qu'il faut surveiller ; les issues ouvertes pour la suite.
-Un ADR accepté ne se réécrit pas : un changement de cap est un nouvel ADR qui le remplace (ou un amendement daté en fin
-de fichier, pour une précision qui ne renverse pas la décision).
+## Consequences
+What becomes easier, what becomes harder, what to watch; the issues opened for what comes next.
+An accepted ADR is not rewritten: a change of course is a new ADR that supersedes it (or a dated amendment at the end
+of the file, for a clarification that does not overturn the decision).

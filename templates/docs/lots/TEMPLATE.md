@@ -1,32 +1,32 @@
-# LOT-XXX — <nom court>
+# LOT-XXX: <short name>
 
-- **Module / couche :** <moteur | app | outillage | docs>
-- **Modèle :** <auteur> → <relecteur> (jamais le même ; label de niveau de l'issue, `modèle:` par défaut, sinon déduit du routage du projet)
-- **Taille :** S | M | L (L = à découper avant de commencer)
-- **Issue :** #…  ·  **Dépend de :** #… (ou —)
+- **Module / layer:** <engine | app | tooling | docs>
+- **Model:** <author> → <reviewer> (never the same; tier label of the issue, `difficulty:` by default, otherwise deduced from the project's routing)
+- **Difficulty:** trivial | easy | medium | hard (hard spanning several layers = split into lots before starting)
+- **Issue:** #…  ·  **Depends on:** #… (or none)
 
-## Résumé
-Une user story ou deux lignes : ce que le lot apporte et pourquoi maintenant.
+## Summary
+A user story or two lines: what the lot brings and why now.
 
 ## Sources
-Chaque fait externe (règle, API, protocole, comportement de référence) avec sa source : lien officiel, `fichier:ligne`
-à un commit nommé, capture. Rien de deviné : ce qui manque est listé dans « En attente » ci-dessous.
+Each external fact (rule, API, protocol, reference behaviour) with its source: official link, `file:line`
+at a named commit, capture. Nothing guessed: what is missing is listed under "Pending" below.
 
-## Comportement
-Entrées, sorties, règles. Cas limites (vide, très gros, erreurs, annulation, concurrence).
+## Behaviour
+Inputs, outputs, rules. Edge cases (empty, very large, errors, cancellation, concurrency).
 
-## Différences voulues
-Écarts assumés avec la référence (ancien comportement, ancienne version), chacun justifié.
+## Intended differences
+Accepted deviations from the reference (old behaviour, old version), each one justified.
 
-## Données et compatibilité
-Champs persistés ajoutés ou renommés : optionnels ou par défaut, décodage tolérant, migration à la lecture
-(CONVENTIONS.md §Persistance). « Aucun » sinon.
+## Data and compatibility
+Persisted fields added or renamed: optional or with a default, tolerant decoding, migration on read
+(CONVENTIONS.md §Persistence). "None" otherwise.
 
 ## Tests
-Les tests qui prouvent le lot, chacun vu en échec sans le changement. Ce qui ne se teste qu'à la main (et où).
+The tests that prove the lot, each seen failing without the change. What can only be tested by hand (and where).
 
-## En attente
-Captures, décisions (`à clarifier`), accès manquants : chacun avec son issue.
+## Pending
+Captures, decisions (`status: needs-decision`), missing access: each with its issue.
 
-## Leçons
-À reporter dans LESSONS (méthode) ou dans les notes du projet (faits du domaine) à la clôture.
+## Lessons
+To carry over to LESSONS (method) or to the project notes (domain facts) at closing.

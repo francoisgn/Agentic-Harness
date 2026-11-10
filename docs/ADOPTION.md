@@ -1,114 +1,114 @@
-# Adopter le cadre dans un projet, le mettre à jour
+# Adopting the harness in a project, updating it
 
-Usage quotidien une fois adopté, avec l'exemple SwiftHFR : [UTILISATION](UTILISATION.md).
+Day-to-day use once adopted, with the SwiftHFR example: [USAGE](USAGE.md).
 
-Pourquoi ce mécanisme (vendorisation + plugin + workflows réutilisables) et ses limites : [ADR 0001](adr/0001-mecanisme-de-distribution.md).
+Why this mechanism (vendoring + plugin + reusable workflows) and its limits: [ADR 0001](adr/0001-distribution-mechanism.md).
 
-## Ce que le projet reçoit
+## What the project receives
 
-| Chemin dans le projet | Mode | À qui |
+| Path in the project | Mode | Owner |
 |---|---|---|
-| `.harness/docs/*.md` | copie | Cadre : remplacé à chaque synchro (modification locale détectée et refusée) |
-| `.harness/labels.json` | copie | Cadre : taxonomie canonique |
-| `.harness/LICENSE` | copie | Cadre : sa licence (MIT), qui accompagne les fichiers copiés ; ne dit rien de la licence du projet |
-| `.harness/hooks/guard-git.py`, `session-start.sh` | copie | Cadre |
-| `.claude/skills/<skill>/SKILL.md` | copie | Cadre (`/intent`, `/lot-start`, `/lot-finish`, `/review-round`, `/feedback-triage`, `/lessons-check`, `/lesson-propose`, `/compliance-review`, `/status-report`, `/harness-update`) |
-| `.claude/agents/*.md` | copie | Cadre : `adversarial-reviewer`, `issue-steward`, `doc-steward`, `flow-monitor`, `compliance-*` (exclure les référentiels inutiles) |
-| `.harness/scripts/flow-metrics.py` | copie | Cadre : tableau de bord du flux (`flow-report.yml`, `/status-report`) |
-| `.claude/settings.json` | fusion | Projet ; le cadre n'**ajoute** que ses deux hooks s'ils manquent |
-| `CLAUDE.md`, `AGENTS.md` | bloc balisé | Projet, sauf le bloc `<!-- harness:begin cadre -->…<!-- harness:end cadre -->` |
-| `.harness/config.json`, `.github/labels.local.json`, gabarits d'issue et de PR, `docs/lots/TEMPLATE.md`, `.markdownlint-cli2.jsonc`, `.github/workflows/harness.yml`, `.github/workflows/harness-sync.yml` | seed | Projet : créés s'ils manquent, jamais réécrits (sauf les références `@vX.Y.Z` de `harness.yml`) |
-| `.harness/VERSION`, `.harness/lock` | généré | Version, commit du cadre, empreintes des fichiers copiés |
+| `.harness/docs/*.md` | copy | Harness: replaced at each sync (a local modification is detected and refused) |
+| `.harness/labels.json` | copy | Harness: canonical taxonomy |
+| `.harness/LICENSE` | copy | Harness: its licence (MIT), which accompanies the copied files; says nothing about the project's licence |
+| `.harness/hooks/guard-git.py`, `session-start.sh` | copy | Harness |
+| `.claude/skills/<skill>/SKILL.md` | copy | Harness (`/intent`, `/lot-start`, `/lot-finish`, `/review-round`, `/feedback-triage`, `/lessons-check`, `/lesson-propose`, `/compliance-review`, `/status-report`, `/harness-update`) |
+| `.claude/agents/*.md` | copy | Harness: `adversarial-reviewer`, `issue-steward`, `doc-steward`, `flow-monitor`, `compliance-*` (exclude the compliance frameworks you do not need) |
+| `.harness/scripts/flow-metrics.py` | copy | Harness: flow dashboard (`flow-report.yml`, `/status-report`) |
+| `.claude/settings.json` | merge | Project; the harness only **adds** its two hooks if they are missing |
+| `CLAUDE.md`, `AGENTS.md` | marked block | Project, except the block `<!-- harness:begin harness -->…<!-- harness:end harness -->` |
+| `.harness/config.json`, `.github/labels.local.json`, issue and PR templates, `docs/lots/TEMPLATE.md`, `.markdownlint-cli2.jsonc`, `.github/workflows/harness.yml`, `.github/workflows/harness-sync.yml` | seed | Project: created if missing, never rewritten (except the `@vX.Y.Z` references of `harness.yml`) |
+| `.harness/VERSION`, `.harness/lock` | generated | Version, harness commit, checksums of the copied files |
 
-## Adoption (une fois, depuis le Mac ou une session cloud)
+## Adoption (once, from the Mac or a cloud session)
 
-Prérequis : `bash`, `git`, `python3` ; accès en lecture à `francoisgn/agentic-harness` (en session cloud : l'attacher
-à la session ; sur le Mac : `gh auth login && gh auth setup-git`).
+Prerequisites: `bash`, `git`, `python3`; read access to `francoisgn/belayline-agentic-harness` (in a cloud session: attach it
+to the session; on the Mac: `gh auth login && gh auth setup-git`).
 
-1. **Branche** depuis la branche d'intégration à jour :
+1. **Branch** from the up-to-date integration branch:
    ```bash
    git fetch origin && git switch -c chore/adoption-harness origin/develop
    ```
-2. **Récupérer le cadre** à un tag, à côté du projet :
+2. **Fetch the harness** at a tag, next to the project:
    ```bash
-   git clone --depth 1 --branch v0.3.0 https://github.com/francoisgn/agentic-harness.git ../agentic-harness
+   git clone --depth 1 --branch v0.3.0 https://github.com/francoisgn/belayline-agentic-harness.git ../belayline
    ```
-3. **Voir avant d'écrire**, puis appliquer :
+3. **Look before writing**, then apply:
    ```bash
-   ../agentic-harness/scripts/harness-sync.sh --target . --dry-run
-   ../agentic-harness/scripts/harness-sync.sh --target .
+   ../belayline/scripts/harness-sync.sh --target . --dry-run
+   ../belayline/scripts/harness-sync.sh --target .
    ```
-   Code 3 = conflits : un fichier du cadre existe déjà dans le projet (ex. un skill du même nom). Renommer celui du
-   projet, ou relancer avec `--force` si le remplacer est voulu.
-4. **Adapter** (fichiers du projet) :
-   - `CLAUDE.md` : le bloc du cadre a été ajouté **en fin** de fichier s'il existait ; le remonter en tête (marqueurs
-     compris) et retirer de la partie projet ce qui double désormais `ESSENTIEL.md` (workflow générique, pied de
-     commentaire, labels génériques). Garder le spécifique : build, design system, règles métier, modèle de branches.
-   - `AGENTS.md` : section « Harness overrides » (créée par le gabarit, sinon l'ajouter) : chaque règle du cadre que
-     le projet remplace, avec sa raison (convention de branches, taxonomie de labels, politique de merge…). C'est
-     l'endroit que lisent les agents pour savoir où le projet s'écarte du cadre ; le bloc géré y renvoie.
-   - `.harness/config.json` : `protected_branches`, `integration_branch`, `branch_model` (A ou B, BRANCHING-RELEASE.md).
-   - `.github/labels.local.json` : les labels propres au projet (ex. `onglet: …`, `calcul`, `réglementaire`), au même
-     format que `.harness/labels.json` (`axis` facultatif, utile pour l'hygiène des issues). Retirer l'ancien fichier de
-     labels et son workflow s'il fait doublon avec le job `labels` de `harness.yml`.
-   - `.github/workflows/harness.yml` : branche de `push`, `flow` (modèle A ou vide), jobs `docs`, `security` et `review`
-     à activer seulement si le projet n'a pas déjà l'équivalent ; le job `flow` (tableau de bord) est actif d'office.
-   - `.harness/config.json` → `compliance` : référentiels dont les relecteurs sont lancés ([COMPLIANCE](COMPLIANCE.md)). Supprimer les workflows qu'il remplace (ex. `branch-flow.yml`).
-   - **Identité du dépôt** ([CONVENTIONS](CONVENTIONS.md) §Identité du dépôt) : dans `.github/repo-settings.json`,
-     remplacer la description du gabarit par une phrase et remplir `topics` (5 à 15 mots-clés) ; une bannière
-     `docs/assets/banner.svg` en tête du `README.md` et une social preview `docs/assets/social-preview.png`
-     (1280×640). Images absentes : une issue, elles peuvent suivre l'adoption.
-5. **Vérifier** : `../agentic-harness/scripts/harness-sync.sh --target . --check` sort en 0 ; `git diff --stat` ne
-   montre que l'attendu ; lancer une session Claude et constater le message « Cadre agentic-harness » au démarrage.
-6. **Commit unique**, puis PR en brouillon :
-   `Cadre agentic-harness 0.3.0 : adoption` (corps : ce qui a été retiré du `CLAUDE.md`, workflows remplacés, labels
-   déplacés ; pas de `### Ledger` : outillage).
-7. **Après le merge** (opérateur) : lancer le workflow « Cadre » à la main (`workflow_dispatch`) pour créer les labels ;
-   déposer la social preview (Settings → General → Social preview) ;
-   si ce dépôt du cadre est privé, vérifier l'accès Actions ([ADR 0001](adr/0001-mecanisme-de-distribution.md)).
+   Exit code 3 = conflicts: a harness file already exists in the project (e.g. a skill with the same name). Rename
+   the project's one, or rerun with `--force` if replacing it is intended.
+4. **Adapt** (project files):
+   - `CLAUDE.md`: the harness block was added **at the end** of the file if it existed; move it to the top (markers
+     included) and remove from the project part what now duplicates `ESSENTIALS.md` (generic workflow, comment
+     footer, generic labels). Keep what is specific: build, design system, domain rules, branch model.
+   - `AGENTS.md`: "Harness overrides" section (created by the template, otherwise add it): every harness rule that
+     the project replaces, with its reason (branch convention, label taxonomy, merge policy…). This is where agents
+     read where the project departs from the harness; the managed block points to it.
+   - `.harness/config.json`: `protected_branches`, `integration_branch`, `branch_model` (A or B, BRANCHING-RELEASE.md).
+   - `.github/labels.local.json`: the project's own labels (e.g. `area: …`, `calculation`, `regulatory`), in the same
+     format as `.harness/labels.json` (`axis` optional, useful for issue hygiene). Remove the old labels file
+     and its workflow if it duplicates the `labels` job of `harness.yml`.
+   - `.github/workflows/harness.yml`: `push` branch, `flow` (model A or empty), jobs `docs`, `security` and `review`
+     to enable only if the project does not already have the equivalent; the `flow` job (dashboard) is on by default.
+   - `.harness/config.json` → `compliance`: compliance frameworks whose reviewers are run ([COMPLIANCE](COMPLIANCE.md)). Delete the workflows it replaces (e.g. `branch-flow.yml`).
+   - **Repository identity** ([CONVENTIONS](CONVENTIONS.md) §Repository identity): in `.github/repo-settings.json`,
+     replace the template's description with one sentence and fill `topics` (5 to 15 keywords); a banner
+     `docs/assets/banner.svg` at the top of `README.md` and a social preview `docs/assets/social-preview.png`
+     (1280×640). Images missing: an issue, they can follow the adoption.
+5. **Verify**: `../belayline/scripts/harness-sync.sh --target . --check` exits with 0; `git diff --stat` shows
+   only what is expected; start a Claude session and see the "Belayline" message at startup.
+6. **Single commit**, then draft PR:
+   `Belayline 0.3.0: adoption` (body: what was removed from `CLAUDE.md`, workflows replaced, labels
+   moved; no `### Ledger`: tooling).
+7. **After the merge** (operator): run the "Harness" workflow by hand (`workflow_dispatch`) to create the labels;
+   upload the social preview (Settings → General → Social preview);
+   if this harness repository is private, check Actions access ([ADR 0001](adr/0001-distribution-mechanism.md)).
 
-### Facultatif : PR de mise à jour automatique
-`harness-sync.yml` (créé à l'adoption) regarde chaque lundi le dernier tag et ouvre une PR en brouillon. Réglages :
-- cadre privé : secret `HARNESS_TOKEN` (jeton fine-grained : *Contents: read* sur `agentic-harness` ; *Contents* et
-  *Pull requests: write* sur le projet ; *Workflows: write* si l'on veut aussi les références de `harness.yml`, avec la
-  variable de dépôt `HARNESS_SYNC_WORKFLOWS=true`) ;
-- avec le seul `GITHUB_TOKEN` : Settings → Actions → General → « Allow GitHub Actions to create and approve pull requests ».
+### Optional: automatic update PR
+`harness-sync.yml` (created at adoption) looks at the latest tag every Monday and opens a draft PR. Settings:
+- private harness: secret `HARNESS_TOKEN` (fine-grained token: *Contents: read* on `Belayline`; *Contents* and
+  *Pull requests: write* on the project; *Workflows: write* if you also want the references of `harness.yml`, with the
+  repository variable `HARNESS_SYNC_WORKFLOWS=true`);
+- with `GITHUB_TOKEN` alone: Settings → Actions → General → "Allow GitHub Actions to create and approve pull requests".
 
-### Facultatif : le plugin pour les sessions locales
-Dans un dépôt qui a adopté le cadre, les skills et hooks vendorisés suffisent (et marchent en cloud). Le plugin sert sur
-le Mac pour les dépôts **pas encore** adoptés :
+### Optional: the plugin for local sessions
+In a repository that has adopted the harness, the vendored skills and hooks are enough (and work in the cloud). The
+plugin is useful on the Mac for repositories **not yet** adopted:
 ```bash
-claude plugin marketplace add francoisgn/agentic-harness
-claude plugin install harness@agentic-harness            # portée utilisateur
+claude plugin marketplace add francoisgn/belayline-agentic-harness
+claude plugin install belay@belayline            # user scope
 ```
-Ses skills s'appellent alors `/harness:lot-start`, etc. Mise à jour automatique : `/plugin` → Marketplaces →
-agentic-harness → Enable auto-update. Pour le déclarer dans un dépôt (sessions locales seulement ; une session cloud
-l'ignore), ajouter à `.claude/settings.json` :
+Its skills are then called `/belay:lot-start`, etc. Automatic update: `/plugin` → Marketplaces →
+Belayline → Enable auto-update. To declare it in a repository (local sessions only; a cloud session
+ignores it), add to `.claude/settings.json`:
 ```json
 {
   "extraKnownMarketplaces": {
-    "agentic-harness": { "source": { "source": "github", "repo": "francoisgn/agentic-harness", "ref": "v0.3.0" } }
+    "Belayline": { "source": { "source": "github", "repo": "francoisgn/belayline-agentic-harness", "ref": "v0.3.0" } }
   },
-  "enabledPlugins": { "harness@agentic-harness": true }
+  "enabledPlugins": { "belay@belayline": true }
 }
 ```
-Dans un dépôt adopté, préférer ne **pas** l'activer (les skills existeraient en double, `/lot-start` et
-`/harness:lot-start`).
+In an adopted repository, prefer **not** to enable it (the skills would exist twice, `/lot-start` and
+`/belay:lot-start`).
 
-## Mises à jour
-- Skill `/harness-update` (guide pas à pas), ou à la main :
+## Updates
+- Skill `/harness-update` (step-by-step guide), or by hand:
   ```bash
   git switch -c chore/harness-vX.Y.Z origin/develop
-  ../agentic-harness/scripts/harness-sync.sh --ref vX.Y.Z --target .     # ou --source <clone à ce tag>
+  ../belayline/scripts/harness-sync.sh --ref vX.Y.Z --target .     # or --source <clone at that tag>
   ```
-  Lire le `CHANGELOG.md` du cadre, relire `git diff`, un commit `Cadre agentic-harness : passage en vX.Y.Z`, PR brouillon.
-- Une modification d'un fichier du cadre dans le projet est refusée à la synchro suivante : la proposer au cadre (PR sur
-  `agentic-harness`), ou la garder hors du cadre (fichier du projet), jamais en modifiant la copie vendorisée.
-- `--check` en CI (facultatif) : signale une copie vendorisée modifiée ou en retard sur `.harness/VERSION`.
+  Read the harness's `CHANGELOG.md`, review `git diff`, one commit `Belayline: move to vX.Y.Z`, draft PR.
+- A modification of a harness file in the project is refused at the next sync: propose it to the harness (PR on
+  `Belayline`), or keep it outside the harness (project file), never by editing the vendored copy.
+- `--check` in CI (optional): reports a vendored copy that is modified or behind `.harness/VERSION`.
 
-## Réglages par projet : langue et exclusions
-`.harness/config.json` (créé par la première synchro ; le créer **avant** elle pour que ses réglages s'appliquent dès
-la première fois) :
+## Per-project settings: language and exclusions
+`.harness/config.json` (created by the first sync; create it **before** the sync so that its settings apply from
+the first time):
 ```json
 {
   "language": "en",
@@ -120,108 +120,107 @@ la première fois) :
   "ledger": { "enabled": true, "label": "ledger", "fold_command": "python3 tooling/docs/ledger.py fold --apply --commit" }
 }
 ```
-- `language` : une source traduite `i18n/<langue>/<chemin>` du cadre remplace la source française quand elle existe.
-  Aujourd'hui `en` couvre le bloc de `CLAUDE.md`/`AGENTS.md` et `ESSENTIEL.md` (le fichier chargé à chaque session) ;
-  les autres docs restent en français.
-- `exclude` : motifs glob sur les **destinations** (`*` traverse les `/`). Un fichier exclu n'est pas vendorisé ; s'il
-  l'était déjà et n'a pas été modifié, la synchro suivante le retire. Exclure `CLAUDE.md` ou `AGENTS.md` supprime la
-  gestion du bloc correspondant.
+- `language`: the project's writing language (default `"en"`): the language agents use for code comments, commits,
+  issues, PRs and docs. It only sets that. The harness itself is in English and has no translated copies.
+- `exclude`: glob patterns on the **destinations** (`*` crosses `/`). An excluded file is not vendored; if it
+  already was and has not been modified, the next sync removes it. Excluding `CLAUDE.md` or `AGENTS.md` turns off
+  the management of the corresponding block.
 
-Autres clés, lues par les hooks et les skills (absentes : valeurs par défaut) :
+Other keys, read by the hooks and the skills (missing: default values):
 
-| Clé | Défaut | Effet |
+| Key | Default | Effect |
 |---|---|---|
-| `protected_branches` | `["main", "master", "develop", "beta"]` | Branches que le hook `guard-git` protège |
-| `branch_types` | `["lot", "fix", "feat", "chore", "docs"]` | Types de branche `<type>/<nom-court>` proposés par `/lot-start` et le hook |
-| `labels.model_prefixes` | `["modèle:"]` | Préfixes des labels de niveau de modèle ; `[]` = axe absent (niveau déduit du texte et du routage) |
-| `labels.size_prefixes` | `["taille:"]` | Préfixes des labels de taille ou de difficulté (ex. `["difficulty:"]`) ; `[]` = axe absent |
-| `ledger.enabled`, `ledger.label`, `ledger.fold_command` | `false`, `"ledger"`, `""` | Registre ([CONVENTIONS](CONVENTIONS.md) §Registre) : section `### Ledger` des PR, label, commande de repli du steward |
+| `protected_branches` | `["main", "master", "develop", "beta"]` | Branches that the `guard-git` hook protects |
+| `branch_types` | `["lot", "fix", "feat", "chore", "docs"]` | Branch types `<type>/<short-name>` offered by `/lot-start` and the hook |
+| `labels.model_prefixes` | `["difficulty:"]` | Prefixes of the model-tier labels; `[]` = no such axis (tier deduced from the text and the routing) |
+| `labels.size_prefixes` | `[]` | Prefixes of the size labels when the project has a separate size axis (e.g. `["size:"]`); `[]` = no such axis |
+| `ledger.enabled`, `ledger.label`, `ledger.fold_command` | `false`, `"ledger"`, `""` | Ledger ([CONVENTIONS](CONVENTIONS.md) §Ledger): `### Ledger` section of the PRs, label, the steward's fold command |
 
-`.harness/config.json` est un fichier du projet (créé une fois) : une clé ajoutée par une nouvelle version du cadre ne
-s'y ajoute pas d'elle-même ; sans elle, le défaut s'applique.
+`.harness/config.json` is a project file (created once): a key added by a new version of the harness does not add
+itself to it; without it, the default applies.
 
-### Exemple : ezzz/HFRnow (branche `dev-swift`, docs en anglais, leçons et lots propres)
-1. Branche depuis `dev-swift` (jamais `master`, qui est l'app historique) ; créer `.harness/config.json` comme ci-dessus,
-   en excluant ce que HFRnow a déjà en mieux : ses formulaires d'issue (`.github/ISSUE_TEMPLATE/*`), son gabarit de PR
-   (`.github/pull_request_template.md`), son gabarit de lot (`docs/lots/TEMPLATE.md`), `.markdownlint-cli2.jsonc`, et
-   les workflows du cadre (`.github/workflows/harness*.yml`) : `ezzz/HFRnow` n'appartient pas à `francoisgn`, il ne peut
-   pas appeler un workflow réutilisable d'un cadre privé, et les événements `issues` ne tournent que depuis `master`.
-2. Lancer la synchro : `AGENTS.md` (l'entrée de HFRnow) reçoit le bloc anglais en fin de fichier, `CLAUDE.md` (qui
-   importe déjà `@AGENTS.md`) le bloc anglais qui importe `ESSENTIEL.md` ; `.harness/docs/LESSONS.md` du cadre complète
-   `docs/agents/LESSONS.md` du projet, qui reste la référence (les deux se lisent à l'auto-relecture ; `/lessons-check`
-   le fait).
-3. Garder la taxonomie de labels de HFRnow (`type:`, `priority:`, `difficulty:`…) : ne pas activer `apply-aliases` ;
-   `labels` ci-dessus dit au cadre que la taille se lit dans `difficulty:` et que le niveau de modèle se déduit du
-   routage d'`AGENTS.md` §6. Ses branches `lot/`, `fix/`, `feat/`, `chore/`, `docs/` sont celles du cadre ; son
-   registre (#620) est la brique « ledger » du cadre, avec son propre script.
-4. Les leçons génériques nées dans HFRnow remontent au cadre par PR sur agentic-harness ; les leçons du domaine HFR
-   restent dans le projet.
+### Example: ezzz/HFRnow (branch `dev-swift`, docs in English, its own lessons and lots)
+1. Branch from `dev-swift` (never `master`, which is the legacy app); create `.harness/config.json` as above,
+   excluding what HFRnow already has in a better form: its issue forms (`.github/ISSUE_TEMPLATE/*`), its PR template
+   (`.github/pull_request_template.md`), its lot template (`docs/lots/TEMPLATE.md`), `.markdownlint-cli2.jsonc`, and
+   the harness workflows (`.github/workflows/harness*.yml`): `ezzz/HFRnow` does not belong to `francoisgn`, it cannot
+   call a reusable workflow of a private harness, and `issues` events only run from `master`.
+2. Run the sync: `AGENTS.md` (HFRnow's entry point) receives the block at the end of the file, `CLAUDE.md` (which
+   already imports `@AGENTS.md`) the block that imports `ESSENTIALS.md`; the harness's `.harness/docs/LESSONS.md`
+   complements the project's `docs/agents/LESSONS.md`, which stays the reference (both are read at self-review;
+   `/lessons-check` does it).
+3. Keep HFRnow's label taxonomy (`type:`, `priority:`, `difficulty:`…): do not enable `apply-aliases`;
+   `labels` above tells the harness that the size is read from `difficulty:` and that the model tier is deduced
+   from the routing of `AGENTS.md` §6. Its branches `lot/`, `fix/`, `feat/`, `chore/`, `docs/` are the harness's;
+   its ledger (#620) is the harness's "ledger" building block, with its own script.
+4. Generic lessons born in HFRnow go up to the harness by PR on Belayline; lessons of the HFR domain
+   stay in the project.
 
-## Brancher votre agent de code
+## Connecting your coding agent
 
-Le cadre écrit ses règles une fois (`.harness/docs/`) et les expose par deux fichiers d'entrée : `CLAUDE.md` (bloc
-balisé) et `AGENTS.md` (bloc balisé, [format ouvert](https://agents.md)). Selon l'outil :
+The harness writes its rules once (`.harness/docs/`) and exposes them through two entry files: `CLAUDE.md` (marked
+block) and `AGENTS.md` (marked block, [open format](https://agents.md)). Depending on the tool:
 
-| Agent | Comment il charge les règles | État |
+| Agent | How it loads the rules | State |
 |---|---|---|
-| Claude Code | `CLAUDE.md` (import de `ESSENTIEL.md`), skills, agents et hooks vendorisés ; plugin en local | Adaptateur fourni, testé |
-| Codex CLI, Cursor, GitHub Copilot (agent) | `AGENTS.md` à la racine, présenté comme lu nativement par ces outils | 🟠 à vérifier dans la doc de l'outil et la version utilisée |
-| Gemini CLI | Lit `GEMINI.md` par défaut ; pointer le fichier de contexte vers `AGENTS.md` dans `.gemini/settings.json` | 🟠 réglage à confirmer dans la doc de Gemini CLI |
-| Aider | Charger `AGENTS.md` comme fichier de conventions (`read: AGENTS.md` dans `.aider.conf.yml`) | 🟠 à confirmer dans la doc d'Aider |
-| Autre | Lui faire lire `AGENTS.md`, ou y copier un renvoi vers `.harness/docs/ESSENTIEL.md` | — |
+| Claude Code | `CLAUDE.md` (import of `ESSENTIALS.md`), vendored skills, agents and hooks; plugin locally | Adapter provided, tested |
+| Codex CLI, Cursor, GitHub Copilot (agent) | `AGENTS.md` at the root, presented as read natively by these tools | 🟠 to verify in the tool's docs and the version used |
+| Gemini CLI | Reads `GEMINI.md` by default; point the context file to `AGENTS.md` in `.gemini/settings.json` | 🟠 setting to confirm in the Gemini CLI docs |
+| Aider | Load `AGENTS.md` as a conventions file (`read: AGENTS.md` in `.aider.conf.yml`) | 🟠 to confirm in the Aider docs |
+| Other | Make it read `AGENTS.md`, or copy into it a pointer to `.harness/docs/ESSENTIALS.md` | — |
 
-Sources consultées le 2026-11-07 : site du format [agents.md](https://agents.md) et articles secondaires (pas la doc
-officielle de chaque outil) ; d'où l'état 🟠 tant qu'un projet ne l'a pas vérifié. Les skills, agents et hooks sont
-propres à Claude Code ; pour un autre agent, la méthode, les labels, les gabarits, la CI et le tableau de bord
-s'appliquent tels quels, et les skills se lisent comme des procédures (`.claude/skills/<nom>/SKILL.md`).
+Sources consulted on 2026-11-07: the [agents.md](https://agents.md) format site and secondary articles (not the
+official docs of each tool); hence the 🟠 state until a project has verified it. Skills, agents and hooks are
+specific to Claude Code; for another agent, the method, labels, templates, CI and dashboard apply as they are, and
+the skills read as procedures (`.claude/skills/<name>/SKILL.md`).
 
-## Réglages du dépôt « as code »
+## Repository settings "as code"
 
-Une session cloud ne peut pas modifier les réglages d'un dépôt (LESSONS L56) ; elle modifie
-`.github/repo-settings.json` par PR, et le job `settings` de `harness.yml` (workflow réutilisable `repo-settings.yml`,
-script `.harness/scripts/repo-settings.py`) l'applique au merge :
+A cloud session cannot change a repository's settings (LESSONS L56); it changes
+`.github/repo-settings.json` by PR, and the `settings` job of `harness.yml` (reusable workflow `repo-settings.yml`,
+script `.harness/scripts/repo-settings.py`) applies it at merge:
 
-| Section | Effet |
+| Section | Effect |
 |---|---|
-| `repository` | Description (obligatoire, [CONVENTIONS](CONVENTIONS.md) §Identité du dépôt ; celle du gabarit n'est jamais envoyée), site, fonctions (wiki, discussions), politique de merge, suppression des branches mergées |
-| `topics` | Liste complète des topics (5 à 15 attendus ; avertissement s'ils manquent ou sont mal formés) |
-| `rulesets` | Rulesets gérés par nom (créés ou mis à jour, jamais supprimés automatiquement) : protection de la branche par défaut, contrôles requis |
+| `repository` | Description (mandatory, [CONVENTIONS](CONVENTIONS.md) §Repository identity; the template's is never sent), website, features (wiki, discussions), merge policy, deletion of merged branches |
+| `topics` | Full list of topics (5 to 15 expected; a warning if they are missing or malformed) |
+| `rulesets` | Rulesets managed by name (created or updated, never deleted automatically): default branch protection, required checks |
 
-- **Une fois, par le propriétaire** : créer un jeton fine-grained limité au dépôt, « Administration: read and write »,
-  et l'enregistrer en secret de dépôt `REPO_ADMIN_TOKEN`. Sans lui, le job avertit et ne fait rien.
-- **Dérive** : chaque lundi le job compare le dépôt au fichier et échoue si un réglage a été changé à la main.
-- Contrôles requis : un nom de job direct d'un workflow déclenché par `pull_request` (le check d'un job de workflow
-  réutilisable s'appelle `appelant / appelé`). Un nom faux bloquerait toutes les PR : `check-framework.py` le vérifie
-  pour le cadre, pas pour le gabarit d'un projet (à vérifier à la main avant d'en ajouter).
-- Aucun contournement (`bypass_actors`) n'est déclaré : en urgence, un admin désactive le ruleset dans Settings, puis
-  le remet par le fichier.
-- `--apply` absent (local) : `GH_TOKEN=… python3 .harness/scripts/repo-settings.py --repo owner/nom` affiche le plan.
+- **Once, by the owner**: create a fine-grained token limited to the repository, "Administration: read and write",
+  and store it as the repository secret `REPO_ADMIN_TOKEN`. Without it, the job warns and does nothing.
+- **Drift**: every Monday the job compares the repository to the file and fails if a setting was changed by hand.
+- Required checks: the name of a direct job of a workflow triggered by `pull_request` (the check of a reusable
+  workflow's job is called `caller / called`). A wrong name would block every PR: `check-framework.py` verifies it
+  for the harness, not for a project's template (verify by hand before adding one).
+- No bypass (`bypass_actors`) is declared: in an emergency, an admin disables the ruleset in Settings, then
+  restores it through the file.
+- Without `--apply` (local): `GH_TOKEN=… python3 .harness/scripts/repo-settings.py --repo owner/name` prints the plan.
 
-## Remplacer ou étendre une brique
+## Replacing or extending a building block
 
-Le cadre est un **framework** : chaque brique a un point d'extension, aucune n'est imposée.
+The harness is a **framework**: every building block has an extension point, none is imposed.
 
-| Brique | Garder celle du cadre | La remplacer par celle de l'entreprise | La compléter |
+| Building block | Keep the harness's | Replace it with the company's | Extend it |
 |---|---|---|---|
-| Relecteurs de conformité | `compliance: ["gdpr"]` | `{"id": …, "agent": "<son agent>"}` | `{"id": …, "spec": "docs/compliance/<id>.md"}` ([COMPLIANCE](COMPLIANCE.md) §2) |
-| Relecteur adversarial, stewards | `.claude/agents/<nom>.md` vendorisé | Exclure le fichier (`exclude`) et poser le sien sous le même nom | Un agent du projet sous un autre nom |
-| Skills | `.claude/skills/<nom>/` vendorisé | Exclure et poser le sien | Skills du projet sous d'autres noms |
-| Service de revue | job `review` (`ai-review.yml`) | CodeRabbit ou autre bot : ne pas activer `review` | `.harness/review-instructions.md` |
-| Sécurité | `security.yml`, `docs-security.yml` | Outils de l'entreprise (GHAS, SonarQube, Snyk) : ne pas activer ces jobs | Inputs (`semgrep-configs`, `trivy-severity`) |
-| Réglages du dépôt | job `settings` + `.github/repo-settings.json` | Terraform / Safe-settings de l'entreprise : supprimer `settings` | Sections du fichier |
-| Tableau de bord | job `flow` | Outil de pilotage maison : supprimer `flow` | Seuils en inputs (`stall-hours`, `max-ci-runs`…) |
-| Labels | `.harness/labels.json` | Garder sa taxonomie (`apply-aliases: false`) | `.github/labels.local.json` |
-| Leçons, règles | `.harness/docs/` | — (le `CLAUDE.md` du projet l'emporte) | Leçons et règles du projet dans ses propres fichiers |
+| Compliance reviewers | `compliance: ["gdpr"]` | `{"id": …, "agent": "<its agent>"}` | `{"id": …, "spec": "docs/compliance/<id>.md"}` ([COMPLIANCE](COMPLIANCE.md) §2) |
+| Adversarial reviewer, stewards | vendored `.claude/agents/<name>.md` | Exclude the file (`exclude`) and put your own under the same name | A project agent under another name |
+| Skills | vendored `.claude/skills/<name>/` | Exclude and put your own | Project skills under other names |
+| Review service | `review` job (`ai-review.yml`) | CodeRabbit or another bot: do not enable `review` | `.harness/review-instructions.md` |
+| Security | `security.yml`, `docs-security.yml` | Company tools (GHAS, SonarQube, Snyk): do not enable these jobs | Inputs (`semgrep-configs`, `trivy-severity`) |
+| Repository settings | `settings` job + `.github/repo-settings.json` | Company Terraform / Safe-settings: delete `settings` | Sections of the file |
+| Dashboard | `flow` job | In-house steering tool: delete `flow` | Thresholds as inputs (`stall-hours`, `max-ci-runs`…) |
+| Labels | `.harness/labels.json` | Keep your own taxonomy (`apply-aliases: false`) | `.github/labels.local.json` |
+| Lessons, rules | `.harness/docs/` | — (the project's `CLAUDE.md` wins) | Project lessons and rules in its own files |
 
-Règle : on **n'édite jamais** une copie vendorisée (la synchro la refuse) ; on exclut et on remplace, ou on ajoute à
-côté. Un remplacement utile à tous remonte au cadre par PR.
+Rule: **never edit** a vendored copy (the sync refuses it); exclude and replace, or add alongside. A replacement
+useful to everyone goes up to the harness by PR.
 
-## Adoption partielle
-- **Règles seulement** : exclure `.github/*` et `docs/lots/*`.
-- **Workflows et labels seulement** : ne pas lancer la synchro ; appeler les workflows réutilisables depuis le
-  `harness.yml` du projet en pointant `labels-file` vers une copie de la taxonomie (dépôt de `francoisgn` uniquement si
-  le cadre reste privé).
+## Partial adoption
+- **Rules only**: exclude `.github/*` and `docs/lots/*`.
+- **Workflows and labels only**: do not run the sync; call the reusable workflows from the project's
+  `harness.yml`, pointing `labels-file` to a copy of the taxonomy (repositories of `francoisgn` only if the harness
+  stays private).
 
-## Retrait
-Supprimer `.harness/`, le bloc balisé de `CLAUDE.md`/`AGENTS.md`, les skills vendorisés (liste dans `.harness/lock`), les
-deux hooks de `.claude/settings.json` et `harness.yml` / `harness-sync.yml`.
+## Removal
+Delete `.harness/`, the marked block of `CLAUDE.md`/`AGENTS.md`, the vendored skills (list in `.harness/lock`), the
+two hooks of `.claude/settings.json` and `harness.yml` / `harness-sync.yml`.

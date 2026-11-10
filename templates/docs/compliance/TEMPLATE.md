@@ -1,25 +1,25 @@
 ---
-id: <identifiant court, ex. dora>
-référentiel: <texte officiel et version, ex. Règlement (UE) 2022/2554 (DORA)>
-confirme: <qui tranche : DPO, RSSI, QSA, auditeur>
-version-spec: 1
+id: <short identifier, e.g. dora>
+framework: <official text and version, e.g. Regulation (EU) 2022/2554 (DORA)>
+confirmed_by: <who decides: DPO, CISO, QSA, auditor>
+spec-version: 1
 ---
-# <Nom du référentiel> : spec de revue
+# <Name of the compliance framework>: review spec
 
-Spec lue par le relecteur générique `compliance-reviewer` (cadre agentic-harness, COMPLIANCE.md §2). Le projet
-l'écrit, la tient à jour et la déclare dans `.harness/config.json` :
+Spec read by the generic reviewer `compliance-reviewer` (Belayline, COMPLIANCE.md §2). The project
+writes it, keeps it up to date and declares it in `.harness/config.json`:
 `{"id": "<id>", "spec": "docs/compliance/<id>.md", "paths": ["…"], "keywords": ["…"]}`.
-Rien de deviné : un identifiant d'exigence non vérifié sur le texte officiel porte « (à vérifier) ».
+Nothing guessed: a requirement identifier not verified against the official text carries "(to verify)".
 
-## Quand intervenir
-- Chemins, mots-clés, types de données qui font entrer un diff dans le périmètre.
+## When to step in
+- Paths, keywords, data types that bring a diff into scope.
 
-## Ce que je vérifie
-1. <Ce qui se vérifie dans le code, la configuration, la CI ou les docs> — <exigence, n°> (<source>)
+## What I check
+1. <What can be verified in the code, the configuration, the CI or the docs>: <requirement, no.> (<source>)
 2. …
 
-## Preuves attendues
-- Artefacts qui doivent exister dans le dépôt (registre, analyse d'impact, ADR, SBOM, politique…).
+## Expected evidence
+- Artifacts that must exist in the repository (register, impact assessment, ADR, SBOM, policy…).
 
 ## Sources
-- <URL officielle> (consultée le <AAAA-MM-JJ>)
+- <Official URL> (accessed on <YYYY-MM-DD>)

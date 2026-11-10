@@ -1,19 +1,19 @@
 #!/usr/bin/env python3
-"""Réglages du dépôt GitHub décrits dans un fichier versionné (.github/repo-settings.json), appliqués par la CI.
+"""GitHub repository settings described in a versioned file (.github/repo-settings.json), applied by CI.
 
-Une session cloud ne peut pas modifier les réglages d'un dépôt (LESSONS L56) : elle modifie ce fichier par PR ; au
-merge, le workflow repo-settings.yml lance ce script avec un jeton d'administration (secret REPO_ADMIN_TOKEN).
+A cloud session cannot change the settings of a repository (LESSONS L56): it changes this file through a PR; on
+merge, the repo-settings.yml workflow runs this script with an administration token (secret REPO_ADMIN_TOKEN).
 
-Sections (toutes facultatives ; une section absente n'est pas touchée) :
-  "repository" : champs de PATCH /repos/{owner}/{repo} listés dans REPO_FIELDS ; une description restée celle du
-                 gabarit (`<…>`) n'est pas envoyée ;
-  "topics"     : liste complète des topics (remplace l'existante) ;
-  Description ou topics manquants ou non valides : avertissement, sans bloquer (CONVENTIONS.md §Identité du dépôt).
-  "rulesets"   : rulesets gérés, identifiés par leur `name` (créés ou mis à jour ; un ruleset absent du fichier n'est
-                 jamais supprimé : on le retire à la main, c'est voulu).
-Usage : repo-settings.py --repo owner/nom [--file .github/repo-settings.json] [--apply]
-Sans --apply : affiche le plan et sort en 2 s'il y a des écarts (contrôle de dérive), 0 sinon.
-Jeton : variable GH_TOKEN (fine-grained, « Administration: write » sur le dépôt). Bibliothèque standard seulement.
+Sections (all optional; a missing section is left untouched):
+  "repository": fields of PATCH /repos/{owner}/{repo} listed in REPO_FIELDS; a description still the one of the
+                template (`<...>`) is not sent;
+  "topics":     full list of topics (replaces the existing one);
+  Description or topics missing or invalid: warning, without blocking (CONVENTIONS.md §Repository identity).
+  "rulesets":   managed rulesets, identified by their `name` (created or updated; a ruleset missing from the file is
+                never deleted: remove it by hand, on purpose).
+Usage: repo-settings.py --repo owner/name [--file .github/repo-settings.json] [--apply]
+Without --apply: prints the plan and exits 2 if there are gaps (drift check), 0 otherwise.
+Token: GH_TOKEN variable (fine-grained, "Administration: write" on the repository). Standard library only.
 """
 import argparse
 import json
@@ -29,40 +29,40 @@ REPO_FIELDS = {"description", "homepage", "has_issues", "has_projects", "has_wik
                "squash_merge_commit_title", "squash_merge_commit_message"}
 RULESET_KEYS = ("name", "target", "enforcement", "conditions", "rules", "bypass_actors")
 API = "https://api.github.com"
-# Règles de GitHub pour un topic : minuscules, chiffres, tirets, 50 caractères au plus, 20 topics au plus par dépôt
+# GitHub rules for a topic: lowercase letters, digits, hyphens, 50 characters at most, 20 topics at most per repository
 # (https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/classifying-your-repository-with-topics)
 TOPIC = re.compile(r"^[a-z0-9][a-z0-9-]{0,49}$")
 MAX_TOPICS = 20
 
 
 def _placeholder(text):
-    """Vrai pour une description vide ou restée celle du gabarit (`<une phrase : …>`)."""
+    """True for a description that is empty or still the one of the template (`<one sentence: ...>`)."""
     text = (text or "").strip()
     return not text or (text.startswith("<") and text.endswith(">"))
 
 
 def identity_gaps(desired):
-    """Ce qui manque pour que le dépôt dise ce qu'il est (CONVENTIONS.md §Identité du dépôt) ; fonction pure."""
+    """What is missing for the repository to say what it is (CONVENTIONS.md §Repository identity); pure function."""
     gaps = []
     if _placeholder((desired.get("repository") or {}).get("description")):
-        gaps.append("description absente ou restée celle du gabarit : une phrase, ce que fait le projet et pour qui")
+        gaps.append("description missing or still the one of the template: one sentence, what the project does and for whom")
     topics = desired.get("topics") or []
     bad = [t for t in topics if not isinstance(t, str) or not TOPIC.match(t)]
     if not topics:
-        gaps.append("topics absents : 5 à 15 mots-clés (domaine, technologie, usage)")
+        gaps.append("topics missing: 5 to 15 keywords (domain, technology, use)")
     elif bad:
-        gaps.append(f"topics non valides {bad} : minuscules, chiffres et tirets, 50 caractères au plus")
+        gaps.append(f"invalid topics {bad}: lowercase letters, digits and hyphens, 50 characters at most")
     elif len(set(topics)) > MAX_TOPICS:
-        gaps.append(f"topics trop nombreux ({len(set(topics))}) : {MAX_TOPICS} au plus")
+        gaps.append(f"too many topics ({len(set(topics))}): {MAX_TOPICS} at most")
     return gaps
 
 
 def _covers(actual, wanted):
-    """`actual` (réponse de l'API) contient `wanted` (fichier) : clés du fichier ⊆ réponse, récursivement.
+    """`actual` (API response) contains `wanted` (file): keys of the file ⊆ response, recursively.
 
-    L'API renvoie des valeurs par défaut que le fichier ne dit pas (`allowed_merge_methods`, `integration_id`…) : elles
-    ne sont pas une dérive. Les listes se comparent sans ordre, élément par élément, à longueur égale (une règle en plus
-    côté GitHub EST une dérive).
+    The API returns default values the file does not state (`allowed_merge_methods`, `integration_id`...): they are
+    not drift. Lists are compared without order, item by item, at equal length (one more rule on the GitHub side IS
+    drift).
     """
     if isinstance(wanted, dict):
         return isinstance(actual, dict) and all(k in actual and _covers(actual[k], v) for k, v in wanted.items())
@@ -80,19 +80,19 @@ def _covers(actual, wanted):
 
 
 def plan(desired, current):
-    """Actions à mener pour que `current` ressemble à `desired` (fonction pure)."""
+    """Actions to take so that `current` looks like `desired` (pure function)."""
     actions = []
-    desired = {k: v for k, v in desired.items() if not k.startswith("$")}  # "$comment" : documentation du fichier
+    desired = {k: v for k, v in desired.items() if not k.startswith("$")}  # "$comment": documentation of the file
     unknown_sections = sorted(set(desired) - {"repository", "topics", "rulesets"})
     if unknown_sections:
-        raise ValueError(f"sections inconnues : {unknown_sections} (permis : repository, topics, rulesets)")
+        raise ValueError(f"unknown sections: {unknown_sections} (allowed: repository, topics, rulesets)")
     repo = desired.get("repository")
     if repo is not None:
         unknown = sorted(set(repo) - REPO_FIELDS)
         if unknown:
-            raise ValueError(f"champs de dépôt non gérés : {unknown} (permis : {sorted(REPO_FIELDS)})")
+            raise ValueError(f"unmanaged repository fields: {unknown} (allowed: {sorted(REPO_FIELDS)})")
         fields = {k: v for k, v in repo.items() if current.get("repository", {}).get(k) != v
-                  and not (k == "description" and _placeholder(v))}  # le texte du gabarit ne part jamais sur GitHub
+                  and not (k == "description" and _placeholder(v))}  # the template text never goes to GitHub
         if fields:
             actions.append({"op": "patch-repo", "fields": fields})
     if desired.get("topics") is not None:
@@ -102,7 +102,7 @@ def plan(desired, current):
     names = [r.get("name") for r in desired.get("rulesets") or []]
     duplicates = sorted({n for n in names if names.count(n) > 1})
     if duplicates:
-        raise ValueError(f"rulesets déclarés deux fois : {duplicates} (le nom identifie un ruleset)")
+        raise ValueError(f"rulesets declared twice: {duplicates} (the name identifies a ruleset)")
     by_name = {r["name"]: r for r in current.get("rulesets", [])}
     for ruleset in desired.get("rulesets") or []:
         wanted = {k: ruleset[k] for k in RULESET_KEYS if k in ruleset}
@@ -141,23 +141,23 @@ def github(token):
                                      headers={"Authorization": f"Bearer {token}",
                                               "Accept": "application/vnd.github+json",
                                               "X-GitHub-Api-Version": "2022-11-28",
-                                              "User-Agent": "agentic-harness-repo-settings"})
+                                              "User-Agent": "belayline-repo-settings"})
         try:
             with urllib.request.urlopen(req, timeout=30) as resp:
                 raw = resp.read()
         except urllib.error.HTTPError as e:
             detail = e.read().decode(errors="replace")[:500]
-            raise SystemExit(f"✘ {method} {path} : HTTP {e.code} {detail}") from None
+            raise SystemExit(f"✘ {method} {path}: HTTP {e.code} {detail}") from None
         return json.loads(raw) if raw else {}
     return http
 
 
 def describe(a):
     if a["op"] == "patch-repo":
-        return "dépôt : " + ", ".join(f"{k} → {json.dumps(v, ensure_ascii=False)}" for k, v in a["fields"].items())
+        return "repository: " + ", ".join(f"{k} → {json.dumps(v, ensure_ascii=False)}" for k, v in a["fields"].items())
     if a["op"] == "put-topics":
         return "topics → " + ", ".join(a["names"])
-    return f"ruleset « {a['ruleset']['name']} » : {'création' if a['op'] == 'create-ruleset' else 'mise à jour'}"
+    return f"ruleset \"{a['ruleset']['name']}\": {'create' if a['op'] == 'create-ruleset' else 'update'}"
 
 
 def main():
@@ -168,7 +168,7 @@ def main():
     a = ap.parse_args()
     token = os.environ.get("GH_TOKEN")
     if not token:
-        raise SystemExit("✘ GH_TOKEN absent (secret REPO_ADMIN_TOKEN : jeton « Administration: write » sur le dépôt)")
+        raise SystemExit("✘ GH_TOKEN missing (secret REPO_ADMIN_TOKEN: token with \"Administration: write\" on the repository)")
     with open(a.file, encoding="utf-8") as f:
         desired = json.load(f)
     for gap in identity_gaps(desired):
@@ -178,13 +178,13 @@ def main():
     for act in actions:
         print(f"- {describe(act)}")
     if not actions:
-        print("🟢 Réglages conformes au fichier.")
+        print("🟢 Settings match the file.")
         return 0
     if not a.apply:
-        print(f"🟠 {len(actions)} écart(s) ; --apply pour appliquer.")
+        print(f"🟠 {len(actions)} gap(s); --apply to apply.")
         return 2
     apply(a.repo, actions, http)
-    print(f"🟢 {len(actions)} changement(s) appliqué(s).")
+    print(f"🟢 {len(actions)} change(s) applied.")
     return 0
 
 

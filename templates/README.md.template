@@ -1,0 +1,46 @@
+# <Project name>
+
+<!-- Technology badges: one per real building block of the project (language, framework, platform, CI, license).
+     Format: https://img.shields.io/badge/<name>-<version>-<colour>?logo=<simpleicons.org slug>&logoColor=white
+     A status badge (CI, version) points to a live source, never a number written by hand. -->
+![Language](https://img.shields.io/badge/language-version-informational)
+![Platform](https://img.shields.io/badge/platform-version-informational)
+![CI](https://img.shields.io/badge/CI-GitHub_Actions-2088FF?logo=githubactions&logoColor=white)
+
+> <One sentence: what the product does, for whom.>
+
+<!-- A screenshot or an image of the product in use (docs/images/…), with alternative text that describes it. -->
+
+**TL;DR**: <the problem, the product's answer, where it stands, in three lines.>
+
+## Architecture
+
+![Project architecture: interface, engine, data, external services, CI, agents](docs/diagrams/architecture.svg)
+
+<!-- Source: docs/diagrams/architecture.json → `python3 .harness/scripts/diagrams-render.py` → .svg and .excalidraw
+     (scene editable on excalidraw.com). Commit the three files together. -->
+
+## Progress
+
+<!-- Kept up to date by `/readme-update` at the end of each lot: one line per lot or milestone, state re-read from the issues. -->
+<!-- harness:begin progress -->
+| Lot | Scope | State | Issue / PR |
+|---|---|---|---|
+| LOT-001 | <scope> | ⚪ to do | #… |
+<!-- harness:end progress -->
+
+States: ⚪ to do · 🔵 in progress · 🟠 in review · 🔴 blocked · 🟢 shipped.
+
+## Quick start
+
+```bash
+# Exact commands: install, run, test.
+```
+
+## Contributing
+
+See [CONTRIBUTING.md](CONTRIBUTING.md): claim an issue, open a PR, expected checks.
+
+## License
+
+<License and link to the file.>

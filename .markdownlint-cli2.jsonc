@@ -1,4 +1,4 @@
-// Seulement les règles qui attrapent une vraie casse du rendu (tableaux cassés, ancres mortes) : LESSONS L07.
+// Only the rules that catch real rendering breakage (broken tables, dead anchors): LESSONS L07.
 {
   "config": {
     "default": false,

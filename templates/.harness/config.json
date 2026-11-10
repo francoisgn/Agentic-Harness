@@ -1,11 +1,12 @@
 {
-  "language": "fr",
+  "language": "en",
   "exclude": [],
   "protected_branches": ["main", "master", "develop", "beta"],
   "integration_branch": "develop",
   "branch_model": "A",
   "branch_types": ["lot", "fix", "feat", "chore", "docs"],
-  "labels": { "model_prefixes": ["modèle:"], "size_prefixes": ["taille:"] },
+  "labels": { "model_prefixes": ["difficulty:"], "size_prefixes": [] },
   "ledger": { "enabled": false, "label": "ledger", "fold_command": "" },
-  "compliance": []
+  "compliance": [],
+  "readme": { "badges": true, "image": true, "architecture": "excalidraw", "progress": true, "quickstart": true, "contributing": true }
 }

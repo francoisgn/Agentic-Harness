@@ -1,4 +1,4 @@
-"""Tests de scripts/repo-settings.py : calcul des changements (pur) et application (HTTP simulé)."""
+"""Tests of scripts/repo-settings.py: computing the changes (pure) and applying them (simulated HTTP)."""
 import importlib.util
 import json
 import pathlib
@@ -9,7 +9,7 @@ spec = importlib.util.spec_from_file_location("repo_settings", ROOT / "scripts" 
 rs = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(rs)
 
-RULESET = {"name": "master protégée", "target": "branch", "enforcement": "active",
+RULESET = {"name": "protected master", "target": "branch", "enforcement": "active",
            "conditions": {"ref_name": {"include": ["~DEFAULT_BRANCH"], "exclude": []}},
            "rules": [{"type": "deletion"}, {"type": "non_fast_forward"}]}
 
@@ -21,30 +21,30 @@ class PlanTests(unittest.TestCase):
         self.assertEqual(rs.plan(desired, current), [])
 
     def test_repository_fields_only_changed_ones(self):
-        actions = rs.plan({"repository": {"description": "nouvelle", "has_wiki": False}},
-                          {"repository": {"description": "ancienne", "has_wiki": False}, "topics": [], "rulesets": []})
-        self.assertEqual(actions, [{"op": "patch-repo", "fields": {"description": "nouvelle"}}])
+        actions = rs.plan({"repository": {"description": "new", "has_wiki": False}},
+                          {"repository": {"description": "old", "has_wiki": False}, "topics": [], "rulesets": []})
+        self.assertEqual(actions, [{"op": "patch-repo", "fields": {"description": "new"}}])
 
     def test_topics_replaced_as_a_set(self):
         actions = rs.plan({"topics": ["claude-code", "agentic"]}, {"repository": {}, "topics": ["old"], "rulesets": []})
         self.assertEqual(actions, [{"op": "put-topics", "names": ["agentic", "claude-code"]}])
 
     def test_placeholder_description_is_never_sent(self):
-        desired = {"repository": {"description": "<une phrase : ce que fait le projet, pour qui>", "has_wiki": False}}
+        desired = {"repository": {"description": "<one sentence: what the project does, for whom>", "has_wiki": False}}
         actions = rs.plan(desired, {"repository": {"description": "", "has_wiki": True}, "topics": [], "rulesets": []})
         self.assertEqual(actions, [{"op": "patch-repo", "fields": {"has_wiki": False}}])
 
     def test_identity_gaps_none_when_described_and_tagged(self):
-        self.assertEqual(rs.identity_gaps({"repository": {"description": "Un cadre."}, "topics": ["ai-agents", "tdd"]}), [])
+        self.assertEqual(rs.identity_gaps({"repository": {"description": "A harness."}, "topics": ["ai-agents", "tdd"]}), [])
 
     def test_identity_gaps_on_missing_or_placeholder_description(self):
-        for repo in ({}, {"description": ""}, {"description": "<une phrase>"}):
+        for repo in ({}, {"description": ""}, {"description": "<one sentence>"}):
             gaps = rs.identity_gaps({"repository": repo, "topics": ["tdd"]})
             self.assertEqual(len(gaps), 1, repo)
             self.assertIn("description", gaps[0])
 
     def test_identity_gaps_on_empty_or_invalid_topics(self):
-        ok = {"description": "Un cadre."}
+        ok = {"description": "A harness."}
         self.assertIn("topics", rs.identity_gaps({"repository": ok, "topics": []})[0])
         self.assertIn("topics", rs.identity_gaps({"repository": ok})[0])
         for bad in ("Claude Code", "CI", "-tdd", "x" * 51):
@@ -106,7 +106,7 @@ class PlanTests(unittest.TestCase):
         self.assertEqual(rs.plan({"repository": {"description": "d"}}, {})[0]["op"], "patch-repo")
 
     def test_unmanaged_rulesets_are_never_deleted(self):
-        current = {"repository": {}, "topics": [], "rulesets": [dict(RULESET, id=7, name="à la main")]}
+        current = {"repository": {}, "topics": [], "rulesets": [dict(RULESET, id=7, name="by hand")]}
         self.assertEqual(rs.plan({"rulesets": []}, current), [])
 
     def test_absent_sections_are_left_alone(self):
@@ -115,7 +115,7 @@ class PlanTests(unittest.TestCase):
     def test_unknown_section_is_rejected_but_comments_allowed(self):
         empty = {"repository": {}, "topics": [], "rulesets": []}
         with self.assertRaises(ValueError):
-            rs.plan({"ruleset": []}, empty)  # faute de frappe : sinon ignorée en silence
+            rs.plan({"ruleset": []}, empty)  # typo: otherwise silently ignored
         self.assertEqual(rs.plan({"$comment": "doc"}, empty), [])
 
     def test_unknown_repository_field_is_rejected(self):
@@ -152,7 +152,7 @@ class ShippedSettingsTests(unittest.TestCase):
     def test_framework_and_template_settings_are_valid(self):
         for p in (ROOT / ".github/repo-settings.json", ROOT / "templates/.github/repo-settings.json"):
             desired = json.loads(p.read_text(encoding="utf-8"))
-            rs.plan(desired, {"repository": {}, "topics": [], "rulesets": []})  # lève si un champ est inconnu
+            rs.plan(desired, {"repository": {}, "topics": [], "rulesets": []})  # raises if a field is unknown
 
 
 if __name__ == "__main__":

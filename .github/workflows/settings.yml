@@ -1,9 +1,10 @@
-name: Réglages
+name: Settings
 
-# Réglages du dépôt du cadre « as code » (.github/repo-settings.json) : appliqués au merge, dérive contrôlée chaque
-# semaine. Même logique que le workflow réutilisable repo-settings.yml des projets, en job direct ici (le cadre lance
-# son propre script ; un appel local `uses: ./…` est signalé par zizmor, audit self-repository).
-# Secret REPO_ADMIN_TOKEN : jeton fine-grained limité à ce dépôt, « Administration: read and write ». Absent → avertissement.
+# Repository settings of the harness "as code" (.github/repo-settings.json): applied on merge, drift checked every
+# week. Same logic as the reusable workflow repo-settings.yml used by projects, as a direct job here (the harness runs
+# its own script; a local call `uses: ./…` is flagged by zizmor, audit self-repository).
+# Secret REPO_ADMIN_TOKEN: fine-grained token limited to this repository, "Administration: read and write". Missing → warning.
+# The labels of the harness repository are synced by labels-sync.yml itself (its `push` trigger).
 on:
   push:
     branches: [master]
@@ -20,7 +21,7 @@ concurrency:
 
 jobs:
   settings:
-    name: Réglages du dépôt
+    name: Repository settings
     runs-on: ubuntu-latest
     timeout-minutes: 5
     permissions:
@@ -30,18 +31,18 @@ jobs:
         with:
           persist-credentials: false
 
-      - name: Appliquer ou contrôler
+      - name: Apply or check
         env:
           GH_TOKEN: ${{ secrets.REPO_ADMIN_TOKEN }}
           EVENT: ${{ github.event_name }}
         run: |
           if [ -z "$GH_TOKEN" ]; then
-            echo "::warning::Secret REPO_ADMIN_TOKEN absent : réglages non appliqués (docs/ADOPTION.md §Réglages du dépôt)"
+            echo "::warning::Secret REPO_ADMIN_TOKEN missing: settings not applied (docs/ADOPTION.md §Repository settings)"
             exit 0
           fi
           if [ "$EVENT" = "schedule" ]; then
             python3 scripts/repo-settings.py --repo "$GITHUB_REPOSITORY" \
-              || { echo "::error::Dérive : un réglage a été changé hors du fichier (voir le plan ci-dessus)"; exit 1; }
+              || { echo "::error::Drift: a setting was changed outside the file (see the plan above)"; exit 1; }
           else
             python3 scripts/repo-settings.py --repo "$GITHUB_REPOSITORY" --apply
           fi

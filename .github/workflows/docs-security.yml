@@ -1,9 +1,10 @@
-name: Docs et sécurité (réutilisable)
+name: Docs and security (reusable)
 
-# Socle gratuit, sans compte tiers (CI-BUDGET.md §Sécurité), en UN job : markdownlint (tableaux et ancres),
-# gitleaks (historique), zizmor et actionlint (workflows). Chaque outil tourne même si le précédent échoue : un
-# seul passage donne tous les constats. Rien ne tourne sur un brouillon.
-# Désactiver ce que le projet couvre déjà ailleurs (inputs), pour ne pas payer deux fois.
+# Free baseline, no third-party account (CI-BUDGET.md §Security), in ONE job: markdownlint (tables and anchors), README
+# at the harness standard,
+# gitleaks (history), zizmor and actionlint (workflows). Each tool runs even if the previous one fails: a
+# single run gives every finding. Nothing runs on a draft.
+# Disable what the project already covers elsewhere (inputs), so as not to pay twice.
 on:
   workflow_call:
     inputs:
@@ -17,6 +18,10 @@ on:
         type: boolean
         default: true
       actionlint:
+        type: boolean
+        default: true
+      readme:
+        description: Project README at the harness standard (README-STANDARD.md) and diagrams up to date; skipped if the scripts are not vendored
         type: boolean
         default: true
 
@@ -35,13 +40,24 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-          fetch-depth: 0   # gitleaks lit tout l'historique
+          fetch-depth: 0   # gitleaks reads the whole history
 
-      - name: Markdown · tableaux et ancres (markdownlint, règles de .markdownlint-cli2.jsonc)
+      - name: Markdown · tables and anchors (markdownlint, rules from .markdownlint-cli2.jsonc)
         if: ${{ !cancelled() && inputs.markdownlint }}
         run: npx --yes markdownlint-cli2@0.18.1
 
-      - name: Secrets · gitleaks (historique)
+      - name: README · harness standard and diagrams up to date (.harness/config.json › readme)
+        if: ${{ !cancelled() && inputs.readme }}
+        run: |
+          if [ ! -f .harness/scripts/readme-check.py ]; then echo "::notice::readme-check.py not vendored: check skipped"; exit 0; fi
+          rc=0
+          python3 .harness/scripts/readme-check.py || rc=1
+          if [ -d docs/diagrams ] && [ -f .harness/scripts/diagrams-render.py ]; then
+            python3 .harness/scripts/diagrams-render.py --check || rc=1
+          fi
+          exit "$rc"
+
+      - name: Secrets · gitleaks (history)
         if: ${{ !cancelled() && inputs.gitleaks }}
         run: |
           if [ "$GITHUB_EVENT_NAME" = "pull_request" ]; then LOG_OPTS=HEAD; else LOG_OPTS=--all; fi
@@ -52,6 +68,6 @@ jobs:
         if: ${{ !cancelled() && inputs.zizmor }}
         run: pipx run zizmor==1.31.1 --offline --min-severity low .github/workflows
 
-      - name: Workflows · actionlint (+ shellcheck des run:)
+      - name: Workflows · actionlint (+ shellcheck of run:)
         if: ${{ !cancelled() && inputs.actionlint }}
         run: docker run --rm -v "$PWD":/repo -w /repo rhysd/actionlint:1.7.7 -color

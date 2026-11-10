@@ -1,36 +1,36 @@
-# Retour de test : devient une issue par point, rattachée à une issue parapluie (cadre : METHODOLOGY.md §3).
-name: Retour de test
-description: Bug, ergonomie, calcul ou idée relevé en utilisant l'app
-labels: [feedback]
+# Test feedback: becomes one issue per point, attached to an umbrella issue (harness: METHODOLOGY.md §3).
+name: Test feedback
+description: Bug, usability, calculation or idea noted while using the app
+labels: ["type: epic", "status: needs-triage"]
 body:
   - type: textarea
-    id: resume
+    id: summary
     attributes:
-      label: Résumé
-      description: Une phrase lisible d'un coup d'œil ; le détail va dans les champs suivants.
-      placeholder: "En tant que …, je veux …, pour …"
+      label: Summary
+      description: One sentence readable at a glance; the detail goes in the next fields.
+      placeholder: "As a …, I want …, so that …"
     validations:
       required: true
   - type: dropdown
     id: type
     attributes:
       label: Type
-      options: [Bug, Ergonomie / design, Calcul à vérifier, Idée / fonctionnalité, Autre]
+      options: [Bug, Usability / design, Calculation to verify, Idea / feature, Other]
     validations:
       required: true
   - type: textarea
-    id: constat
+    id: observed
     attributes:
-      label: Ce que je vois
-      description: Saisies utilisées, écran, captures d'écran (glisser-déposer). Jamais de mot de passe, cookie ou donnée personnelle.
+      label: What I see
+      description: Inputs used, screen, screenshots (drag and drop). Never a password, cookie or personal data.
     validations:
       required: true
   - type: textarea
-    id: attendu
+    id: expected
     attributes:
-      label: Ce que j'attendais
+      label: What I expected
   - type: input
     id: version
     attributes:
-      label: Version et appareil
-      placeholder: "ex. 0.6.0 (3), iPhone, iOS 27.1"
+      label: Version and device
+      placeholder: "e.g. 0.6.0 (3), iPhone, iOS 27.1"

@@ -1,9 +1,9 @@
 # AGENTS.md
 
-<!-- harness:begin cadre -->
-<!-- harness:end cadre -->
+<!-- harness:begin harness -->
+<!-- harness:end harness -->
 
 ## Harness overrides
-<!-- Dérogations du projet au cadre agentic-harness, chacune avec sa raison (elles l'emportent sur .harness/docs/).
-     Ex. : « Branches : `<host>/<nom>` au lieu de `<type>/<nom-court>`, parce que… » ; « Pas de label de taille : le
-     niveau se lit dans docs/LOTS.md ». Vide si le projet suit le cadre tel quel. -->
+<!-- Deviations of the project from the Belayline harness, each with its reason (they win over .harness/docs/).
+     E.g.: "Branches: `<host>/<name>` instead of `<type>/<short-name>`, because…"; "No difficulty label: the
+     tier is read in docs/LOTS.md". Empty if the project follows the harness as is. -->

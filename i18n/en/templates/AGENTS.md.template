@@ -1,9 +1,0 @@
-# AGENTS.md
-
-<!-- harness:begin cadre -->
-<!-- harness:end cadre -->
-
-## Harness overrides
-<!-- The project's departures from the agentic-harness framework, each with its reason (they win over .harness/docs/).
-     E.g. "Branches: `<host>/<name>` instead of `<type>/<short-name>`, because…"; "No size label: the level is read
-     from docs/LOTS.md". Empty if the project follows the framework as is. -->

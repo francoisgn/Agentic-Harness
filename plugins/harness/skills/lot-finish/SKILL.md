@@ -1,55 +1,58 @@
 ---
 name: lot-finish
-description: Termine un lot selon le cadre agentic-harness — contrôles locaux, auto-relecture LESSONS, revue adversariale par un autre modèle, PR (brouillon puis Ready) avec ligne d'issue, `Claim:`, lot, problème/cause/changement/tests et `### Ledger` si le projet en tient un, commentaires de fin. À utiliser quand le code d'un lot est écrit.
-argument-hint: "[n° d'issue…]"
+description: Finishes a lot following the Belayline harness (local checks, LESSONS self-review, adversarial review by another model, PR (draft then Ready) with issue line, `Claim:`, lot, problem/cause/change/tests and `### Ledger` if the project keeps one, closing comments). Use when the code of a lot is written.
+argument-hint: "[issue number…]"
 ---
 
-# Terminer un lot
+# Finish a lot
 
-Issues du lot : $ARGUMENTS (sinon celles prises en charge sur la branche courante).
-Références : `.harness/docs/CONVENTIONS.md` (§PR, §Registre, §Commentaires), `.harness/docs/ORCHESTRATION.md` §3
-(revue adversariale), `.harness/docs/CI-BUDGET.md` §2 (sinon les mêmes fichiers sous `${CLAUDE_PLUGIN_ROOT}/docs/`).
+Issues of the lot: $ARGUMENTS (otherwise those claimed on the current branch).
+References: `.harness/docs/CONVENTIONS.md` (§Pull requests, §Ledger, §GitHub comments), `.harness/docs/ORCHESTRATION.md`
+§3 (adversarial review), `.harness/docs/CI-BUDGET.md` §2 (otherwise the same files under
+`${CLAUDE_PLUGIN_ROOT}/docs/`).
 
-1. **Contrôles locaux** : tests, lint, couverture, script de CI locale du projet (`CLAUDE.md` › Build et tests).
-   `git status` : aucun fichier suivi oublié, aucun artefact. Chaque nouveau test a été vu **en échec** sans le
-   changement. Code d'app non compilable ici (cloud Linux) : relu avec une rigueur de compilateur, et noté.
-2. **Auto-relecture** : skill `/lessons-check` (ou à la main contre `LESSONS.md`). Docs, plan, réglementation à jour
-   dans les mêmes commits. Version et fichiers du registre (CHANGELOG, Nouveautés…) **non** touchés.
-3. **Revue adversariale** : un sous-agent neuf, **d'un autre modèle** que l'auteur, en lecture seule, reçoit seulement
-   le diff (`git diff origin/<intégration>...HEAD`), la spec, `ESSENTIEL.md`, `LESSONS.md`, avec la consigne
-   d'ORCHESTRATION.md §3 — jamais tes conclusions. Poster son verdict sur la PR. Corriger chaque constat Haute/Moyenne
-   en **un** commit, faire revérifier.
-4. **Commits** : atomiques par issue, dans la langue et le style du projet (`git log`), attribution de la session en
-   fin de message, trailer `Agent: <identifiant>`.
-5. **Push et PR** : le travail a déjà été poussé souvent sur la PR en brouillon (sinon : pousser et l'ouvrir en
-   brouillon vers la branche d'intégration). Titre dans le style des PR précédentes. **Corps**, court, dans cet ordre :
+1. **Local checks**: tests, lint, coverage, the project's local CI script (`CLAUDE.md` › Build and tests).
+   `git status`: no tracked file forgotten, no artefact. Each new test has been seen **failing** without the
+   change. App code that cannot be compiled here (Linux cloud): reread with compiler-level rigour, and noted.
+2. **Self-review**: skill `/lessons-check` (or by hand against `LESSONS.md`). Docs, plan, regulation updated in the
+   same commits; **README**: `/readme-update` (the lot's row in the progress table, badges, architecture diagram if
+   the modules or flows changed; `.harness/docs/README-STANDARD.md`). Version and ledger files (CHANGELOG, What's
+   New…) **not** touched.
+3. **Adversarial review**: a fresh subagent, **of another model** than the author, read-only, receives only the diff
+   (`git diff origin/<integration>...HEAD`), the spec, `ESSENTIALS.md`, `LESSONS.md`, with the instruction from
+   ORCHESTRATION.md §3. Never your conclusions. Post its verdict on the PR. Fix each High/Medium finding in **one**
+   commit, have it rechecked.
+4. **Commits**: atomic per issue, in the project's language and style (`git log`), session attribution at the end of
+   the message, trailer `Agent: <identifier>`.
+5. **Push and PR**: the work has already been pushed often to the draft PR (otherwise: push and open it as a draft to
+   the integration branch). Title in the style of previous PRs. **Body**, short, in this order:
    ````text
-   LOT-XXX                      ← seulement pour un lot du plan
-   Closes #n                    ← une ligne par issue ; travail partiel : Refs #n — reste : …
-   Claim: <identifiant>         ← égal au /claim actif de l'issue
+   LOT-XXX                      ← only for a lot of the plan
+   Closes #n                    ← one line per issue; partial work: Refs #n — left: …
+   Claim: <identifier>          ← equal to the issue's active /claim
 
-   **Problème** … **Cause** … **Changement** (et pourquoi si large, pas plus) …
-   **Tests** : noms, ce qu'ils vérifient, vus en échec sans le changement ; commandes lancées ; non testé / à valider
-   sur l'appareil.
+   **Problem** … **Cause** … **Change** (and why this wide, no wider) …
+   **Tests**: names, what they check, seen failing without the change; commands run; not tested / to validate
+   on the device.
 
-   ### Ledger                    ← seulement si .harness/config.json → ledger.enabled est vrai et qu'il y a une entrée
-   ```<type d'entrée>
+   ### Ledger                    ← only if .harness/config.json → ledger.enabled is true and there is an entry
+   ```<entry type>
    …
    ```
 
-   Modèle auteur : … (<identifiant>) · relecteur : … (<identifiant du relecteur>)
-   <ligne de génération>
+   Author model: … (<identifier>) · reviewer: … (<reviewer's identifier>)
+   <generation line>
    ````
-   Registre (`CONVENTIONS.md` §Registre) : les entrées vont dans les blocs de `### Ledger`,
-   au format du script du projet, et la PR reçoit le label `ledger` (ou celui de `ledger.label`) ; aucune entrée → ni
-   section ni label. Projet sans registre : pas de section du tout.
-6. **Ready for review** quand tout est fini et relu : c'est là que la CI coûteuse tourne. Ensuite, un commit et un push
-   par cycle de revue (`/review-round`) ; jamais de push « pour voir » sur une PR prête.
-7. **Commentaires de fin** sur chaque issue : fait, lien de la PR, ce qui reste, décisions prises (option la plus simple
-   retenue si ambiguïté), à valider sur l'appareil ; pied `---` / `_Generated by [Claude Code](https://claude.ai/code)_`.
-   Mettre à jour la colonne PR du tableau de l'issue parapluie ; la fermer si tous ses points le sont. Travail
-   arrêté avant la fin : le dire, puis `/release`.
-8. **Travail découvert** : une issue labellisée par sujet (jamais seulement une note).
-9. Ne merger que selon la politique du projet (sinon l'accord de l'opérateur). Après un merge qui ne ferme pas
-   l'issue : « Fait dans #PR (mergée en `<sha>`) », puis vérifier qu'elle est fermée. Rendre compte : lien de la PR,
-   ce qui reste, ce qu'il faut vérifier sur Mac (`/review-round` pour la suite).
+   Ledger (`CONVENTIONS.md` §Ledger): entries go in the blocks of `### Ledger`, in the format of the project's
+   script, and the PR gets the label `ledger` (or the one in `ledger.label`); no entry → neither section nor label.
+   Project without a ledger: no section at all.
+6. **Ready for review** when everything is finished and reviewed: this is when the costly CI runs. After that, one
+   commit and one push per review round (`/review-round`); never a push "to see" on a ready PR.
+7. **Closing comments** on each issue: done, PR link, what is left, decisions made (simplest option chosen when
+   ambiguous), to validate on the device; footer `---` / `_Generated by [Claude Code](https://claude.ai/code)_`.
+   Update the PR column of the umbrella issue's table; close it if all its points are closed. Work stopped before
+   the end: say so, then `/release`.
+8. **Discovered work**: one labelled issue per subject (never only a note).
+9. Merge only according to the project's policy (otherwise the operator's approval). After a merge that does not
+   close the issue: "Done in #PR (merged at `<sha>`)", then check that it is closed. Report: PR link, what is left,
+   what must be checked on the Mac (`/review-round` for what follows).

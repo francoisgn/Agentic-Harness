@@ -1,0 +1,191 @@
+[
+ {
+  "type": "cameraUpdate",
+  "width": 1200,
+  "height": 620,
+  "x": 0,
+  "y": 0
+ },
+ {
+  "type": "text",
+  "id": "t",
+  "x": 40,
+  "y": 20,
+  "text": "Architecture: replace with the project's own",
+  "fontSize": 30
+ },
+ {
+  "type": "text",
+  "id": "st",
+  "x": 40,
+  "y": 62,
+  "text": "edit docs/diagrams/architecture.json, re-run the render, commit the three files",
+  "fontSize": 18,
+  "strokeColor": "#757575"
+ },
+ {
+  "type": "rectangle",
+  "id": "ui",
+  "x": 40,
+  "y": 130,
+  "width": 300,
+  "height": 120,
+  "roundness": {
+   "type": 3
+  },
+  "backgroundColor": "#a5d8ff",
+  "fillStyle": "solid",
+  "strokeColor": "#4a9eed",
+  "label": {
+   "text": "Interface\nscreens, views, CLI",
+   "fontSize": 20
+  }
+ },
+ {
+  "type": "rectangle",
+  "id": "core",
+  "x": 450,
+  "y": 130,
+  "width": 300,
+  "height": 120,
+  "roundness": {
+   "type": 3
+  },
+  "backgroundColor": "#b2f2bb",
+  "fillStyle": "solid",
+  "strokeColor": "#22c55e",
+  "label": {
+   "text": "Engine\nbusiness rules, tested",
+   "fontSize": 20
+  }
+ },
+ {
+  "type": "rectangle",
+  "id": "data",
+  "x": 860,
+  "y": 130,
+  "width": 300,
+  "height": 120,
+  "roundness": {
+   "type": 3
+  },
+  "backgroundColor": "#ffd8a8",
+  "fillStyle": "solid",
+  "strokeColor": "#f59e0b",
+  "label": {
+   "text": "Data\npersistence, migrations",
+   "fontSize": 20
+  }
+ },
+ {
+  "type": "arrow",
+  "id": "a1",
+  "x": 340,
+  "y": 190,
+  "width": 110,
+  "height": 0,
+  "points": [
+   [
+    0,
+    0
+   ],
+   [
+    110,
+    0
+   ]
+  ],
+  "endArrowhead": "arrow"
+ },
+ {
+  "type": "arrow",
+  "id": "a2",
+  "x": 750,
+  "y": 190,
+  "width": 110,
+  "height": 0,
+  "points": [
+   [
+    0,
+    0
+   ],
+   [
+    110,
+    0
+   ]
+  ],
+  "endArrowhead": "arrow"
+ },
+ {
+  "type": "rectangle",
+  "id": "ext",
+  "x": 450,
+  "y": 360,
+  "width": 300,
+  "height": 120,
+  "roundness": {
+   "type": 3
+  },
+  "backgroundColor": "#eebefa",
+  "fillStyle": "solid",
+  "strokeColor": "#8b5cf6",
+  "label": {
+   "text": "External services\nAPI, authentication",
+   "fontSize": 20
+  }
+ },
+ {
+  "type": "arrow",
+  "id": "a3",
+  "x": 600,
+  "y": 250,
+  "width": 0,
+  "height": 110,
+  "points": [
+   [
+    0,
+    0
+   ],
+   [
+    0,
+    110
+   ]
+  ],
+  "endArrowhead": "arrow"
+ },
+ {
+  "type": "rectangle",
+  "id": "ci",
+  "x": 860,
+  "y": 360,
+  "width": 300,
+  "height": 120,
+  "roundness": {
+   "type": 3
+  },
+  "backgroundColor": "#fff3bf",
+  "fillStyle": "solid",
+  "strokeColor": "#f59e0b",
+  "label": {
+   "text": "CI and delivery\ntests, security, release",
+   "fontSize": 20
+  }
+ },
+ {
+  "type": "rectangle",
+  "id": "ops",
+  "x": 40,
+  "y": 360,
+  "width": 300,
+  "height": 120,
+  "roundness": {
+   "type": 3
+  },
+  "backgroundColor": "#c3fae8",
+  "fillStyle": "solid",
+  "strokeColor": "#06b6d4",
+  "label": {
+   "text": "Agents and operator\nissues, lots, PRs",
+   "fontSize": 20
+  }
+ }
+]
