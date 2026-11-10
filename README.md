@@ -97,6 +97,7 @@ python3 scripts/check-framework.py && python3 -m unittest discover -s scripts/te
 ```
 
 ## Versions et contributions
+- Licence : [MIT](LICENSE). `harness-sync.sh` la copie dans `.harness/LICENSE` du projet, avec les fichiers du cadre.
 - Semver, tags `vX.Y.Z` sur `master`, [CHANGELOG](CHANGELOG.md) à chaque version (section « Action » pour les
   projets). Avant 1.0.0, un MINEUR peut casser : le CHANGELOG le dit.
 - Contribuer : une issue avec son intention, une branche, une PR en brouillon, la CI verte, une revue par un autre
