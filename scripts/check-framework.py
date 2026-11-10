@@ -9,6 +9,7 @@
 Usage : check-framework.py [--root <dépôt>]   (sort en 1 au moindre écart, liste tous les écarts)
 """
 import argparse
+import importlib.util
 import json
 import pathlib
 import re
@@ -118,6 +119,29 @@ def check(root):
                     if chk["context"] not in job_names:
                         errors.append(f".github/repo-settings.json : contrôle requis « {chk['context']} » absent des "
                                       f"jobs de .github/workflows ({sorted(job_names)})")
+
+    # Identité du dépôt (CONVENTIONS.md §Identité du dépôt) : le cadre s'applique sa propre règle
+    if settings.is_file():
+        spec = importlib.util.spec_from_file_location("repo_settings", root / "scripts/repo-settings.py")
+        rs = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(rs)
+        errors += [f".github/repo-settings.json : {gap}"
+                   for gap in rs.identity_gaps(json.loads(settings.read_text(encoding="utf-8")))]
+    banner, social = root / "docs/assets/banner.svg", root / "docs/assets/social-preview.png"
+    if not banner.is_file():
+        errors.append("docs/assets/banner.svg : bannière du README introuvable")
+    readme = root / "README.md"
+    if readme.is_file() and "docs/assets/banner.svg" not in readme.read_text(encoding="utf-8"):
+        errors.append("README.md : la bannière docs/assets/banner.svg n'y est pas affichée")
+    if not social.is_file():
+        errors.append("docs/assets/social-preview.png : social preview introuvable")
+    else:
+        head = social.read_bytes()[:24]  # signature PNG, puis IHDR : largeur et hauteur sur 4 octets chacune
+        size = (int.from_bytes(head[16:20], "big"), int.from_bytes(head[20:24], "big"))
+        if head[:8] != b"\x89PNG\r\n\x1a\n" or size != (1280, 640):
+            errors.append(f"docs/assets/social-preview.png : PNG de 1280×640 attendu (lu : {size[0]}×{size[1]})")
+        elif social.stat().st_size >= 1_000_000:
+            errors.append("docs/assets/social-preview.png : doit peser moins de 1 Mo (limite de GitHub)")
 
     orch = (root / "docs/ORCHESTRATION.md").read_text(encoding="utf-8")
     section = orch[orch.find("## 7."):]

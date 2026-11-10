@@ -5,8 +5,10 @@ Une session cloud ne peut pas modifier les réglages d'un dépôt (LESSONS L56) 
 merge, le workflow repo-settings.yml lance ce script avec un jeton d'administration (secret REPO_ADMIN_TOKEN).
 
 Sections (toutes facultatives ; une section absente n'est pas touchée) :
-  "repository" : champs de PATCH /repos/{owner}/{repo} listés dans REPO_FIELDS ;
+  "repository" : champs de PATCH /repos/{owner}/{repo} listés dans REPO_FIELDS ; une description restée celle du
+                 gabarit (`<…>`) n'est pas envoyée ;
   "topics"     : liste complète des topics (remplace l'existante) ;
+  Description ou topics manquants ou non valides : avertissement, sans bloquer (CONVENTIONS.md §Identité du dépôt).
   "rulesets"   : rulesets gérés, identifiés par leur `name` (créés ou mis à jour ; un ruleset absent du fichier n'est
                  jamais supprimé : on le retire à la main, c'est voulu).
 Usage : repo-settings.py --repo owner/nom [--file .github/repo-settings.json] [--apply]
@@ -16,6 +18,7 @@ Jeton : variable GH_TOKEN (fine-grained, « Administration: write » sur le dép
 import argparse
 import json
 import os
+import re
 import sys
 import urllib.error
 import urllib.request
@@ -26,6 +29,32 @@ REPO_FIELDS = {"description", "homepage", "has_issues", "has_projects", "has_wik
                "squash_merge_commit_title", "squash_merge_commit_message"}
 RULESET_KEYS = ("name", "target", "enforcement", "conditions", "rules", "bypass_actors")
 API = "https://api.github.com"
+# Règles de GitHub pour un topic : minuscules, chiffres, tirets, 50 caractères au plus, 20 topics au plus par dépôt
+# (https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/classifying-your-repository-with-topics)
+TOPIC = re.compile(r"^[a-z0-9][a-z0-9-]{0,49}$")
+MAX_TOPICS = 20
+
+
+def _placeholder(text):
+    """Vrai pour une description vide ou restée celle du gabarit (`<une phrase : …>`)."""
+    text = (text or "").strip()
+    return not text or (text.startswith("<") and text.endswith(">"))
+
+
+def identity_gaps(desired):
+    """Ce qui manque pour que le dépôt dise ce qu'il est (CONVENTIONS.md §Identité du dépôt) ; fonction pure."""
+    gaps = []
+    if _placeholder((desired.get("repository") or {}).get("description")):
+        gaps.append("description absente ou restée celle du gabarit : une phrase, ce que fait le projet et pour qui")
+    topics = desired.get("topics") or []
+    bad = [t for t in topics if not isinstance(t, str) or not TOPIC.match(t)]
+    if not topics:
+        gaps.append("topics absents : 5 à 15 mots-clés (domaine, technologie, usage)")
+    elif bad:
+        gaps.append(f"topics non valides {bad} : minuscules, chiffres et tirets, 50 caractères au plus")
+    elif len(set(topics)) > MAX_TOPICS:
+        gaps.append(f"topics trop nombreux ({len(set(topics))}) : {MAX_TOPICS} au plus")
+    return gaps
 
 
 def _covers(actual, wanted):
@@ -62,7 +91,8 @@ def plan(desired, current):
         unknown = sorted(set(repo) - REPO_FIELDS)
         if unknown:
             raise ValueError(f"champs de dépôt non gérés : {unknown} (permis : {sorted(REPO_FIELDS)})")
-        fields = {k: v for k, v in repo.items() if current.get("repository", {}).get(k) != v}
+        fields = {k: v for k, v in repo.items() if current.get("repository", {}).get(k) != v
+                  and not (k == "description" and _placeholder(v))}  # le texte du gabarit ne part jamais sur GitHub
         if fields:
             actions.append({"op": "patch-repo", "fields": fields})
     if desired.get("topics") is not None:
@@ -141,6 +171,8 @@ def main():
         raise SystemExit("✘ GH_TOKEN absent (secret REPO_ADMIN_TOKEN : jeton « Administration: write » sur le dépôt)")
     with open(a.file, encoding="utf-8") as f:
         desired = json.load(f)
+    for gap in identity_gaps(desired):
+        print(f"::warning file={a.file}::{gap}")
     http = github(token)
     actions = plan(desired, read_current(a.repo, http))
     for act in actions:

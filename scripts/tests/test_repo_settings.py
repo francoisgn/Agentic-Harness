@@ -29,6 +29,32 @@ class PlanTests(unittest.TestCase):
         actions = rs.plan({"topics": ["claude-code", "agentic"]}, {"repository": {}, "topics": ["old"], "rulesets": []})
         self.assertEqual(actions, [{"op": "put-topics", "names": ["agentic", "claude-code"]}])
 
+    def test_placeholder_description_is_never_sent(self):
+        desired = {"repository": {"description": "<une phrase : ce que fait le projet, pour qui>", "has_wiki": False}}
+        actions = rs.plan(desired, {"repository": {"description": "", "has_wiki": True}, "topics": [], "rulesets": []})
+        self.assertEqual(actions, [{"op": "patch-repo", "fields": {"has_wiki": False}}])
+
+    def test_identity_gaps_none_when_described_and_tagged(self):
+        self.assertEqual(rs.identity_gaps({"repository": {"description": "Un cadre."}, "topics": ["ai-agents", "tdd"]}), [])
+
+    def test_identity_gaps_on_missing_or_placeholder_description(self):
+        for repo in ({}, {"description": ""}, {"description": "<une phrase>"}):
+            gaps = rs.identity_gaps({"repository": repo, "topics": ["tdd"]})
+            self.assertEqual(len(gaps), 1, repo)
+            self.assertIn("description", gaps[0])
+
+    def test_identity_gaps_on_empty_or_invalid_topics(self):
+        ok = {"description": "Un cadre."}
+        self.assertIn("topics", rs.identity_gaps({"repository": ok, "topics": []})[0])
+        self.assertIn("topics", rs.identity_gaps({"repository": ok})[0])
+        for bad in ("Claude Code", "CI", "-tdd", "x" * 51):
+            self.assertIn(bad, rs.identity_gaps({"repository": ok, "topics": ["tdd", bad]})[0])
+        self.assertIn("20", rs.identity_gaps({"repository": ok, "topics": [f"t{i}" for i in range(21)]})[0])
+
+    def test_shipped_settings_have_description_and_topics(self):
+        shipped = json.loads((ROOT / ".github/repo-settings.json").read_text(encoding="utf-8"))
+        self.assertEqual(rs.identity_gaps(shipped), [])
+
     def test_ruleset_created_then_updated_by_name(self):
         created = rs.plan({"rulesets": [RULESET]}, {"repository": {}, "topics": [], "rulesets": []})
         self.assertEqual([a["op"] for a in created], ["create-ruleset"])

@@ -34,6 +34,9 @@ Objectif : qu'un agent de lot puisse prendre une issue **sans poser de question*
   un flux ou une architecture se décrit mieux en image (Mermaid dans le Markdown : rendu par GitHub, versionné, relu
   comme du code).
 - Tient à jour les vues d'ensemble : README (contenu, état), plan des lots, index des ADR.
+- Vérifie l'identité du dépôt ([CONVENTIONS](CONVENTIONS.md) §Identité du dépôt) : description et topics renseignés
+  dans `.github/repo-settings.json`, bannière affichée en tête du README, social preview versionnée (1280×640), le
+  tout fidèle à l'intention du projet ; absent ou périmé → une issue, ou la PR de docs pour la description et les topics (le dépôt de la social preview dans les réglages revient à l'opérateur).
 - Si le projet tient un registre ([CONVENTIONS](CONVENTIONS.md) §Registre) : après un lot de merges, lance la commande
   de repli du projet (`.harness/config.json` → `ledger.fold_command`), ouvre **une** PR de docs qui ne touche que les
   fichiers du registre et que le script reproduit, signale les entrées mal formées sur leur PR, puis marque les PR

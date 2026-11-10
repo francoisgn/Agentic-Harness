@@ -1,11 +1,11 @@
 {
   "$comment": "Réglages du dépôt du cadre, appliqués au merge par .github/workflows/settings.yml (scripts/repo-settings.py). Modifier par PR, jamais à la main dans Settings (la dérive est signalée chaque semaine).",
   "repository": {
-    "description": "Cadre versionné pour piloter le développement agentique (Claude Code) : intention et TDD, issues → lots → PR, revues adversariales, conformité branchable, stewards, FinOps et tableau de bord du flux.",
+    "description": "Versioned, open harness for building software with coding agents (Claude Code, Codex, Cursor, Gemini CLI, Copilot, Aider): intent and TDD, issues → batches → PRs, adversarial reviews, pluggable compliance, stewards, FinOps and a flow dashboard.",
     "has_wiki": false,
     "delete_branch_on_merge": true
   },
-  "topics": ["agentic", "claude-code", "ai-agents", "devops", "code-review", "compliance", "finops", "tdd", "github-actions", "framework"],
+  "topics": ["ai-agents", "coding-agents", "agentic-coding", "claude-code", "codex", "cursor", "gemini-cli", "github-copilot", "aider", "agents-md", "tdd", "code-review", "compliance", "finops", "github-actions"],
   "rulesets": [
     {
       "name": "master protégée",
