@@ -275,6 +275,30 @@ class BulletVerdictTests(unittest.TestCase):
         self.assertEqual([e["problem"] for e in fm.review_events(p)], [True, False])
 
 
+class UnverifiedTests(unittest.TestCase):
+    """REVIEW-ROUNDS §Traceability: a verdict line may end with "· unverified: N"; the dashboard counts the merged PRs
+    whose last harness verdict before the merge still carries unverified points."""
+
+    def test_unverified_count_is_read_from_the_verdict_line(self):
+        p = pull(1)
+        p["comments"] = [comment("c", ADV_OK + " · unverified: 2"), comment("c", ADV_KO),
+                         comment("c", "**AI review (sonnet): APPROVED** head y · Unverified: 1")]
+        self.assertEqual([e.get("unverified") for e in fm.review_events(p)], [2, 0, 1])
+
+    def test_merged_prs_whose_last_verdict_keeps_unverified_points_are_counted(self):
+        def merged(n, *bodies):
+            p = pull(n, state="closed", created="2026-11-05T00:00:00Z", merged="2026-11-06T00:00:00Z")
+            p["comments"] = [comment("c", b, f"2026-11-05T0{i}:00:00Z") for i, b in enumerate(bodies, 1)]
+            return p
+        pulls = [merged(1, ADV_OK + " · unverified: 1"),                       # still unverified at merge
+                 merged(2, ADV_OK + " · unverified: 1", ADV_OK),               # resolved by a later verdict
+                 merged(3, ADV_OK)]
+        q = fm.quality(pulls)
+        self.assertEqual(q["unverified"], 1)
+        report = fm.analyse({"issues": [], "pulls": pulls, "runs": []}, now=fm.parse_time(NOW))
+        self.assertIn("approved with unverified points", fm.render_markdown(report, "o/r"))
+
+
 class SkippedRunTests(unittest.TestCase):
     def test_skipped_runs_cost_no_minutes(self):
         runs = [run("x", conclusion="skipped", minutes=0), run("x", conclusion="success", minutes=2.5)]

@@ -5,6 +5,17 @@ moving to this version.
 
 ## Unreleased
 
+- **Review rounds tightened from what the reviews of this release showed**
+  ([REVIEW-ROUNDS](docs/REVIEW-ROUNDS.md), [ORCHESTRATION](docs/ORCHESTRATION.md) §3):
+  - a verdict lists the claims the reviewer could not check under **Unverified**, its first line ends with
+    `· unverified: N`, and each point is verified or accepted before the merge; the dashboard counts merged PRs whose
+    last verdict still carries unverified points (`flow-metrics.py`);
+  - every reviewer states the model it actually ran on; an adversarial verdict on the author's model does not count;
+  - after an APPROVED, a form-only delta gets a short confirmation on the delta, any other delta a full re-review;
+  - when the review service skips the repository or never reviews the head, the code review falls back to the
+    `review` job or a fresh sub-agent of another model on the diff only;
+  - a reviewer works only in its own worktree, never in the author's checkout. Lessons L83 and L84.
+
 - **Plugin renamed `belay` → `belayline`** ([ADR 0004](docs/adr/0004-plugin-named-belayline.md)): `belay` is also the
   command name of other 2026 agent-safety tools. Install with `claude plugin install belayline@belayline`; skills
   are `/belayline:<skill>`. Landscape decisions recorded in `.out-of-scope/`: guard hooks stay fail-open, no runtime

@@ -36,12 +36,14 @@ VERDICT_RE = re.compile(r"\*\*(Adversarial|AI|Compliance) review[^*\n]*?:\s*"
 VERDICT_SOURCE = {"Adversarial": "adversarial", "AI": "ai", "Compliance": "compliance"}
 VERDICT_PROBLEMS = ("CHANGES REQUESTED", "GAPS")
 VERDICT_IGNORED = "OUT OF SCOPE"
+# "· unverified: N" at the end of a verdict line: points the reviewer could not check (REVIEW-ROUNDS §Traceability)
+UNVERIFIED_RE = re.compile(r"unverified:\s*(\d+)", re.I)
 ACTIONABLE_RE = re.compile(r"Actionable comments posted:\s*(\d+)")
 MIN_QUALITY_SAMPLE = 3
 
 
 def review_events(pull):
-    """Verdicts traced on a PR, in order (GitHub reviews, then comments): [{source, problem, at}].
+    """Verdicts traced on a PR, in order (GitHub reviews, then comments): [{source, problem, at[, unverified]}].
 
     Sources: harness verdicts ("**Adversarial review|AI review|Compliance review (...): VERDICT**", REVIEW-ROUNDS.md,
     traceability section), CodeRabbit ("Actionable comments posted: N"), humans (APPROVED / CHANGES_REQUESTED).
@@ -59,7 +61,8 @@ def review_events(pull):
                     for m in [VERDICT_RE.match(re.sub(r"^(?:[-*]|\d+[.)])\s+", "", line.strip()))] if m]
         if verdicts:
             events += [{"source": VERDICT_SOURCE[m.group(1)], "at": at,
-                        "problem": m.group(2) in VERDICT_PROBLEMS}
+                        "problem": m.group(2) in VERDICT_PROBLEMS,
+                        "unverified": int(u.group(1)) if (u := UNVERIFIED_RE.search(m.string)) else 0}
                        for m in verdicts if m.group(2) != VERDICT_IGNORED]
             continue
         if login.startswith("coderabbitai"):
@@ -76,7 +79,7 @@ def review_events(pull):
 
 def quality(merged):
     """First-pass quality and fix effort on merged PRs (FINOPS.md §4)."""
-    q = {"reviewed": 0, "problem": 0, "untraced": 0, "by_source": {},
+    q = {"reviewed": 0, "problem": 0, "untraced": 0, "unverified": 0, "by_source": {},
          "agent": {"reviewed": 0, "problem": 0}, "human": {"reviewed": 0, "problem": 0}}
     fix_commits, fix_hours = [], []
     for p in merged:
@@ -88,6 +91,9 @@ def quality(merged):
             continue
         side = q["agent"] if is_agent(p) else q["human"]
         q["reviewed"] += 1
+        harness = [e for e in events if "unverified" in e]
+        if harness and harness[-1]["unverified"]:
+            q["unverified"] += 1
         side["reviewed"] += 1
         problems = [e for e in events if e["problem"]]
         if not problems:
@@ -339,6 +345,9 @@ def render_markdown(r, repo):
         out.append("- No merged PR with a traced review over the period.")
     if q["untraced"]:
         out.append(f"\n🟠 {q['untraced']} merged PR(s) without any traced verdict: the measure ignores them "
+                   "(REVIEW-ROUNDS.md, traceability section).")
+    if q.get("unverified"):
+        out.append(f"\n🟠 {q['unverified']} merged PR(s) approved with unverified points still open in the last verdict "
                    "(REVIEW-ROUNDS.md, traceability section).")
     if r["labels"]:
         out += ["", "## Open issues by label", "", "| Label | Count |", "|---|---|"]
