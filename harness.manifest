@@ -38,6 +38,8 @@ copy      scripts/readme-progress.py                  .harness/scripts/readme-pr
 copy      scripts/diagrams/render.py                  .harness/scripts/diagrams-render.py
 # Relative links and cross-file anchors in Markdown (docs-security.yml; in-file anchors are markdownlint's MD051)
 copy      scripts/doc-links.py                        .harness/scripts/doc-links.py
+# Doc steward: "anything to fold?" decision, docs PR body, weekly audit issues (doc-steward.yml, STEWARDS.md §2)
+copy      scripts/doc-steward.py                      .harness/scripts/doc-steward.py
 
 # Vendored hooks (git guardrail, session reminder) and their declaration
 copy      plugins/harness/scripts/guard-git.py        .harness/hooks/guard-git.py

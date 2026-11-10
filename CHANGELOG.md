@@ -5,6 +5,16 @@ moving to this version.
 
 ## Unreleased
 
+- **Doc steward at merge, weekly safety net** ([STEWARDS](docs/STEWARDS.md) §2): new reusable `doc-steward.yml`, opt-in
+  `steward` job in `harness.yml` (it adds `closed` to the `pull_request` types; the `pr` job skips it). After each
+  merge into the integration branch, `doc-steward.py pending` (vendored in `.harness/scripts/`) decides without any
+  agent: merged PRs still labelled `ledger`, or `Docs:` lines naming files since the last steward PR; nothing → one
+  short job. Otherwise `ledger.fold_command` folds the ledger (its own reproducible commit), `readme-progress.py`
+  refreshes the progress block, a Claude agent with a read-only token edits only the declared docs, and a job
+  without an agent opens or updates ONE draft PR from `docs/steward` (never a protected branch; entries it cannot
+  place are listed in it). Several merges queue in one concurrency group. Monday: audit only (README, links,
+  diagrams, progress block), one `type: docs` issue per gap. Merge pass skipped with a notice without
+  `ANTHROPIC_API_KEY` / `CLAUDE_CODE_OAUTH_TOKEN`; never required.
 - **README progress generated from the issues**: `readme-progress.py` (vendored in `.harness/scripts/`) rewrites the
   block between the `progress` markers: one row per `type: epic` lot (state, closed/total sub-issues, issue and PR
   links), otherwise one per milestone; ⚠ on an epic without sub-issue or an issue with zero or several `status:`

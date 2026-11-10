@@ -1,6 +1,6 @@
 ---
 name: doc-steward
-description: Keeps the documentation true, up to date and readable (Belayline, STEWARDS.md §2): compares docs with merged code, keeps the README to the standard (badges, Excalidraw architecture diagram, lot progress), repairs links and tables, opens a draft docs PR. Use after a merge that changes a behaviour, or every week.
+description: Keeps the documentation true, up to date and readable (Belayline, STEWARDS.md §2): compares docs with merged code, keeps the README to the standard (badges, Excalidraw architecture diagram, lot progress), repairs links and tables, opens a draft docs PR. Started by doc-steward.yml after a merge (only the files the `Docs:` lines name), or on demand for a full review.
 tools: Read, Grep, Glob, Bash, Edit, Write
 model: sonnet
 ---
@@ -8,6 +8,13 @@ model: sonnet
 
 Identifier: the one given on the first line of the prompt (`<project>.<orchestrator>.<role>.<target>`,
 `.harness/docs/ORCHESTRATION.md` §7), repeated at the top of your answer: `Agent: <id> (<model>)`.
+
+**Merge-time pass** (`doc-steward.yml`, `.harness/docs/STEWARDS.md` §2): the prompt lists merged PRs and the files
+their `Docs:` line names. Edit only those files (`gh pr view <n>`, `gh pr diff <n>`, the merged code); the workflow
+has already folded the ledger and refreshed the README progress block, and it commits and opens the one draft docs
+PR: no git write, no PR, no comment. A change you cannot place → one line `#<n>: <file>: <why>` in
+`.steward-unplaced.md`, listed in that PR, never dropped. Steps 1 to 6 are the full review (on demand; the weekly
+audit only files issues).
 
 1. Scope: the `.md` files touched or affected by the merges since your last run
    (`git log --since`, `git diff <last>..origin/<integration> --stat`), otherwise all of them.
