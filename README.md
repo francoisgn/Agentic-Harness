@@ -1,16 +1,18 @@
 # agentic-harness
 
+![agentic-harness, « the versioned framework that keeps your coding agents on track, from intent to merge » : des trajectoires d'agents emmêlées passent dans la boucle du harnais et ressortent en voies tenues, jalon après jalon (intention, TDD, revue adversariale, CI), jusqu'au merge ; les leçons reviennent au harnais](docs/assets/banner.svg)
+
 > Un harnais versionné et ouvert pour développer avec des agents de code : intention et TDD, issues → lots → PR,
 > revues adversariales, conformité branchable, stewards, FinOps et tableau de bord du flux. Pour tout dépôt GitHub,
 > tout agent (Claude Code, Codex, Cursor, Gemini CLI, Copilot, Aider…) et toute équipe.
-
-![Les mécanismes du harnais : un opérateur, un orchestrateur, des agents jetables, un dépôt qui porte l'état, une CI et un tableau de bord qui bouclent](docs/diagrams/mecanismes.svg)
 
 **TL;DR** : les agents écrivent vite, mais sans cadre ils dérivent (contexte perdu, revues en boucle, CI qui brûle des
 minutes, qualité inégale). Le harnais donne à chaque projet **la même méthode, les mêmes garde-fous, les mêmes leçons
 et les mêmes contrôles**, récupérés à une version donnée et mis à jour par PR. Le contexte vit dans le dépôt, pas
 dans l'agent. L'opérateur parle à un seul orchestrateur, qui délègue chaque tâche au bon niveau de modèle et la fait
 relire par un modèle plus fort. Chaque brique se garde, se remplace ou se complète.
+
+![Les mécanismes du harnais : un opérateur, un orchestrateur, des agents jetables, un dépôt qui porte l'état, une CI et un tableau de bord qui bouclent](docs/diagrams/mecanismes.svg)
 
 ## Ce que ça change, concrètement
 
@@ -75,8 +77,9 @@ un client iOS).
 | [`docs/COMPLIANCE.md`](docs/COMPLIANCE.md) | Relecteurs de conformité : catalogue, trois modes de branchement |
 | [`docs/CI-BUDGET.md`](docs/CI-BUDGET.md) | Minutes de CI, sécurité (SAST, SCA, secrets), variables, volume agentique |
 | [`docs/LESSONS.md`](docs/LESSONS.md) | Leçons par portée, sources citées ; comment en proposer |
-| [`docs/CONVENTIONS.md`](docs/CONVENTIONS.md), [`docs/BRANCHING-RELEASE.md`](docs/BRANCHING-RELEASE.md), [`docs/MAC-HANDOFF.md`](docs/MAC-HANDOFF.md) | Commits et PR, branches et versions, partage cloud / poste local |
+| [`docs/CONVENTIONS.md`](docs/CONVENTIONS.md), [`docs/BRANCHING-RELEASE.md`](docs/BRANCHING-RELEASE.md), [`docs/MAC-HANDOFF.md`](docs/MAC-HANDOFF.md) | Commits et PR, identité du dépôt (description, topics, bannière, social preview), branches et versions, partage cloud / poste local |
 | [`docs/adr/`](docs/adr/README.md) | Décisions du cadre |
+| [`docs/assets/`](docs/assets) | Identité visuelle : bannière du README (`banner.svg`), social preview (`social-preview.svg` → `.png`, 1280×640) |
 | [`docs/diagrams/`](docs/diagrams) | Schémas : source `.json`, scène `.excalidraw` (modifiable sur excalidraw.com), image `.svg` |
 | `plugins/harness/` | Adaptateur Claude Code : 10 skills, 13 agents, hooks, plugin |
 | `templates/`, `i18n/en/` | Gabarits vendorisés ; édition anglaise des fichiers chargés à chaque session |
@@ -86,7 +89,7 @@ un client iOS).
 ## Qualité du harnais lui-même
 
 Un job de CI (`ci.yml`), chaque étape lancée même si la précédente échoue : cohérence du cadre (skills, agents,
-manifeste, labels, nommage, contrôles requis), tests (vendorisation, hooks, tableau de bord, conformité, réglages,
+manifeste, labels, nommage, contrôles requis, description, topics, bannière et social preview), tests (vendorisation, hooks, tableau de bord, conformité, réglages,
 schémas), ShellCheck, versions, actionlint, zizmor, markdownlint, gitleaks. En local :
 ```bash
 python3 scripts/check-framework.py && python3 -m unittest discover -s scripts/tests -p 'test_*.py' \
