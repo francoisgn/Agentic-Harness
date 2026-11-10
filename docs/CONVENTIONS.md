@@ -134,7 +134,7 @@ or a screenshot):
 | Image | File | Format | Where it is used |
 |---|---|---|---|
 | **Banner** | `docs/assets/banner.svg` (or `.png`) | wide (about 3:1), readable at 800 px wide, clean background (light and dark themes), alt text that describes it | first image of `README.md`, under the title |
-| **Social preview** | `docs/assets/social-preview.png`, its source next to it (`.svg` or other) | PNG **1280×640**, under 1 MB, the essentials more than 40 px from the edges | preview of the repository link (social networks, messaging apps) |
+| **Social preview** | `docs/assets/social-preview.png`, its source next to it when it has one (`.svg` or other) | PNG **1280×640**, under 1 MB, the essentials more than 40 px from the edges | preview of the repository link (social networks, messaging apps) |
 
 - Both share the same motif and the same project name; one sentence of intent at most, no feature list. Their text
   is in **English** (a link preview travels beyond the project's audience), unless the project's audience speaks
