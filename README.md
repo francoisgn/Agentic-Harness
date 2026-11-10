@@ -20,7 +20,7 @@ same checks**, fetched at a given version and updated by PR. The context lives i
 The operator talks to a single orchestrator, which delegates each task to the right model tier and has it reviewed by
 a stronger model. Each building block can be kept, replaced or extended.
 
-![The mechanisms of the harness: one operator, one orchestrator, disposable agents, a repository that holds the state, a CI and a dashboard that close the loop](docs/diagrams/mechanisms.svg)
+![The mechanisms: the operator talks to one orchestrator, which delegates to lot agents, stewards and reviewers that read and write the repository; ready PRs go to CI and code review, a dashboard reads both and reports drift back, the versioned harness enters by a sync PR, under bounded guardrails](docs/diagrams/mechanisms.svg)
 
 ## What it changes, concretely
 
@@ -37,11 +37,11 @@ a stronger model. Each building block can be kept, replaced or extended.
 
 ## The cycle of a change
 
-![The cycle: intent, ready issue, lot in TDD, reviews, ready PR, CI, merge, measurement, then lessons that feed back into the intent](docs/diagrams/cycle.svg)
+![The cycle: intent, ready issue, lot in TDD, reviews (findings loop back to the lot, at most 3 rounds), ready PR, CI and code review, merge, measure, then lessons back to the intent, with four callouts on where a gap is settled](docs/diagrams/cycle.svg)
 
 ## Quick start: using the harness in your project
 
-![Six steps: fetch, sync, configure, work, steer, update; with any agent; each building block replaceable](docs/diagrams/leverage.svg)
+![Six steps: fetch, sync, configure, work, steer, update, with a new version looping from update back to sync; any coding agent; every building block replaceable](docs/diagrams/leverage.svg)
 
 ```bash
 git clone --depth 1 --branch v0.3.0 https://github.com/francoisgn/belayline-agentic-harness.git ../belayline
