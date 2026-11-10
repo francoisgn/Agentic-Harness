@@ -30,6 +30,22 @@ A contribution that adds a rule also says how to disable it.
 | A rule loaded in every session | `docs/ESSENTIALS.md`; keep it short |
 | A behaviour visible to a project | `CHANGELOG.md`, with an "Action" line if the project has to do something |
 
+## Size limits
+
+`scripts/check-framework.py` fails on a file that grows without limit, because every loaded line costs context. Body
+size in characters, after the frontmatter (constants at the top of the script, with the reason for each value):
+
+| File | Limit | Why |
+|---|---|---|
+| `SKILL.md` | 5000 | Largest skill today is 4.2 kB, plus about 20 % |
+| Agent file | 5500 | Largest agent today is 4.4 kB (compliance agents have six mandatory sections), plus about 25 % |
+| `docs/ESSENTIALS.md` | 5600 | Tighter: loaded in every session; 5.2 kB today, plus about 7 % |
+
+The report names the file, its size and the limit; nothing is truncated. Shorten the file; a file that legitimately
+needs more is listed in `SIZE_EXCEPTIONS` with its reason, the global limit is not raised. The same check fails when a
+skill or agent links a `.harness/docs/` or `${CLAUDE_PLUGIN_ROOT}/docs/` file that does not exist, or when the counts
+in the README or the skill list of `templates/CLAUDE.md.block` differ from `plugins/harness/`.
+
 ## What does not go in
 
 - A rule with no observed failure behind it, or one that cannot be switched off.

@@ -7,6 +7,8 @@ name: PR hygiene (reusable)
 #     section with at least one fenced block, and a PR whose section has entry blocks carries the label;
 #   - doc impact (`docs-code-paths` not empty): a PR that changes code paths has a `Docs:` line (in the ledger
 #     section, else in the body) naming existing doc files or `none (<reason>)`; one warning, never a failure;
+#   - warning (never a failure) if `integration-branch` is not the repository default branch: GitHub runs
+#     issues, issue_comment, pull_request_target and schedule workflows from the default branch only;
 #   - non-empty "Changelog" section if `require-changelog` (old convention, replaced by the ledger).
 # A promotion PR (head in `promotion-heads`) and exempt authors (Dependabot) only go through the flow check.
 # A draft only goes through the flow check: the rest is judged on the switch to "Ready for review".
@@ -49,6 +51,10 @@ on:
         description: 'Globs of the code paths whose change asks for a `Docs:` line (CONVENTIONS.md §Ledger; `.md` files never count); a warning, never a failure. Empty = no check'
         type: string
         default: "*"
+      integration-branch:
+        description: The project's integration branch (`.harness/config.json`); if it is not the default branch, a warning is emitted (never a failure). Empty = no check
+        type: string
+        default: ""
 
 permissions:
   contents: read
@@ -75,6 +81,8 @@ jobs:
           PROMOTION_HEADS: ${{ inputs.promotion-heads }}
           EXEMPT_AUTHORS: ${{ inputs.exempt-authors }}
           DOCS_CODE_PATHS: ${{ inputs.docs-code-paths }}
+          INTEGRATION_BRANCH: ${{ inputs.integration-branch }}
+          DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
         with:
           script: |
             const pr = context.payload.pull_request;
@@ -83,6 +91,13 @@ jobs:
             const glob = (p) => new RegExp('^' + p.replace(/[.+?^${}()|[\]\\]/g, '\\$&').replace(/\*/g, '.*') + '$');
             const base = pr.base.ref, head = pr.head.ref;
             const errors = [];
+
+            const integration = (process.env.INTEGRATION_BRANCH || '').trim();
+            if (integration) {
+              const def = (process.env.DEFAULT_BRANCH || '').trim();
+              if (!def) core.warning(`Could not check whether the integration branch "${integration}" is the default branch.`);
+              else if (def !== integration) core.warning(`Integration branch "${integration}" is not the default branch "${def}": GitHub runs issues, issue_comment, pull_request_target and schedule workflows from the default branch only, so label hygiene, claims, the dashboard and the weekly jobs stay silent.`);
+            }
 
             if (process.env.FLOW && words(process.env.FLOW_BASES).includes(base)) {
               const ok = words(process.env.FLOW).some((pair) => {
