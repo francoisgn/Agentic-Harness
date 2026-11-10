@@ -29,6 +29,9 @@ moving to this version.
   `.harness/config.json` › `readme`.
 - **Tiered CI baseline** ([CI-BASELINE](docs/CI-BASELINE.md)): hygiene, quality (one local command = the CI),
   expensive, heavy security, process; six workflow invariants; survey of three real projects.
+- **Anti-bloat checks** (`check-framework.py`): size limits on skills, agents and `docs/ESSENTIALS.md` (listed
+  exceptions only), skill and agent doc links must resolve, README counts and the `CLAUDE.md.block` skill list must
+  match `plugins/harness/` ([CONTRIBUTING](CONTRIBUTING.md) §Size limits).
 - The harness applies its own standard: README with badges and progress block, `CONTRIBUTING.md`, checked in CI.
 - `scripts/diagrams/render.py`: `--dir` option.
 - **Repository identity** (CONVENTIONS §Repository identity): every repository that follows the harness carries a
