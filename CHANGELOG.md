@@ -7,9 +7,11 @@ moving to this version.
 
 - **Positioning** ([POSITIONING](docs/POSITIONING.md)): where Belayline sits among agent harnesses. Runtime harnesses
   gate, sandbox or replay each action; Belayline governs the process around them (intent, TDD, two traced reviews,
-  bounded loops, metrics, versioned rules). Memory in the repository, not the agent; the orchestrator conducts, it
-  does not compose. Six audited projects and one paper, sourced and dated (read 2026-11-10); the ideas taken are
-  tracked in the "Landscape audit" umbrella issue.
+  bounded loops, metrics, versioned rules). Compared with Google's Elephant–Goldfish Model, which makes the same
+  author / fresh-reviewer split: memory in the repository rather than an elephant agent, briefs instead of cold
+  context, a reviewer of another model, the whole change rather than the spec; dated prior use in SwiftHFR
+  (2026-10-24). Six audited projects and one paper, sourced and dated (read 2026-11-10); the ideas taken are tracked
+  in the "Landscape audit" umbrella issue.
 
 - **Security: Excalidraw exporter dependencies** (`scripts/diagrams/package.json`): `overrides` pin patched versions
   of transitive dependencies flagged by Dependabot (nanoid 3.3.20 and 5.1.16, lodash-es 4.18.1, katex 0.19.1);

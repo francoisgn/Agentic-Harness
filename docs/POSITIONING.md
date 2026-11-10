@@ -16,7 +16,9 @@
   - process: "is this change what was asked, is it proven, reviewed and measured, and what do we learn from it?"
 - They combine. A runtime guard protects each action; Belayline makes the sequence of actions add up to the right
   change.
-- The memory lives in the **repository**, not in the agent. The orchestrator is a **conductor, not a composer**.
+- Like Google's Elephant–Goldfish Model, Belayline has work reviewed by a "goldfish" that never sees the author's
+  conversation. Unlike it, the memory lives in the **repository**, not in an elephant agent, and the orchestrator is
+  a **conductor, not a composer**.
 
 ## 1. Two layers
 
@@ -36,17 +38,38 @@ For anything else at runtime, it relies on the agent's own permission settings, 
 
 ## 2. The elephant, the goldfish, and the repository
 
-An agent that keeps everything in its own context is an **elephant**. It remembers, but every turn re-reads a
-growing history, so it costs more and drifts more. And it forgets everything when the session ends. An agent that
-starts empty each time is a **goldfish**: cheap, but it redoes the same work.
+Google's [Elephant–Goldfish Model](https://github.com/google/elephant-goldfish-model) names a split that Belayline
+also makes: "Design with an elephant. Review with a goldfish." The **elephant** "holds your project context and
+drafts the specification"; the **goldfish** reviewers "examine the draft and referenced source material without the
+earlier conversation". The project describes itself as an open-source plugin for designing and reviewing software
+with agents, and as "not an officially supported Google product".
 
-Belayline lets agents be goldfish because **the repository is the elephant**:
+Belayline makes the same split, and wrote it down before it was packaged as a harness. It distils practices first
+used in two of its author's projects:
 
-- the plan, the decisions, the progress and the lessons are written in issues, PRs, ADRs and docs;
-- an agent you stop loses nothing;
-- an agent you start reads the state and carries on ([FINOPS](FINOPS.md) §1).
+- [SwiftHFR](https://github.com/francoisgn/ios-app_SwiftHFR), commit `bbd2048` of 2026-10-24: "the reviewer is
+  never the author model";
+- SwiftHFR, commit `abb50b6` of 2026-10-24: sessions "coordinate only through shared, visible state";
+  "Scratchpads, agent memory and `/tmp` are invisible to other sessions and do not count";
+- a private app, from 2026-10-20: issues routed to a model tier by label.
 
-The orchestrator is the only long-lived agent. Its context is kept short: summaries and links to the state.
+Belayline's first docs (commit `57770bd`, 2026-11-07) ask for a "fresh subagent of another model" given "never the
+author's explanations or conclusions" ([ORCHESTRATION](ORCHESTRATION.md) §3). The dates above are those of the
+commits; we make no claim about when the Elephant–Goldfish Model was first written.
+
+The two approaches differ in five ways:
+
+| | Elephant–Goldfish Model | Belayline |
+|---|---|---|
+| Where the context lives | In the elephant: the agent that holds the project context and drafts | In the **repository**: issues, PRs, ADRs, lessons. No agent has to remember; you stop one and lose nothing ([FINOPS](FINOPS.md) §1) |
+| Cost of context | In our reading, the elephant's context grows with the project, and each goldfish reads the draft and its sources cold | A fresh agent gets a brief with exactly the files and issues it needs, and the docs are short with the essentials first ([FINOPS](FINOPS.md) §1, "Avoid cold context") |
+| How work resumes | The elephant carries the thread | The orchestrator does not wait in memory: it is woken by a scheduled checkpoint ([ORCHESTRATION](ORCHESTRATION.md) §4) or, in sessions that subscribe to them, by a PR event, and then re-reads the state ([FINOPS](FINOPS.md) §3) |
+| The reviewer | A goldfish: fresh context, without the earlier conversation | A goldfish **of another model** than the author, at a tier at least equal, plus a separate code review |
+| Scope | Designing and reviewing a specification, approved by a human before implementation | The whole change: intent, lot, TDD, the two reviews, CI, merge, dashboard, lessons |
+
+An elephant is expensive: every turn re-reads a growing history, it drifts, and it forgets everything when the
+session ends. Belayline keeps no elephant agent: the only long-lived agent, the orchestrator, keeps a short context
+of summaries and links to the state.
 
 The orchestrator is a **conductor, not a composer**:
 
@@ -116,7 +139,7 @@ asks for a failure observed in a real project. Ideas that fail that bar are reco
 |---|---|---|
 | A verdict never hides what was not verified ("UNVERIFIED is never dressed up as PASS") | haqaliz/belay | Taken: a reviewer could not verify a sourced fact and the verdict line could not say so ([#40](https://github.com/francoisgn/belayline-agentic-harness/issues/40)) |
 | Decide what a broken guard does: fail open or fail closed | sacuadros/agent-harness, SECBLOK/belay | Open question, no failure observed yet ([#41](https://github.com/francoisgn/belayline-agentic-harness/issues/41)) |
-| Measure whether reviews prevent real defects | arXiv 2610.25568 | Open question, no failure observed yet ([#42](https://github.com/francoisgn/belayline-agentic-harness/issues/42)) |
+| Measure whether reviews prevent real defects, and follow it over time: as models improve, the adversarial review should find less, and a lower tier can take it over | arXiv 2610.25568 | Taken by the maintainer ([#42](https://github.com/francoisgn/belayline-agentic-harness/issues/42)) |
 | A size threshold for a lot | sacuadros/agent-harness | Open question, no failure observed yet ([#44](https://github.com/francoisgn/belayline-agentic-harness/issues/44)) |
 | Rules rendered into each agent's own format | sacuadros/agent-harness | Declined: no consumer project uses those agents ([record](https://github.com/francoisgn/belayline-agentic-harness/blob/master/.out-of-scope/single-source-per-tool.md)) |
 | A runtime guardrail as a replaceable building block, with an audit log | SECBLOK/belay, mikepenz/agent-belay | Open question, no failure observed yet ([#46](https://github.com/francoisgn/belayline-agentic-harness/issues/46)) |
@@ -151,7 +174,7 @@ The paper also warns against reading too much into its own results:
 - The authors conclude: "do not imply that additional agents or review necessarily improve outcomes".
 - The study ran no ablations and used single runs.
 
-Belayline's answer is to measure review value rather than assume it
+Belayline's answer is to measure review value rather than assume it, and to follow it as models improve
 ([#42](https://github.com/francoisgn/belayline-agentic-harness/issues/42)).
 
 ## Sources
@@ -167,6 +190,7 @@ All read 2026-11-10.
 - https://github.com/sacuadros/agent-harness
 - https://github.com/latintzar/harness
 - https://arxiv.org/html/2610.25568v1
+- https://github.com/google/elephant-goldfish-model
 
 Not read: the Medium article "How to build an agent harness that decides in 0.65 seconds" (blocked by a Cloudflare
 challenge).
