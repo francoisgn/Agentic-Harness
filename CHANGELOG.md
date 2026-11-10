@@ -43,6 +43,7 @@ moving to this version.
   vendored files.
 - **`SECURITY.md`**: versions covered, private report (never a public issue), response times, scope; direct link
   from the issue template chooser.
+- **Declined ideas recorded** (`.out-of-scope/`): skills invoked only by the human (`disable-model-invocation`) and one source compiled into per-tool skill formats (Cursor, Codex, Gemini CLI), each with the change that would reopen it (#19).
 
 **Action**: point `uses:` references and the clone URL at `francoisgn/belayline-agentic-harness` (the sync rewrites
 `harness.yml`); reinstall the plugin as `belay@belayline`. Then run `harness-sync.sh` again; rename the markers `harness:begin cadre`/`harness:end cadre` to `harness`,
