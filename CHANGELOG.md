@@ -7,7 +7,11 @@ moving to this version.
 
 - **Lesson classes**: `/lesson-propose` classifies each item as mechanical (proposed check as an issue, no line),
   judgment (a lesson line) or one-off (nothing); the "Lesson" form asks for the class and the check; header of
-  `docs/LESSONS.md` explains them. Existing lessons are not yet sorted.
+  `docs/LESSONS.md` explains them.
+- **Lessons sorted** (#18): a **Class** column in `docs/LESSONS.md`; ids unchanged. 79 rows judgment, L07 enforced
+  by markdownlint MD056, L53 by zizmor, L75 `mechanical, check to write` (issue to come). `/lessons-check` reads only
+  the judgment rows and those whose check is still to write: 80 rows instead of 82. A test checks that every
+  `L<nn>` cited in docs, skills, agents, templates and workflows exists.
 - **Two explicit reviews** ([REVIEW-ROUNDS](docs/REVIEW-ROUNDS.md) §The two reviews): the adversarial review
   (intent: issue + diff + lessons, isolated fresh sub-agent that refuses to give a verdict if it cannot be isolated)
   and the code review (diff only, by the review service) are named separately; one clean round on the current head
