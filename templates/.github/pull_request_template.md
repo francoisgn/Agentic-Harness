@@ -18,9 +18,11 @@ Claim: <!-- identifier of the active /claim of the issue -->
 <!-- Reviews: each verdict (adversarial, compliance) is posted as a comment, the first negative one included
      (REVIEW-ROUNDS.md §Traceability). -->
 
-<!-- Ledger (only if .harness/config.json → ledger.enabled, CONVENTIONS.md §Ledger): a "### Ledger" section
-     with one block per entry, in the format of the project's script, and the `ledger` label. No entry:
-     neither section nor label. Never edit the ledger files directly. -->
+<!-- Doc impact (CONVENTIONS.md §Ledger): the doc files this change makes untrue, or "none (<reason>)". With a
+     ledger (.harness/config.json → ledger.enabled), this line goes in the "### Ledger" section instead, and the
+     section holds one block per entry, in the format of the project's script, with the `ledger` label; no
+     entry: no block, no label. Never edit the ledger files directly. -->
+Docs: <!-- e.g. README.md, docs/USAGE.md — or: none (internal refactor) -->
 
 <!-- Author / reviewer model (must differ), with the identifier of each agent (ORCHESTRATION.md §7): -->
 Author model: … (<project>.<orc>.lot.<target>) · reviewer: … (<project>.<orc>.rev.<target>)

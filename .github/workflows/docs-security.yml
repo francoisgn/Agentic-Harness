@@ -1,7 +1,7 @@
 name: Docs and security (reusable)
 
 # Free baseline, no third-party account (CI-BUDGET.md §Security), in ONE job: markdownlint (tables and anchors), README
-# at the harness standard,
+# at the harness standard, relative links and cross-file anchors in Markdown,
 # gitleaks (history), zizmor and actionlint (workflows). Each tool runs even if the previous one fails: a
 # single run gives every finding. Nothing runs on a draft.
 # Disable what the project already covers elsewhere (inputs), so as not to pay twice.
@@ -22,6 +22,10 @@ on:
         default: true
       readme:
         description: Project README at the harness standard (README-STANDARD.md) and diagrams up to date; skipped if the scripts are not vendored
+        type: boolean
+        default: true
+      doc-links:
+        description: Relative links and cross-file anchors of the Markdown files resolve (doc-links.py); skipped if the script is not vendored
         type: boolean
         default: true
 
@@ -56,6 +60,12 @@ jobs:
             python3 .harness/scripts/diagrams-render.py --check || rc=1
           fi
           exit "$rc"
+
+      - name: Markdown · relative links and cross-file anchors (in-file anchors are markdownlint's MD051)
+        if: ${{ !cancelled() && inputs.doc-links }}
+        run: |
+          if [ ! -f .harness/scripts/doc-links.py ]; then echo "::notice::doc-links.py not vendored: check skipped"; exit 0; fi
+          python3 .harness/scripts/doc-links.py
 
       - name: Secrets · gitleaks (history)
         if: ${{ !cancelled() && inputs.gitleaks }}

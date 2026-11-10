@@ -12,10 +12,11 @@ A contribution that adds a rule also says how to disable it.
    ```bash
    python3 scripts/check-framework.py && python3 -m unittest discover -s scripts/tests -p 'test_*.py' \
      && scripts/tests/test-harness-sync.sh && python3 scripts/diagrams/render.py --check \
-     && python3 scripts/readme-check.py
+     && python3 scripts/readme-check.py && python3 scripts/doc-links.py
    ```
 4. **A draft PR**, then "Ready for review" when everything is done and reviewed by a model other than the author.
-   Nothing runs in CI on a draft.
+   Nothing runs in CI on a draft. The body carries a `Docs:` line: the doc files the change makes untrue, or
+   `Docs: none (<reason>)` (`docs/CONVENTIONS.md` §Ledger).
 
 ## What a PR keeps true
 
