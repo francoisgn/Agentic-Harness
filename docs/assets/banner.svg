@@ -1,57 +1,69 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 400" width="1280" height="400" role="img" aria-labelledby="t d">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1194 373" role="img" aria-labelledby="t d">
 <title id="t">Belayline</title>
-<desc id="d">On the left, tangled agent trajectories; they pass through the harness buckle and come out as parallel lanes that clear four checkpoints (intent, TDD, adversarial review, CI) up to the merge; a dashed return path brings lessons back to the harness.</desc>
-<rect width="1280" height="400" rx="16" fill="#0d1117"/>
-<text x="48" y="76" font-family="'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="40" font-weight="700" fill="#f0f6fc">Belayline</text>
-<text x="48" y="112" font-family="Inter, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="19" fill="#9198a1">The open harness that keeps your coding agents on track, from intent to merge.</text>
-<path d="M38.0 222.0 C40.3 231.6 38.8 264.1 49.4 270.2 C60.0 276.4 64.7 270.8 91.0 252.5 C117.3 234.3 148.9 194.3 180.9 178.9 C213.0 163.6 228.7 175.4 251.1 175.8 C273.6 176.1 283.5 168.8 293.3 180.8 C303.2 192.7 276.3 223.6 300.6 235.4 C324.8 247.1 384.6 240.5 414.6 239.5 C444.6 238.5 443.4 232.2 450.6 230.4 L496.6 230.4 C555.8 230.4 543.9 195.9 603.1 195.9 L1131.4 195.9" fill="none" stroke="#a78bfa" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/>
-<path d="M38.0 193.6 C42.2 208.2 25.5 253.6 58.8 266.6 C92.2 279.7 179.6 248.1 204.8 258.9 C230.0 269.6 187.7 311.7 185.0 320.3 C182.2 329.0 173.3 327.8 191.2 302.2 C209.2 276.6 252.1 209.2 274.6 192.2 C297.2 175.3 276.1 206.4 304.1 217.5 C332.1 228.6 385.3 243.3 414.6 247.5 C443.9 251.8 443.4 240.5 450.6 238.7 L496.6 238.7 C555.8 238.7 543.9 221.4 603.1 221.4 L1131.4 221.4" fill="none" stroke="#60a5fa" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/>
-<path d="M38.0 201.7 C51.5 215.0 87.0 257.9 105.4 268.4 C123.8 278.9 122.8 272.2 130.0 254.4 C137.2 236.5 125.2 175.1 141.5 179.2 C157.9 183.3 181.7 266.9 212.0 274.8 C242.2 282.6 262.0 225.4 292.6 218.4 C323.1 211.4 340.5 235.2 364.9 239.8 C389.3 244.4 397.4 240.0 414.6 241.4 C431.7 242.8 443.4 245.9 450.6 247.0 L496.6 247.0 C555.8 247.0 543.9 247.0 603.1 247.0 L1131.4 247.0" fill="none" stroke="#22d3ee" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/>
-<path d="M38.0 288.8 C54.5 272.6 97.0 215.2 120.7 207.6 C144.3 200.0 131.0 235.9 156.3 250.9 C181.6 265.8 233.9 268.3 247.2 282.3 C260.4 296.3 221.6 330.5 222.6 320.9 C223.6 311.4 219.4 259.9 252.3 234.4 C285.2 208.9 354.7 189.3 387.2 193.4 C419.6 197.5 401.9 242.6 414.6 255.0 C427.2 267.4 443.4 255.3 450.6 255.3 L496.6 255.3 C555.8 255.3 543.9 272.6 603.1 272.6 L1131.4 272.6" fill="none" stroke="#fbbf24" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/>
-<path d="M38.0 181.6 C53.7 202.8 93.0 263.1 116.7 287.7 C140.3 312.4 144.6 307.0 156.1 304.8 C167.6 302.7 152.9 286.2 174.2 277.1 C195.4 268.0 238.0 254.8 262.4 259.3 C286.9 263.8 268.7 302.6 296.3 299.4 C323.9 296.1 376.9 249.2 400.6 243.0 C424.2 236.8 404.6 264.1 414.6 268.2 C424.6 272.4 443.4 264.6 450.6 263.6 L496.6 263.6 C555.8 263.6 543.9 298.1 603.1 298.1 L1131.4 298.1" fill="none" stroke="#f472b6" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/>
-<line x1="650.5" y1="181.8" x2="650.5" y2="312.2" stroke="#3d444d" stroke-width="1.9" stroke-dasharray="5.1 5.1"/>
-<circle cx="650.5" cy="195.9" r="5.4" fill="#0d1117" stroke="#a78bfa" stroke-width="2.6"/>
-<circle cx="650.5" cy="221.4" r="5.4" fill="#0d1117" stroke="#60a5fa" stroke-width="2.6"/>
-<circle cx="650.5" cy="247.0" r="5.4" fill="#0d1117" stroke="#22d3ee" stroke-width="2.6"/>
-<circle cx="650.5" cy="272.6" r="5.4" fill="#0d1117" stroke="#fbbf24" stroke-width="2.6"/>
-<circle cx="650.5" cy="298.1" r="5.4" fill="#0d1117" stroke="#f472b6" stroke-width="2.6"/>
-<text x="650.5" y="172.7" font-family="'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="13" fill="#9198a1" text-anchor="middle">intent</text>
-<line x1="775.3" y1="181.8" x2="775.3" y2="312.2" stroke="#3d444d" stroke-width="1.9" stroke-dasharray="5.1 5.1"/>
-<circle cx="775.3" cy="195.9" r="5.4" fill="#0d1117" stroke="#a78bfa" stroke-width="2.6"/>
-<circle cx="775.3" cy="221.4" r="5.4" fill="#0d1117" stroke="#60a5fa" stroke-width="2.6"/>
-<circle cx="775.3" cy="247.0" r="5.4" fill="#0d1117" stroke="#22d3ee" stroke-width="2.6"/>
-<circle cx="775.3" cy="272.6" r="5.4" fill="#0d1117" stroke="#fbbf24" stroke-width="2.6"/>
-<circle cx="775.3" cy="298.1" r="5.4" fill="#0d1117" stroke="#f472b6" stroke-width="2.6"/>
-<text x="775.3" y="172.7" font-family="'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="13" fill="#9198a1" text-anchor="middle">TDD</text>
-<line x1="900.0" y1="181.8" x2="900.0" y2="312.2" stroke="#3d444d" stroke-width="1.9" stroke-dasharray="5.1 5.1"/>
-<circle cx="900.0" cy="195.9" r="5.4" fill="#0d1117" stroke="#a78bfa" stroke-width="2.6"/>
-<circle cx="900.0" cy="221.4" r="5.4" fill="#0d1117" stroke="#60a5fa" stroke-width="2.6"/>
-<circle cx="900.0" cy="247.0" r="5.4" fill="#0d1117" stroke="#22d3ee" stroke-width="2.6"/>
-<circle cx="900.0" cy="272.6" r="5.4" fill="#0d1117" stroke="#fbbf24" stroke-width="2.6"/>
-<circle cx="900.0" cy="298.1" r="5.4" fill="#0d1117" stroke="#f472b6" stroke-width="2.6"/>
-<text x="900.0" y="172.7" font-family="'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="13" fill="#9198a1" text-anchor="middle">adversarial review</text>
-<line x1="1024.8" y1="181.8" x2="1024.8" y2="312.2" stroke="#3d444d" stroke-width="1.9" stroke-dasharray="5.1 5.1"/>
-<circle cx="1024.8" cy="195.9" r="5.4" fill="#0d1117" stroke="#a78bfa" stroke-width="2.6"/>
-<circle cx="1024.8" cy="221.4" r="5.4" fill="#0d1117" stroke="#60a5fa" stroke-width="2.6"/>
-<circle cx="1024.8" cy="247.0" r="5.4" fill="#0d1117" stroke="#22d3ee" stroke-width="2.6"/>
-<circle cx="1024.8" cy="272.6" r="5.4" fill="#0d1117" stroke="#fbbf24" stroke-width="2.6"/>
-<circle cx="1024.8" cy="298.1" r="5.4" fill="#0d1117" stroke="#f472b6" stroke-width="2.6"/>
-<text x="1024.8" y="172.7" font-family="'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="13" fill="#9198a1" text-anchor="middle">CI</text>
-<circle cx="1131.4" cy="195.9" r="9.9" fill="#3fb950"/>
-<path d="M1126.9 195.9 l3.2 3.4 l6.0 -6.7" fill="none" stroke="#0d1117" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
-<circle cx="1131.4" cy="221.4" r="9.9" fill="#3fb950"/>
-<path d="M1126.9 221.4 l3.2 3.4 l6.0 -6.7" fill="none" stroke="#0d1117" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
-<circle cx="1131.4" cy="247.0" r="9.9" fill="#3fb950"/>
-<path d="M1126.9 247.0 l3.2 3.4 l6.0 -6.7" fill="none" stroke="#0d1117" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
-<circle cx="1131.4" cy="272.6" r="9.9" fill="#3fb950"/>
-<path d="M1126.9 272.6 l3.2 3.4 l6.0 -6.7" fill="none" stroke="#0d1117" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
-<circle cx="1131.4" cy="298.1" r="9.9" fill="#3fb950"/>
-<path d="M1126.9 298.1 l3.2 3.4 l6.0 -6.7" fill="none" stroke="#0d1117" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
-<text x="1131.4" y="172.7" font-family="'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="13" fill="#3fb950" text-anchor="middle">merge</text>
-<rect x="450.6" y="216.0" width="46" height="62.1" rx="13.8" fill="#0d1117" fill-opacity=".55" stroke="#f0f6fc" stroke-width="3.7"/>
-<line x1="473.6" y1="222.4" x2="473.6" y2="271.6" stroke="#f0f6fc" stroke-width="3.7" stroke-linecap="round"/>
-<path d="M1131.4 314.1 Q1131.4 325.0 1091.4 325.0 L513.6 325.0 Q473.6 325.0 473.6 290.8" fill="none" stroke="#9198a1" stroke-width="1.9" stroke-dasharray="5.1 5.1" stroke-linecap="round"/>
-<path d="M467.2 294.4 L473.6 286.0 L480.0 294.4" fill="none" stroke="#9198a1" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/>
-<rect x="767.4" y="312.0" width="70.2" height="26.0" fill="#0d1117"/>
-<text x="802.5" y="329.5" font-family="'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="13" fill="#9198a1" text-anchor="middle">lessons</text>
+<desc id="d">A compass on a navy chart: concentric cyan and amber rings, a needle holding its heading, and a dashed amber agent trajectory crossing the rings from one waypoint to the next, through the centre.</desc>
+<defs>
+<linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#10182c"/><stop offset="1" stop-color="#202c48"/></linearGradient>
+<radialGradient id="halo" gradientUnits="userSpaceOnUse" cx="885" cy="186.5" r="215"><stop offset="0" stop-color="#2b6f8c" stop-opacity=".55"/><stop offset=".55" stop-color="#2b6f8c" stop-opacity=".28"/><stop offset="1" stop-color="#2b6f8c" stop-opacity="0"/></radialGradient>
+<linearGradient id="fade" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#fff" stop-opacity=".0"/><stop offset=".12" stop-color="#fff"/></linearGradient>
+</defs>
+<rect width="1194" height="373" fill="url(#bg)"/>
+<rect width="1194" height="373" fill="url(#halo)"/>
+
+<mask id="m"><rect x="606" y="0" width="588" height="373" fill="url(#fade)"/></mask><g mask="url(#m)"><line x1="606.5" y1="0.0" x2="606.5" y2="373.0" stroke="#9db4d8" stroke-opacity="0.09" stroke-width="1"/><line x1="658.0" y1="0.0" x2="658.0" y2="373.0" stroke="#9db4d8" stroke-opacity="0.09" stroke-width="1"/><line x1="709.5" y1="0.0" x2="709.5" y2="373.0" stroke="#9db4d8" stroke-opacity="0.09" stroke-width="1"/><line x1="761.0" y1="0.0" x2="761.0" y2="373.0" stroke="#9db4d8" stroke-opacity="0.09" stroke-width="1"/><line x1="812.5" y1="0.0" x2="812.5" y2="373.0" stroke="#9db4d8" stroke-opacity="0.09" stroke-width="1"/><line x1="864.0" y1="0.0" x2="864.0" y2="373.0" stroke="#9db4d8" stroke-opacity="0.09" stroke-width="1"/><line x1="915.5" y1="0.0" x2="915.5" y2="373.0" stroke="#9db4d8" stroke-opacity="0.09" stroke-width="1"/><line x1="967.0" y1="0.0" x2="967.0" y2="373.0" stroke="#9db4d8" stroke-opacity="0.09" stroke-width="1"/><line x1="1018.5" y1="0.0" x2="1018.5" y2="373.0" stroke="#9db4d8" stroke-opacity="0.09" stroke-width="1"/><line x1="1070.0" y1="0.0" x2="1070.0" y2="373.0" stroke="#9db4d8" stroke-opacity="0.09" stroke-width="1"/><line x1="1121.5" y1="0.0" x2="1121.5" y2="373.0" stroke="#9db4d8" stroke-opacity="0.09" stroke-width="1"/><line x1="1173.0" y1="0.0" x2="1173.0" y2="373.0" stroke="#9db4d8" stroke-opacity="0.09" stroke-width="1"/><line x1="606.0" y1="46.5" x2="1194.0" y2="46.5" stroke="#9db4d8" stroke-opacity="0.09" stroke-width="1"/><line x1="606.0" y1="93.1" x2="1194.0" y2="93.1" stroke="#9db4d8" stroke-opacity="0.09" stroke-width="1"/><line x1="606.0" y1="139.7" x2="1194.0" y2="139.7" stroke="#9db4d8" stroke-opacity="0.09" stroke-width="1"/><line x1="606.0" y1="186.3" x2="1194.0" y2="186.3" stroke="#9db4d8" stroke-opacity="0.09" stroke-width="1"/><line x1="606.0" y1="232.9" x2="1194.0" y2="232.9" stroke="#9db4d8" stroke-opacity="0.09" stroke-width="1"/><line x1="606.0" y1="279.5" x2="1194.0" y2="279.5" stroke="#9db4d8" stroke-opacity="0.09" stroke-width="1"/><line x1="606.0" y1="326.1" x2="1194.0" y2="326.1" stroke="#9db4d8" stroke-opacity="0.09" stroke-width="1"/></g>
+<line x1="597.0" y1="186.5" x2="685.0" y2="186.5" stroke="#42d5e3" stroke-opacity="0.6" stroke-width="1"/>
+<line x1="717.0" y1="186.5" x2="1053.0" y2="186.5" stroke="#8aa0c0" stroke-opacity="0.3" stroke-width="1"/><line x1="885.0" y1="18.5" x2="885.0" y2="354.5" stroke="#8aa0c0" stroke-opacity="0.3" stroke-width="1"/>
+<circle cx="699.5" cy="85.5" r="2.6" fill="#3aa3b6"/>
+<circle cx="1076.5" cy="74.5" r="2.6" fill="#3aa3b6"/>
+<circle cx="1072.5" cy="298.5" r="2.6" fill="#3aa3b6"/>
+<circle cx="885" cy="186.5" r="156.5" fill="none" stroke="#8aa0c0" stroke-width="1" stroke-opacity="0.5"/>
+<line x1="1027.0" y1="186.5" x2="1042.5" y2="186.5" stroke="#c3cede" stroke-opacity="0.7" stroke-width="1.1"/>
+<line x1="1029.3" y1="161.1" x2="1032.2" y2="160.5" stroke="#d5dde8" stroke-opacity="0.6" stroke-width="1"/>
+<line x1="1022.7" y1="136.4" x2="1025.5" y2="135.4" stroke="#d5dde8" stroke-opacity="0.6" stroke-width="1"/>
+<line x1="1008.0" y1="115.5" x2="1021.4" y2="107.8" stroke="#c3cede" stroke-opacity="0.7" stroke-width="1.1"/>
+<line x1="997.2" y1="92.3" x2="999.5" y2="90.4" stroke="#d5dde8" stroke-opacity="0.6" stroke-width="1"/>
+<line x1="979.2" y1="74.3" x2="981.1" y2="72.0" stroke="#d5dde8" stroke-opacity="0.6" stroke-width="1"/>
+<line x1="956.0" y1="63.5" x2="963.8" y2="50.1" stroke="#c3cede" stroke-opacity="0.7" stroke-width="1.1"/>
+<line x1="935.1" y1="48.8" x2="936.1" y2="46.0" stroke="#d5dde8" stroke-opacity="0.6" stroke-width="1"/>
+<line x1="910.4" y1="42.2" x2="911.0" y2="39.3" stroke="#d5dde8" stroke-opacity="0.6" stroke-width="1"/>
+<line x1="885.0" y1="44.5" x2="885.0" y2="29.0" stroke="#c3cede" stroke-opacity="0.7" stroke-width="1.1"/>
+<line x1="859.6" y1="42.2" x2="859.0" y2="39.3" stroke="#d5dde8" stroke-opacity="0.6" stroke-width="1"/>
+<line x1="834.9" y1="48.8" x2="833.9" y2="46.0" stroke="#d5dde8" stroke-opacity="0.6" stroke-width="1"/>
+<line x1="814.0" y1="63.5" x2="806.2" y2="50.1" stroke="#c3cede" stroke-opacity="0.7" stroke-width="1.1"/>
+<line x1="790.8" y1="74.3" x2="788.9" y2="72.0" stroke="#d5dde8" stroke-opacity="0.6" stroke-width="1"/>
+<line x1="772.8" y1="92.3" x2="770.5" y2="90.4" stroke="#d5dde8" stroke-opacity="0.6" stroke-width="1"/>
+<line x1="762.0" y1="115.5" x2="748.6" y2="107.8" stroke="#c3cede" stroke-opacity="0.7" stroke-width="1.1"/>
+<line x1="747.3" y1="136.4" x2="744.5" y2="135.4" stroke="#d5dde8" stroke-opacity="0.6" stroke-width="1"/>
+<line x1="740.7" y1="161.1" x2="737.8" y2="160.5" stroke="#d5dde8" stroke-opacity="0.6" stroke-width="1"/>
+<line x1="743.0" y1="186.5" x2="727.5" y2="186.5" stroke="#c3cede" stroke-opacity="0.7" stroke-width="1.1"/>
+<line x1="740.7" y1="211.9" x2="737.8" y2="212.5" stroke="#d5dde8" stroke-opacity="0.6" stroke-width="1"/>
+<line x1="747.3" y1="236.6" x2="744.5" y2="237.6" stroke="#d5dde8" stroke-opacity="0.6" stroke-width="1"/>
+<line x1="762.0" y1="257.5" x2="748.6" y2="265.2" stroke="#c3cede" stroke-opacity="0.7" stroke-width="1.1"/>
+<line x1="772.8" y1="280.7" x2="770.5" y2="282.6" stroke="#d5dde8" stroke-opacity="0.6" stroke-width="1"/>
+<line x1="790.8" y1="298.7" x2="788.9" y2="301.0" stroke="#d5dde8" stroke-opacity="0.6" stroke-width="1"/>
+<line x1="814.0" y1="309.5" x2="806.2" y2="322.9" stroke="#c3cede" stroke-opacity="0.7" stroke-width="1.1"/>
+<line x1="834.9" y1="324.2" x2="833.9" y2="327.0" stroke="#d5dde8" stroke-opacity="0.6" stroke-width="1"/>
+<line x1="859.6" y1="330.8" x2="859.0" y2="333.7" stroke="#d5dde8" stroke-opacity="0.6" stroke-width="1"/>
+<line x1="885.0" y1="328.5" x2="885.0" y2="344.0" stroke="#c3cede" stroke-opacity="0.7" stroke-width="1.1"/>
+<line x1="910.4" y1="330.8" x2="911.0" y2="333.7" stroke="#d5dde8" stroke-opacity="0.6" stroke-width="1"/>
+<line x1="935.1" y1="324.2" x2="936.1" y2="327.0" stroke="#d5dde8" stroke-opacity="0.6" stroke-width="1"/>
+<line x1="956.0" y1="309.5" x2="963.8" y2="322.9" stroke="#c3cede" stroke-opacity="0.7" stroke-width="1.1"/>
+<line x1="979.2" y1="298.7" x2="981.1" y2="301.0" stroke="#d5dde8" stroke-opacity="0.6" stroke-width="1"/>
+<line x1="997.2" y1="280.7" x2="999.5" y2="282.6" stroke="#d5dde8" stroke-opacity="0.6" stroke-width="1"/>
+<line x1="1008.0" y1="257.5" x2="1021.4" y2="265.3" stroke="#c3cede" stroke-opacity="0.7" stroke-width="1.1"/>
+<line x1="1022.7" y1="236.6" x2="1025.5" y2="237.6" stroke="#d5dde8" stroke-opacity="0.6" stroke-width="1"/>
+<line x1="1029.3" y1="211.9" x2="1032.2" y2="212.5" stroke="#d5dde8" stroke-opacity="0.6" stroke-width="1"/>
+<circle cx="885" cy="186.5" r="137" fill="none" stroke="#42d5e3" stroke-width="1.9" stroke-opacity="0.95"/>
+<circle cx="885" cy="186.5" r="120" fill="none" stroke="#b8c6da" stroke-width="1.2" stroke-opacity="0.75" stroke-dasharray=".1 6.2" stroke-linecap="round"/>
+<circle cx="885" cy="186.5" r="87" fill="none" stroke="#8aa0c0" stroke-width="1" stroke-opacity="0.75"/>
+<circle cx="885" cy="186.5" r="61.5" fill="none" stroke="#42d5e3" stroke-width="1.6" stroke-opacity="0.95"/>
+<circle cx="885" cy="186.5" r="39.5" fill="none" stroke="#e8a94e" stroke-width="1.8" stroke-opacity="1"/>
+<polygon points="885,108.5 900,186.5 885,264.5 870,186.5" fill="#3fb6c8" fill-opacity=".16" stroke="#42d5e3" stroke-width="1.6" stroke-linejoin="round"/>
+<path d="M778.0 253.5 C782.5 254.4 795.5 259.2 805.0 259.0 C814.5 258.8 825.5 257.7 835.0 252.5 C844.5 247.3 853.7 238.0 862.0 228.0 C870.3 218.0 878.7 203.8 885.0 192.5 C891.3 181.2 893.3 171.2 900.0 160.0 C906.7 148.8 915.8 133.8 925.0 125.0 C934.2 116.2 943.0 110.9 955.0 107.0 C967.0 103.1 990.0 102.4 997.0 101.5" fill="none" stroke="#9a8866" stroke-opacity=".3" stroke-width="9" stroke-linecap="round"/>
+<path d="M778.0 253.5 C782.5 254.4 795.5 259.2 805.0 259.0 C814.5 258.8 825.5 257.7 835.0 252.5 C844.5 247.3 853.7 238.0 862.0 228.0 C870.3 218.0 878.7 203.8 885.0 192.5 C891.3 181.2 893.3 171.2 900.0 160.0 C906.7 148.8 915.8 133.8 925.0 125.0 C934.2 116.2 943.0 110.9 955.0 107.0 C967.0 103.1 990.0 102.4 997.0 101.5" fill="none" stroke="#e8a94e" stroke-width="3" stroke-dasharray="7 5"/>
+<circle cx="778" cy="253.5" r="4.6" fill="#e8a94e"/><circle cx="997" cy="101.5" r="5.6" fill="#e8a94e"/>
+<circle cx="885" cy="186.5" r="7.2" fill="#f7fbfb" stroke="#42d5e3" stroke-width="2.2"/>
+<text x="82" y="152" font-family="Inter, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="47" font-weight="700" letter-spacing="-1.65" fill="#f5f0e6">Belayline</text>
+<rect x="82" y="176.5" width="67" height="2.6" rx="1.3" fill="#42d5e3"/>
+<text x="82" y="215" font-family="Inter, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="18.5" fill="#dfe3ea">Keep coding agents on track.</text>
+<text x="83" y="308" font-family="Inter, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="10.5" letter-spacing="2.7" fill="#7f90ad">INTENT / TDD / REVIEW / MERGE</text>
 </svg>

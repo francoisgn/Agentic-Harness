@@ -33,6 +33,9 @@ moving to this version.
 - The harness applies the rule to itself: description rewritten (any coding agent, no longer only Claude Code),
   topics widened to the agents covered, banner and social preview added; `check-framework.py` checks description,
   topics and images.
+- **New banner and social preview** (compass motif, "Keep coding agents on track."): the README shows
+  `docs/assets/banner.png`, rendered from `banner.svg` so the typeface does not depend on the reader's fonts;
+  `check-framework.py` accepts a banner in `.svg` or `.png`.
 - **MIT licence** (`LICENSE`): the harness had none; `harness-sync.sh` copies it into `.harness/LICENSE` with the
   vendored files.
 - **`SECURITY.md`**: versions covered, private report (never a public issue), response times, scope; direct link

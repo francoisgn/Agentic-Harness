@@ -135,12 +135,13 @@ def check(root):
         spec.loader.exec_module(rs)
         errors += [f".github/repo-settings.json: {gap}"
                    for gap in rs.identity_gaps(json.loads(settings.read_text(encoding="utf-8")))]
-    banner, social = root / "docs/assets/banner.svg", root / "docs/assets/social-preview.png"
-    if not banner.is_file():
-        errors.append("docs/assets/banner.svg: README banner not found")
+    social = root / "docs/assets/social-preview.png"
+    banners = [f"docs/assets/banner.{ext}" for ext in ("svg", "png") if (root / f"docs/assets/banner.{ext}").is_file()]
     readme = root / "README.md"
-    if readme.is_file() and "docs/assets/banner.svg" not in readme.read_text(encoding="utf-8"):
-        errors.append("README.md: the banner docs/assets/banner.svg is not shown in it")
+    if not banners:
+        errors.append("docs/assets/banner.svg (or .png): README banner not found")
+    elif readme.is_file() and not any(b in readme.read_text(encoding="utf-8") for b in banners):
+        errors.append(f"README.md: the banner {banners[0]} is not shown in it")
     if not social.is_file():
         errors.append("docs/assets/social-preview.png: social preview not found")
     else:

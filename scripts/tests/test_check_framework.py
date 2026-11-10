@@ -81,14 +81,27 @@ class CheckFrameworkTests(unittest.TestCase):
         self.assertEqual(run(self.tmp).returncode, 0)
 
     def test_banner_must_exist(self):
-        (self.tmp / "docs/assets/banner.svg").unlink()
+        for banner in (self.tmp / "docs/assets").glob("banner.*"):
+            banner.unlink()
         r = run(self.tmp)
         self.assertEqual(r.returncode, 1)
-        self.assertIn("banner.svg", r.stdout)
+        self.assertIn("docs/assets/banner", r.stdout)
+
+    def test_banner_may_be_svg_or_png(self):
+        readme = self.tmp / "README.md"
+        for banner in (self.tmp / "docs/assets").glob("banner.*"):
+            readme.write_text(readme.read_text().replace(f"docs/assets/{banner.name}", "docs/assets/BANNER"))
+            banner.unlink()
+        for ext in ("svg", "png"):
+            (self.tmp / f"docs/assets/banner.{ext}").write_bytes(b"x")
+            readme.write_text(readme.read_text().replace("docs/assets/BANNER", f"docs/assets/banner.{ext}"))
+            self.assertEqual(run(self.tmp).returncode, 0, ext)
+            (self.tmp / f"docs/assets/banner.{ext}").unlink()
+            readme.write_text(readme.read_text().replace(f"docs/assets/banner.{ext}", "docs/assets/BANNER"))
 
     def test_readme_must_show_banner(self):
         p = self.tmp / "README.md"
-        p.write_text(p.read_text().replace("docs/assets/banner.svg", "docs/assets/other.svg"))
+        p.write_text(p.read_text().replace("docs/assets/banner.", "docs/assets/other."))
         self.assertIn("README.md", run(self.tmp).stdout)
 
     def test_social_preview_must_be_1280_by_640(self):
