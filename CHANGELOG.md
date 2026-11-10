@@ -5,6 +5,12 @@ moving to this version.
 
 ## Unreleased
 
+- **Security: Excalidraw exporter dependencies** (`scripts/diagrams/package.json`): `overrides` pin patched versions
+  of transitive dependencies flagged by Dependabot (nanoid 3.3.20 and 5.1.16, lodash-es 4.18.1, katex 0.19.1);
+  `npm audit` reports 0 vulnerabilities. Exported SVGs are byte-identical. katex 0.19 brings commander 15, so the
+  exporter now declares `engines.node >=22.12`. Exposure was low (optional, offline tool, never installed by CI or
+  vendored).
+
 - **Guide: the layers of AI** ([`docs/ai-layers/`](docs/ai-layers/README.md)), a series by audience; first part
   [apps and CLIs](docs/ai-layers/obo-agents.md): chatbot vs agent working on your behalf, four layers (presentation,
   agent, execution, inference), the contract that governs your data by plan type and platform, a tools matrix
