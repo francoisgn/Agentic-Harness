@@ -9,7 +9,7 @@
   - A **runtime harness** sits between the agent and its tools. Before or after each action it decides, in
     milliseconds, whether to allow, block, ask a human, sandbox or replay that action.
   - Belayline is a **process harness**. It governs the work around those actions: the intent written before any
-    code, tests seen failing first, an intent review by another model and a code review with every verdict traced,
+    code, tests seen failing first, an adversarial review by another model and a code review, every verdict traced,
     bounded loops, a dashboard, and rules that are versioned and updated by pull request.
 - The two layers answer different questions:
   - runtime: "may this command run now?";
@@ -26,11 +26,11 @@
 | Unit | One tool call | One issue, one lot, one pull request |
 | Time scale | Milliseconds to seconds | Hours to days |
 | Where the state lives | The proxy's trace, the agent's session | The repository: issues, PRs, docs, ADRs, lessons |
-| Typical mechanisms | Allow, deny or ask rules; sandboxes; MCP proxies; replay against real state; per-action approval | Intent and definition of done; TDD; an intent review and a code review; traced verdicts; bounded loops; stewards; dashboard; pluggable compliance; versioned rules |
+| Typical mechanisms | Allow, deny or ask rules; sandboxes; MCP proxies; replay against real state; per-action approval | Intent and definition of done; TDD; an adversarial review and a code review; traced verdicts; bounded loops; stewards; dashboard; pluggable compliance; versioned rules |
 | Who decides | A rule engine, sometimes a human per action | The operator, through the orchestrator, at defined checkpoints |
 
-Belayline has one runtime guard of its own, the `guard-git` hook, which refuses force-pushes and pushes to protected
-branches.
+Belayline has one runtime guard of its own: `guard-git`, an agent hook (Claude Code, before each shell command)
+that refuses force-pushes, pushes to protected branches and `--no-verify`.
 For anything else at runtime, it relies on the agent's own permission settings, or on a dedicated tool
 ([#46](https://github.com/francoisgn/belayline-agentic-harness/issues/46)).
 
@@ -63,11 +63,11 @@ This is the split described in [ORCHESTRATION](ORCHESTRATION.md) and [FINOPS](FI
 | Project | Layer | What it says it does | Licence, maturity (as read) |
 |---|---|---|---|
 | [haqaliz/belay](https://github.com/haqaliz/belay) ([vision](https://github.com/haqaliz/belay/blob/master/VISION.md), [PyPI `belay-harness`](https://pypi.org/project/belay-harness/0.13.0/)) | Runtime: verification | A proxy between an agent and its MCP servers that sandboxes, then replays each step against real state. Verdicts: PASS, WARN, FAIL, UNVERIFIED. It only sees MCP traffic | Apache-2.0, alpha |
-| [SECBLOK/belay](https://github.com/SECBLOK/belay) | Runtime: security | Gates tool calls (Deny > Ask > Allow, fail-closed), with canary files, a hash-chained audit log and SARIF scans, "no LLM in the decision path by default" | AGPL-3.0 plus a commercial edition |
-| [mikepenz/agent-belay](https://github.com/mikepenz/agent-belay) | Runtime: human approval | A desktop app that receives each tool call through hooks and lets a human approve it. Risk scoring 1–5 by an LLM; local cost tracking | Apache-2.0, macOS builds |
-| [hev/belaykit](https://github.com/hev/belaykit) | Library | One Go interface over the `claude` and `codex` CLIs, with tracing and a Slack notifier | Early |
+| [SECBLOK/belay](https://github.com/SECBLOK/belay) | Runtime: security | Gates tool calls (Deny > Ask > Allow, fail-closed), with canary files, a hash-chained audit log and SARIF scans; "no LLM in the decision path" | AGPL-3.0 plus a commercial edition |
+| [mikepenz/agent-belay](https://github.com/mikepenz/agent-belay) | Runtime: human approval | A desktop app that receives each tool call through hooks and lets a human approve it, with "Always Allow" patterns. Optional risk scoring 1–5 by an LLM; experimental local cost tracking | Apache-2.0; macOS, Windows, Linux (prebuilt packages for macOS only) |
+| [hev/belaykit](https://github.com/hev/belaykit) | Library | One Go interface over the `claude` and `codex` CLIs, with tracing and a Slack notifier | No licence file found |
 | [sacuadros/agent-harness](https://github.com/sacuadros/agent-harness) | Distribution of rules | One source of rules, skills, subagents and guard hooks, rendered into each agent's own files. Fail-closed guards; a scope check on turns that reach 5 files or 150 lines | MIT, tests |
-| [latintzar/harness](https://github.com/latintzar/harness) | Application platform | A Codex-based harness with generative UI for business "verticals": scoped files, approvals, spend accounting | MIT, early |
+| [latintzar/harness](https://github.com/latintzar/harness) | Application platform | A Codex-based harness with generative UI for business "verticals": scoped files, approvals, spend accounting | MIT |
 | [arXiv 2610.25568](https://arxiv.org/html/2610.25568v1) | Research | A planner, worker and reviewer harness evaluated on four benchmarks (Spine AI, 18 Oct 2026) | CC BY 4.0 |
 
 Of these, sacuadros/agent-harness is the closest to Belayline. It also spreads one set of rules across several
@@ -82,8 +82,8 @@ Belayline adds what a runtime layer does not see. Each item points to the doc th
 
 - **intent before code**: user story, error behaviours, definition of done ([METHODOLOGY](METHODOLOGY.md) §2 bis);
 - **proof by tests seen failing first** ([METHODOLOGY](METHODOLOGY.md) §2 ter);
-- **two separate reviews**: the intent review (called "adversarial" in [REVIEW-ROUNDS](REVIEW-ROUNDS.md)) checks
-  the change against the issue, by another model isolated from the author; the code review checks the diff, through
+- **two separate reviews** ([REVIEW-ROUNDS](REVIEW-ROUNDS.md)): the adversarial review checks the change against
+  the issue's intent, by another model isolated from the author; the code review checks the diff, through
   the project's review service;
 - **every verdict traced on the PR**, so first-pass quality can be measured;
 - **bounded loops**: 3 review rounds and 6 CI-tested pushes per PR ([FINOPS](FINOPS.md) §3);
@@ -106,8 +106,9 @@ It leaves to the agent's own permissions, or to a runtime tool:
 
 ## 5. What we take from them
 
-An idea seen elsewhere is not enough to enter the harness: [SCOPE.md](../SCOPE.md) asks for a failure observed in a
-real project. Ideas that fail that bar are recorded in [`.out-of-scope/`](../.out-of-scope/README.md).
+An idea seen elsewhere is not enough to enter the harness: [SCOPE.md](https://github.com/francoisgn/belayline-agentic-harness/blob/master/SCOPE.md) asks for a failure
+observed in a real project. Ideas that fail that bar are recorded in
+[`.out-of-scope/`](https://github.com/francoisgn/belayline-agentic-harness/blob/master/.out-of-scope/README.md).
 
 | Idea | From | Status |
 |---|---|---|
@@ -115,34 +116,36 @@ real project. Ideas that fail that bar are recorded in [`.out-of-scope/`](../.ou
 | Decide what a broken guard does: fail open or fail closed | sacuadros/agent-harness, SECBLOK/belay | Open question, no failure observed yet ([#41](https://github.com/francoisgn/belayline-agentic-harness/issues/41)) |
 | Measure whether reviews prevent real defects | arXiv 2610.25568 | Open question, no failure observed yet ([#42](https://github.com/francoisgn/belayline-agentic-harness/issues/42)) |
 | A size threshold for a lot | sacuadros/agent-harness | Open question, no failure observed yet ([#44](https://github.com/francoisgn/belayline-agentic-harness/issues/44)) |
-| Rules rendered into each agent's own format | sacuadros/agent-harness | Declined: no consumer project uses those agents ([record](../.out-of-scope/single-source-per-tool.md)) |
+| Rules rendered into each agent's own format | sacuadros/agent-harness | Declined: no consumer project uses those agents ([record](https://github.com/francoisgn/belayline-agentic-harness/blob/master/.out-of-scope/single-source-per-tool.md)) |
 | A runtime guardrail as a replaceable building block, with an audit log | SECBLOK/belay, mikepenz/agent-belay | Open question, no failure observed yet ([#46](https://github.com/francoisgn/belayline-agentic-harness/issues/46)) |
 
 What we do not take:
 
 - **An LLM that scores the risk of each action.** The judge can be fooled by the same injected text as the agent.
-  SECBLOK/belay keeps models out of its decision path by default.
-- **A human approval for every action.** After a few dozen, approvals stop being read. Belayline keeps human
-  confirmation for consequential actions ([ESSENTIALS](ESSENTIALS.md) §Guardrails).
+  SECBLOK/belay keeps models out of its decision path ("no LLM in the decision path").
+- **A human approval for every action.** In our view, approvals asked too often stop being read; the tools that
+  offer it mitigate this (agent-belay's "Always Allow" patterns, SECBLOK/belay asking only when its rules do not
+  decide). Belayline keeps human confirmation for consequential actions ([ESSENTIALS](ESSENTIALS.md) §Guardrails).
 - **Token and spend accounting per run.** Belayline's FinOps stays at the level of the split; users judge their own
-  costs ([record](../.out-of-scope/token-cost-accounting.md)).
+  costs ([record](https://github.com/francoisgn/belayline-agentic-harness/blob/master/.out-of-scope/token-cost-accounting.md)).
 
 ## 6. What the evidence says
 
 The paper [arXiv 2610.25568](https://arxiv.org/html/2610.25568v1) describes a harness close to Belayline's design:
 
 - the original objective is kept separate from the plan;
-- the reviewer re-derives the facts from the original request rather than trusting the worker;
+- the reviewer can be instructed to re-derive the facts from the original request rather than trust the worker;
 - workers get summaries and references, not full histories;
 - follow-up rounds are capped.
 
-That matches Belayline's intent review, its context in the repository and its bounded loops.
+That matches Belayline's adversarial review, its context in the repository and its bounded loops.
 
 The paper also warns against reading too much into its own results:
 
 - On a paired subset of 53 tasks, the harness raised the mean score by about 20 points but lowered the median
-  slightly, at about seven times the cost.
-- In one case, the review step disrupted a working machine.
+  slightly, at about seven times the cost. The arm configured with the same frontier model lowered the mean
+  slightly.
+- In one case, the review step disrupted a working environment, although the final official checks passed.
 - The authors conclude: "do not imply that additional agents or review necessarily improve outcomes".
 - The study ran no ablations and used single runs.
 
