@@ -5,6 +5,13 @@ moving to this version.
 
 ## Unreleased
 
+- **Guide: the layers of AI** ([`docs/ai-layers/`](docs/ai-layers/README.md)), a series by audience; first part
+  [apps and CLIs](docs/ai-layers/obo-agents.md): chatbot vs agent working on your behalf, four layers (presentation,
+  agent, execution, inference), the contract that governs your data by plan type and platform, a tools matrix
+  (Claude Code, Codex, Antigravity, Gemini CLI, Gemini Code Assist, Copilot, Cursor), what does not combine, and why
+  "we approved tool X" needs one answer per layer. Two Excalidraw diagrams. Every product fact is sourced and dated
+  (read 2026-11-10). Vendored with the other docs into `.harness/docs/ai-layers/`.
+
 - **README diagrams redrawn, exported by Excalidraw** (`docs/diagrams/`): mechanisms, cycle and adoption diagrams
   checked against the docs (two reviews: intent before "Ready", code on the ready PR; the dashboard reads the
   repository and CI; the harness enters the repository by a sync PR; loops bounded to 3 review rounds and 6 CI-tested

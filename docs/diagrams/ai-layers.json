@@ -193,7 +193,7 @@
   "fillStyle": "hachure",
   "strokeColor": "#2f9e44",
   "label": {
-   "text": "your machine (CLI, IDE extension)\nor a cloud container (web sessions,\nCodex cloud, Copilot cloud agent)",
+   "text": "your machine (CLI, IDE extension)\nor a cloud container (web sessions,\nCodex Cloud, Copilot cloud agent)",
    "fontSize": 20
   },
   "roundness": {
@@ -273,7 +273,7 @@
   "fillStyle": "hachure",
   "strokeColor": "#0c8599",
   "label": {
-   "text": "vendor subscription (seat price)\nvendor API key (pay per token)\ncloud platform (Vertex AI, Bedrock)",
+   "text": "vendor subscription (seat price)\nvendor API key (pay per token)\ncloud platform (Bedrock, Agent Platform)",
    "fontSize": 20
   },
   "roundness": {
