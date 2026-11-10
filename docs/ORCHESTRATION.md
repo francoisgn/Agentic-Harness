@@ -52,8 +52,14 @@ The `difficulty:` labels point to these **tiers**, whatever the provider:
 | Strong, frontier | `difficulty: medium`, `difficulty: hard` | Claude Opus / Fable, the provider's largest reasoning model |
 
 ## 3. Adversarial review by a subagent
+This is the **intent** review: it asks "does the change do what the issue asks?". The **code** review (diff only, by
+the review service on the PR) is a separate review with a separate input; the table is in
+[REVIEW-ROUNDS](REVIEW-ROUNDS.md) §The two reviews.
+
 Before moving the PR to "Ready for review":
 - start a **fresh subagent on another model** (agent `adversarial-reviewer`, model overridden if needed), read-only (no push, no merge, no comment);
+- it must be **isolated from the author's context**; if it cannot be (same session, no sub-agent tool), it says so
+  and gives no verdict, and the PR is not "Ready";
 - give it **only**: the diff, the spec (issue or lot file), `ESSENTIALS.md`, `LESSONS.md`, the architecture and
   the specs of the dependencies, the `Closes`/`Refs` lines of the PR. **Never** the author's explanations or
   conclusions;
@@ -70,8 +76,9 @@ Before moving the PR to "Ready for review":
 
 - **post every verdict on the PR**, including the first negative one ([REVIEW-ROUNDS](REVIEW-ROUNDS.md)
   §Traceability): this is what measures first-pass quality;
-- fix every High and Medium finding in **one** commit, have the same reviewer re-check that head, until
-  APPROVED. Bot findings follow [REVIEW-ROUNDS](REVIEW-ROUNDS.md).
+- fix every High and Medium finding in **one** commit, have the same reviewer re-check that head; a round with no
+  finding on the current head ends the loop (one clean round, within 3 cycles); settled findings are listed in the PR
+  and not reopened without new evidence ([REVIEW-ROUNDS](REVIEW-ROUNDS.md) §Convergence). Bot findings follow [REVIEW-ROUNDS](REVIEW-ROUNDS.md).
 
 ## 4. Child sessions (orchestrator)
 - **One task per session**: one issue (or one lot), claimed by the orchestrator on behalf of the child

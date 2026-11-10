@@ -18,10 +18,14 @@ References: `.harness/docs/CONVENTIONS.md` (§Pull requests, §Ledger, §GitHub 
    same commits; **README**: `/readme-update` (the lot's row in the progress table, badges, architecture diagram if
    the modules or flows changed; `.harness/docs/README-STANDARD.md`). Version and ledger files (CHANGELOG, What's
    New…) **not** touched.
-3. **Adversarial review**: a fresh subagent, **of another model** than the author, read-only, receives only the diff
+3. **Adversarial review** (the intent review: "does the change do what the issue asks?"): a fresh subagent,
+   **of another model** than the author, read-only, **isolated from your context**, receives only the diff
    (`git diff origin/<integration>...HEAD`), the spec, `ESSENTIALS.md`, `LESSONS.md`, with the instruction from
-   ORCHESTRATION.md §3. Never your conclusions. Post its verdict on the PR. Fix each High/Medium finding in **one**
-   commit, have it rechecked.
+   ORCHESTRATION.md §3. Never your conclusions. If it cannot be isolated it gives no verdict and the PR is not
+   Ready. Post its verdict on the PR. Fix each High/Medium finding in **one** commit, have it rechecked: a round
+   with no finding on the current head ends the loop (one clean round, within 3 cycles); list settled findings in
+   the PR, not reopened without new evidence. The code review (diff only) is the review service's, on the ready PR;
+   without one, the AI review workflow or a human does it and the PR says which.
 4. **Commits**: atomic per issue, in the project's language and style (`git log`), session attribution at the end of
    the message, trailer `Agent: <identifier>`.
 5. **Push and PR**: the work has already been pushed often to the draft PR (otherwise: push and open it as a draft to

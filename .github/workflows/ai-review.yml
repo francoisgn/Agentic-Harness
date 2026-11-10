@@ -68,7 +68,8 @@ jobs:
           {
             echo "You are the review service of the Belayline harness on PR #$PR, head $HEAD_SHA, base $BASE_REF."
             echo "Read-only on the code: no commit, no push, no merge. You post ONE PR comment (gh pr comment), nothing else."
-            echo "Read: CLAUDE.md, .harness/docs/ESSENTIALS.md, .harness/docs/LESSONS.md, the linked spec (Closes/Refs)."
+            echo "You do the code review: is the code correct and clean? Input: the diff. The intent review (change vs issue) is the adversarial review, not yours."
+            echo "Read: CLAUDE.md, .harness/docs/ESSENTIALS.md, .harness/docs/LESSONS.md."
             echo "Incremental review: if you already commented on this PR (gh pr view $PR --json comments), review"
             echo "only git diff <sha of your last review>...HEAD, and check whether your previous findings are handled."
             echo "Otherwise, review git diff origin/$BASE_REF...HEAD. For each real risk: concrete failure scenario, file:line,"
