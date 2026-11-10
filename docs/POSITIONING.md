@@ -17,8 +17,8 @@
 - They combine. A runtime guard protects each action; Belayline makes the sequence of actions add up to the right
   change.
 - Like Google's Elephant–Goldfish Model, Belayline has work reviewed by a "goldfish" that never sees the author's
-  conversation. Unlike it, the memory lives in the **repository**, not in an elephant agent, and the orchestrator is
-  a **conductor, not a composer**.
+  conversation. Belayline also keeps the plan, the progress and the decisions in the **repository** (issues, PRs),
+  so no long-lived author agent is needed, and the orchestrator is a **conductor, not a composer**.
 
 ## 1. Two layers
 
@@ -42,10 +42,12 @@ Google's [Elephant–Goldfish Model](https://github.com/google/elephant-goldfish
 also makes: "Design with an elephant. Review with a goldfish." The **elephant** "holds your project context and
 drafts the specification"; the **goldfish** reviewers "examine the draft and referenced source material without the
 earlier conversation". The project describes itself as an open-source plugin for designing and reviewing software
-with agents, and as "not an officially supported Google product".
+with agents, and as "not an officially supported Google product". It credits "Dave Rensin's original essay" for its
+ideas ([essay](https://medium.com/@drensin/elephants-goldfish-and-the-new-golden-age-of-software-engineering-c33641a48874),
+not read here: blocked by a Cloudflare challenge).
 
-Belayline makes the same split, and wrote it down before it was packaged as a harness. It distils practices first
-used in two of its author's projects:
+Belayline makes the same split. Its rules were in use in its author's projects before Belayline itself was
+packaged:
 
 - [SwiftHFR](https://github.com/francoisgn/ios-app_SwiftHFR), commit `bbd2048` of 2026-10-24: "the reviewer is
   never the author model";
@@ -53,23 +55,23 @@ used in two of its author's projects:
   "Scratchpads, agent memory and `/tmp` are invisible to other sessions and do not count";
 - a private app, from 2026-10-20: issues routed to a model tier by label.
 
-Belayline's first docs (commit `57770bd`, 2026-11-07) ask for a "fresh subagent of another model" given "never the
-author's explanations or conclusions" ([ORCHESTRATION](ORCHESTRATION.md) §3). The dates above are those of the
+Belayline's first docs (commit `57770bd`, 2026-11-07, in French) ask for a fresh subagent of another model, given
+never the author's explanations or conclusions ([ORCHESTRATION](ORCHESTRATION.md) §3). The dates above are those of the
 commits; we make no claim about when the Elephant–Goldfish Model was first written.
 
 The two approaches differ in five ways:
 
 | | Elephant–Goldfish Model | Belayline |
 |---|---|---|
-| Where the context lives | In the elephant: the agent that holds the project context and drafts | In the **repository**: issues, PRs, ADRs, lessons. No agent has to remember; you stop one and lose nothing ([FINOPS](FINOPS.md) §1) |
+| Where the context lives | The elephant holds the project context; the brief, the draft and the approved specifications are saved as files (`docs/designs/`), with skills to bootstrap and report drift on them | In the **repository**, including the plan, the progress and the decisions (issues, PRs, ADRs, lessons). No agent has to remember; you stop one and lose nothing ([FINOPS](FINOPS.md) §1) |
 | Cost of context | In our reading, the elephant's context grows with the project, and each goldfish reads the draft and its sources cold | A fresh agent gets a brief with exactly the files and issues it needs, and the docs are short with the essentials first ([FINOPS](FINOPS.md) §1, "Avoid cold context") |
-| How work resumes | The elephant carries the thread | The orchestrator does not wait in memory: it is woken by a scheduled checkpoint ([ORCHESTRATION](ORCHESTRATION.md) §4) or, in sessions that subscribe to them, by a PR event, and then re-reads the state ([FINOPS](FINOPS.md) §3) |
+| How work resumes | In our reading, the elephant carries the conversation that led to the draft | The orchestrator does not wait in memory: a PR event it subscribed to, or a scheduled checkpoint, wakes it, and it re-reads the state ([ORCHESTRATION](ORCHESTRATION.md) §4, [FINOPS](FINOPS.md) §3) |
 | The reviewer | A goldfish: fresh context, without the earlier conversation | A goldfish **of another model** than the author, at a tier at least equal, plus a separate code review |
 | Scope | Designing and reviewing a specification, approved by a human before implementation | The whole change: intent, lot, TDD, the two reviews, CI, merge, dashboard, lessons |
 
-An elephant is expensive: every turn re-reads a growing history, it drifts, and it forgets everything when the
-session ends. Belayline keeps no elephant agent: the only long-lived agent, the orchestrator, keeps a short context
-of summaries and links to the state.
+In our view, a long-lived elephant agent is expensive: every turn re-reads a growing history, it drifts, and it
+forgets everything when the session ends. Belayline keeps no elephant agent: the only long-lived agent, the
+orchestrator, keeps a short context of summaries and links to the state.
 
 The orchestrator is a **conductor, not a composer**:
 
@@ -192,5 +194,5 @@ All read 2026-11-10.
 - https://arxiv.org/html/2610.25568v1
 - https://github.com/google/elephant-goldfish-model
 
-Not read: the Medium article "How to build an agent harness that decides in 0.65 seconds" (blocked by a Cloudflare
-challenge).
+Not read, blocked by a Cloudflare challenge: the Medium article "How to build an agent harness that decides in 0.65
+seconds", and Dave Rensin's essay credited by the Elephant–Goldfish Model.

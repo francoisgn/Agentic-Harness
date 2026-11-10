@@ -5,13 +5,15 @@ moving to this version.
 
 ## Unreleased
 
+- **Orchestration: wait on events, not in memory** ([ORCHESTRATION](docs/ORCHESTRATION.md) §4): subscribe the
+  session to a PR's activity where the tool allows it, with one late checkpoint as a safety net.
 - **Positioning** ([POSITIONING](docs/POSITIONING.md)): where Belayline sits among agent harnesses. Runtime harnesses
   gate, sandbox or replay each action; Belayline governs the process around them (intent, TDD, two traced reviews,
   bounded loops, metrics, versioned rules). Compared with Google's Elephant–Goldfish Model, which makes the same
-  author / fresh-reviewer split: memory in the repository rather than an elephant agent, briefs instead of cold
-  context, a reviewer of another model, the whole change rather than the spec; dated prior use in SwiftHFR
-  (2026-10-24). Six audited projects and one paper, sourced and dated (read 2026-11-10); the ideas taken are tracked
-  in the "Landscape audit" umbrella issue.
+  author / fresh-reviewer split: plan, progress and decisions in the repository rather than a long-lived agent, briefs
+  instead of cold context, a reviewer of another model, the whole change rather than the spec; earlier use of these
+  rules in the author's projects dated from commits (SwiftHFR, 2026-10-24). Six audited projects and one paper,
+  sourced and dated (read 2026-11-10); the ideas taken are tracked in the "Landscape audit" umbrella issue.
 
 - **Security: Excalidraw exporter dependencies** (`scripts/diagrams/package.json`): `overrides` pin patched versions
   of transitive dependencies flagged by Dependabot (nanoid 3.3.20 and 5.1.16, lodash-es 4.18.1, katex 0.19.1);
