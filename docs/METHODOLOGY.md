@@ -165,8 +165,8 @@ recommendation:
   issue (§4); several related lots sit under one umbrella issue (§3). `docs/LOTS.md`, when the project has one, keeps
   the plan (scope, dependencies, routing); the epic or umbrella keeps the order of taking and the progress. Without
   `docs/LOTS.md`, the umbrella holds the plan too. The head is never an agent kept alive to "own" the work: it goes
-  stale, costs context and has to be watched. The only long-lived agent is the orchestrator; stewards come back on
-  a schedule, but each run is a fresh agent ([FINOPS](FINOPS.md) §1).
+  stale, costs context and has to be watched. The only long-lived agent is the orchestrator; stewards are started
+  per task (some on a schedule), each run a fresh agent ([FINOPS](FINOPS.md) §1).
 - **Splitting is done by a disposable agent**: a `plan` agent splits at the start, or when the work must be
   re-planned, writes the result in the issues (and `docs/LOTS.md`), then stops.
 - **A lot that stays big says why**, in one line of the PR (e.g. "one atomic rename, splitting would leave the build

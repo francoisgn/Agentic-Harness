@@ -9,7 +9,7 @@ moving to this version.
   ([FINOPS](docs/FINOPS.md) §2 and §5, [REVIEW-ROUNDS](docs/REVIEW-ROUNDS.md), [METHODOLOGY](docs/METHODOLOGY.md)
   §5 and §6):
   - each settled finding listed in a PR starts with `[fixed]`, `[declined: false positive]` or
-    `[declined: not worth it]`; a bug found after a merge carries `Introduced by #NNN`; FINOPS §5 gives the `gh search`
+    `[declined: not worth it]`; a bug found after a merge carries `Introduced by #NNN`; FINOPS §5 gives the GitHub API
     queries to read them. The harness computes nothing: lowering the reviewer tier as models improve stays the
     operator's decision;
   - no cap on lot size (recorded in `.out-of-scope/`): split as much as possible, an issue (the lot's epic, or an

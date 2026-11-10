@@ -125,9 +125,10 @@ q 'is:pr is:merged "declined false positive"'      # shortlist: PRs with a findi
 q 'is:pr is:merged "declined not worth it"'        # shortlist: PRs with a finding declined as not worth it
 q 'is:issue "Introduced by"'                       # defects that got through (then check the type: label)
 q 'is:pr is:merged "Adversarial review (fable)"'   # PRs reviewed by a model: write the name the verdicts use
-# The tags of one PR (body and comments)
+# The settled findings of one PR (body and comments): a tag counts only at the start of a line
 { gh api repos/OWNER/REPO/pulls/N --jq .body; gh api repos/OWNER/REPO/issues/N/comments --paginate --jq '.[].body'; } |
-  grep -oE '\[(fixed|declined: false positive|declined: not worth it)\]' | sort | uniq -c
+  grep -oE '^[[:space:]]*([-*] )?\[(fixed|declined: false positive|declined: not worth it)\]' |
+  sed 's/^[-* ]*//' | sort | uniq -c
 ```
 
 Compare periods (before and after a model change) rather than reading one number. The trend feeds §2 rule 3.

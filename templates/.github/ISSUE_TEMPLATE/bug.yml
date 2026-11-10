@@ -25,8 +25,8 @@ body:
   - type: input
     id: introduced
     attributes:
-      label: Introduced by
-      description: 'The PR that brought the defect, when known: "Introduced by #NNN" (METHODOLOGY.md §6, FINOPS.md §5).'
+      label: Origin (PR)
+      description: 'When known, write "Introduced by #NNN" with the PR that brought the defect (METHODOLOGY.md §6).'
   - type: input
     id: version
     attributes:
