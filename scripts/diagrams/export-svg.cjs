@@ -52,7 +52,7 @@ function bundle() {
 }
 
 async function main(scenes) {
-  if (!scenes.length) {
+  if (!scenes.length || scenes.some((s) => !s.endsWith(".excalidraw"))) {
     console.error("usage: export-svg.cjs <scene.excalidraw>...");
     return 2;
   }
@@ -72,12 +72,12 @@ async function main(scenes) {
         + `</script><script src="/node_modules/.belayline/export-bundle.js"></script>`);
     }
     const file = path.join(HERE, url);
-    if (!file.startsWith(MODULES + path.sep) || !fs.existsSync(file)) {
+    if (!file.startsWith(MODULES + path.sep) || !fs.existsSync(file) || !fs.statSync(file).isFile()) {
       res.statusCode = 404;
       return res.end();
     }
     res.setHeader("content-type", types[path.extname(file)] || "application/octet-stream");
-    fs.createReadStream(file).pipe(res);
+    fs.createReadStream(file).on("error", () => res.destroy()).pipe(res);
   });
   await new Promise((ok) => server.listen(0, "127.0.0.1", ok));
   const origin = `http://127.0.0.1:${server.address().port}`;
@@ -89,8 +89,9 @@ async function main(scenes) {
     await page.goto(origin + "/");
     await page.waitForFunction(() => typeof window.exportScene === "function");
     for (const scenePath of scenes) {
-      const raw = fs.readFileSync(scenePath);
-      const svg = await page.evaluate((s) => window.exportScene(s), JSON.parse(raw.toString("utf8")));
+      // LF only, whatever the checkout did to line endings: the bytes render.py hashes
+      const raw = fs.readFileSync(scenePath, "utf8").replace(/\r\n/g, "\n");
+      const svg = await page.evaluate((s) => window.exportScene(s), JSON.parse(raw));
       fs.writeFileSync(scenePath.replace(/\.excalidraw$/, ".svg"), stamp(svg, sha256(raw)));
     }
   } finally {

@@ -56,8 +56,8 @@ def _jitter_line(r, x1, y1, x2, y2, rough):
     return " ".join(out)
 
 
-def text_width(text, size):
-    return max((len(line) for line in text.split("\n")), default=0) * size * CHAR_W
+def text_width(text, size, char_w=CHAR_W):
+    return max((len(line) for line in text.split("\n")), default=0) * size * char_w
 
 
 def _text(x, y, text, size, color, anchor="middle"):
@@ -166,7 +166,7 @@ def overflows(source):
         label = e.get("label")
         if label and e["type"] in ("rectangle", "ellipse", "diamond"):
             size = label.get("fontSize", 20)
-            need_w = text_width(label["text"], size) / CHAR_W * FIT_CHAR_W * (1.25 if e["type"] == "ellipse" else 1) + 20
+            need_w = text_width(label["text"], size, FIT_CHAR_W) * (1.25 if e["type"] == "ellipse" else 1) + 20
             need_h = len(label["text"].split("\n")) * size * LINE_H + 12
             if need_w > e["width"] or need_h > e["height"]:
                 issues.append(f"{e['id']}: \"{label['text'].splitlines()[0]}…\" overflows "
@@ -261,7 +261,14 @@ def to_scene(source):
 
 
 def scene_hash(scene):
-    return hashlib.sha256(scene.encode("utf-8")).hexdigest()
+    # LF only, as written by write_lf(): the same bytes export-svg.cjs hashes, on every OS
+    return hashlib.sha256(scene.replace("\r\n", "\n").encode("utf-8")).hexdigest()
+
+
+def write_lf(path, text):
+    """Writes with LF line endings on every OS (write_text would write CRLF on Windows)."""
+    with open(path, "w", encoding="utf-8", newline="\n") as f:
+        f.write(text)
 
 
 def body_hash(svg):
@@ -330,13 +337,13 @@ def main():
                     problems.append(f"{shown(path)}: not up to date (run the diagram rendering again without --check)")
             continue
         if current_scene != scene:
-            scene_path.write_text(scene, encoding="utf-8")
+            write_lf(scene_path, scene)
             print(f"✔ {shown(scene_path)}")
         builtin_svg = current_svg is not None and not ANY_STAMP.search(current_svg)
         if export and (not svg_ok or (a.engine == "excalidraw" and builtin_svg)):
             to_export.append((svg_path, source))
         elif not svg_ok:
-            svg_path.write_text(render_svg(source), encoding="utf-8")
+            write_lf(svg_path, render_svg(source))
             hint = export_hint()
             print(f"✔ {shown(svg_path)} (built-in renderer{'; ' + hint if hint else ''})")
     if to_export:
@@ -350,7 +357,7 @@ def main():
             if svg_is_current(current, source):
                 print(f"✔ {shown(path)} (Excalidraw)")
             elif a.engine != "excalidraw":
-                path.write_text(render_svg(source), encoding="utf-8")
+                write_lf(path, render_svg(source))
                 print(f"✔ {shown(path)} (built-in renderer)")
             elif not done.returncode:
                 problems.append(f"{shown(path)}: the export did not produce an up-to-date SVG")
