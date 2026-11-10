@@ -3,6 +3,15 @@
 Format : une section par version (semver), du plus récent au plus ancien. « Action » = ce qu'un projet consommateur doit
 faire en passant à cette version.
 
+## Non publié
+
+- **Licence MIT** (`LICENSE`) : le cadre n'en avait pas ; `harness-sync.sh` la copie dans `.harness/LICENSE` avec les
+  fichiers vendorisés.
+- **`SECURITY.md`** : versions couvertes, signalement privé (jamais d'issue publique), délais, périmètre ; lien direct
+  depuis le choix de gabarit d'issue.
+
+Action : aucune ; la prochaine synchro ajoute `.harness/LICENSE`.
+
 ## 0.3.0 — 2026-11-09
 
 Retours du premier projet consommateur : un cadre neutre, des règles qui ne se contredisent plus. **Rupture de

@@ -18,6 +18,9 @@
 tree      docs                                        .harness/docs
 copy      templates/.github/labels.json               .harness/labels.json
 
+# Licence du cadre (MIT) : elle accompagne les fichiers copiés, le projet n'a rien à faire pour la respecter
+copy      LICENSE                                     .harness/LICENSE
+
 # Skills : copiés dans le dépôt pour fonctionner aussi en session cloud (qui ne charge pas les plugins du dépôt)
 tree      plugins/harness/skills                      .claude/skills
 
