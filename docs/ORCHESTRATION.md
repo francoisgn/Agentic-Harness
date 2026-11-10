@@ -96,6 +96,9 @@ Before moving the PR to "Ready for review":
   as a task can be split, at the right model tier ([FINOPS](FINOPS.md) §1–§2).
 - **Never poll in a loop**: schedule a checkpoint (5 to 10 min; e.g. Claude Code: `send_later`), then read
   the result (e.g. Claude Code: `list_events`, kinds `result`/`assistant`). Archive the child once its result is used.
+- **Wait on events, not in memory**: when the tool can subscribe a session to a PR's activity (e.g. Claude Code:
+  `subscribe_pr_activity`), CI results, reviews and the merge wake the session, which then re-reads the PR; keep one
+  late checkpoint as a safety net for events that may not arrive.
 - Watchdog: a child with no commit and no comment for 30 min, or one that repeats the same failing command three
   times, is stopped; its state is noted on its issue and the issue is released.
 - Permissions: a child inherits only pre-approved tools. Durable rules go in the versioned `.claude/settings.json`,
