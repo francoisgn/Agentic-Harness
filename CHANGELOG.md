@@ -27,6 +27,11 @@ moving to this version.
   `diagrams-render.py` vendored, templates `README.md`, `CONTRIBUTING.md` and `docs/diagrams/architecture.*` created
   if missing; check in `docs-security.yml` (input `readme`). Each point can be switched off in
   `.harness/config.json` › `readme`.
+- **Default branch alert** (#10): the session-start hook and `harness-sync.sh` (also `--check`, exit code unchanged)
+  print a 🟠 line when `integration_branch` is not the repository's default branch (workflows triggered by issues,
+  comments and schedules would never run), or "could not check" when it is unknown; `pr-hygiene.yml` emits a
+  `::warning::` (new input `integration-branch`). Silence with `"default_branch_check": false` in
+  `.harness/config.json`.
 - **Tiered CI baseline** ([CI-BASELINE](docs/CI-BASELINE.md)): hygiene, quality (one local command = the CI),
   expensive, heavy security, process; six workflow invariants; survey of three real projects.
 - **Anti-bloat checks** (`check-framework.py`): size limits on skills, agents and `docs/ESSENTIALS.md` (listed
