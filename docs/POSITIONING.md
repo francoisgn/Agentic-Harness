@@ -92,9 +92,10 @@ Belayline adds what a runtime layer does not see. Each item points to the doc th
 - **lessons that move from project to project**;
 - **rules vendored at a version** and updated by PR ([ADOPTION](ADOPTION.md));
 - **efficiency at the level of the split**: the right model tier for each task, early delegation, bounded loops
-  ([FINOPS](FINOPS.md) §2–§3). Belayline does not count tokens, compare an API key with a subscription, or compute
-  anyone's return on investment: each user knows their own economics. It offers a layer that makes the work more
-  efficient, not a verdict on what it should cost.
+  ([FINOPS](FINOPS.md) §2–§3). The harness does not collect or compute token usage (an operator may read the
+  trend in the provider's console, FINOPS §4), does not compare an API key with a subscription, and does not
+  compute anyone's return on investment: each user knows their own economics. It offers a layer that makes the work
+  more efficient, not a verdict on what it should cost.
 
 It leaves to the agent's own permissions, or to a runtime tool:
 
@@ -106,8 +107,9 @@ It leaves to the agent's own permissions, or to a runtime tool:
 
 ## 5. What we take from them
 
-An idea seen elsewhere is not enough to enter the harness: [SCOPE.md](https://github.com/francoisgn/belayline-agentic-harness/blob/master/SCOPE.md) asks for a failure
-observed in a real project. Ideas that fail that bar are recorded in
+An idea seen elsewhere is not enough to enter the harness:
+[SCOPE.md](https://github.com/francoisgn/belayline-agentic-harness/blob/master/SCOPE.md)
+asks for a failure observed in a real project. Ideas that fail that bar are recorded in
 [`.out-of-scope/`](https://github.com/francoisgn/belayline-agentic-harness/blob/master/.out-of-scope/README.md).
 
 | Idea | From | Status |
@@ -143,8 +145,8 @@ That matches Belayline's adversarial review, its context in the repository and i
 The paper also warns against reading too much into its own results:
 
 - On a paired subset of 53 tasks, the harness raised the mean score by about 20 points but lowered the median
-  slightly, at about seven times the cost. The arm configured with the same frontier model lowered the mean
-  slightly.
+  slightly, at about seven times the cost. The Opus-configured arm lowered the mean
+  slightly (−1.06).
 - In one case, the review step disrupted a working environment, although the final official checks passed.
 - The authors conclude: "do not imply that additional agents or review necessarily improve outcomes".
 - The study ran no ablations and used single runs.

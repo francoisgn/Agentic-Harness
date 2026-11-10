@@ -19,4 +19,4 @@ Before proposing something, search this folder. Reopening a declined idea is wel
 | [AI review as a required check](ai-review-required-check.md) | 2026-11-09 |
 | [Skills invoked only by the human](user-vs-model-invoked-skills.md) | 2026-11-10 |
 | [One source compiled into per-tool skill formats](single-source-per-tool.md) | 2026-11-10 |
-| [Token and spend accounting per run](token-cost-accounting.md) | 2026-11-10 |
+| [Token and spend accounting per run or per PR in the dashboard](token-cost-accounting.md) | 2026-11-10 |
