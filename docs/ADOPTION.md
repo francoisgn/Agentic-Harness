@@ -81,9 +81,9 @@ In a repository that has adopted the harness, the vendored skills and hooks are 
 plugin is useful on the Mac for repositories **not yet** adopted:
 ```bash
 claude plugin marketplace add francoisgn/belayline-agentic-harness
-claude plugin install belay@belayline            # user scope
+claude plugin install belayline@belayline        # user scope
 ```
-Its skills are then called `/belay:lot-start`, etc. Automatic update: `/plugin` → Marketplaces →
+Its skills are then called `/belayline:lot-start`, etc. Automatic update: `/plugin` → Marketplaces →
 Belayline → Enable auto-update. To declare it in a repository (local sessions only; a cloud session
 ignores it), add to `.claude/settings.json`:
 ```json
@@ -91,11 +91,11 @@ ignores it), add to `.claude/settings.json`:
   "extraKnownMarketplaces": {
     "Belayline": { "source": { "source": "github", "repo": "francoisgn/belayline-agentic-harness", "ref": "v0.3.0" } }
   },
-  "enabledPlugins": { "belay@belayline": true }
+  "enabledPlugins": { "belayline@belayline": true }
 }
 ```
 In an adopted repository, prefer **not** to enable it (the skills would exist twice, `/lot-start` and
-`/belay:lot-start`).
+`/belayline:lot-start`).
 
 ## Updates
 - Skill `/harness-update` (step-by-step guide), or by hand:

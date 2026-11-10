@@ -68,3 +68,6 @@ Three complementary channels, a single source (this repository, tags `vX.Y.Z`):
 Amendment, 2026-11-09: the harness is now written in English only (see CHANGELOG, Unreleased). The block id and the
 file name above are the current ones (`harness`, `ESSENTIALS.md`; formerly `cadre`, `ESSENTIEL.md`). The consequence
 about a project in English no longer applies.
+
+**Amendment, 2026-11-10:** the plugin is now named `belayline` (`belayline@belayline`), not `belay`; see
+[ADR 0004](0004-plugin-named-belayline.md). The decision above is unchanged.

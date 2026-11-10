@@ -55,7 +55,7 @@ example on an iOS client).
 
 | Your agent | What it receives |
 |---|---|
-| **Claude Code** (adapter provided) | `CLAUDE.md` block, skills (`/intent`, `/lot-start`, `/review-round`…), agents (`adversarial-reviewer`, stewards, compliance), guardrail hooks; or the plugin: `claude plugin marketplace add francoisgn/belayline-agentic-harness && claude plugin install belay@belayline` |
+| **Claude Code** (adapter provided) | `CLAUDE.md` block, skills (`/intent`, `/lot-start`, `/review-round`…), agents (`adversarial-reviewer`, stewards, compliance), guardrail hooks; or the plugin: `claude plugin marketplace add francoisgn/belayline-agentic-harness && claude plugin install belayline@belayline` |
 | **Other agents** (Codex, Cursor, Copilot, Gemini CLI, Aider…) | `AGENTS.md` block ([open format](https://agents.md)) that points to the rules (`.harness/docs/ESSENTIALS.md`); read natively or to be enabled, depending on the tool ([ADOPTION](docs/ADOPTION.md) §Connect your coding agent); same method, labels, templates, CI and dashboard |
 | **Human team** | The same issues, labels, PRs, CI and dashboard; status report readable by a non-technical person |
 

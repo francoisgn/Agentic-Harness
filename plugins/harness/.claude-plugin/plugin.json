@@ -1,5 +1,5 @@
 {
-  "name": "belay",
+  "name": "belayline",
   "displayName": "Belayline",
   "version": "0.3.0",
   "description": "Claude Code adapter for the shared agentic development harness (open to any coding agent): intent and TDD, issue → lot → PR loop, adversarial review, compliance reviewers, stewards, flow dashboard, FinOps, git guardrails.",

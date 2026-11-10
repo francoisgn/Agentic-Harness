@@ -34,7 +34,7 @@
 Belayline has one runtime guard of its own: `guard-git`, an agent hook (Claude Code, before each shell command)
 that refuses force-pushes, pushes to protected branches and `--no-verify`.
 For anything else at runtime, it relies on the agent's own permission settings, or on a dedicated tool
-([#46](https://github.com/francoisgn/belayline-agentic-harness/issues/46)).
+([record](https://github.com/francoisgn/belayline-agentic-harness/blob/master/.out-of-scope/runtime-guardrail-block.md)).
 
 ## 2. The elephant, the goldfish, and the repository
 
@@ -98,8 +98,8 @@ This is the split described in [ORCHESTRATION](ORCHESTRATION.md) and [FINOPS](FI
 Of these, sacuadros/agent-harness is the closest to Belayline. It also spreads one set of rules across several
 agents. It works on the developer's machine, while Belayline works through the repository.
 
-The name "belay" is used by several of these tools; Belayline's Claude Code plugin is also called `belay`
-([#50](https://github.com/francoisgn/belayline-agentic-harness/issues/50)).
+The name "belay" is used by several of these tools, so Belayline's Claude Code plugin, first called `belay`, is now
+named `belayline` ([ADR 0004](adr/0004-plugin-named-belayline.md)).
 
 ## 4. What Belayline adds, and what it leaves to others
 
@@ -140,11 +140,11 @@ asks for a failure observed in a real project. Ideas that fail that bar are reco
 | Idea | From | Status |
 |---|---|---|
 | A verdict never hides what was not verified ("UNVERIFIED is never dressed up as PASS") | haqaliz/belay | Taken: a reviewer could not verify a sourced fact and the verdict line could not say so ([#40](https://github.com/francoisgn/belayline-agentic-harness/issues/40)) |
-| Decide what a broken guard does: fail open or fail closed | sacuadros/agent-harness, SECBLOK/belay | Open question, no failure observed yet ([#41](https://github.com/francoisgn/belayline-agentic-harness/issues/41)) |
+| Decide what a broken guard does: fail open or fail closed | sacuadros/agent-harness, SECBLOK/belay | Declined: no failure observed; `guard-git` fails open on purpose ([record](https://github.com/francoisgn/belayline-agentic-harness/blob/master/.out-of-scope/guard-fail-closed.md)) |
 | Measure whether reviews prevent real defects, and follow it over time: as models improve, the adversarial review should find less, and a lower tier can take it over | arXiv 2610.25568 | Taken by the maintainer ([#42](https://github.com/francoisgn/belayline-agentic-harness/issues/42)) |
-| A size threshold for a lot | sacuadros/agent-harness | Open question, no failure observed yet ([#44](https://github.com/francoisgn/belayline-agentic-harness/issues/44)) |
+| A size threshold for a lot | sacuadros/agent-harness | Open until a lot shows the need ([#44](https://github.com/francoisgn/belayline-agentic-harness/issues/44)) |
 | Rules rendered into each agent's own format | sacuadros/agent-harness | Declined: no consumer project uses those agents ([record](https://github.com/francoisgn/belayline-agentic-harness/blob/master/.out-of-scope/single-source-per-tool.md)) |
-| A runtime guardrail as a replaceable building block, with an audit log | SECBLOK/belay, mikepenz/agent-belay | Open question, no failure observed yet ([#46](https://github.com/francoisgn/belayline-agentic-harness/issues/46)) |
+| A runtime guardrail as a replaceable building block, with an audit log | SECBLOK/belay, mikepenz/agent-belay | Declined: runtime gating is left to the agent or a dedicated tool ([record](https://github.com/francoisgn/belayline-agentic-harness/blob/master/.out-of-scope/runtime-guardrail-block.md)) |
 
 What we do not take:
 

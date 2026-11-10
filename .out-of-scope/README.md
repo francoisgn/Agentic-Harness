@@ -20,3 +20,5 @@ Before proposing something, search this folder. Reopening a declined idea is wel
 | [Skills invoked only by the human](user-vs-model-invoked-skills.md) | 2026-11-10 |
 | [One source compiled into per-tool skill formats](single-source-per-tool.md) | 2026-11-10 |
 | [Token and spend accounting per run or per PR in the dashboard](token-cost-accounting.md) | 2026-11-10 |
+| [Guard hooks that fail closed](guard-fail-closed.md) | 2026-11-10 |
+| [A "runtime guardrail" building block in ADOPTION](runtime-guardrail-block.md) | 2026-11-10 |

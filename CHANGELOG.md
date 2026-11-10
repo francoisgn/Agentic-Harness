@@ -5,6 +5,15 @@ moving to this version.
 
 ## Unreleased
 
+- **Plugin renamed `belay` → `belayline`** ([ADR 0004](docs/adr/0004-plugin-named-belayline.md)): `belay` is also the
+  command name of other 2026 agent-safety tools. Install with `claude plugin install belayline@belayline`; skills
+  are `/belayline:<skill>`. Landscape decisions recorded in `.out-of-scope/`: guard hooks stay fail-open, no runtime
+  guardrail building block.
+
+  **Action** (plugin users only; the vendored copy is not affected): `claude plugin uninstall belay@belayline`, then
+  `claude plugin install belayline@belayline`; in `.claude/settings.json`, replace `"belay@belayline"` with
+  `"belayline@belayline"` under `enabledPlugins`.
+
 - **Orchestration: wait on events, not in memory** ([ORCHESTRATION](docs/ORCHESTRATION.md) §4): subscribe the
   session to a PR's activity where the tool allows it, with one late checkpoint as a safety net.
 
