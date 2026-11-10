@@ -48,7 +48,7 @@ jobs:
 
       - name: ShellCheck
         if: ${{ !cancelled() }}
-        run: shellcheck scripts/*.sh scripts/tests/*.sh plugins/harness/scripts/*.sh
+        run: shellcheck scripts/*.sh scripts/tests/*.sh plugins/harness/scripts/*.sh templates/scripts/*.sh
 
       - name: Python (hook syntax)
         if: ${{ !cancelled() }}

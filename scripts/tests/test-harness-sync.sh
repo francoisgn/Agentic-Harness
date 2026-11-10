@@ -28,6 +28,7 @@ grep -q '@.harness/docs/ESSENTIALS.md' "$T/CLAUDE.md" || fail "ESSENTIALS import
 [ -f "$T/.harness/docs/LESSONS.md" ] && [ -f "$T/.claude/skills/lot-start/SKILL.md" ] || fail "docs or skills missing"
 [ -x "$T/.harness/hooks/guard-git.py" ] || fail "hook not executable"
 [ -f "$T/.claude/agents/adversarial-reviewer.md" ] && [ -f "$T/.claude/agents/compliance-gdpr.md" ] || fail "agents missing"
+[ -x "$T/scripts/local-check.sh" ] && grep -qF '# >>> steps' "$T/scripts/local-check.sh" || fail "local-check skeleton not seeded executable"
 [ -f "$T/.github/ISSUE_TEMPLATE/task.yml" ] && [ ! -e "$T/.github/ISSUE_TEMPLATE/tache.yml" ] || fail "task.yml template"
 [ "$(grep -cFx '<!-- harness:begin harness -->' "$T/AGENTS.md")" = 1 ] || fail "AGENTS.md block"
 [ -f "$T/.harness/scripts/flow-metrics.py" ] && [ -f "$T/.harness/scripts/compliance-plan.py" ] \

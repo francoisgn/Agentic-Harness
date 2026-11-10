@@ -5,6 +5,11 @@ moving to this version.
 
 ## Unreleased
 
+- **Local check = the CI** ([CI-BASELINE](docs/CI-BASELINE.md) §3): skill `/local-check` writes
+  `scripts/local-check.sh` from the project's workflows (`--quick` for what changed, full by default), seeded as a
+  skeleton that reports INCOMPLETE until it has steps; summary and result OK / FAILED / INCOMPLETE (exit 0 / 1 / 2),
+  a missing tool or another host is never green. `/lot-finish` step 1 runs it. The harness's own script replays
+  `ci.yml` (drift tested).
 - **Lesson classes**: `/lesson-propose` classifies each item as mechanical (proposed check as an issue, no line),
   judgment (a lesson line) or one-off (nothing); the "Lesson" form asks for the class and the check; header of
   `docs/LESSONS.md` explains them. Existing lessons are not yet sorted.
@@ -61,6 +66,8 @@ An existing README is not touched: `python3 .harness/scripts/readme-check.py` li
 (`readme: false` to avoid it).
 Fill in the description and the topics in `.github/repo-settings.json`, add the two images (an issue is enough to
 start); the operator uploads the social preview in the repository settings. The next sync adds `.harness/LICENSE`.
+The next sync also seeds `scripts/local-check.sh`, which reports INCOMPLETE until `/local-check` fills in its steps
+(a project with its own command names it in `CLAUDE.md` and adds `scripts/local-check.sh` to `exclude`).
 
 ## 0.3.0 — 2026-11-09
 

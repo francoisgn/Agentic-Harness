@@ -7,4 +7,4 @@ This block is managed by `scripts/harness-sync.sh`, which lives in the [Belaylin
 @.harness/docs/ESSENTIALS.md
 
 Read as the task requires (not loaded by default): method `.harness/docs/METHODOLOGY.md`, conventions `.harness/docs/CONVENTIONS.md`, lessons `.harness/docs/LESSONS.md` (self-review before every PR), reviews `.harness/docs/REVIEW-ROUNDS.md`, orchestration and model choice `.harness/docs/ORCHESTRATION.md`, branches and releases `.harness/docs/BRANCHING-RELEASE.md`, CI budget and security `.harness/docs/CI-BUDGET.md`, project README `.harness/docs/README-STANDARD.md`, Mac handoff `.harness/docs/MAC-HANDOFF.md`.
-Skills: `/intent`, `/lot-start`, `/lot-finish`, `/review-round`, `/feedback-triage`, `/lessons-check`, `/readme-update`, `/status-report`, `/compliance-review`, `/lesson-propose`, `/harness-update`.
+Skills: `/intent`, `/lot-start`, `/lot-finish`, `/local-check`, `/review-round`, `/feedback-triage`, `/lessons-check`, `/readme-update`, `/status-report`, `/compliance-review`, `/lesson-propose`, `/harness-update`.

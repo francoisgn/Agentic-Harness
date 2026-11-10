@@ -8,12 +8,9 @@ A contribution that adds a rule also says how to disable it.
 1. **An issue first**, with its intent: the failure observed in a real project, what the building block changes, how
    we will know it is done. A lesson born in your project: "Lesson" form.
 2. **A branch** from an up-to-date `master`; atomic commits, in English, in the style of `git log`.
-3. **Local checks** (the same as the CI, one Linux job):
-   ```bash
-   python3 scripts/check-framework.py && python3 -m unittest discover -s scripts/tests -p 'test_*.py' \
-     && scripts/tests/test-harness-sync.sh && python3 scripts/diagrams/render.py --check \
-     && python3 scripts/readme-check.py
-   ```
+3. **Local checks**: `scripts/local-check.sh` runs the steps of `ci.yml` (`--quick`: only those whose files
+   changed). It ends with OK, FAILED or INCOMPLETE (a tool is missing: install it, or say in the PR which steps did
+   not run); a test fails if the script and `ci.yml` drift apart, so a CI step changes in both.
 4. **A draft PR**, then "Ready for review" when everything is done and reviewed by a model other than the author.
    Nothing runs in CI on a draft.
 

@@ -44,6 +44,10 @@ and every fix costs a run.
 - It writes a readable summary (what ran, what was skipped, why) that the PR reuses.
 - `CLAUDE.md` › Build and tests names it. The pre-commit hook runs its fast part.
 
+The harness seeds a skeleton, `scripts/local-check.sh` (exit codes 0 OK, 1 FAILED, 2 INCOMPLETE; never rewritten by
+the sync), and the skill `/local-check` fills in its steps from the project's workflows. The harness's own
+`scripts/local-check.sh` replays its `ci.yml`, and a test fails if the two drift apart.
+
 ## 4. What the survey showed
 
 | Finding | Where | What the baseline takes from it |
