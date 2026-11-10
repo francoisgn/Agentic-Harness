@@ -61,6 +61,8 @@ seed      templates/.github/ISSUE_TEMPLATE/task.yml     .github/ISSUE_TEMPLATE/t
 seed      templates/docs/lots/TEMPLATE.md             docs/lots/TEMPLATE.md
 seed      templates/docs/compliance/TEMPLATE.md       docs/compliance/TEMPLATE.md
 seed      templates/.markdownlint-cli2.jsonc          .markdownlint-cli2.jsonc
+# Local check = the CI (CI-BASELINE.md §3): a skeleton that says INCOMPLETE until /local-check fills in its steps
+seed      templates/scripts/local-check.sh            scripts/local-check.sh
 # README at the harness standard: never rewritten if it already exists (readme-check.py then lists the gaps)
 seed      templates/README.md.template                README.md
 seed      templates/CONTRIBUTING.md.template          CONTRIBUTING.md

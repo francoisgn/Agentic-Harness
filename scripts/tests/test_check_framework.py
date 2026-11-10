@@ -1,6 +1,7 @@
 """Tests of scripts/check-framework.py: the real repository passes, every kind of defect is detected."""
 import json
 import pathlib
+import re
 import shutil
 import subprocess
 import sys
@@ -234,10 +235,10 @@ class CheckFrameworkTests(unittest.TestCase):
 
     def test_readme_counts_must_match_the_plugin(self):
         p = self.tmp / "README.md"
-        p.write_text(p.read_text().replace("11 skills, 13 agents", "12 skills, 14 agents", 1))
+        p.write_text(re.sub(r"\d+ skills, \d+ agents", "99 skills, 98 agents", p.read_text(), count=1))
         out = run(self.tmp).stdout
-        self.assertIn("12 skills", out)
-        self.assertIn("14 agents", out)
+        self.assertIn("99 skills", out)
+        self.assertIn("98 agents", out)
 
     def test_block_skill_list_must_match_the_plugin(self):
         p = self.tmp / "templates/CLAUDE.md.block"
