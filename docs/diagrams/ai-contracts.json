@@ -19,7 +19,7 @@
   "id": "subtitle",
   "x": 40,
   "y": 64,
-  "text": "the contract that governs your data follows whoever sells the inference, and the plan type",
+  "text": "the contract that governs your data follows whoever sells and operates the inference, and the plan type",
   "fontSize": 18,
   "strokeColor": "#757575"
  },
