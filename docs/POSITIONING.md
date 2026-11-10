@@ -169,9 +169,8 @@ That matches Belayline's adversarial review, its context in the repository and i
 
 The paper also warns against reading too much into its own results:
 
-- On a paired subset of 53 tasks, the harness raised the mean score by about 20 points but lowered the median
-  slightly, at about seven times the cost. The Opus-configured arm lowered the mean
-  slightly (−1.06).
+- On a paired subset of 53 tasks, the Fable-configured harness raised the mean score by about 20 points but lowered
+  the median slightly, at about seven times the cost. The Opus-configured arm lowered the mean slightly (−1.06).
 - In one case, the review step disrupted a working environment, although the final official checks passed.
 - The authors conclude: "do not imply that additional agents or review necessarily improve outcomes".
 - The study ran no ablations and used single runs.
