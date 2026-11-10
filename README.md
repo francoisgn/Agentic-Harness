@@ -73,6 +73,7 @@ and can be taken without the rest.
 | Have an agent's work reviewed | [REVIEW-ROUNDS](docs/REVIEW-ROUNDS.md), [ORCHESTRATION](docs/ORCHESTRATION.md) §3 | Agent `adversarial-reviewer`, skill `/review-round` |
 | Frame an issue before coding | [METHODOLOGY](docs/METHODOLOGY.md) §2 bis | Skill `/intent` |
 | Control cost (models, loops, minutes) | [FINOPS](docs/FINOPS.md) | Agent `flow-monitor`, skill `/status-report` |
+| Understand what "we use Claude Code" or "we approved Copilot" actually covers: screens, agent, where it acts, who bills the model, which contract governs the data | [AI layers](docs/ai-layers/README.md): a guide in parts, starting with [apps and CLIs](docs/ai-layers/obo-agents.md) | "Using `docs/ai-layers/obo-agents.md`, turn our tool approval into one answer per layer" |
 | Know why the harness is built this way | [ADR](docs/adr/README.md): context, rejected options, consequences | "Summarise the ADRs and what they rule out" |
 
 Three ways to use it, from the lightest to the most complete:
@@ -120,6 +121,7 @@ Knowledge flows both ways: propose a lesson born in your project through the "Le
 | [`docs/CI-BASELINE.md`](docs/CI-BASELINE.md), [`docs/CI-BUDGET.md`](docs/CI-BUDGET.md) | Tiered CI baseline; CI minutes, security (SAST, SCA, secrets), variables, agentic volume |
 | [`docs/LESSONS.md`](docs/LESSONS.md) | Lessons by scope, sources cited; how to propose one |
 | [`docs/CONVENTIONS.md`](docs/CONVENTIONS.md), [`docs/BRANCHING-RELEASE.md`](docs/BRANCHING-RELEASE.md), [`docs/MAC-HANDOFF.md`](docs/MAC-HANDOFF.md) | Commits and PRs, repository identity (description, topics, banner, social preview), branches and versions, split between cloud and local machine |
+| [`docs/ai-layers/`](docs/ai-layers/README.md) | The layers of AI tools, by audience: presentation, agent, execution, inference and the contract behind it |
 | [`docs/adr/`](docs/adr/README.md) | Decisions of the harness |
 | [`docs/assets/`](docs/assets) | Visual identity: README banner (`banner.svg` → `.png`), social preview (`social-preview.svg` → `.png`, 1280×640) |
 | [`docs/diagrams/`](docs/diagrams) | Diagrams: `.json` source, `.excalidraw` scene (editable on excalidraw.com), `.svg` image |

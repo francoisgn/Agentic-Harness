@@ -1,0 +1,354 @@
+[
+ {
+  "type": "cameraUpdate",
+  "width": 1200,
+  "height": 900,
+  "x": 0,
+  "y": 0
+ },
+ {
+  "type": "text",
+  "id": "title",
+  "x": 40,
+  "y": 20,
+  "text": "Same model, three ways to buy it, three contracts",
+  "fontSize": 30
+ },
+ {
+  "type": "text",
+  "id": "subtitle",
+  "x": 40,
+  "y": 64,
+  "text": "the contract that governs your data follows whoever sells and operates the inference, and the plan type",
+  "fontSize": 18,
+  "strokeColor": "#757575"
+ },
+ {
+  "type": "rectangle",
+  "id": "agent",
+  "x": 40,
+  "y": 290,
+  "width": 260,
+  "height": 130,
+  "strokeWidth": 2,
+  "backgroundColor": "#a5d8ff",
+  "fillStyle": "hachure",
+  "strokeColor": "#1971c2",
+  "label": {
+   "text": "Your coding agent\ncalls a model\n(e.g. Claude)",
+   "fontSize": 20
+  },
+  "roundness": {
+   "type": 3
+  }
+ },
+ {
+  "type": "rectangle",
+  "id": "s1",
+  "x": 380,
+  "y": 130,
+  "width": 380,
+  "height": 130,
+  "strokeWidth": 2,
+  "backgroundColor": "#c3fae8",
+  "fillStyle": "hachure",
+  "strokeColor": "#0c8599",
+  "label": {
+   "text": "Model vendor\nsubscription or API key\n(Anthropic, OpenAI, Google)",
+   "fontSize": 20
+  },
+  "roundness": {
+   "type": 3
+  }
+ },
+ {
+  "type": "rectangle",
+  "id": "t1",
+  "x": 840,
+  "y": 130,
+  "width": 360,
+  "height": 130,
+  "strokeWidth": 2,
+  "backgroundColor": "#f3d9fa",
+  "fillStyle": "hachure",
+  "strokeColor": "#9c36b5",
+  "label": {
+   "text": "Vendor terms\nconsumer for personal plans,\ncommercial for business",
+   "fontSize": 20
+  },
+  "roundness": {
+   "type": 3
+  }
+ },
+ {
+  "type": "arrow",
+  "id": "as1",
+  "x": 300,
+  "y": 355,
+  "width": 80,
+  "height": 160,
+  "points": [
+   [
+    0,
+    0
+   ],
+   [
+    80,
+    -160
+   ]
+  ],
+  "strokeColor": "#1e1e1e",
+  "strokeWidth": 2,
+  "endArrowhead": "arrow"
+ },
+ {
+  "type": "arrow",
+  "id": "gs1",
+  "x": 760,
+  "y": 195,
+  "width": 80,
+  "height": 0,
+  "points": [
+   [
+    0,
+    0
+   ],
+   [
+    80,
+    0
+   ]
+  ],
+  "strokeColor": "#1e1e1e",
+  "strokeWidth": 2,
+  "endArrowhead": "arrow"
+ },
+ {
+  "type": "rectangle",
+  "id": "s2",
+  "x": 380,
+  "y": 290,
+  "width": 380,
+  "height": 130,
+  "strokeWidth": 2,
+  "backgroundColor": "#c3fae8",
+  "fillStyle": "hachure",
+  "strokeColor": "#0c8599",
+  "label": {
+   "text": "Cloud platform\nBedrock, Agent Platform,\nFoundry (your cloud bill)",
+   "fontSize": 20
+  },
+  "roundness": {
+   "type": 3
+  }
+ },
+ {
+  "type": "rectangle",
+  "id": "t2",
+  "x": 840,
+  "y": 290,
+  "width": 360,
+  "height": 130,
+  "strokeWidth": 2,
+  "backgroundColor": "#f3d9fa",
+  "fillStyle": "hachure",
+  "strokeColor": "#9c36b5",
+  "label": {
+   "text": "Cloud terms + model terms\nhow they combine\ndepends on the platform",
+   "fontSize": 20
+  },
+  "roundness": {
+   "type": 3
+  }
+ },
+ {
+  "type": "arrow",
+  "id": "as2",
+  "x": 300,
+  "y": 355,
+  "width": 80,
+  "height": 0,
+  "points": [
+   [
+    0,
+    0
+   ],
+   [
+    80,
+    0
+   ]
+  ],
+  "strokeColor": "#1e1e1e",
+  "strokeWidth": 2,
+  "endArrowhead": "arrow"
+ },
+ {
+  "type": "arrow",
+  "id": "gs2",
+  "x": 760,
+  "y": 355,
+  "width": 80,
+  "height": 0,
+  "points": [
+   [
+    0,
+    0
+   ],
+   [
+    80,
+    0
+   ]
+  ],
+  "strokeColor": "#1e1e1e",
+  "strokeWidth": 2,
+  "endArrowhead": "arrow"
+ },
+ {
+  "type": "rectangle",
+  "id": "s3",
+  "x": 380,
+  "y": 450,
+  "width": 380,
+  "height": 130,
+  "strokeWidth": 2,
+  "backgroundColor": "#c3fae8",
+  "fillStyle": "hachure",
+  "strokeColor": "#0c8599",
+  "label": {
+   "text": "Tool vendor plan\nCopilot, Cursor\n(models resold)",
+   "fontSize": 20
+  },
+  "roundness": {
+   "type": 3
+  }
+ },
+ {
+  "type": "rectangle",
+  "id": "t3",
+  "x": 840,
+  "y": 450,
+  "width": 360,
+  "height": 130,
+  "strokeWidth": 2,
+  "backgroundColor": "#f3d9fa",
+  "fillStyle": "hachure",
+  "strokeColor": "#9c36b5",
+  "label": {
+   "text": "Tool vendor terms\nGitHub, Cursor:\nconsumer or business plan",
+   "fontSize": 20
+  },
+  "roundness": {
+   "type": 3
+  }
+ },
+ {
+  "type": "arrow",
+  "id": "as3",
+  "x": 300,
+  "y": 355,
+  "width": 80,
+  "height": 160,
+  "points": [
+   [
+    0,
+    0
+   ],
+   [
+    80,
+    160
+   ]
+  ],
+  "strokeColor": "#1e1e1e",
+  "strokeWidth": 2,
+  "endArrowhead": "arrow"
+ },
+ {
+  "type": "arrow",
+  "id": "gs3",
+  "x": 760,
+  "y": 515,
+  "width": 80,
+  "height": 0,
+  "points": [
+   [
+    0,
+    0
+   ],
+   [
+    80,
+    0
+   ]
+  ],
+  "strokeColor": "#1e1e1e",
+  "strokeWidth": 2,
+  "endArrowhead": "arrow"
+ },
+ {
+  "type": "rectangle",
+  "id": "lg0",
+  "x": 40,
+  "y": 620,
+  "width": 28,
+  "height": 20,
+  "strokeWidth": 2,
+  "roundness": {
+   "type": 3
+  },
+  "backgroundColor": "#a5d8ff",
+  "fillStyle": "hachure",
+  "strokeColor": "#1971c2"
+ },
+ {
+  "type": "text",
+  "id": "lgt0",
+  "x": 78,
+  "y": 620,
+  "text": "agent",
+  "fontSize": 16
+ },
+ {
+  "type": "rectangle",
+  "id": "lg1",
+  "x": 156,
+  "y": 620,
+  "width": 28,
+  "height": 20,
+  "strokeWidth": 2,
+  "roundness": {
+   "type": 3
+  },
+  "backgroundColor": "#c3fae8",
+  "fillStyle": "hachure",
+  "strokeColor": "#0c8599"
+ },
+ {
+  "type": "text",
+  "id": "lgt1",
+  "x": 194,
+  "y": 620,
+  "text": "who sells the inference",
+  "fontSize": 16
+ },
+ {
+  "type": "rectangle",
+  "id": "lg2",
+  "x": 421,
+  "y": 620,
+  "width": 28,
+  "height": 20,
+  "strokeWidth": 2,
+  "roundness": {
+   "type": 3
+  },
+  "backgroundColor": "#f3d9fa",
+  "fillStyle": "hachure",
+  "strokeColor": "#9c36b5"
+ },
+ {
+  "type": "text",
+  "id": "lgt2",
+  "x": 459,
+  "y": 620,
+  "text": "contract that governs your data",
+  "fontSize": 16
+ }
+]
