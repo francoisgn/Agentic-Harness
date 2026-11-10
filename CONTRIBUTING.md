@@ -12,7 +12,8 @@ A contribution that adds a rule also says how to disable it.
    changed). It ends with OK, FAILED or INCOMPLETE (a tool is missing: install it, or say in the PR which steps did
    not run); a test fails if the script and `ci.yml` drift apart, so a CI step changes in both.
 4. **A draft PR**, then "Ready for review" when everything is done and reviewed by a model other than the author.
-   Nothing runs in CI on a draft.
+   Nothing runs in CI on a draft. The body carries a `Docs:` line: the doc files the change makes untrue, or
+   `Docs: none (<reason>)` (`docs/CONVENTIONS.md` §Ledger).
 
 ## What a PR keeps true
 

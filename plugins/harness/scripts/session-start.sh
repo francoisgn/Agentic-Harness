@@ -23,6 +23,32 @@ if [ "$MODE" = plugin ] && [ -n "${CLAUDE_PLUGIN_ROOT:-}" ]; then
 fi
 BRANCH="$(git -C "$PROJECT" rev-parse --abbrev-ref HEAD 2>/dev/null || echo '?')"
 
+# Warns (never blocks) when "integration_branch" in .harness/config.json is not the repository's default branch:
+# GitHub runs issues, issue_comment, pull_request_target and schedule workflows from the default branch only.
+# "default_branch_check": false in the config silences it. Default branch unknown: says so, never "OK".
+default_branch_alert() {
+  local cfg="$1/.harness/config.json" integ ref def
+  [ -f "$cfg" ] && command -v python3 >/dev/null 2>&1 || return 0
+  integ="$(python3 -c '
+import json, sys
+try:
+    c = json.load(open(sys.argv[1], encoding="utf-8"))
+except Exception:
+    sys.exit(0)
+if isinstance(c, dict) and c.get("default_branch_check") is not False and isinstance(c.get("integration_branch"), str):
+    print(c["integration_branch"])
+' "$cfg" 2>/dev/null)" || return 0
+  [ -n "$integ" ] || return 0
+  ref="$(git -C "$1" symbolic-ref -q refs/remotes/origin/HEAD 2>/dev/null)" || ref=""
+  def="${ref#refs/remotes/origin/}"
+  if [ -z "$def" ]; then
+    echo "- 🟠 Could not check whether the integration branch \"$integ\" is the repository's default branch (no origin/HEAD: run \`git remote set-head origin -a\`)."
+  elif [ "$def" != "$integ" ]; then
+    echo "- 🟠 Integration branch \"$integ\" is not the default branch \"$def\": GitHub runs issues, issue_comment, pull_request_target and schedule workflows from the default branch only, so label hygiene, claims, the dashboard and the weekly jobs stay silent (to silence: \"default_branch_check\": false in .harness/config.json)."
+  fi
+  return 0
+}
+
 echo "## Belayline"
 if [ -n "$VENDORED" ]; then
   echo "- Vendored version: ${VENDORED} (.harness/VERSION)${PLUGIN:+; plugin: ${PLUGIN}}. Rules: .harness/docs/ESSENTIALS.md."
@@ -36,5 +62,6 @@ echo "- Current branch: ${BRANCH}. Work = an issue claimed with \`/claim <id>\`,
 if [ "${CLAUDE_CODE_REMOTE:-}" = "true" ]; then
   echo "- Cloud session (Linux): no Xcode build here; reread app code with compiler-level rigour, handoff to the Mac (MAC-HANDOFF.md)."
 fi
+default_branch_alert "$PROJECT"
 echo "- Push early and often to a draft PR (no costly CI); \"Ready\" after self-review (LESSONS.md) and review by another model; then one commit per review round."
 exit 0

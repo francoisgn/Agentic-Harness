@@ -2,7 +2,7 @@ name: CI
 
 # CI of the harness itself, in ONE Linux job (budget: CI-BUDGET.md §2, §5): harness consistency (skills, agents,
 # manifest, labels, naming), tests (harness-sync.sh, hooks, flow-metrics, checks), scripts, workflows, JSON and
-# versions, markdown, secrets. Each step runs even if the previous one fails: one run gives every finding.
+# versions, markdown (tables, anchors, relative links), secrets. Each step runs even if the previous one fails: one run gives every finding.
 # Nothing on a draft; a docs PR costs only one minute.
 on:
   push:
@@ -78,6 +78,10 @@ jobs:
       - name: Markdown (tables, anchors)
         if: ${{ !cancelled() }}
         run: npx --yes markdownlint-cli2@0.18.1
+
+      - name: Markdown · relative links and cross-file anchors
+        if: ${{ !cancelled() }}
+        run: python3 scripts/doc-links.py
 
       - name: Secrets · gitleaks
         if: ${{ !cancelled() }}

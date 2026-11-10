@@ -34,19 +34,32 @@ Free order after the header. The rest (FAQ, roadmap, credits) belongs to the pro
 
 ```markdown
 <!-- harness:begin progress -->
-| Lot | Scope | State | Issue / PR |
+| Lot | State | Done | Issue / PR |
 |---|---|---|---|
-| LOT-001 | Calculation engine | 🟢 delivered | #12 · #31 |
-| LOT-002 | Input screen | 🔵 in progress | #14 |
+| LOT-001 Calculation engine | 🟢 shipped | 4/4 | [#12](…) · [#31](…) |
+| LOT-002 Input screen | 🔵 in progress | 1/3 | [#14](…) |
 <!-- harness:end progress -->
 ```
 
-- States: ⚪ to do · 🔵 in progress · 🟠 in review · 🔴 blocked · 🟢 delivered.
-- The **source of truth stays the issue** ([METHODOLOGY](METHODOLOGY.md)): the table is a view of it, rewritten at
-  the end of every lot (`/lot-finish` → `/readme-update`) from the state reread on GitHub. `docs/LOTS.md` stays the
-  plan and does not change for progress.
-- Without a lot plan: one row per GitHub milestone, or per product capability.
-- Two parallel lots touch the same table: each changes only its own row, to avoid the conflict.
+- **Generated, never written by hand**: `python3 .harness/scripts/readme-progress.py` (token in `GH_TOKEN`) rewrites
+  the block from GitHub: one row per lot (`type: epic` issue, [ADR 0003](adr/0003-labels-readable-by-axis.md)) with
+  its title, state, closed/total sub-issues and links to the issue and its PRs (a PR whose body names the epic or a
+  sub-issue after `Closes`/`Fixes`/`Resolves`/`Refs`). Without any epic: one row per GitHub milestone (closed/total
+  issues). The text outside the markers is never touched; without markers the script refuses to write.
+- **States**, first rule that applies: 🟢 shipped (every sub-issue closed) · 🟠 in review (a linked PR open and
+  ready) · 🔵 in progress (`status: claimed`) · 🔴 blocked (`status: blocked` or `status: needs-decision`) · ⚪ to do.
+  The labels are read on the epic and its open sub-issues.
+- **Never guessed**: an epic without sub-issue, or an open issue with zero or several `status:` labels, is shown
+  with a ⚠ mark; such an issue's labels do not choose the state.
+- `--check` writes nothing and exits 1 if the committed block differs from the issues (diff printed). No token or no
+  network: nothing is written, and `--check` says "could not check" (exit 2), never "up to date".
+- The **source of truth stays the issue** ([METHODOLOGY](METHODOLOGY.md)): the table is a view of it, regenerated at
+  the end of every lot (`/lot-finish` → `/readme-update`). `docs/LOTS.md` stays the plan and does not change for
+  progress. Two parallel lots that both regenerate the block: on conflict, rerun the script after the merge.
+- Opt-in drift report: input `readme-progress: true` of `flow-report.yml` runs `--check` with the dashboard and
+  writes the result in the job summary; it never commits.
+- Switched off (`"progress": false`) or no GitHub issues (tracking elsewhere): the table is the project's, one row
+  per milestone or per product capability, written by hand.
 
 ## 4. Architecture diagram: Excalidraw by default
 

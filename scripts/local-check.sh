@@ -171,6 +171,9 @@ CMD
 step "Markdown (tables, anchors)" "npx" "*.md .markdownlint-cli2.jsonc" <<'CMD'
 npx --yes markdownlint-cli2@0.18.1
 CMD
+step "Markdown · relative links and cross-file anchors" "python3" "*.md scripts/doc-links.py" <<'CMD'
+python3 scripts/doc-links.py
+CMD
 step "Secrets · gitleaks" "git docker" "" <<'CMD'
 if [ -n "$BASE_SHA" ]; then LOG_OPTS="$BASE_SHA..HEAD"; else LOG_OPTS=--all; fi
 docker run --rm -v "$PWD":/repo ghcr.io/gitleaks/gitleaks:v8.30.1 \

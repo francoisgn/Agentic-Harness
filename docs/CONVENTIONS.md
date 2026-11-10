@@ -40,7 +40,9 @@ Detail and promotions: [BRANCHING-RELEASE](BRANCHING-RELEASE.md).
   4. the problem, the cause, what changes and why this wide and no wider;
   5. the tests: names, what they check, shown failing without the change; commands run; watch points / not tested
      (e.g. app not compiled in the Linux container, to validate on iPhone);
-  6. a **`### Ledger`** section only if the project keeps a ledger (§Ledger); otherwise nothing;
+  6. the **doc impact**: a `Docs:` line naming the doc files the change makes untrue (updated in the PR, or by the
+     steward from the ledger), or `Docs: none (<reason>)`; in the **`### Ledger`** section if the project keeps a
+     ledger (§Ledger), otherwise in the body;
   7. author and reviewer models; the generation line last.
 - Do not merge yourself unless the project's policy says otherwise (depending on the project: the maintainer merges,
   or the author merges a ready and approved PR, except for risky flows).
@@ -52,7 +54,13 @@ Optional building block, for projects that keep a shared log-like file (CHANGELO
 table) that many PRs would want to modify at the same time.
 - A work PR **never touches** these files. Its entries go in a `### Ledger` section of the **PR body**, in fenced
   blocks whose language is the entry type (e.g. ` ```changelog `, ` ```gap-new `), and the PR carries the `ledger`
-  label. No entry: no section, no label.
+  label. No entry: no block, no label.
+- **Doc impact**: the section always has a `Docs:` line, outside the blocks, listing the doc files the PR makes
+  untrue (`Docs: README.md, docs/USAGE.md`), or `Docs: none (<reason>)` (`Docs: none (internal refactor)`). Docs
+  never drift further than one merge: the steward reads the line at merge time. `pr-hygiene.yml` warns, never
+  fails, when a ready PR changes code paths (input `docs-code-paths`, default every file but `.md`; empty switches it
+  off) and has no `Docs:` line, when `none` has no reason, or when a listed file does not exist on the PR head.
+  Without a ledger, the same line lives in the PR body; nothing else changes.
 - After the merges, a **steward** (upkeep role, [STEWARDS](STEWARDS.md)) runs the project's script that reads the
   merged PRs labelled `ledger`, **folds** their entries into the files and opens **a single docs PR**, which
   touches only these files; then it replaces `ledger` with `ledger: done` on each folded PR.
@@ -62,8 +70,8 @@ table) that many PRs would want to modify at the same time.
 - The adversarial reviewer reviews the `### Ledger` section like code. A malformed entry is reported and skipped by
   the steward (the others are folded): the author fixes the PR body, not the files.
 
-Wiring the block in: the harness provides the convention and the PR body checks (`pr-hygiene.yml`, input
-`ledger-label`); the project provides its fold script (block format, target files, order, idempotence), declared in
+Wiring the block in: the harness provides the convention and the PR body checks (`pr-hygiene.yml`, inputs
+`ledger-label` and `docs-code-paths`); the project provides its fold script (block format, target files, order, idempotence), declared in
 `.harness/config.json` → `ledger` (`enabled`, `label`, `fold_command`), and a CI check that refuses a PR outside
 the steward's branch touching the ledger files. The labels `ledger` and `ledger: done` go in
 `.github/labels.local.json`. Full example (block format, script, check): `tooling/docs/README.md` of HFRnow

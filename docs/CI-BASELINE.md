@@ -83,6 +83,9 @@ the sync), and the skill `/local-check` fills in its steps from the project's wo
 1. Tier 1: write the local command, name it in `CLAUDE.md`, have the project's workflow replay it.
 2. Tier 0: uncomment the `docs` job of `harness.yml`.
 3. Check that the integration branch is the default branch (otherwise the `issue`, `flow`, `settings` jobs
-   stay silent).
+   stay silent). The harness checks it for you: the session-start hook and `harness-sync.sh` (also `--check`) print a
+   🟠 line when `.harness/config.json` › `integration_branch` differs from `origin/HEAD` ("could not check" if
+   unknown), and `pr-hygiene.yml` emits a `::warning::` (input `integration-branch`). Never blocking;
+   `"default_branch_check": false` silences it for a project that keeps two branches on purpose.
 4. Ruleset: required checks = real job names ([CI-BUDGET](CI-BUDGET.md) §4), in `.github/repo-settings.json`.
 5. Tiers 2 and 3 depending on the project.

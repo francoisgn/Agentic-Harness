@@ -5,6 +5,18 @@ moving to this version.
 
 ## Unreleased
 
+- **README progress generated from the issues**: `readme-progress.py` (vendored in `.harness/scripts/`) rewrites the
+  block between the `progress` markers: one row per `type: epic` lot (state, closed/total sub-issues, issue and PR
+  links), otherwise one per milestone; ⚠ on an epic without sub-issue or an issue with zero or several `status:`
+  labels; `--check` exits 1 on drift. `/readme-update` uses it instead of hand-written rows; `flow-report.yml` input
+  `readme-progress` reports drift in the job summary (README-STANDARD §3).
+- **Doc impact per PR** ([CONVENTIONS](docs/CONVENTIONS.md) §Ledger): every PR carries a `Docs:` line (doc files it
+  makes untrue, or `Docs: none (<reason>)`), in the `### Ledger` section with a ledger, otherwise in the body; the PR
+  template asks for it. `pr-hygiene.yml` warns (never fails) when a ready PR changes code paths without it (new input
+  `docs-code-paths`, empty = off) or names a missing file; a ledger section with only this line no longer needs the
+  label. New `doc-links.py` (vendored as `.harness/scripts/doc-links.py`): relative links and cross-file anchors in
+  Markdown resolve, run in the docs job of `docs-security.yml` (input `doc-links`) and in the harness CI. STEWARDS §2
+  describes three levels: per PR, at merge, weekly safety net.
 - **Local check = the CI** ([CI-BASELINE](docs/CI-BASELINE.md) §3): skill `/local-check` writes
   `scripts/local-check.sh` from the project's workflows (`--quick` for what changed, full by default), seeded as a
   skeleton that reports INCOMPLETE until it has steps; summary and result OK / FAILED / INCOMPLETE (exit 0 / 1 / 2),
@@ -12,7 +24,11 @@ moving to this version.
   `ci.yml` (drift tested).
 - **Lesson classes**: `/lesson-propose` classifies each item as mechanical (proposed check as an issue, no line),
   judgment (a lesson line) or one-off (nothing); the "Lesson" form asks for the class and the check; header of
-  `docs/LESSONS.md` explains them. Existing lessons are not yet sorted.
+  `docs/LESSONS.md` explains them.
+- **Lessons sorted** (#18): a **Class** column in `docs/LESSONS.md`; ids unchanged. 79 rows judgment, L07 enforced
+  by markdownlint MD056, L53 by zizmor, L75 `mechanical, check to write` (issue to come). `/lessons-check` reads only
+  the judgment rows and those whose check is still to write: 80 rows instead of 82. A test checks that every
+  `L<nn>` cited in docs, skills, agents, templates and workflows exists.
 - **Two explicit reviews** ([REVIEW-ROUNDS](docs/REVIEW-ROUNDS.md) §The two reviews): the adversarial review
   (intent: issue + diff + lessons, isolated fresh sub-agent that refuses to give a verdict if it cannot be isolated)
   and the code review (diff only, by the review service) are named separately; one clean round on the current head
@@ -32,6 +48,11 @@ moving to this version.
   `diagrams-render.py` vendored, templates `README.md`, `CONTRIBUTING.md` and `docs/diagrams/architecture.*` created
   if missing; check in `docs-security.yml` (input `readme`). Each point can be switched off in
   `.harness/config.json` › `readme`.
+- **Default branch alert** (#10): the session-start hook and `harness-sync.sh` (also `--check`, exit code unchanged)
+  print a 🟠 line when `integration_branch` is not the repository's default branch (workflows triggered by issues,
+  comments and schedules would never run), or "could not check" when it is unknown; `pr-hygiene.yml` emits a
+  `::warning::` (new input `integration-branch`). Silence with `"default_branch_check": false` in
+  `.harness/config.json`.
 - **Tiered CI baseline** ([CI-BASELINE](docs/CI-BASELINE.md)): hygiene, quality (one local command = the CI),
   expensive, heavy security, process; six workflow invariants; survey of three real projects.
 - **Anti-bloat checks** (`check-framework.py`): size limits on skills, agents and `docs/ESSENTIALS.md` (listed
@@ -66,6 +87,9 @@ An existing README is not touched: `python3 .harness/scripts/readme-check.py` li
 (`readme: false` to avoid it).
 Fill in the description and the topics in `.github/repo-settings.json`, add the two images (an issue is enough to
 start); the operator uploads the social preview in the repository settings. The next sync adds `.harness/LICENSE`.
+Add a `Docs:` line to `.github/pull_request_template.md` (a project file, not rewritten; see the template's). The
+`docs` job, if enabled, now checks relative links and cross-file anchors once the sync vendors `doc-links.py`: fix
+what it lists, or `doc-links: false`; `docs-code-paths: ""` in the `pr` job silences the doc impact warning.
 The next sync also seeds `scripts/local-check.sh`, which reports INCOMPLETE until `/local-check` fills in its steps
 (a project with its own command names it in `CLAUDE.md` and adds `scripts/local-check.sh` to `exclude`).
 

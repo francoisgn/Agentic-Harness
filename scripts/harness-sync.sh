@@ -19,6 +19,9 @@
 # Project settings read from <target>/.harness/config.json (create it BEFORE the first sync for them to count):
 #   "exclude": ["pattern", ...]   destinations not to vendor (glob on the relative path, `*` crosses `/`);
 #                                 an excluded file that is already vendored and unmodified is removed.
+#   "integration_branch": "b"     warns (exit code unchanged) if b is not the default branch, because GitHub runs
+#                                 issue and schedule workflows from the default branch only;
+#   "default_branch_check": false silences that warning.
 # ("language" in that file is the project's language for agents; it does not select the harness sources.)
 # Migration: a managed block still marked with the former id `cadre` gets its two marker lines rewritten to `harness`.
 # Exit codes: 0 = ok; 1 = --check found drift; 2 = usage or error; 3 = conflicts (files left as they are).
@@ -40,7 +43,7 @@ while [ $# -gt 0 ]; do
     --force) FORCE=1 ;;
     --skip-workflows) SKIP_WF=1 ;;
     --skip-seed) SKIP_SEED=1 ;;
-    -h|--help) sed -n '2,25p' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;;
+    -h|--help) sed -n '2,28p' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;;
     *) die "unknown option: $1" ;;
   esac
   shift
@@ -235,6 +238,32 @@ do_refbump() {
   put "$rel" "$WORK/bumped"
 }
 
+# Warns (never blocks) when "integration_branch" in .harness/config.json is not the repository's default branch:
+# GitHub runs issues, issue_comment, pull_request_target and schedule workflows from the default branch only.
+# "default_branch_check": false in the config silences it. Default branch unknown: says so, never "OK".
+default_branch_alert() {
+  local cfg="$1/.harness/config.json" integ ref def
+  [ -f "$cfg" ] && command -v python3 >/dev/null 2>&1 || return 0
+  integ="$(python3 -c '
+import json, sys
+try:
+    c = json.load(open(sys.argv[1], encoding="utf-8"))
+except Exception:
+    sys.exit(0)
+if isinstance(c, dict) and c.get("default_branch_check") is not False and isinstance(c.get("integration_branch"), str):
+    print(c["integration_branch"])
+' "$cfg" 2>/dev/null)" || return 0
+  [ -n "$integ" ] || return 0
+  ref="$(git -C "$1" symbolic-ref -q refs/remotes/origin/HEAD 2>/dev/null)" || ref=""
+  def="${ref#refs/remotes/origin/}"
+  if [ -z "$def" ]; then
+    echo "🟠 Could not check whether the integration branch \"$integ\" is the repository's default branch (no origin/HEAD: run \`git remote set-head origin -a\`)."
+  elif [ "$def" != "$integ" ]; then
+    echo "🟠 Integration branch \"$integ\" is not the default branch \"$def\": GitHub runs issues, issue_comment, pull_request_target and schedule workflows from the default branch only, so label hygiene, claims, the dashboard and the weekly jobs stay silent (to silence: \"default_branch_check\": false in .harness/config.json)."
+  fi
+  return 0
+}
+
 printf 'Belayline %s (%s) → %s [%s]\n' "$VERSION" "${COMMIT:0:12}" "$TARGET" "$MODE"
 while read -r kind src rel id tpl; do
   case "$kind" in ''|'#'*) continue ;; esac
@@ -274,6 +303,7 @@ put ".harness/VERSION" "$WORK/version"
 } >"$WORK/lock"
 put "$LOCK_REL" "$WORK/lock"
 
+default_branch_alert "$TARGET"
 [ "$SKIPPED" = 0 ] || printf '  (%s entry(ies) under .github/workflows/ skipped: --skip-workflows)\n' "$SKIPPED"
 if [ "$CONFLICTS" -gt 0 ]; then
   printf '🟠 %s conflict(s), affected files left as they are; %s change(s).\n' "$CONFLICTS" "$CHANGES"
