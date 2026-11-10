@@ -5,6 +5,11 @@ moving to this version.
 
 ## Unreleased
 
+- **README progress generated from the issues**: `readme-progress.py` (vendored in `.harness/scripts/`) rewrites the
+  block between the `progress` markers: one row per `type: epic` lot (state, closed/total sub-issues, issue and PR
+  links), otherwise one per milestone; ⚠ on an epic without sub-issue or an issue with zero or several `status:`
+  labels; `--check` exits 1 on drift. `/readme-update` uses it instead of hand-written rows; `flow-report.yml` input
+  `readme-progress` reports drift in the job summary (README-STANDARD §3).
 - **Lesson classes**: `/lesson-propose` classifies each item as mechanical (proposed check as an issue, no line),
   judgment (a lesson line) or one-off (nothing); the "Lesson" form asks for the class and the check; header of
   `docs/LESSONS.md` explains them. Existing lessons are not yet sorted.

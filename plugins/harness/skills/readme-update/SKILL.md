@@ -19,10 +19,12 @@ is not put back.
    `docs/diagrams/architecture.json`, then `python3 .harness/scripts/diagrams-render.py` and commit `.json`, `.svg`,
    `.excalidraw` together. The diagram shows what is shipped, not the target; 5 to 9 boxes, one verb on each useful
    arrow. A text overflow reported by the render gets fixed (wider box or shorter text).
-4. **Progress**: rewrite the table between `<!-- harness:begin progress -->` and `<!-- harness:end progress -->`.
-   One row per lot of `docs/LOTS.md` (otherwise per GitHub milestone); the state is read from the issue and its PR
-   **now** (open, claimed, PR ready, merged, `status: blocked`), never from the session's memory:
-   ⚪ to do · 🔵 in progress · 🟠 in review · 🔴 blocked · 🟢 shipped.
+4. **Progress**: never write the rows by hand. `python3 .harness/scripts/readme-progress.py` (token in `GH_TOKEN`)
+   regenerates the block between `<!-- harness:begin progress -->` and `<!-- harness:end progress -->` from GitHub
+   now: one row per `type: epic` lot (otherwise per milestone), state read from the issues and their PRs. Exit 2
+   (no token, no network, no markers): say so in the report, leave the block as it is; add the markers if they are
+   missing. A ⚠ in a row (epic without sub-issue, zero or several `status:` labels) is fixed on the issue, not in
+   the README.
 5. **Images**: a screenshot goes in only if it shows the current product; alt text that describes what is seen;
    file under `docs/images/`. A screenshot that needs a specific device or machine: an issue, not an invented
    image.

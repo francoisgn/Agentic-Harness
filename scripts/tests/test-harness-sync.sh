@@ -32,7 +32,8 @@ grep -q '@.harness/docs/ESSENTIALS.md' "$T/CLAUDE.md" || fail "ESSENTIALS import
 [ "$(grep -cFx '<!-- harness:begin harness -->' "$T/AGENTS.md")" = 1 ] || fail "AGENTS.md block"
 [ -f "$T/.harness/scripts/flow-metrics.py" ] && [ -f "$T/.harness/scripts/compliance-plan.py" ] \
   && cmp -s "$ROOT/LICENSE" "$T/.harness/LICENSE" \
-  && [ -f "$T/.harness/scripts/repo-settings.py" ] && [ -f "$T/.github/repo-settings.json" ] || fail "scripts, settings or licence missing"
+  && [ -f "$T/.harness/scripts/repo-settings.py" ] && [ -f "$T/.github/repo-settings.json" ] \
+  && [ -f "$T/.harness/scripts/readme-progress.py" ] || fail "scripts, settings or licence missing"
 [ -f "$T/docs/compliance/TEMPLATE.md" ] && [ -f "$T/.claude/agents/compliance-reviewer.md" ] || fail "spec template or generic reviewer missing"
 jq -e '.permissions.allow[0] == "Bash(swift test:*)" and (.hooks.PreToolUse | length) == 1' "$T/.claude/settings.json" >/dev/null \
   || fail "settings.json merge"
