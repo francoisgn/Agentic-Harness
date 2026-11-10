@@ -75,7 +75,9 @@ Before moving the PR to "Ready for review":
   > (sourced?), tests shown failing without the change, every line of LESSONS.md. Answer in under 300 words:
   > `**Adversarial review (<model>): APPROVED | CHANGES REQUESTED** — head <sha>`, numbered findings (High /
   > Medium / Low / Nit, `file:line`, failure scenario, fix), then a short **Verified** list and an
-  > **Unverified** list (claims you could not check; the first line then ends with `· unverified: N`). A
+  > **Unverified** list (claims you could not check; the first line then ends with `· unverified: N`; if every
+  > point is unverified, do not answer APPROVED; if you run on the author's model, say so: the verdict will not
+  > count). A
   > security flaw: only "CHANGES REQUESTED — security finding, detail sent privately".
 
 - **post every verdict on the PR**, including the first negative one ([REVIEW-ROUNDS](REVIEW-ROUNDS.md)

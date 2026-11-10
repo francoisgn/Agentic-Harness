@@ -32,7 +32,8 @@ checks the change against the **intent**, the second checks the **code** on its 
   bound of 3 cycles ([FINOPS](FINOPS.md) §3); two clean rounds are never required.
 - **Re-check after an approval.** When the head moves after an APPROVED, the scope of the re-check follows the delta.
   A **form-only** delta (wording, formatting, links, line wrapping, or nits the reviewer itself asked for) gets a short
-  confirmation from the same reviewer, on the delta only, posted as a verdict on the new head. Any other delta (code,
+  confirmation from the same reviewer, on the delta only, posted as a verdict on the new head with the usual first
+  line (`**Adversarial review (<model>): APPROVED** — head <sha>`, or `CHANGES REQUESTED`). Any other delta (code,
   tests, configuration, a sourced fact, anything security-related) gets a full re-review.
 - **Settled findings are listed in the PR**, each with its recorded reason (fixed in a commit, or not fixed and why).
   A reviewer that reopens one is answered by pointing to that record: it counts as a new finding only with **new
@@ -62,13 +63,15 @@ checks the change against the **intent**, the second checks the **code** on its 
 
 A review bot can skip a review ("Review skipped") or pause on a branch: after the push,
 check that it reviewed the **new head**; otherwise ask for `@coderabbitai review` (from a cloud session,
-`@mentions` are altered: the operator posts it). The round is complete only when the bot has reviewed the pushed head.
+`@mentions` are altered: the operator posts it). The round is complete only when the bot, or its fallback
+(§The two reviews), has reviewed the pushed head.
 
 **CI noise or real failure**: a check that fails in a few seconds with no log (missing token, service
 unavailable, runner never acquired) is not "CI red": say so and point to the real checks. "Flaky" is
 not a cause: one re-run at most, then investigate.
 
-**Ready to merge** = required checks green **and** zero open threads **and** the bot has reviewed the head **and** an
+**Ready to merge** = required checks green **and** zero open threads **and** the bot, or its fallback (§The two
+reviews), has reviewed the head **and** an
 adversarial review APPROVED on that head, with settled findings listed in the PR and every unverified point
 verified or accepted (and the project's merge policy).
 

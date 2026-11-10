@@ -37,7 +37,7 @@ VERDICT_SOURCE = {"Adversarial": "adversarial", "AI": "ai", "Compliance": "compl
 VERDICT_PROBLEMS = ("CHANGES REQUESTED", "GAPS")
 VERDICT_IGNORED = "OUT OF SCOPE"
 # "· unverified: N" at the end of a verdict line: points the reviewer could not check (REVIEW-ROUNDS §Traceability)
-UNVERIFIED_RE = re.compile(r"unverified:\s*(\d+)", re.I)
+UNVERIFIED_RE = re.compile(r"·\s*unverified:\s*(\d+)\W*$", re.I)
 ACTIONABLE_RE = re.compile(r"Actionable comments posted:\s*(\d+)")
 MIN_QUALITY_SAMPLE = 3
 

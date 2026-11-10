@@ -285,6 +285,11 @@ class UnverifiedTests(unittest.TestCase):
                          comment("c", "**AI review (sonnet): APPROVED** head y · Unverified: 1")]
         self.assertEqual([e.get("unverified") for e in fm.review_events(p)], [2, 0, 1])
 
+    def test_only_the_suffix_of_the_verdict_line_counts(self):
+        p = pull(1)
+        p["comments"] = [comment("c", ADV_OK + ", previously unverified: 2, now checked")]
+        self.assertEqual([e.get("unverified") for e in fm.review_events(p)], [0])
+
     def test_merged_prs_whose_last_verdict_keeps_unverified_points_are_counted(self):
         def merged(n, *bodies):
             p = pull(n, state="closed", created="2026-11-05T00:00:00Z", merged="2026-11-06T00:00:00Z")
