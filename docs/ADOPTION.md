@@ -85,15 +85,17 @@ claude plugin install belayline@belayline        # user scope
 ```
 Its skills are then called `/belayline:lot-start`, etc. Automatic update: `/plugin` → Marketplaces →
 Belayline → Enable auto-update. To declare it in a repository (local sessions only; a cloud session
-ignores it), add to `.claude/settings.json`:
+ignores it), add to `.claude/settings.json`, with `ref` set to a harness tag:
 ```json
 {
   "extraKnownMarketplaces": {
-    "Belayline": { "source": { "source": "github", "repo": "francoisgn/belayline-agentic-harness", "ref": "v0.3.0" } }
+    "belayline": { "source": { "source": "github", "repo": "francoisgn/belayline-agentic-harness", "ref": "vX.Y.Z" } }
   },
   "enabledPlugins": { "belayline@belayline": true }
 }
 ```
+The plugin is named `belayline` from the first release after v0.3.0 ([ADR 0004](adr/0004-plugin-named-belayline.md));
+up to v0.3.0 it is `belay@belayline` and its skills are `/belay:<skill>`.
 In an adopted repository, prefer **not** to enable it (the skills would exist twice, `/lot-start` and
 `/belayline:lot-start`).
 

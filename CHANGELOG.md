@@ -11,8 +11,9 @@ moving to this version.
   guardrail building block.
 
   **Action** (plugin users only; the vendored copy is not affected): `claude plugin uninstall belay@belayline`, then
-  `claude plugin install belayline@belayline`; in `.claude/settings.json`, replace `"belay@belayline"` with
-  `"belayline@belayline"` under `enabledPlugins`.
+  `claude plugin install belayline@belayline`. In `.claude/settings.json`, replace `"belay@belayline"` with
+  `"belayline@belayline"` under `enabledPlugins`, and set the marketplace `ref` under `extraKnownMarketplaces` to this
+  release's tag or later. In your own notes and scripts, replace `/belay:<skill>` with `/belayline:<skill>`.
 
 - **Orchestration: wait on events, not in memory** ([ORCHESTRATION](docs/ORCHESTRATION.md) §4): subscribe the
   session to a PR's activity where the tool allows it, with one late checkpoint as a safety net.
