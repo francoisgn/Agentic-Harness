@@ -9,6 +9,5 @@
   },
   "homepage": "https://github.com/francoisgn/agentic-harness",
   "repository": "https://github.com/francoisgn/agentic-harness",
-  "license": "MIT",
   "keywords": ["workflow", "issues", "review", "orchestration", "ci-budget", "compliance", "finops", "tdd"]
 }

@@ -19,7 +19,7 @@ class CheckFrameworkTests(unittest.TestCase):
         self.tmp = pathlib.Path(tempfile.mkdtemp())
         for d in ("plugins", "docs", "templates", "scripts", "i18n", ".github"):
             shutil.copytree(ROOT / d, self.tmp / d)
-        for f in ("harness.manifest", "VERSION", "CHANGELOG.md", "README.md", "LICENSE"):
+        for f in ("harness.manifest", "VERSION", "CHANGELOG.md", "README.md"):
             shutil.copy(ROOT / f, self.tmp / f)
 
     def tearDown(self):
