@@ -5,6 +5,13 @@ moving to this version.
 
 ## Unreleased
 
+- **Doc impact per PR** ([CONVENTIONS](docs/CONVENTIONS.md) §Ledger): every PR carries a `Docs:` line (doc files it
+  makes untrue, or `Docs: none (<reason>)`), in the `### Ledger` section with a ledger, otherwise in the body; the PR
+  template asks for it. `pr-hygiene.yml` warns (never fails) when a ready PR changes code paths without it (new input
+  `docs-code-paths`, empty = off) or names a missing file; a ledger section with only this line no longer needs the
+  label. New `doc-links.py` (vendored as `.harness/scripts/doc-links.py`): relative links and cross-file anchors in
+  Markdown resolve, run in the docs job of `docs-security.yml` (input `doc-links`) and in the harness CI. STEWARDS §2
+  describes three levels: per PR, at merge, weekly safety net.
 - **Lesson classes**: `/lesson-propose` classifies each item as mechanical (proposed check as an issue, no line),
   judgment (a lesson line) or one-off (nothing); the "Lesson" form asks for the class and the check; header of
   `docs/LESSONS.md` explains them. Existing lessons are not yet sorted.
@@ -58,6 +65,9 @@ An existing README is not touched: `python3 .harness/scripts/readme-check.py` li
 (`readme: false` to avoid it).
 Fill in the description and the topics in `.github/repo-settings.json`, add the two images (an issue is enough to
 start); the operator uploads the social preview in the repository settings. The next sync adds `.harness/LICENSE`.
+Add a `Docs:` line to `.github/pull_request_template.md` (a project file, not rewritten; see the template's). The
+`docs` job, if enabled, now checks relative links and cross-file anchors once the sync vendors `doc-links.py`: fix
+what it lists, or `doc-links: false`; `docs-code-paths: ""` in the `pr` job silences the doc impact warning.
 
 ## 0.3.0 — 2026-11-09
 

@@ -30,6 +30,14 @@ Goal: a lot agent can claim an issue **without asking a question**.
 
 ## 2. Doc steward: docs that stay true and readable
 
+Docs are kept true at three levels, from the cheapest to the widest:
+
+| Level | When | Who | What |
+|---|---|---|---|
+| **Per PR** | every ready PR, no agent | the author; `pr-hygiene.yml`, `docs-security.yml` | a `Docs:` line declares the doc impact ([CONVENTIONS](CONVENTIONS.md) §Ledger; a warning if missing); deterministic checks in the existing docs job: README standard, diagram renders up to date, relative links and cross-file anchors (`doc-links.py`), tables and in-file anchors (markdownlint) |
+| **At merge** | after a merge that touches behaviour | the doc steward | updates the files the merged PRs' `Docs:` lines name, folds the ledger |
+| **Weekly safety net** | every week | the doc steward | the full pass below, for whatever slipped through the first two |
+
 - Compares the docs with the merged code: described behaviour = delivered behaviour (LESSONS L08), live links and
   anchors, unbroken tables (L07). What has drifted: a docs PR, an issue if the code is at fault.
 - Readable by a human: one file one role (L10), stable headings, TL;DR at the top of long docs, **a diagram** when
