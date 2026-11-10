@@ -102,6 +102,39 @@ ok "unreadable config.json refused"
 [ "$(run --skip-workflows --skip-seed)" = 0 ] || fail "--skip-workflows"
 ok "--skip-workflows / --skip-seed"
 
+# Integration branch vs default branch (GitHub runs issue/schedule/pull_request_target workflows from the default branch only).
+SS="$ROOT/plugins/harness/scripts/session-start.sh"
+T3="$WORK/dbcheck"
+mkdir -p "$T3/.harness" && git -C "$T3" init -q -b develop
+printf '{ "integration_branch": "develop" }\n' >"$T3/.harness/config.json"
+printf '1.0.0\n' >"$T3/.harness/VERSION"
+dbsync() { "$SYNC" --source "$ROOT" --target "$T3" "$@" >"$WORK/out3" 2>&1; echo $?; }
+dbhook() { CLAUDE_PROJECT_DIR="$T3" bash "$SS" vendored >"$WORK/hook.out" 2>&1; cat "$WORK/hook.out"; }
+# Undeterminable (no origin/HEAD): "could not check", never "OK"; exit code unchanged.
+dbhook | grep -q 'Could not check' || fail "session-start: undeterminable default branch must say \"could not check\""
+BASE_RC="$(dbsync --check)"
+grep -q 'Could not check' "$WORK/out3" || fail "sync: undeterminable default branch must say \"could not check\""
+# Mismatch.
+git -C "$T3" symbolic-ref refs/remotes/origin/HEAD refs/remotes/origin/main
+[ "$(dbhook | grep -c '🟠 Integration branch')" = 1 ] || fail "session-start: one warning line on mismatch"
+dbhook | grep 'Integration branch' | grep -q '"develop".*"main"' || fail "session-start: warning must name both branches"
+dbhook | grep 'Integration branch' | grep -q 'issue_comment' || fail "session-start: warning must name the silent workflows"
+[ "$(dbsync --check)" = "$BASE_RC" ] || fail "sync --check: the warning must not change the exit code"
+grep -q '🟠 Integration branch "develop"' "$WORK/out3" || fail "sync --check: mismatch warning missing"
+dbsync --dry-run >/dev/null; grep -q '🟠 Integration branch' "$WORK/out3" || fail "sync --dry-run: mismatch warning missing"
+# Match: nothing printed.
+git -C "$T3" symbolic-ref refs/remotes/origin/HEAD refs/remotes/origin/develop
+! dbhook | grep -qE 'Integration branch|Could not check' || fail "session-start: must stay silent when the branches match"
+dbsync --check >/dev/null; ! grep -qE 'Integration branch|Could not check' "$WORK/out3" || fail "sync: must stay silent when the branches match"
+# Silenced by the project, in both mismatch and undeterminable cases.
+git -C "$T3" symbolic-ref refs/remotes/origin/HEAD refs/remotes/origin/main
+printf '{ "integration_branch": "develop", "default_branch_check": false }\n' >"$T3/.harness/config.json"
+! dbhook | grep -qE 'Integration branch|Could not check' || fail "session-start: default_branch_check false must silence"
+dbsync --check >/dev/null; ! grep -qE 'Integration branch|Could not check' "$WORK/out3" || fail "sync: default_branch_check false must silence"
+grep -q 'default_branch' "$ROOT/.github/workflows/pr-hygiene.yml" && grep -q '::warning::\|core.warning' "$ROOT/.github/workflows/pr-hygiene.yml" \
+  || fail "pr-hygiene: default branch warning missing"
+ok "integration branch vs default branch: mismatch, match, undeterminable, silenced"
+
 # Hooks
 g() { printf '{"tool_input":{"command":%s},"cwd":"%s"}' "$(jq -Rn --arg c "$1" '$c')" "$T" | CLAUDE_PROJECT_DIR="$T" python3 "$GUARD" 2>/dev/null; echo $?; }
 [ "$(g 'git push --force origin fix/x')" = 2 ] || fail "guard: force"
@@ -112,7 +145,10 @@ g() { printf '{"tool_input":{"command":%s},"cwd":"%s"}' "$(jq -Rn --arg c "$1" '
 [ "$(g 'git push -u origin lot/lot-1')" = 0 ] || fail "guard: legitimate push refused"
 [ "$(g 'echo git push --force')" = 0 ] || fail "guard: false positive"
 ok "guard-git"
-CLAUDE_PROJECT_DIR="$T" bash "$ROOT/plugins/harness/scripts/session-start.sh" vendored | grep -qF "$(cat "$ROOT/VERSION") (.harness/VERSION)" || fail "session-start"
-CLAUDE_PROJECT_DIR="$T" bash "$ROOT/plugins/harness/scripts/session-start.sh" plugin | grep -q . && fail "session-start plugin should stay silent"
+# Output captured first: grep -q closing the pipe early would make the hook die of SIGPIPE under pipefail.
+CLAUDE_PROJECT_DIR="$T" bash "$SS" vendored >"$WORK/ss.out" 2>&1
+grep -qF "$(cat "$ROOT/VERSION") (.harness/VERSION)" "$WORK/ss.out" || fail "session-start"
+CLAUDE_PROJECT_DIR="$T" bash "$SS" plugin >"$WORK/ss.out" 2>&1
+[ ! -s "$WORK/ss.out" ] || fail "session-start plugin should stay silent"
 ok "session-start"
 printf '🟢 %s test groups passed.\n' "$PASS"

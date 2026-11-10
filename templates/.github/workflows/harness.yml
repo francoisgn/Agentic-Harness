@@ -51,6 +51,9 @@ jobs:
       flow: "beta:develop beta:hotfix/* master:beta master:hotfix/*"
       # Ledger (CONVENTIONS.md §Ledger): name of the label if the project keeps one ("ledger"), otherwise empty.
       ledger-label: ""
+      # Integration branch of .harness/config.json: warns if it is not the default branch (needs a harness version
+      # that has this input; uncomment after the next version bump).
+      # integration-branch: "develop"
 
   # Repository settings "as code" (.github/repo-settings.json): applied on push, drift checked on Monday.
   # Secret REPO_ADMIN_TOKEN (fine-grained, this repository only, "Administration: write"); missing → warning only.

@@ -135,6 +135,7 @@ Other keys, read by the hooks and the skills (missing: default values):
 | `branch_types` | `["lot", "fix", "feat", "chore", "docs"]` | Branch types `<type>/<short-name>` offered by `/lot-start` and the hook |
 | `labels.model_prefixes` | `["difficulty:"]` | Prefixes of the model-tier labels; `[]` = no such axis (tier deduced from the text and the routing) |
 | `labels.size_prefixes` | `[]` | Prefixes of the size labels when the project has a separate size axis (e.g. `["size:"]`); `[]` = no such axis |
+| `default_branch_check` | `true` | `false` silences the 🟠 warning (session start, `harness-sync.sh`, `pr-hygiene.yml`) printed when `integration_branch` is not the repository's default branch: GitHub runs `issues`, `issue_comment`, `pull_request_target` and `schedule` workflows from the default branch only |
 | `ledger.enabled`, `ledger.label`, `ledger.fold_command` | `false`, `"ledger"`, `""` | Ledger ([CONVENTIONS](CONVENTIONS.md) §Ledger): `### Ledger` section of the PRs, label, the steward's fold command |
 
 `.harness/config.json` is a project file (created once): a key added by a new version of the harness does not add
