@@ -9,8 +9,8 @@
   - A **runtime harness** sits between the agent and its tools. Before or after each action it decides, in
     milliseconds, whether to allow, block, ask a human, sandbox or replay that action.
   - Belayline is a **process harness**. It governs the work around those actions: the intent written before any
-    code, tests seen failing first, two separate reviews by another model with every verdict traced, bounded loops,
-    a dashboard, and rules that are versioned and updated by pull request.
+    code, tests seen failing first, an intent review by another model and a code review with every verdict traced,
+    bounded loops, a dashboard, and rules that are versioned and updated by pull request.
 - The two layers answer different questions:
   - runtime: "may this command run now?";
   - process: "is this change what was asked, is it proven, reviewed and measured, and what do we learn from it?"
@@ -29,7 +29,8 @@
 | Typical mechanisms | Allow, deny or ask rules; sandboxes; MCP proxies; replay against real state; per-action approval | Intent and definition of done; TDD; an intent review and a code review; traced verdicts; bounded loops; stewards; dashboard; pluggable compliance; versioned rules |
 | Who decides | A rule engine, sometimes a human per action | The operator, through the orchestrator, at defined checkpoints |
 
-Belayline has one runtime guard of its own, a git hook that refuses force-pushes and pushes to protected branches.
+Belayline has one runtime guard of its own, the `guard-git` hook, which refuses force-pushes and pushes to protected
+branches.
 For anything else at runtime, it relies on the agent's own permission settings, or on a dedicated tool
 ([#46](https://github.com/francoisgn/belayline-agentic-harness/issues/46)).
 
@@ -81,14 +82,19 @@ Belayline adds what a runtime layer does not see. Each item points to the doc th
 
 - **intent before code**: user story, error behaviours, definition of done ([METHODOLOGY](METHODOLOGY.md) §2 bis);
 - **proof by tests seen failing first** ([METHODOLOGY](METHODOLOGY.md) §2 ter);
-- **two separate reviews**: the intent review checks the change against the issue, by another model isolated from
-  the author; the code review checks the diff ([REVIEW-ROUNDS](REVIEW-ROUNDS.md));
+- **two separate reviews**: the intent review (called "adversarial" in [REVIEW-ROUNDS](REVIEW-ROUNDS.md)) checks
+  the change against the issue, by another model isolated from the author; the code review checks the diff, through
+  the project's review service;
 - **every verdict traced on the PR**, so first-pass quality can be measured;
 - **bounded loops**: 3 review rounds and 6 CI-tested pushes per PR ([FINOPS](FINOPS.md) §3);
 - **stewards**, a dashboard and a status report ([STEWARDS](STEWARDS.md));
 - **pluggable compliance reviewers** ([COMPLIANCE](COMPLIANCE.md));
 - **lessons that move from project to project**;
-- **rules vendored at a version** and updated by PR ([ADOPTION](ADOPTION.md)).
+- **rules vendored at a version** and updated by PR ([ADOPTION](ADOPTION.md));
+- **efficiency at the level of the split**: the right model tier for each task, early delegation, bounded loops
+  ([FINOPS](FINOPS.md) §2–§3). Belayline does not count tokens, compare an API key with a subscription, or compute
+  anyone's return on investment: each user knows their own economics. It offers a layer that makes the work more
+  efficient, not a verdict on what it should cost.
 
 It leaves to the agent's own permissions, or to a runtime tool:
 
@@ -100,15 +106,17 @@ It leaves to the agent's own permissions, or to a runtime tool:
 
 ## 5. What we take from them
 
-| Idea | From | Issue |
+An idea seen elsewhere is not enough to enter the harness: [SCOPE.md](../SCOPE.md) asks for a failure observed in a
+real project. Ideas that fail that bar are recorded in [`.out-of-scope/`](../.out-of-scope/README.md).
+
+| Idea | From | Status |
 |---|---|---|
-| A verdict never hides what was not verified ("UNVERIFIED is never dressed up as PASS") | haqaliz/belay | [#40](https://github.com/francoisgn/belayline-agentic-harness/issues/40) |
-| Decide what a broken guard does: fail open or fail closed | sacuadros/agent-harness, SECBLOK/belay | [#41](https://github.com/francoisgn/belayline-agentic-harness/issues/41) |
-| Measure whether reviews prevent real defects | arXiv 2610.25568 | [#42](https://github.com/francoisgn/belayline-agentic-harness/issues/42) |
-| Token cost per run, not read by hand | latintzar/harness, mikepenz/agent-belay | [#43](https://github.com/francoisgn/belayline-agentic-harness/issues/43) |
-| A size threshold for a lot | sacuadros/agent-harness | [#44](https://github.com/francoisgn/belayline-agentic-harness/issues/44) |
-| Rules rendered into each agent's own format | sacuadros/agent-harness | [#45](https://github.com/francoisgn/belayline-agentic-harness/issues/45) |
-| A runtime guardrail as a replaceable building block, with an audit log | SECBLOK/belay, mikepenz/agent-belay | [#46](https://github.com/francoisgn/belayline-agentic-harness/issues/46) |
+| A verdict never hides what was not verified ("UNVERIFIED is never dressed up as PASS") | haqaliz/belay | Taken: a reviewer could not verify a sourced fact and the verdict line could not say so ([#40](https://github.com/francoisgn/belayline-agentic-harness/issues/40)) |
+| Decide what a broken guard does: fail open or fail closed | sacuadros/agent-harness, SECBLOK/belay | Open question, no failure observed yet ([#41](https://github.com/francoisgn/belayline-agentic-harness/issues/41)) |
+| Measure whether reviews prevent real defects | arXiv 2610.25568 | Open question, no failure observed yet ([#42](https://github.com/francoisgn/belayline-agentic-harness/issues/42)) |
+| A size threshold for a lot | sacuadros/agent-harness | Open question, no failure observed yet ([#44](https://github.com/francoisgn/belayline-agentic-harness/issues/44)) |
+| Rules rendered into each agent's own format | sacuadros/agent-harness | Declined: no consumer project uses those agents ([record](../.out-of-scope/single-source-per-tool.md)) |
+| A runtime guardrail as a replaceable building block, with an audit log | SECBLOK/belay, mikepenz/agent-belay | Open question, no failure observed yet ([#46](https://github.com/francoisgn/belayline-agentic-harness/issues/46)) |
 
 What we do not take:
 
@@ -116,6 +124,8 @@ What we do not take:
   SECBLOK/belay keeps models out of its decision path by default.
 - **A human approval for every action.** After a few dozen, approvals stop being read. Belayline keeps human
   confirmation for consequential actions ([ESSENTIALS](ESSENTIALS.md) §Guardrails).
+- **Token and spend accounting per run.** Belayline's FinOps stays at the level of the split; users judge their own
+  costs ([record](../.out-of-scope/token-cost-accounting.md)).
 
 ## 6. What the evidence says
 

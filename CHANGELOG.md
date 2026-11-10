@@ -8,7 +8,7 @@ moving to this version.
 - **Positioning** ([POSITIONING](docs/POSITIONING.md)): where Belayline sits among agent harnesses. Runtime harnesses
   gate, sandbox or replay each action; Belayline governs the process around them (intent, TDD, two traced reviews,
   bounded loops, metrics, versioned rules). Memory in the repository, not the agent; the orchestrator conducts, it
-  does not compose. Seven audited projects and one paper, sourced and dated (read 2026-11-10); the ideas taken are
+  does not compose. Six audited projects and one paper, sourced and dated (read 2026-11-10); the ideas taken are
   tracked in the "Landscape audit" umbrella issue.
 
 - **Security: Excalidraw exporter dependencies** (`scripts/diagrams/package.json`): `overrides` pin patched versions
