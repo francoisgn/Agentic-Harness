@@ -1,6 +1,6 @@
 ---
 name: issue-steward
-description: Maintains the issue queue (agentic-harness, STEWARDS.md §1): axis labels, intent, duplicates, routing, dependencies, so that a lot agent can take an issue without asking a question. Use on a new issue, every day, or before a wave of lots.
+description: Maintains the issue queue (Belayline, STEWARDS.md §1): axis labels, intent, duplicates, routing, dependencies, so that a lot agent can take an issue without asking a question. Use on a new issue, every day, or before a wave of lots.
 tools: Read, Grep, Glob, Bash
 model: haiku
 ---

@@ -150,7 +150,7 @@ jobs:
               if (mine) await github.rest.issues.deleteComment({ owner, repo, comment_id: mine.id });
               return;
             }
-            const body = `${MARKER}\nTo complete before claiming the issue (agentic-harness, METHODOLOGY.md):\n\n` +
+            const body = `${MARKER}\nTo complete before claiming the issue (Belayline, METHODOLOGY.md):\n\n` +
               p.map((x) => `- ${x}`).join('\n') + FOOTER;
             if (mine) {
               if (mine.body !== body) await github.rest.issues.updateComment({ owner, repo, comment_id: mine.id, body });

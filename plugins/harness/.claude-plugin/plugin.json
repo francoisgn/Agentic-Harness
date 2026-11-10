@@ -1,13 +1,13 @@
 {
-  "name": "harness",
+  "name": "belay",
   "displayName": "Agentic Harness",
   "version": "0.2.0",
   "description": "Claude Code adapter for the shared agentic development harness (open to any coding agent): intent and TDD, issue → lot → PR loop, adversarial review, compliance reviewers, stewards, flow dashboard, FinOps, git guardrails.",
   "author": {
-    "name": "agentic-harness contributors",
-    "url": "https://github.com/francoisgn/agentic-harness"
+    "name": "Belayline contributors",
+    "url": "https://github.com/francoisgn/belayline-agentic-harness"
   },
-  "homepage": "https://github.com/francoisgn/agentic-harness",
-  "repository": "https://github.com/francoisgn/agentic-harness",
+  "homepage": "https://github.com/francoisgn/belayline-agentic-harness",
+  "repository": "https://github.com/francoisgn/belayline-agentic-harness",
   "keywords": ["workflow", "issues", "review", "orchestration", "ci-budget", "compliance", "finops", "tdd"]
 }

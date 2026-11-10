@@ -1,6 +1,6 @@
 ---
 name: lesson-propose
-description: Proposes a new lesson (recurring mistake, review finding of a new kind) for the LESSONS.md table, in the project, or in the agentic-harness harness through a "Lesson" issue if it applies elsewhere. Use after a review round, an incident or a mistake that must not happen again.
+description: Proposes a new lesson (recurring mistake, review finding of a new kind) for the LESSONS.md table, in the project, or in the Belayline harness through a "Lesson" issue if it applies elsewhere. Use after a review round, an incident or a mistake that must not happen again.
 argument-hint: "<finding or link to a PR / comment>"
 ---
 
@@ -14,7 +14,7 @@ Material: $ARGUMENTS. Reference: `.harness/docs/LESSONS.md` (header: scope, sour
    verifiable sentence (what to do, not the anecdote), the **source** (PR, comment, commit, at a SHA).
 3. **Where?**
    - specific to the project's domain → project table, in the commit that fixes it;
-   - valid elsewhere → an issue on `francoisgn/agentic-harness` with the "Lesson" form (labels `lesson`,
+   - valid elsewhere → an issue on `francoisgn/belayline-agentic-harness` with the "Lesson" form (labels `lesson`,
      `type: docs`): title `Lesson: <summary>`, body = scope, lesson, source, counter-example, how to check it in
      review. From a cloud session, the harness repository must be attached (`add_repo`).
 4. Show the proposal to the operator before creating the issue (it touches another repository). The `L..` number is

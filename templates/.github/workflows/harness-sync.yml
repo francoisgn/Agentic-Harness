@@ -1,12 +1,12 @@
 name: Harness sync
 
-# Every week (or by hand), looks at the latest vX.Y.Z tag of the agentic-harness harness; if it is newer than
+# Every week (or by hand), looks at the latest vX.Y.Z tag of the Belayline harness; if it is newer than
 # .harness/VERSION, runs harness-sync.sh at that tag and opens a DRAFT PR to the integration branch
 # (docs/ADOPTION.md §Updates). Nothing else: review and merge stay human.
 #
 # Access (docs/adr/0001):
 #   - public harness: nothing to do; private harness: secret HARNESS_TOKEN = fine-grained token "Contents: read" on
-#     francoisgn/agentic-harness, plus "Contents / Pull requests: write" on THIS repository;
+#     francoisgn/belayline-agentic-harness, plus "Contents / Pull requests: write" on THIS repository;
 #   - the GITHUB_TOKEN cannot push a file under .github/workflows/: without the variable HARNESS_SYNC_WORKFLOWS=true
 #     (and a HARNESS_TOKEN that has "Workflows: write"), the sync skips them and the PR says so;
 #   - Settings → Actions → General: "Allow GitHub Actions to create and approve pull requests" (if GITHUB_TOKEN).
@@ -36,7 +36,7 @@ jobs:
       contents: write
       pull-requests: write
     env:
-      HARNESS_REPO: francoisgn/agentic-harness
+      HARNESS_REPO: francoisgn/belayline-agentic-harness
       TOKEN: ${{ secrets.HARNESS_TOKEN || github.token }}
       SYNC_WORKFLOWS: ${{ vars.HARNESS_SYNC_WORKFLOWS }}
       INPUT_REF: ${{ inputs.ref }}
@@ -98,10 +98,10 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git switch -c "$BRANCH"
           git add -A
-          git commit -q -m "agentic-harness: update to $TAG"
+          git commit -q -m "Belayline: update to $TAG"
           git push -q "https://x-access-token:${TOKEN}@github.com/${GITHUB_REPOSITORY}.git" "HEAD:refs/heads/$BRANCH"
           {
-            echo "Update of the [agentic-harness](https://github.com/${HARNESS_REPO}) harness to \`$TAG\`: see the harness CHANGELOG for details."
+            echo "Update of the [Belayline](https://github.com/${HARNESS_REPO}) harness to \`$TAG\`: see the harness CHANGELOG for details."
             echo
             if [ "$STATUS" = 3 ]; then echo "🟠 **Conflicts**: harness files modified locally were left as they are (log below)."; echo; fi
             if [ "$SYNC_WORKFLOWS" != "true" ]; then echo "🟠 Files under \`.github/workflows/\` not touched: update the \`@$TAG\` references of \`harness.yml\` by hand."; echo; fi
@@ -110,4 +110,4 @@ jobs:
             echo "## Changelog"
             echo "None (tooling)."
           } > "$RUNNER_TEMP/body.md"
-          gh pr create --draft --base "$BASE" --head "$BRANCH" --title "agentic-harness: update to $TAG" --body-file "$RUNNER_TEMP/body.md"
+          gh pr create --draft --base "$BASE" --head "$BRANCH" --title "Belayline: update to $TAG" --body-file "$RUNNER_TEMP/body.md"

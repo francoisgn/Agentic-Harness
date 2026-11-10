@@ -69,11 +69,11 @@ calls to the reusable workflows of a private harness (ADR 0001); vendoring is en
 `gdpr`: the app handles an account, session cookies and private messages (personal data); this is a proposal for
 the maintainer to confirm, not a legal qualification.
 
-**Adoption** (cloud session with `ezzz/HFRnow` and `francoisgn/agentic-harness` attached, or Mac):
+**Adoption** (cloud session with `ezzz/HFRnow` and `francoisgn/belayline-agentic-harness` attached, or Mac):
 ```bash
 git fetch origin && git switch -c claude/adoption-harness origin/dev-swift
-git clone --depth 1 --branch v0.2.0 https://github.com/francoisgn/agentic-harness.git ../agentic-harness
-../agentic-harness/scripts/harness-sync.sh --target . --dry-run && ../agentic-harness/scripts/harness-sync.sh --target .
+git clone --depth 1 --branch v0.2.0 https://github.com/francoisgn/belayline-agentic-harness.git ../belayline
+../belayline/scripts/harness-sync.sh --target . --dry-run && ../belayline/scripts/harness-sync.sh --target .
 ```
 
 **One lot end to end** (issue #312, `LOT-082`, label `difficulty: easy`):

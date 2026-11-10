@@ -6,7 +6,7 @@ self-review missed it, tighten that step; new kind = new row, proposed to the ha
 otherwise kept in the project's own lessons.
 
 **Adding one** (skill `/lesson-propose`): a lesson that holds beyond one project goes up to the harness through a
-**"Lesson" issue** on `francoisgn/agentic-harness` (dedicated form, label `lesson`): scope, lesson in one verifiable
+**"Lesson" issue** on `francoisgn/belayline-agentic-harness` (dedicated form, label `lesson`): scope, lesson in one verifiable
 sentence, source at a SHA, counter-example. The harness steward merges it into this table by PR (next number, MINOR
 in the CHANGELOG); projects receive it at the next sync.
 

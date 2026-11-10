@@ -1,6 +1,6 @@
-# agentic-harness
+# Belayline
 
-[![CI](https://github.com/francoisgn/agentic-harness/actions/workflows/ci.yml/badge.svg)](https://github.com/francoisgn/agentic-harness/actions/workflows/ci.yml)
+[![CI](https://github.com/francoisgn/belayline-agentic-harness/actions/workflows/ci.yml/badge.svg)](https://github.com/francoisgn/belayline-agentic-harness/actions/workflows/ci.yml)
 ![Python, standard library only](https://img.shields.io/badge/Python-3_stdlib-3776AB?logo=python&logoColor=white)
 ![Bash](https://img.shields.io/badge/Bash-ShellCheck-4EAA25?logo=gnubash&logoColor=white)
 ![GitHub Actions](https://img.shields.io/badge/GitHub_Actions-reusable_workflows-2088FF?logo=githubactions&logoColor=white)
@@ -8,9 +8,11 @@
 ![AGENTS.md](https://img.shields.io/badge/AGENTS.md-any_agent-111111)
 ![Excalidraw](https://img.shields.io/badge/Excalidraw-diagrams-6965DB?logo=excalidraw&logoColor=white)
 
-> A versioned, open harness for developing with coding agents: intent and TDD, issues → lots → PRs, adversarial
+> **Belayline: the open harness for agentic development.** Versioned skills, tools and method: intent and TDD, issues → lots → PRs, adversarial
 > reviews, pluggable compliance, stewards, FinOps and a flow dashboard. For any GitHub repository, any agent (Claude
 > Code, Codex, Cursor, Gemini CLI, Copilot, Aider…) and any team.
+
+![Belayed agents: the agent climbs lot by lot in a harness, the operator holds the rope, each anchor (intent, tests, review, CI) is a guardrail](docs/images/belay.svg)
 
 ![The mechanisms of the harness: one operator, one orchestrator, disposable agents, a repository that holds the state, a CI and a dashboard that close the loop](docs/diagrams/mechanisms.svg)
 
@@ -42,9 +44,9 @@ a stronger model. Each building block can be kept, replaced or extended.
 ![Six steps: fetch, sync, configure, work, steer, update; with any agent; each building block replaceable](docs/diagrams/leverage.svg)
 
 ```bash
-git clone --depth 1 --branch v0.2.0 https://github.com/francoisgn/agentic-harness.git ../agentic-harness
-../agentic-harness/scripts/harness-sync.sh --target . --dry-run   # look before writing
-../agentic-harness/scripts/harness-sync.sh --target .
+git clone --depth 1 --branch v0.2.0 https://github.com/francoisgn/belayline-agentic-harness.git ../belayline
+../belayline/scripts/harness-sync.sh --target . --dry-run   # look before writing
+../belayline/scripts/harness-sync.sh --target .
 ```
 
 Then: configure `.harness/config.json` (branches, language, exclusions, `compliance`) and
@@ -53,7 +55,7 @@ example on an iOS client).
 
 | Your agent | What it receives |
 |---|---|
-| **Claude Code** (adapter provided) | `CLAUDE.md` block, skills (`/intent`, `/lot-start`, `/review-round`…), agents (`adversarial-reviewer`, stewards, compliance), guardrail hooks; or the plugin: `claude plugin marketplace add francoisgn/agentic-harness && claude plugin install harness@agentic-harness` |
+| **Claude Code** (adapter provided) | `CLAUDE.md` block, skills (`/intent`, `/lot-start`, `/review-round`…), agents (`adversarial-reviewer`, stewards, compliance), guardrail hooks; or the plugin: `claude plugin marketplace add francoisgn/belayline-agentic-harness && claude plugin install belay@belayline` |
 | **Other agents** (Codex, Cursor, Copilot, Gemini CLI, Aider…) | `AGENTS.md` block ([open format](https://agents.md)) that points to the rules (`.harness/docs/ESSENTIALS.md`); read natively or to be enabled, depending on the tool ([ADOPTION](docs/ADOPTION.md) §Connect your coding agent); same method, labels, templates, CI and dashboard |
 | **Human team** | The same issues, labels, PRs, CI and dashboard; status report readable by a non-technical person |
 

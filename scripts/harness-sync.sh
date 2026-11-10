@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Vendors the agentic-harness harness into a consumer repository, at a given version (docs/ADOPTION.md).
+# Vendors the Belayline harness into a consumer repository, at a given version (docs/ADOPTION.md).
 #
 # Usage: harness-sync.sh [--source DIR | --ref vX.Y.Z] [--target DIR] [--check | --dry-run] [--force]
 #                        [--skip-workflows] [--skip-seed]
@@ -25,7 +25,7 @@
 # Bash 3.2 compatible (macOS); python3 only for the jsonmerge mode and to read .harness/config.json.
 set -euo pipefail
 
-HARNESS_REPO="${HARNESS_REPO:-francoisgn/agentic-harness}"
+HARNESS_REPO="${HARNESS_REPO:-francoisgn/belayline-agentic-harness}"
 HARNESS_URL="${HARNESS_URL:-https://github.com/${HARNESS_REPO}.git}"
 SRC="" REF="" TARGET="." MODE=apply FORCE=0 SKIP_WF=0 SKIP_SEED=0
 
@@ -235,7 +235,7 @@ do_refbump() {
   put "$rel" "$WORK/bumped"
 }
 
-printf 'agentic-harness %s (%s) → %s [%s]\n' "$VERSION" "${COMMIT:0:12}" "$TARGET" "$MODE"
+printf 'Belayline %s (%s) → %s [%s]\n' "$VERSION" "${COMMIT:0:12}" "$TARGET" "$MODE"
 while read -r kind src rel id tpl; do
   case "$kind" in ''|'#'*) continue ;; esac
   if [ "$kind" != tree ] && is_excluded "$rel"; then continue; fi
@@ -268,7 +268,7 @@ done <"$OLD"
 printf '%s\n' "$VERSION" >"$WORK/version"
 put ".harness/VERSION" "$WORK/version"
 {
-  printf '# agentic-harness lock: written by scripts/harness-sync.sh, do not edit by hand.\n'
+  printf '# Belayline lock: written by scripts/harness-sync.sh, do not edit by hand.\n'
   printf 'version\t%s\nrepo\t%s\ncommit\t%s\n' "$VERSION" "$HARNESS_REPO" "$COMMIT"
   LC_ALL=C sort -t "$(printf '\t')" -k3,3 "$NEW"
 } >"$WORK/lock"

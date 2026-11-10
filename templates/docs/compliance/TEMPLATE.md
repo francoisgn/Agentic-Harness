@@ -6,7 +6,7 @@ spec-version: 1
 ---
 # <Name of the compliance framework>: review spec
 
-Spec read by the generic reviewer `compliance-reviewer` (agentic-harness, COMPLIANCE.md §2). The project
+Spec read by the generic reviewer `compliance-reviewer` (Belayline, COMPLIANCE.md §2). The project
 writes it, keeps it up to date and declares it in `.harness/config.json`:
 `{"id": "<id>", "spec": "docs/compliance/<id>.md", "paths": ["…"], "keywords": ["…"]}`.
 Nothing guessed: a requirement identifier not verified against the official text carries "(to verify)".

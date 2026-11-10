@@ -1,6 +1,6 @@
 ---
 name: lot-finish
-description: Finishes a lot following the agentic-harness harness (local checks, LESSONS self-review, adversarial review by another model, a single push, draft PR with Closes/Changelog, closing comments on the issues and the umbrella). Use when the code of a lot is written.
+description: Finishes a lot following the Belayline harness (local checks, LESSONS self-review, adversarial review by another model, a single push, draft PR with Closes/Changelog, closing comments on the issues and the umbrella). Use when the code of a lot is written.
 argument-hint: "[issue number…]"
 ---
 

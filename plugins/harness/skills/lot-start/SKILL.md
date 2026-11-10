@@ -1,6 +1,6 @@
 ---
 name: lot-start
-description: Starts a lot or an issue following the agentic-harness harness (checks that the issue is ready, claims it with a comment and a plan, creates the claude/<lot> branch from the up-to-date integration branch). Use at the start of any work on one or more issues.
+description: Starts a lot or an issue following the Belayline harness (checks that the issue is ready, claims it with a comment and a plan, creates the claude/<lot> branch from the up-to-date integration branch). Use at the start of any work on one or more issues.
 argument-hint: "<issue number>[,<number>…] [lot-name]"
 ---
 

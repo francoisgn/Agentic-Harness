@@ -37,7 +37,7 @@
 "fillStyle": "solid",
 "strokeColor": "#4a9eed",
 "label": {
-"text": "1. Fetch\ngit clone --branch vX.Y.Z\nagentic-harness",
+"text": "1. Fetch\ngit clone --branch vX.Y.Z\nBelayline",
 "fontSize": 20
 }
 },

@@ -1,4 +1,4 @@
-# Contributing to agentic-harness
+# Contributing to Belayline
 
 The harness is a toolbox, not a doctrine: each building block must be possible to keep, replace or switch off.
 A contribution that adds a rule also says how to disable it.

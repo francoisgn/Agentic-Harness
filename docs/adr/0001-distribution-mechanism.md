@@ -33,7 +33,7 @@ Three complementary channels, a single source (this repository, tags `vX.Y.Z`):
    which imports `@.harness/docs/ESSENTIALS.md`. Everything outside the markers belongs to the project and is never
    touched. Version and fingerprints live in `.harness/VERSION` and `.harness/lock`: a local change to a harness file
    is detected and never overwritten without `--force`.
-2. **Plugin** `harness@agentic-harness` (this repository is a marketplace): the same skills and hooks for **local**
+2. **Plugin** `belay@belayline` (this repository is a marketplace): the same skills and hooks for **local**
    sessions (Mac, terminal) and for repositories that have not adopted the harness yet. If a repository has both,
    the vendored copy wins (the plugin's session hook stays silent).
 3. **Reusable workflows** (`on: workflow_call`) called by a thin `harness.yml` in the project: label sync (harness +

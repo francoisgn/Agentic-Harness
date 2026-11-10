@@ -1,6 +1,6 @@
 name: Harness
 
-# Calls the reusable workflows of the agentic-harness harness (docs/ADOPTION.md). Project file: adapt it
+# Calls the reusable workflows of the Belayline harness (docs/ADOPTION.md). Project file: adapt it
 # freely; harness-sync.sh only rewrites the `@…` references below (refbump mode), pinned to the SHA of the
 # harness commit with the tag as a comment (`@<sha> # vX.Y.Z`), like any action.
 # Budget: Linux jobs of a few seconds (1 min billed each); nothing on macOS.
@@ -28,7 +28,7 @@ jobs:
     permissions:
       contents: read
       issues: write
-    uses: francoisgn/agentic-harness/.github/workflows/labels-sync.yml@v0.2.0
+    uses: francoisgn/belayline-agentic-harness/.github/workflows/labels-sync.yml@v0.2.0
     with:
       apply-aliases: false   # true to rename old labels (e.g. `P1 🔴` → `priority: high`), once the project's workflows and docs use the new names
 
@@ -37,7 +37,7 @@ jobs:
     permissions:
       contents: read
       issues: write
-    uses: francoisgn/agentic-harness/.github/workflows/issue-hygiene.yml@v0.2.0
+    uses: francoisgn/belayline-agentic-harness/.github/workflows/issue-hygiene.yml@v0.2.0
 
   pr:
     if: github.event_name == 'pull_request'
@@ -45,7 +45,7 @@ jobs:
       contents: read
       issues: write
       pull-requests: read
-    uses: francoisgn/agentic-harness/.github/workflows/pr-hygiene.yml@v0.2.0
+    uses: francoisgn/belayline-agentic-harness/.github/workflows/pr-hygiene.yml@v0.2.0
     with:
       # Model A (develop → beta → master). Model B (one integration branch): leave empty.
       flow: "beta:develop beta:hotfix/* master:beta master:hotfix/*"
@@ -57,7 +57,7 @@ jobs:
     if: github.event_name == 'push' || github.event_name == 'workflow_dispatch' || (github.event_name == 'schedule' && github.event.schedule == '47 5 * * 1')
     permissions:
       contents: read
-    uses: francoisgn/agentic-harness/.github/workflows/repo-settings.yml@v0.2.0
+    uses: francoisgn/belayline-agentic-harness/.github/workflows/repo-settings.yml@v0.2.0
     with:
       apply: ${{ github.event_name != 'schedule' }}
     secrets:
@@ -71,21 +71,21 @@ jobs:
       issues: write
       pull-requests: read
       actions: read
-    uses: francoisgn/agentic-harness/.github/workflows/flow-report.yml@v0.2.0
+    uses: francoisgn/belayline-agentic-harness/.github/workflows/flow-report.yml@v0.2.0
 
   # Docs + security baseline, if the project does not have it already (otherwise delete these jobs: do not pay twice).
   # docs:
   #   if: github.event_name == 'pull_request' && github.event.action != 'edited'
   #   permissions:
   #     contents: read
-  #   uses: francoisgn/agentic-harness/.github/workflows/docs-security.yml@v0.2.0
+  #   uses: francoisgn/belayline-agentic-harness/.github/workflows/docs-security.yml@v0.2.0
   #   with:
   #     gitleaks: false   # already in the security job
   # security:   # SAST (Semgrep) + SCA (Trivy) + secrets (gitleaks), CI-BUDGET.md §3
   #   if: (github.event_name == 'pull_request' && github.event.action != 'edited') || (github.event_name == 'schedule' && github.event.schedule == '47 5 * * 1')
   #   permissions:
   #     contents: read
-  #   uses: francoisgn/agentic-harness/.github/workflows/security.yml@v0.2.0
+  #   uses: francoisgn/belayline-agentic-harness/.github/workflows/security.yml@v0.2.0
   #   with:
   #     semgrep-configs: "p/default p/secrets p/github-actions"   # + p/swift, p/python…
 
@@ -97,7 +97,7 @@ jobs:
   #     pull-requests: write
   #     issues: read
   #     id-token: write
-  #   uses: francoisgn/agentic-harness/.github/workflows/ai-review.yml@v0.2.0
+  #   uses: francoisgn/belayline-agentic-harness/.github/workflows/ai-review.yml@v0.2.0
   #   secrets:
   #     ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
   #   with:

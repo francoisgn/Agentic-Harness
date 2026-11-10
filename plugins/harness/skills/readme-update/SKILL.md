@@ -1,6 +1,6 @@
 ---
 name: readme-update
-description: Brings the project README up to the agentic-harness standard and keeps it true (technology badges in the header, product image, Excalidraw architecture diagram, lot progress table, getting started, Contributing section). Use at the end of a lot, after a merge that changes the architecture or the state of a lot, or when the README is missing, empty or out of date.
+description: Brings the project README up to the Belayline standard and keeps it true (technology badges in the header, product image, Excalidraw architecture diagram, lot progress table, getting started, Contributing section). Use at the end of a lot, after a merge that changes the architecture or the state of a lot, or when the README is missing, empty or out of date.
 argument-hint: "[lot or section to update, default: everything]"
 ---
 

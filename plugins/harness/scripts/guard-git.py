@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Git guardrail (PreToolUse hook on Bash) of the agentic-harness harness.
+"""Git guardrail (PreToolUse hook on Bash) of the Belayline harness.
 
 Refuses, before execution, the commands that break the shared rules (docs/BRANCHING-RELEASE.md, docs/ESSENTIALS.md):
   - a forced `git push` (`--force`, `-f`, `--force-with-lease`, refspec `+…`);
@@ -123,7 +123,7 @@ def main() -> int:
     except Exception:  # noqa: BLE001 (a broken hook never blocks work)
         return 0
     if reason:
-        print(f"agentic-harness: {reason}. If this is really intended, the operator runs the command themselves "
+        print(f"Belayline: {reason}. If this is really intended, the operator runs the command themselves "
               "(docs/BRANCHING-RELEASE.md).", file=sys.stderr)
         return 2
     return 0

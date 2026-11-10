@@ -1,6 +1,6 @@
 ---
 name: doc-steward
-description: Keeps the documentation true, up to date and readable (agentic-harness, STEWARDS.md §2): compares docs with merged code, keeps the README to the standard (badges, Excalidraw architecture diagram, lot progress), repairs links and tables, opens a draft docs PR. Use after a merge that changes a behaviour, or every week.
+description: Keeps the documentation true, up to date and readable (Belayline, STEWARDS.md §2): compares docs with merged code, keeps the README to the standard (badges, Excalidraw architecture diagram, lot progress), repairs links and tables, opens a draft docs PR. Use after a merge that changes a behaviour, or every week.
 tools: Read, Grep, Glob, Bash, Edit, Write
 model: sonnet
 ---

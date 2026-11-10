@@ -1,6 +1,6 @@
 # Harness essentials
 
-Rules shared by every project that follows agentic-harness. This file is imported into every session: it stays
+Rules shared by every project that follows Belayline. This file is imported into every session: it stays
 short. The detail is in the other files of this folder. The project's rules (`CLAUDE.md`) win; report a conflict in
 an issue.
 

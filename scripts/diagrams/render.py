@@ -241,7 +241,7 @@ def to_scene(source):
             out.append(text_el(tid, cx - tw / 2, cy - th / 2, tw, th, label["text"], size, container=e["id"]))
         else:
             out.append(el)
-    scene = {"type": "excalidraw", "version": 2, "source": "agentic-harness (scripts/diagrams/render.py)",
+    scene = {"type": "excalidraw", "version": 2, "source": "Belayline (scripts/diagrams/render.py)",
              "elements": out, "appState": {"viewBackgroundColor": "#ffffff", "gridSize": None}, "files": {}}
     return json.dumps(scene, ensure_ascii=False, indent=1) + "\n"
 

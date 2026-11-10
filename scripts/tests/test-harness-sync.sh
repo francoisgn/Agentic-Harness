@@ -37,7 +37,7 @@ jq -e '.permissions.allow[0] == "Bash(swift test:*)" and (.hooks.PreToolUse | le
   || fail "settings.json merge"
 PIN="$(git -C "$ROOT" rev-parse HEAD 2>/dev/null) # v$(cat "$ROOT/VERSION")"
 if [ -n "$(git -C "$ROOT" status --porcelain 2>/dev/null)" ] || ! git -C "$ROOT" rev-parse HEAD >/dev/null 2>&1; then PIN="v$(cat "$ROOT/VERSION")"; fi
-[ "$(grep -c "agentic-harness/.github/workflows/.*@$PIN\$" "$T/.github/workflows/harness.yml")" = 8 ] || fail "refbump ($PIN)"
+[ "$(grep -c "belayline-agentic-harness/.github/workflows/.*@$PIN\$" "$T/.github/workflows/harness.yml")" = 8 ] || fail "refbump ($PIN)"
 ok "first sync: block, docs, skills, hooks, JSON merge, refbump"
 
 [ "$(run)" = 0 ] && grep -q 'Up to date' "$WORK/out" || fail "second sync not idempotent: $(cat "$WORK/out")"

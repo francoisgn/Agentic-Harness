@@ -1,6 +1,6 @@
 ---
 name: lessons-check
-description: Self-review of the current diff against the lessons table of the agentic-harness harness (and the project's) before a PR or a review fix; returns a verdict per applicable lesson. Use before pushing or before moving a PR to review.
+description: Self-review of the current diff against the lessons table of the Belayline harness (and the project's) before a PR or a review fix; returns a verdict per applicable lesson. Use before pushing or before moving a PR to review.
 argument-hint: "[base, default: integration branch]"
 ---
 

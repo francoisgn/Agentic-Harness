@@ -66,7 +66,7 @@ jobs:
           BASE_REF: ${{ github.event.pull_request.base.ref }}
         run: |
           {
-            echo "You are the review service of the agentic-harness harness on PR #$PR, head $HEAD_SHA, base $BASE_REF."
+            echo "You are the review service of the Belayline harness on PR #$PR, head $HEAD_SHA, base $BASE_REF."
             echo "Read-only on the code: no commit, no push, no merge. You post ONE PR comment (gh pr comment), nothing else."
             echo "Read: CLAUDE.md, .harness/docs/ESSENTIALS.md, .harness/docs/LESSONS.md, the linked spec (Closes/Refs)."
             echo "Incremental review: if you already commented on this PR (gh pr view $PR --json comments), review"

@@ -338,7 +338,7 @@ def render_markdown(r, repo):
     out += ["", f"_Thresholds: idle {t['stall_hours']} h (draft {t['draft_stall_hours']} h), "
                 f"CI loop > {t['max_ci_runs']} tested pushes, review loop > {t['max_review_rounds']} reviews, "
                 f"PRs with a problem > {t['max_problem_ratio']}% (from {MIN_QUALITY_SAMPLE} reviewed PRs). "
-                "How to read it: FINOPS.md §4 of agentic-harness._", ""]
+                "How to read it: FINOPS.md §4 of Belayline._", ""]
     return "\n".join(out)
 
 

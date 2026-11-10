@@ -5,6 +5,9 @@ moving to this version.
 
 ## Unreleased
 
+- **Renamed to Belayline** (formerly agentic-harness): repository `francoisgn/belayline-agentic-harness`, plugin
+  `belay` in marketplace `belayline` (`claude plugin install belay@belayline`). The vendored folder `.harness/`,
+  `harness-sync.sh`, `harness.yml` and the `harness:` markers keep their names.
 - **English**: the whole harness is now in English; `i18n/` removed; files renamed (ESSENTIEL → ESSENTIALS,
   UTILISATION → USAGE, diagram and ADR names, issue forms `lesson.yml`, `task.yml`); managed block id `cadre` →
   `harness`; README progress markers `avancement` → `progress`.
@@ -22,7 +25,8 @@ moving to this version.
 - The harness applies its own standard: README with badges and progress block, `CONTRIBUTING.md`, checked in CI.
 - `scripts/diagrams/render.py`: `--dir` option.
 
-**Action**: run `harness-sync.sh` again; rename the markers `harness:begin cadre`/`harness:end cadre` to `harness`,
+**Action**: point `uses:` references and the clone URL at `francoisgn/belayline-agentic-harness` (the sync rewrites
+`harness.yml`); reinstall the plugin as `belay@belayline`. Then run `harness-sync.sh` again; rename the markers `harness:begin cadre`/`harness:end cadre` to `harness`,
 and `avancement` to `progress` in README; run the label sync once with `apply-aliases: true`;
 `.harness/docs/ESSENTIEL.md` import in CLAUDE.md becomes `.harness/docs/ESSENTIALS.md` (rewritten by the sync).
 An existing README is not touched: `python3 .harness/scripts/readme-check.py` lists the gaps; to switch it off,
@@ -34,7 +38,7 @@ An existing README is not touched: `python3 .harness/scripts/readme-check.py` li
 Intent, TDD, FinOps, stewards, compliance, security and flow measurement.
 
 - **Open to all**: no more reference by name to the creator (roles: maintainer, operator; plugin author
-  "agentic-harness contributors"); the harness applies to any coding agent (Claude Code, Codex CLI, Cursor, Gemini
+  "Belayline contributors"); the harness applies to any coding agent (Claude Code, Codex CLI, Cursor, Gemini
   CLI, Copilot, Aider…; loaded through `AGENTS.md`, natively or to be enabled depending on the tool: ADOPTION
   §Connect your coding agent), Claude Code remaining the adapter provided (plugin, hooks, `.claude/`); comment footer
   naming the agent; model tiers per provider (ORCHESTRATION §2).
@@ -96,7 +100,7 @@ First version, distilled from HFRnow (`dev-swift`) and ios-app_credit-immo (`dev
 - `scripts/harness-sync.sh`: idempotent vendoring (modes copy, tree, block, seed, jsonmerge, refbump), lock with
   fingerprints, `--check`, `--dry-run`, `--force`, `--skip-workflows`, `--skip-seed`, per-project language and
   exclusions.
-- Plugin `harness` (marketplace `agentic-harness`): six skills, `guard-git` hook (force push, push to a protected
+- Plugin `harness` (marketplace `Belayline`): six skills, `guard-git` hook (force push, push to a protected
   branch, `--no-verify`), reminder hook at session start.
 - Reusable workflows: `labels-sync`, `issue-hygiene`, `pr-hygiene`, `docs-security`.
 

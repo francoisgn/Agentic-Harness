@@ -1,7 +1,7 @@
 {
  "type": "excalidraw",
  "version": 2,
- "source": "agentic-harness (scripts/diagrams/render.py)",
+ "source": "Belayline (scripts/diagrams/render.py)",
  "elements": [
   {
    "angle": 0,
@@ -25,10 +25,10 @@
    "type": "text",
    "x": 338,
    "y": 20,
-   "width": 515.84,
+   "width": 416.0,
    "height": 40.0,
-   "text": "agentic-harness: the mechanisms",
-   "originalText": "agentic-harness: the mechanisms",
+   "text": "Belayline: the mechanisms",
+   "originalText": "Belayline: the mechanisms",
    "fontSize": 32,
    "fontFamily": 2,
    "textAlign": "left",

@@ -1,6 +1,6 @@
 ---
 name: adversarial-reviewer
-description: Independent adversarial reviewer of a PR or a diff (agentic-harness, ORCHESTRATION.md §3). Read-only. Use before "Ready for review", with a model different from the author's and of at least the same tier; give it only the diff, the spec, ESSENTIALS.md and LESSONS.md, never the author's conclusions.
+description: Independent adversarial reviewer of a PR or a diff (Belayline, ORCHESTRATION.md §3). Read-only. Use before "Ready for review", with a model different from the author's and of at least the same tier; give it only the diff, the spec, ESSENTIALS.md and LESSONS.md, never the author's conclusions.
 tools: Read, Grep, Glob, Bash
 model: opus
 ---

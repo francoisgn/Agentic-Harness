@@ -1,7 +1,7 @@
 {
  "type": "excalidraw",
  "version": 2,
- "source": "agentic-harness (scripts/diagrams/render.py)",
+ "source": "Belayline (scripts/diagrams/render.py)",
  "elements": [
   {
    "angle": 0,
@@ -133,8 +133,8 @@
    "y": 147.5,
    "width": 260.0,
    "height": 75.0,
-   "text": "1. Fetch\ngit clone --branch vX.Y.Z\nagentic-harness",
-   "originalText": "1. Fetch\ngit clone --branch vX.Y.Z\nagentic-harness",
+   "text": "1. Fetch\ngit clone --branch vX.Y.Z\nBelayline",
+   "originalText": "1. Fetch\ngit clone --branch vX.Y.Z\nBelayline",
    "fontSize": 20,
    "fontFamily": 2,
    "textAlign": "center",

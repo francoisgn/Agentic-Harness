@@ -1,6 +1,6 @@
-## Shared harness: agentic-harness {{HARNESS_VERSION}}
+## Shared harness: Belayline {{HARNESS_VERSION}}
 
-This block is managed by `scripts/harness-sync.sh` of the [agentic-harness](https://github.com/francoisgn/agentic-harness) harness: do not edit it here (propose changes in the harness). The rest of this file belongs to the project and wins over the harness on any conflict, to be reported in an issue.
+This block is managed by `scripts/harness-sync.sh` of the [Belayline](https://github.com/francoisgn/belayline-agentic-harness) harness: do not edit it here (propose changes in the harness). The rest of this file belongs to the project and wins over the harness on any conflict, to be reported in an issue.
 
 @.harness/docs/ESSENTIALS.md
 

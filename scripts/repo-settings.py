@@ -111,7 +111,7 @@ def github(token):
                                      headers={"Authorization": f"Bearer {token}",
                                               "Accept": "application/vnd.github+json",
                                               "X-GitHub-Api-Version": "2022-11-28",
-                                              "User-Agent": "agentic-harness-repo-settings"})
+                                              "User-Agent": "belayline-repo-settings"})
         try:
             with urllib.request.urlopen(req, timeout=30) as resp:
                 raw = resp.read()

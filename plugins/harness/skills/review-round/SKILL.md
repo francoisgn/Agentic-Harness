@@ -1,6 +1,6 @@
 ---
 name: review-round
-description: Handles one review round of a PR (CodeRabbit, CodeQL, humans) following the agentic-harness harness (read everything, verify each finding, fix the class, counter-check, one commit and one push, one reply per thread). Use when review comments arrive on a PR.
+description: Handles one review round of a PR (CodeRabbit, CodeQL, humans) following the Belayline harness (read everything, verify each finding, fix the class, counter-check, one commit and one push, one reply per thread). Use when review comments arrive on a PR.
 argument-hint: "<PR number>"
 ---
 

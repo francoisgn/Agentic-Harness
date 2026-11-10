@@ -1,15 +1,15 @@
 {
-  "name": "agentic-harness",
+  "name": "belayline",
   "description": "Shared agentic development harness, open to any coding agent (adapter provided: Claude Code), for the projects that adopt it: intent and TDD, issues → lots → PRs, adversarial reviews, compliance, stewards, FinOps, guardrails.",
   "owner": {
-    "name": "agentic-harness contributors",
-    "url": "https://github.com/francoisgn/agentic-harness"
+    "name": "Belayline contributors",
+    "url": "https://github.com/francoisgn/belayline-agentic-harness"
   },
   "plugins": [
     {
-      "name": "harness",
+      "name": "belay",
       "source": "./plugins/harness",
-      "description": "Skills (intent, lot-start, lot-finish, review-round, feedback-triage, lessons-check, lesson-propose, compliance-review, status-report, harness-update), agents (adversarial reviewer, stewards, compliance) and hooks of the agentic-harness harness (Claude Code adapter).",
+      "description": "Skills (intent, lot-start, lot-finish, review-round, feedback-triage, lessons-check, lesson-propose, compliance-review, status-report, harness-update), agents (adversarial reviewer, stewards, compliance) and hooks of the Belayline harness (Claude Code adapter).",
       "category": "workflow",
       "tags": ["issues", "lots", "review", "orchestration", "ci"]
     }

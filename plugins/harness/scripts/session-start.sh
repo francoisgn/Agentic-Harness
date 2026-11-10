@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# SessionStart hook of the agentic-harness harness: a few lines of context added at the start of each session.
+# SessionStart hook of the Belayline harness: a few lines of context added at the start of each session.
 # Usage: session-start.sh plugin|vendored
 #   plugin    run by the Claude Code plugin (version in ${CLAUDE_PLUGIN_ROOT});
 #   vendored  run by the vendored copy in .harness/hooks/ (declared in .claude/settings.json).
@@ -23,7 +23,7 @@ if [ "$MODE" = plugin ] && [ -n "${CLAUDE_PLUGIN_ROOT:-}" ]; then
 fi
 BRANCH="$(git -C "$PROJECT" rev-parse --abbrev-ref HEAD 2>/dev/null || echo '?')"
 
-echo "## agentic-harness"
+echo "## Belayline"
 if [ -n "$VENDORED" ]; then
   echo "- Vendored version: ${VENDORED} (.harness/VERSION)${PLUGIN:+; plugin: ${PLUGIN}}. Rules: .harness/docs/ESSENTIALS.md."
   if [ -n "$PLUGIN" ] && [ "$PLUGIN" != "$VENDORED" ]; then

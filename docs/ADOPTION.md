@@ -21,7 +21,7 @@ Why this mechanism (vendoring + plugin + reusable workflows) and its limits: [AD
 
 ## Adoption (once, from the Mac or a cloud session)
 
-Prerequisites: `bash`, `git`, `python3`; read access to `francoisgn/agentic-harness` (in a cloud session: attach it
+Prerequisites: `bash`, `git`, `python3`; read access to `francoisgn/belayline-agentic-harness` (in a cloud session: attach it
 to the session; on the Mac: `gh auth login && gh auth setup-git`).
 
 1. **Branch** from the up-to-date integration branch:
@@ -30,12 +30,12 @@ to the session; on the Mac: `gh auth login && gh auth setup-git`).
    ```
 2. **Fetch the harness** at a tag, next to the project:
    ```bash
-   git clone --depth 1 --branch v0.2.0 https://github.com/francoisgn/agentic-harness.git ../agentic-harness
+   git clone --depth 1 --branch v0.2.0 https://github.com/francoisgn/belayline-agentic-harness.git ../belayline
    ```
 3. **Look before writing**, then apply:
    ```bash
-   ../agentic-harness/scripts/harness-sync.sh --target . --dry-run
-   ../agentic-harness/scripts/harness-sync.sh --target .
+   ../belayline/scripts/harness-sync.sh --target . --dry-run
+   ../belayline/scripts/harness-sync.sh --target .
    ```
    Exit code 3 = conflicts: a harness file already exists in the project (e.g. a skill with the same name). Rename
    the project's one, or rerun with `--force` if replacing it is intended.
@@ -50,17 +50,17 @@ to the session; on the Mac: `gh auth login && gh auth setup-git`).
    - `.github/workflows/harness.yml`: `push` branch, `flow` (model A or empty), jobs `docs`, `security` and `review`
      to enable only if the project does not already have the equivalent; the `flow` job (dashboard) is on by default.
    - `.harness/config.json` → `compliance`: compliance frameworks whose reviewers are run ([COMPLIANCE](COMPLIANCE.md)). Delete the workflows it replaces (e.g. `branch-flow.yml`).
-5. **Verify**: `../agentic-harness/scripts/harness-sync.sh --target . --check` exits with 0; `git diff --stat` shows
-   only what is expected; start a Claude session and see the "agentic-harness" message at startup.
+5. **Verify**: `../belayline/scripts/harness-sync.sh --target . --check` exits with 0; `git diff --stat` shows
+   only what is expected; start a Claude session and see the "Belayline" message at startup.
 6. **Single commit**, then draft PR:
-   `agentic-harness 0.2.0: adoption` (body: what was removed from `CLAUDE.md`, workflows replaced, labels
+   `Belayline 0.2.0: adoption` (body: what was removed from `CLAUDE.md`, workflows replaced, labels
    moved; `## Changelog`: "None (tooling)").
 7. **After the merge** (operator): run the "Harness" workflow by hand (`workflow_dispatch`) to create the labels;
    if this harness repository is private, check Actions access ([ADR 0001](adr/0001-distribution-mechanism.md)).
 
 ### Optional: automatic update PR
 `harness-sync.yml` (created at adoption) looks at the latest tag every Monday and opens a draft PR. Settings:
-- private harness: secret `HARNESS_TOKEN` (fine-grained token: *Contents: read* on `agentic-harness`; *Contents* and
+- private harness: secret `HARNESS_TOKEN` (fine-grained token: *Contents: read* on `Belayline`; *Contents* and
   *Pull requests: write* on the project; *Workflows: write* if you also want the references of `harness.yml`, with the
   repository variable `HARNESS_SYNC_WORKFLOWS=true`);
 - with `GITHUB_TOKEN` alone: Settings → Actions → General → "Allow GitHub Actions to create and approve pull requests".
@@ -69,32 +69,32 @@ to the session; on the Mac: `gh auth login && gh auth setup-git`).
 In a repository that has adopted the harness, the vendored skills and hooks are enough (and work in the cloud). The
 plugin is useful on the Mac for repositories **not yet** adopted:
 ```bash
-claude plugin marketplace add francoisgn/agentic-harness
-claude plugin install harness@agentic-harness            # user scope
+claude plugin marketplace add francoisgn/belayline-agentic-harness
+claude plugin install belay@belayline            # user scope
 ```
-Its skills are then called `/harness:lot-start`, etc. Automatic update: `/plugin` → Marketplaces →
-agentic-harness → Enable auto-update. To declare it in a repository (local sessions only; a cloud session
+Its skills are then called `/belay:lot-start`, etc. Automatic update: `/plugin` → Marketplaces →
+Belayline → Enable auto-update. To declare it in a repository (local sessions only; a cloud session
 ignores it), add to `.claude/settings.json`:
 ```json
 {
   "extraKnownMarketplaces": {
-    "agentic-harness": { "source": { "source": "github", "repo": "francoisgn/agentic-harness", "ref": "v0.2.0" } }
+    "Belayline": { "source": { "source": "github", "repo": "francoisgn/belayline-agentic-harness", "ref": "v0.2.0" } }
   },
-  "enabledPlugins": { "harness@agentic-harness": true }
+  "enabledPlugins": { "belay@belayline": true }
 }
 ```
 In an adopted repository, prefer **not** to enable it (the skills would exist twice, `/lot-start` and
-`/harness:lot-start`).
+`/belay:lot-start`).
 
 ## Updates
 - Skill `/harness-update` (step-by-step guide), or by hand:
   ```bash
   git switch -c claude/harness-vX.Y.Z origin/develop
-  ../agentic-harness/scripts/harness-sync.sh --ref vX.Y.Z --target .     # or --source <clone at that tag>
+  ../belayline/scripts/harness-sync.sh --ref vX.Y.Z --target .     # or --source <clone at that tag>
   ```
-  Read the harness's `CHANGELOG.md`, review `git diff`, one commit `agentic-harness: move to vX.Y.Z`, draft PR.
+  Read the harness's `CHANGELOG.md`, review `git diff`, one commit `Belayline: move to vX.Y.Z`, draft PR.
 - A modification of a harness file in the project is refused at the next sync: propose it to the harness (PR on
-  `agentic-harness`), or keep it outside the harness (project file), never by editing the vendored copy.
+  `Belayline`), or keep it outside the harness (project file), never by editing the vendored copy.
 - `--check` in CI (optional): reports a vendored copy that is modified or behind `.harness/VERSION`.
 
 ## Per-project settings: language and exclusions
@@ -126,7 +126,7 @@ the first time):
    complements the project's `docs/agents/LESSONS.md`, which stays the reference (both are read at self-review;
    `/lessons-check` does it).
 3. Keep HFRnow's label taxonomy (`type:`, `priority:`, `difficulty:`…): do not enable `apply-aliases`.
-4. Generic lessons born in HFRnow go up to the harness by PR on agentic-harness; lessons of the HFR domain
+4. Generic lessons born in HFRnow go up to the harness by PR on Belayline; lessons of the HFR domain
    stay in the project.
 
 ## Connecting your coding agent

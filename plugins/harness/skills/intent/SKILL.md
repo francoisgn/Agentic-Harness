@@ -1,6 +1,6 @@
 ---
 name: intent
-description: Turns a request (message, note, idea) into an issue an agent can work from (user story, error behaviours, definition of done, testable acceptance criteria, axis labels), following the agentic-harness harness. Use before any work that does not yet have a clear issue.
+description: Turns a request (message, note, idea) into an issue an agent can work from (user story, error behaviours, definition of done, testable acceptance criteria, axis labels), following the Belayline harness. Use before any work that does not yet have a clear issue.
 argument-hint: "<request in one sentence>"
 ---
 
