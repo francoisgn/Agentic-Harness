@@ -7,6 +7,7 @@ moving to this version.
 
 - **Orchestration: wait on events, not in memory** ([ORCHESTRATION](docs/ORCHESTRATION.md) §4): subscribe the
   session to a PR's activity where the tool allows it, with one late checkpoint as a safety net.
+
 - **Positioning** ([POSITIONING](docs/POSITIONING.md)): where Belayline sits among agent harnesses. Runtime harnesses
   gate, sandbox or replay each action; Belayline governs the process around them (intent, TDD, two traced reviews,
   bounded loops, metrics, versioned rules). Compared with Google's Elephant–Goldfish Model, which makes the same
