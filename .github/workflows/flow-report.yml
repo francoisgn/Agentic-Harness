@@ -5,6 +5,7 @@ name: Flow dashboard (reusable)
 # agent / human ratio, first-run quality (problem PRs, correction effort), CI cost (FINOPS.md §4, STEWARDS.md §4).
 # Vendored script: .harness/scripts/flow-metrics.py.
 # Cost: one Linux job of under a minute per run; call it on `schedule` (daily) and by hand.
+# Opt-in `readme-progress`: also reports drift of the README progress block (readme-progress.py --check), never commits.
 # The `dashboard` label is not in the harness base set: this workflow creates it if it is missing.
 on:
   workflow_call:
@@ -35,6 +36,13 @@ on:
         description: Fail the job if the dashboard is 🔴 (alert through the workflow failure e-mail)
         type: boolean
         default: false
+      readme-progress:
+        description: "Also compare the README progress block with the issues (readme-progress.py --check); drift goes to the job summary, nothing is committed"
+        type: boolean
+        default: false
+      readme-progress-script:
+        type: string
+        default: ".harness/scripts/readme-progress.py"
 
 permissions:
   contents: read
@@ -83,6 +91,22 @@ jobs:
           else
             gh issue create --repo "$GITHUB_REPOSITORY" --title "$TITLE" --label "$LABEL" --body-file report.md
           fi
+
+      - name: README progress drift
+        if: ${{ inputs.readme-progress }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+          SCRIPT: ${{ inputs.readme-progress-script }}
+        run: |
+          if [ ! -f "$SCRIPT" ]; then echo "::notice::$SCRIPT not vendored: check skipped"; exit 0; fi
+          rc=0
+          python3 "$SCRIPT" --check >progress.txt || rc=$?
+          { echo "## README progress"; echo; echo '```diff'; cat progress.txt; echo '```'; } >>"$GITHUB_STEP_SUMMARY"
+          case "$rc" in
+            0) ;;
+            1) echo "::warning::README progress block differs from the issues: run readme-progress.py (see the summary)" ;;
+            *) echo "::warning::README progress could not be checked (see the summary)" ;;
+          esac
 
       - name: Alert if 🔴
         if: ${{ inputs.fail-on-red }}

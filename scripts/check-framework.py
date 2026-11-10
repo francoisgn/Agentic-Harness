@@ -6,6 +6,8 @@
 - manifest: every source exists;
 - labels: unique names, `axis: value` format (or one of the plain names), the exclusive axes are all present;
 - repository identity (CONVENTIONS.md §Repository identity): description, topics, README banner, social preview;
+- anti-bloat (CONTRIBUTING.md §Size limits): body size of skills, agents and ESSENTIALS.md; doc links that must resolve;
+  skill/agent counts in the README and the skill list of `templates/CLAUDE.md.block` = what `plugins/harness/` holds;
 - agent naming (ORCHESTRATION.md §7): every example matches the published regular expression.
 Usage: check-framework.py [--root <repository>]   (exits 1 on any gap, lists every gap)
 """
@@ -24,6 +26,17 @@ LABEL_RE = re.compile(r"^[a-z]+: [a-z-]+$")
 PLAIN_LABELS = {"direct-pr", "dependencies"}
 EXCLUSIVE_AXES = ("status", "type", "priority", "difficulty")
 
+# Size limits, in characters of the body (after the frontmatter). Text written by agents accumulates and every loaded
+# line costs context, so a file over its limit is a gap: shorten it, or list it in SIZE_EXCEPTIONS with the reason.
+# Measured 2026-11: largest skill 4.2 kB, largest agent 4.4 kB, ESSENTIALS.md 5.2 kB.
+SKILL_BODY_LIMIT = 5000      # largest skill (4.2 kB) + ~20 %: a skill loads whole when invoked
+AGENT_BODY_LIMIT = 5500      # largest agent (4.4 kB) + ~25 %: compliance agents carry six mandatory sections
+ESSENTIALS_BODY_LIMIT = 5600  # current size (5.2 kB) + ~7 %: tighter, because it is loaded in EVERY session
+# Path relative to the root -> (limit, reason). Empty on purpose: a file that needs more is listed here, never by
+# raising a global limit above.
+SIZE_EXCEPTIONS = {}
+DOC_LINK_RE = re.compile(r"(?:\.harness|\$\{CLAUDE_PLUGIN_ROOT\})/docs/([A-Za-z0-9_-]+(?:\.[A-Za-z0-9_-]+)*)")
+
 
 def frontmatter(path):
     text = path.read_text(encoding="utf-8")
@@ -36,6 +49,51 @@ def frontmatter(path):
             key, value = line.split(":", 1)
             meta[key.strip()] = value.strip()
     return meta, text[end + 4:]
+
+
+def size_gaps(root, path, limit, body):
+    rel = path.relative_to(root).as_posix()
+    limit = SIZE_EXCEPTIONS.get(rel, (limit, ""))[0]
+    if len(body) > limit:
+        return [f"{rel}: body is {len(body)} characters, limit {limit} (shorten it, or list an exception with its reason)"]
+    return []
+
+
+def anti_bloat_gaps(root):
+    """Body sizes, doc links of skills and agents, and the counts announced by README and CLAUDE.md.block."""
+    errors = []
+    plugin = root / "plugins/harness"
+    skills = sorted((plugin / "skills").glob("*/SKILL.md"))
+    agents = sorted((plugin / "agents").glob("*.md"))
+    for path, limit in [(p, SKILL_BODY_LIMIT) for p in skills] + [(p, AGENT_BODY_LIMIT) for p in agents]:
+        meta, body = frontmatter(path)
+        errors += size_gaps(root, path, limit, body)
+        for m in DOC_LINK_RE.finditer(body):
+            if not (root / "docs" / m.group(1)).exists():
+                errors.append(f"{path.relative_to(root).as_posix()}: links to docs/{m.group(1)}, which does not exist")
+    essentials = root / "docs/ESSENTIALS.md"
+    if essentials.is_file():
+        errors += size_gaps(root, essentials, ESSENTIALS_BODY_LIMIT, frontmatter(essentials)[1])
+
+    readme = root / "README.md"
+    if readme.is_file():
+        m = re.search(r"(\d+) skills, (\d+) agents", readme.read_text(encoding="utf-8"))
+        if not m:
+            errors.append("README.md: \"<n> skills, <m> agents\" not found")
+        else:
+            if int(m.group(1)) != len(skills):
+                errors.append(f"README.md: announces {m.group(1)} skills, plugins/harness/ holds {len(skills)}")
+            if int(m.group(2)) != len(agents):
+                errors.append(f"README.md: announces {m.group(2)} agents, plugins/harness/ holds {len(agents)}")
+    block = root / "templates/CLAUDE.md.block"
+    if block.is_file():
+        m = re.search(r"^Skills: (.+)$", block.read_text(encoding="utf-8"), re.M)
+        listed = set(re.findall(r"`/([a-z0-9-]+)`", m.group(1))) if m else set()
+        actual = {p.parent.name for p in skills}
+        errors += [f"templates/CLAUDE.md.block: skill /{n} is not in the skill list" for n in sorted(actual - listed)]
+        errors += [f"templates/CLAUDE.md.block: lists /{n}, which plugins/harness/skills/ does not hold"
+                   for n in sorted(listed - actual)]
+    return errors
 
 
 def pull_request_job_names(text):
@@ -163,7 +221,7 @@ def check(root):
         if not examples:
             errors.append("docs/ORCHESTRATION.md §7: no identifier example")
         errors += [f"docs/ORCHESTRATION.md §7: non-matching example \"{e}\"" for e in examples if not rx.match(e)]
-    return errors
+    return errors + anti_bloat_gaps(root)
 
 
 def main():

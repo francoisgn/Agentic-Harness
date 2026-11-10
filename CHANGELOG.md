@@ -5,6 +5,11 @@ moving to this version.
 
 ## Unreleased
 
+- **README progress generated from the issues**: `readme-progress.py` (vendored in `.harness/scripts/`) rewrites the
+  block between the `progress` markers: one row per `type: epic` lot (state, closed/total sub-issues, issue and PR
+  links), otherwise one per milestone; ⚠ on an epic without sub-issue or an issue with zero or several `status:`
+  labels; `--check` exits 1 on drift. `/readme-update` uses it instead of hand-written rows; `flow-report.yml` input
+  `readme-progress` reports drift in the job summary (README-STANDARD §3).
 - **Lesson classes**: `/lesson-propose` classifies each item as mechanical (proposed check as an issue, no line),
   judgment (a lesson line) or one-off (nothing); the "Lesson" form asks for the class and the check; header of
   `docs/LESSONS.md` explains them.
@@ -31,8 +36,16 @@ moving to this version.
   `diagrams-render.py` vendored, templates `README.md`, `CONTRIBUTING.md` and `docs/diagrams/architecture.*` created
   if missing; check in `docs-security.yml` (input `readme`). Each point can be switched off in
   `.harness/config.json` › `readme`.
+- **Default branch alert** (#10): the session-start hook and `harness-sync.sh` (also `--check`, exit code unchanged)
+  print a 🟠 line when `integration_branch` is not the repository's default branch (workflows triggered by issues,
+  comments and schedules would never run), or "could not check" when it is unknown; `pr-hygiene.yml` emits a
+  `::warning::` (new input `integration-branch`). Silence with `"default_branch_check": false` in
+  `.harness/config.json`.
 - **Tiered CI baseline** ([CI-BASELINE](docs/CI-BASELINE.md)): hygiene, quality (one local command = the CI),
   expensive, heavy security, process; six workflow invariants; survey of three real projects.
+- **Anti-bloat checks** (`check-framework.py`): size limits on skills, agents and `docs/ESSENTIALS.md` (listed
+  exceptions only), skill and agent doc links must resolve, README counts and the `CLAUDE.md.block` skill list must
+  match `plugins/harness/` ([CONTRIBUTING](CONTRIBUTING.md) §Size limits).
 - The harness applies its own standard: README with badges and progress block, `CONTRIBUTING.md`, checked in CI.
 - `scripts/diagrams/render.py`: `--dir` option.
 - **Repository identity** (CONVENTIONS §Repository identity): every repository that follows the harness carries a
