@@ -18,11 +18,23 @@ checks the change against the **intent**, the second checks the **code** on its 
   sub-agent tool) says so and gives **no verdict**: a review in the author's context is not an adversarial review.
 - **No review service.** A project without one has the code review done by the AI review workflow or by a human, and
   the PR says which.
+- **Review service installed but silent.** If the service posts a skip notice (e.g. CodeRabbit: "does not receive
+  automatic reviews") or has not reviewed the current head, the code review falls back to the `review` job
+  (`ai-review.yml`) when it is enabled, otherwise to a fresh sub-agent of another model than the author, given the
+  diff only. Its verdict uses the `**AI review (<model>): …**` line, and the PR says which fallback was used.
+- **The reviewer's model is part of the verdict.** Every reviewer states the model it actually ran on, in its verdict
+  line. A session can change model while it runs: an adversarial verdict given on the author's model is traced with
+  that model, does not count as the adversarial review, and a reviewer of another model redoes it (LESSONS L84).
 
 ## Convergence: a settled finding stays settled
 
 - **One clean round ends the loop**: a round with no finding on the current head is the last one. It stays within the
   bound of 3 cycles ([FINOPS](FINOPS.md) §3); two clean rounds are never required.
+- **Re-check after an approval.** When the head moves after an APPROVED, the scope of the re-check follows the delta.
+  A **form-only** delta (wording, formatting, links, line wrapping, or nits the reviewer itself asked for) gets a short
+  confirmation from the same reviewer, on the delta only, posted as a verdict on the new head with the usual first
+  line (`**Adversarial review (<model>): APPROVED** — head <sha>`, or `CHANGES REQUESTED`). Any other delta (code,
+  tests, configuration, a sourced fact, anything security-related) gets a full re-review.
 - **Settled findings are listed in the PR**, each with its recorded reason (fixed in a commit, or not fixed and why).
   A reviewer that reopens one is answered by pointing to that record: it counts as a new finding only with **new
   evidence** (a new failure path, a changed head, a new input). A security finding is never settled this way: it
@@ -51,14 +63,17 @@ checks the change against the **intent**, the second checks the **code** on its 
 
 A review bot can skip a review ("Review skipped") or pause on a branch: after the push,
 check that it reviewed the **new head**; otherwise ask for `@coderabbitai review` (from a cloud session,
-`@mentions` are altered: the operator posts it). The round is complete only when the bot has reviewed the pushed head.
+`@mentions` are altered: the operator posts it). The round is complete only when the bot, or its fallback
+(§The two reviews), has reviewed the pushed head.
 
 **CI noise or real failure**: a check that fails in a few seconds with no log (missing token, service
 unavailable, runner never acquired) is not "CI red": say so and point to the real checks. "Flaky" is
 not a cause: one re-run at most, then investigate.
 
-**Ready to merge** = required checks green **and** zero open threads **and** the bot has reviewed the head **and** an
-adversarial review APPROVED on that head, with settled findings listed in the PR (and the project's merge policy).
+**Ready to merge** = required checks green **and** zero open threads **and** the bot, or its fallback (§The two
+reviews), has reviewed the head **and** an
+adversarial review APPROVED on that head, with settled findings listed in the PR and every unverified point
+verified or accepted (and the project's merge policy).
 
 ## Traceability: every verdict on the PR
 
@@ -73,6 +88,11 @@ right if **all** verdicts are visible on the PR, above all the first negative on
   `**AI review (<model>): …**` for the review service. The dashboard reads it at the start of a line (possibly
   as a `- ` bullet or a numbered `1. ` item); a `>` quote or a table row does not count;
 - a review done before the PR is opened is posted as soon as it opens, in order;
+- a claim the reviewer could not check (host blocked, tool missing, page not readable) is listed under
+  **Unverified** in the verdict, and the verdict line ends with `· unverified: N`. A verdict whose points are all
+  unverified is not APPROVED. Before the merge, each unverified point is either verified by the author (the evidence
+  in a PR comment) or accepted by the operator in a PR comment; the dashboard counts the merged PRs whose last
+  verdict still carries unverified points;
 - a security finding is traced without detail ("CHANGES REQUESTED — security finding, detail sent
   privately"): it counts, it does not leak;
 - never rewrite or delete a past verdict to "clean up" the PR.

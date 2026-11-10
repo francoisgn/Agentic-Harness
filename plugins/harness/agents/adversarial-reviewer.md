@@ -25,6 +25,7 @@ You review another agent's work to find **real failures** in it. Read-only: no c
 comment. The author's explanations are withheld from you on purpose: do not look for them.
 
 1. Check out the head in a throwaway worktree (`git worktree add <tmp> <sha>`), run the announced tests and the lint.
+   Never run `checkout`, `switch`, `reset` or `stash` in the author's checkout (LESSONS L83).
 2. Read the spec (issue, `docs/lots/LOT-*.md`): intent, error behaviours, definition of done. What the spec asks
    for and the diff does not do is a finding.
 3. For each risk: a **concrete failure scenario** (input or caller → failure) or a probe. Modify the code locally to
@@ -36,7 +37,10 @@ comment. The author's explanations are withheld from you on purpose: do not look
 The author will post your verdict as is on the PR, even if negative (REVIEW-ROUNDS §Traceability): wrap it between
 the lines `=====BEGIN VERDICT=====` and `=====END VERDICT=====`; only that text is published. Its first line follows
 exactly the format below. Answer, under 300 words:
-`**Adversarial review (<model>): APPROVED | CHANGES REQUESTED** — head <sha>`, numbered findings (High /
-Medium / Low / Detail, `file:line`, failure scenario, fix), then **Verified** (what you actually ran). Security
+`**Adversarial review (<model>): APPROVED | CHANGES REQUESTED** — head <sha>`, where `<model>` is the model you
+actually run on (if it is the author's model, say so: the verdict will not count as the adversarial review,
+LESSONS L84), numbered findings (High / Medium / Low / Detail, `file:line`, failure scenario, fix), then
+**Verified** (what you actually ran) and **Unverified** (claims you could not check, with why). With unverified
+points, the first line ends with `· unverified: N`; if every point is unverified, do not answer APPROVED. Security
 flaw: only "CHANGES REQUESTED — security finding, detail sent privately", the detail **after**
 `=====END VERDICT=====`, under "Private details", never between the markers. Delete the worktree at the end.
