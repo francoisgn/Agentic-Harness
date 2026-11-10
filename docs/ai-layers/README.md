@@ -1,9 +1,9 @@
 # The layers of AI: a guide in parts
 
 **TL;DR**: "we use Claude", "we approved Codex", "we have Gemini" mean little on their own. An AI product is a stack
-of layers: where you talk to it, what it is allowed to do, where it acts, which model answers and who bills that model.
-Each layer is a separate choice, with its own risks and its own contract. This guide takes the layers apart, one
-audience at a time.
+of four layers: where you talk to it, what decides and acts, where it acts, and which model answers, sold and operated
+by whom. Each layer is a separate choice, with its own risks and its own contract. This guide takes the layers apart,
+one audience at a time.
 
 | Part | For whom | Status |
 |---|---|---|

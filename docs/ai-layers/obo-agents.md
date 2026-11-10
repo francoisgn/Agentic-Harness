@@ -14,13 +14,15 @@ tools.
   1. Where do I talk to it?
   2. What decides and acts?
   3. Where does it act?
-  4. Where does the model run, and who bills it?
+  4. Where does the model run, and who sells and operates it?
 - "Claude Code", "Codex", "Antigravity" and "Copilot" are mostly **layer 2**, the agent. You reach each one through
   several screens (layer 1). It acts on your laptop or in a vendor's cloud (layer 3). It can be paid through several
   contracts (layer 4).
-- **Your data is governed by the contract with whoever sells and operates the inference, and by the type of plan.**
+- **Your data is governed by the contract with whoever sells and operates the inference** (the model's computation
+  of each answer), **and by the type of plan.**
   The same model, bought three ways, comes with three different contracts.
-- So **"we approved tool X" says almost nothing** until each layer is decided ([§7](#7-we-approved-x-why-the-sentence-says-nothing)).
+- So **"we approved tool X" says almost nothing** until each layer is decided
+  ([§7](#7-we-approved-x-why-the-sentence-says-nothing)).
 
 ## 1. Chatbot or agent
 
@@ -37,7 +39,7 @@ permissions.
 
 ## 2. The four layers
 
-![The four layers of an AI coding agent: presentation (where do I talk to it), agent (what decides and acts), execution (where do tools act), inference (where does the model run); an OBO agent is layers 2 and 3 acting in your files with your rights, a chatbot only has layers 1 and 4](../diagrams/ai-layers.svg)
+![The four layers of an AI coding agent: presentation (where do I talk to it), agent (what decides and acts), execution (where do tools act), inference (where does the model run); an OBO agent is layers 2 and 3 acting in your files with your rights; who sells and operates the inference decides which terms apply; a chatbot only has layers 1 and 4](../diagrams/ai-layers.svg)
 
 | Layer | Question | Typical answers | What changes for you |
 |---|---|---|---|
@@ -48,8 +50,8 @@ permissions.
 
 A product name rarely names a single layer. "Claude Code" is an agent (layer 2) with several screens (layer 1). It
 runs on your machine or in Anthropic's cloud (layer 3), and its inference can be bought from Anthropic or through
-several cloud platforms (layer 4)
-([Claude Code overview](https://code.claude.com/docs/en/overview), [third-party integrations](https://code.claude.com/docs/en/third-party-integrations)).
+several cloud platforms (layer 4). Sources: [Claude Code overview](https://code.claude.com/docs/en/overview),
+[third-party integrations](https://code.claude.com/docs/en/third-party-integrations).
 
 ## 3. Layer 3: where the agent acts
 
@@ -123,7 +125,7 @@ Vertex AI." That is true for one of the two ways Google offers Claude:
 | **Claude Code** (Anthropic) | Terminal, VS Code and JetBrains, desktop app, web, mobile | Your machine (terminal, IDE, desktop); Anthropic's cloud for web sessions. Remote Control runs on your machine and is steered from elsewhere | Claude subscription (Pro, Max, Team, Enterprise), Console API key, Amazon Bedrock, Claude Platform on AWS, Google Cloud's Agent Platform, Microsoft Foundry, an LLM gateway. Web sessions need a Claude subscription | Claude only |
 | **Codex** (OpenAI) | CLI, IDE extension, ChatGPT desktop app, web, iOS | Your machine (CLI, IDE, desktop); Codex Cloud: a cloud workspace per task, which keeps working while your computer sleeps | Sign in with ChatGPT (plans from Free to Enterprise), or an API key (no cloud features). Local surfaces can also use OpenAI models through Amazon Bedrock or a model gateway. Codex Cloud requires ChatGPT sign-in | OpenAI |
 | **Gemini CLI** (Google) | Terminal; behind Gemini Code Assist agent mode in VS Code | Your machine | Gemini Code Assist Standard or Enterprise, Gemini API key, Google Cloud Agent Platform. Individual plans were moved to Antigravity CLI on 2026-06-18; Standard and Enterprise follow a separate deprecation schedule | Gemini |
-| **Antigravity** (Google: app, CLI, IDE, SDK) | Desktop app, terminal, IDE, remote control | Local agents (app); remote agents also exist (*details to verify*) | Free individual tier, Google AI Pro and Ultra, a Google Cloud business plan, API pay-as-you-go | Gemini, plus Claude and an open GPT model in the model picker (separate usage limits) |
+| **Antigravity** (Google: app, CLI, IDE, SDK) | Desktop app, terminal, IDE, remote control | Local agents (app). Remote agents exist; where they run was not verified (2026-11-10) | Free individual tier, Google AI Pro and Ultra, a Google Cloud business plan, API pay-as-you-go | Gemini, plus Claude and an open GPT model in the model picker (separate usage limits) |
 | **Gemini Code Assist** (Google) | VS Code, IntelliJ | Your machine: agent mode uses the IDE's tools (files, terminal) and asks before changes unless always-allow is set | Standard or Enterprise edition | Gemini |
 | **GitHub Copilot** | VS Code and other IDEs, Copilot CLI, github.com, the Copilot app | Your machine (agent mode, CLI). Cloud agent: a GitHub cloud sandbox, a GitHub Actions runner, or a remote environment you connect | Copilot plan; bring your own key in some surfaces. Claude and Codex agents on github.com "can be powered by your existing Copilot subscription" (public preview) | Several vendors |
 | **Cursor** | Desktop editor, web, iOS, Slack, GitHub, Linear, API | Your machine (editor agent). Cloud agents: an isolated cloud VM. Self-hosted machines: tools on your hardware, loop in Cursor's cloud | Cursor plans: Premium and above add cloud agents. Third-party models are paid at API list price from prepaid credit (Teams and Enterprise add a Cursor token rate) | Several vendors, plus Cursor's own |
