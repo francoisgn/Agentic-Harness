@@ -61,7 +61,25 @@ class RenderTests(unittest.TestCase):
         for src in sorted((ROOT / "docs/diagrams").glob("*.json")):
             source = json.loads(src.read_text(encoding="utf-8"))
             self.assertEqual(rd.overflows(source), [], src.name)
-            self.assertEqual((src.with_suffix(".svg")).read_text(encoding="utf-8"), rd.render_svg(source), src.name)
+            self.assertTrue(rd.svg_is_current(src.with_suffix(".svg").read_text(encoding="utf-8"), source), src.name)
+
+    def test_exported_svg_is_checked_through_its_scene_hash(self):
+        src = [BOX, ARROW]
+        exported = f'<svg><!-- belayline-scene-sha256:{rd.scene_hash(rd.to_scene(src))} --></svg>\n'
+        self.assertTrue(rd.svg_is_current(exported, src))
+        moved = [dict(BOX, x=10), ARROW]
+        self.assertFalse(rd.svg_is_current(exported, moved))
+        self.assertTrue(rd.svg_is_current(rd.render_svg(src), src))
+        self.assertFalse(rd.svg_is_current(rd.render_svg(src), moved))
+        self.assertFalse(rd.svg_is_current(None, src))
+
+    def test_scene_uses_excalifont_and_centres_arrow_labels_on_the_longest_segment(self):
+        bent = dict(ARROW, points=[[0, 0], [0, 20], [200, 20]])
+        scene = json.loads(rd.to_scene([BOX, bent]))
+        self.assertTrue(all(e["fontFamily"] == rd.EXCALIFONT for e in scene["elements"] if e["type"] == "text"))
+        label = next(e for e in scene["elements"] if e["id"] == "a-label")
+        self.assertAlmostEqual(label["x"] + label["width"] / 2, 300)
+        self.assertAlmostEqual(label["y"] + label["height"] / 2, 60)
 
 
 if __name__ == "__main__":

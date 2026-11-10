@@ -1,370 +1,637 @@
 [
-{
-"type": "cameraUpdate",
-"width": 1200,
-"height": 900,
-"x": 0,
-"y": -10
-},
-{
-"type": "text",
-"id": "t",
-"x": 355,
-"y": 20,
-"text": "The cycle of a change, from intent to lesson",
-"fontSize": 30
-},
-{
-"type": "rectangle",
-"id": "s1",
-"x": 40,
-"y": 110,
-"width": 250,
-"height": 120,
-"roundness": {
-"type": 3
-},
-"backgroundColor": "#fff3bf",
-"fillStyle": "solid",
-"strokeColor": "#f59e0b",
-"label": {
-"text": "1. Intent\nuser story, errors,\ndefinition of done",
-"fontSize": 20
-}
-},
-{
-"type": "rectangle",
-"id": "s2",
-"x": 330,
-"y": 110,
-"width": 250,
-"height": 120,
-"roundness": {
-"type": 3
-},
-"backgroundColor": "#c3fae8",
-"fillStyle": "solid",
-"strokeColor": "#06b6d4",
-"label": {
-"text": "2. Ready issue\nlabels, duplicates,\ndependencies",
-"fontSize": 20
-}
-},
-{
-"type": "arrow",
-"id": "b1",
-"x": 290,
-"y": 170,
-"width": 40,
-"height": 0,
-"points": [
-[
-0,
-0
-],
-[
-40,
-0
-]
-],
-"endArrowhead": "arrow"
-},
-{
-"type": "rectangle",
-"id": "s3",
-"x": 620,
-"y": 110,
-"width": 250,
-"height": 120,
-"roundness": {
-"type": 3
-},
-"backgroundColor": "#a5d8ff",
-"fillStyle": "solid",
-"strokeColor": "#4a9eed",
-"label": {
-"text": "3. Lot in TDD\nred test, code, green\nnamed agent",
-"fontSize": 20
-}
-},
-{
-"type": "arrow",
-"id": "b2",
-"x": 580,
-"y": 170,
-"width": 40,
-"height": 0,
-"points": [
-[
-0,
-0
-],
-[
-40,
-0
-]
-],
-"endArrowhead": "arrow"
-},
-{
-"type": "rectangle",
-"id": "s4",
-"x": 910,
-"y": 110,
-"width": 250,
-"height": 120,
-"roundness": {
-"type": 3
-},
-"backgroundColor": "#ffd8a8",
-"fillStyle": "solid",
-"strokeColor": "#f59e0b",
-"label": {
-"text": "4. Reviews\nlessons, adversarial,\ncompliance",
-"fontSize": 18
-}
-},
-{
-"type": "arrow",
-"id": "b3",
-"x": 870,
-"y": 170,
-"width": 40,
-"height": 0,
-"points": [
-[
-0,
-0
-],
-[
-40,
-0
-]
-],
-"endArrowhead": "arrow"
-},
-{
-"type": "arrow",
-"id": "lp",
-"x": 1035,
-"y": 230,
-"width": -290,
-"height": 0,
-"points": [
-[
-0,
-0
-],
-[
-0,
-40
-],
-[
--290,
-40
-],
-[
--290,
-0
-]
-],
-"endArrowhead": "arrow",
-"strokeColor": "#ef4444",
-"strokeStyle": "dashed",
-"label": {
-"text": "findings: 1 commit per round, 3 rounds max",
-"fontSize": 16
-}
-},
-{
-"type": "rectangle",
-"id": "s5",
-"x": 910,
-"y": 360,
-"width": 250,
-"height": 120,
-"roundness": {
-"type": 3
-},
-"backgroundColor": "#d0bfff",
-"fillStyle": "solid",
-"strokeColor": "#8b5cf6",
-"label": {
-"text": "5. Ready PR\nfull CI,\ntraced verdicts",
-"fontSize": 20
-}
-},
-{
-"type": "arrow",
-"id": "b4",
-"x": 1100,
-"y": 230,
-"width": 0,
-"height": 130,
-"points": [
-[
-0,
-0
-],
-[
-0,
-130
-]
-],
-"endArrowhead": "arrow"
-},
-{
-"type": "rectangle",
-"id": "s6",
-"x": 620,
-"y": 360,
-"width": 250,
-"height": 120,
-"roundness": {
-"type": 3
-},
-"backgroundColor": "#ffc9c9",
-"fillStyle": "solid",
-"strokeColor": "#ef4444",
-"label": {
-"text": "6. CI\ntests, SAST, SCA,\nsecrets, AI review",
-"fontSize": 20
-}
-},
-{
-"type": "arrow",
-"id": "b5",
-"x": 910,
-"y": 420,
-"width": -40,
-"height": 0,
-"points": [
-[
-0,
-0
-],
-[
--40,
-0
-]
-],
-"endArrowhead": "arrow"
-},
-{
-"type": "rectangle",
-"id": "s7",
-"x": 330,
-"y": 360,
-"width": 250,
-"height": 120,
-"roundness": {
-"type": 3
-},
-"backgroundColor": "#b2f2bb",
-"fillStyle": "solid",
-"strokeColor": "#22c55e",
-"label": {
-"text": "7. Merge\nper the project's\npolicy",
-"fontSize": 20
-}
-},
-{
-"type": "arrow",
-"id": "b6",
-"x": 620,
-"y": 420,
-"width": -40,
-"height": 0,
-"points": [
-[
-0,
-0
-],
-[
--40,
-0
-]
-],
-"endArrowhead": "arrow"
-},
-{
-"type": "rectangle",
-"id": "s8",
-"x": 40,
-"y": 360,
-"width": 250,
-"height": 120,
-"roundness": {
-"type": 3
-},
-"backgroundColor": "#eebefa",
-"fillStyle": "solid",
-"strokeColor": "#ec4899",
-"label": {
-"text": "8. Measure\nproblem PRs, effort,\nloops, cost",
-"fontSize": 20
-}
-},
-{
-"type": "arrow",
-"id": "b7",
-"x": 330,
-"y": 420,
-"width": -40,
-"height": 0,
-"points": [
-[
-0,
-0
-],
-[
--40,
-0
-]
-],
-"endArrowhead": "arrow"
-},
-{
-"type": "arrow",
-"id": "b8",
-"x": 165,
-"y": 360,
-"width": 0,
-"height": -130,
-"points": [
-[
-0,
-0
-],
-[
-0,
--130
-]
-],
-"endArrowhead": "arrow",
-"strokeColor": "#ec4899",
-"label": {
-"text": "lessons",
-"fontSize": 18
-}
-},
-{
-"type": "rectangle",
-"id": "n1",
-"x": 40,
-"y": 560,
-"width": 1120,
-"height": 150,
-"roundness": {
-"type": 3
-},
-"backgroundColor": "#f8f9fa",
-"fillStyle": "solid",
-"strokeColor": "#757575",
-"strokeWidth": 1,
-"label": {
-"text": "A gap at one step is settled at that step:\nmissing product decision (status: needs-decision, no coding), test green without the change (refused),\nCI or review loop (stop, diagnose, reassign), lesson already known (tighten the self-review)",
-"fontSize": 18
-}
-}
+ {
+  "type": "cameraUpdate",
+  "width": 1200,
+  "height": 900,
+  "x": 0,
+  "y": 0
+ },
+ {
+  "type": "text",
+  "id": "title",
+  "x": 40,
+  "y": 20,
+  "text": "The cycle of a change, from intent to lesson",
+  "fontSize": 30
+ },
+ {
+  "type": "text",
+  "id": "subtitle",
+  "x": 40,
+  "y": 64,
+  "text": "eight steps, one loop; a gap is settled at the step where it appears",
+  "fontSize": 18,
+  "strokeColor": "#757575"
+ },
+ {
+  "type": "rectangle",
+  "id": "s1",
+  "x": 40,
+  "y": 170,
+  "width": 260,
+  "height": 130,
+  "strokeWidth": 2,
+  "backgroundColor": "#fff3bf",
+  "fillStyle": "hachure",
+  "strokeColor": "#f08c00",
+  "label": {
+   "text": "1. Intent\nuser story, errors,\ndefinition of done",
+   "fontSize": 20
+  },
+  "roundness": {
+   "type": 3
+  }
+ },
+ {
+  "type": "rectangle",
+  "id": "s2",
+  "x": 340,
+  "y": 170,
+  "width": 260,
+  "height": 130,
+  "strokeWidth": 2,
+  "backgroundColor": "#b2f2bb",
+  "fillStyle": "hachure",
+  "strokeColor": "#2f9e44",
+  "label": {
+   "text": "2. Ready issue\nlabels, duplicates,\ndependencies",
+   "fontSize": 20
+  },
+  "roundness": {
+   "type": 3
+  }
+ },
+ {
+  "type": "rectangle",
+  "id": "s3",
+  "x": 640,
+  "y": 170,
+  "width": 260,
+  "height": 130,
+  "strokeWidth": 2,
+  "backgroundColor": "#a5d8ff",
+  "fillStyle": "hachure",
+  "strokeColor": "#1971c2",
+  "label": {
+   "text": "3. Lot in TDD\n/claim, named agent\nred test, code, green",
+   "fontSize": 20
+  },
+  "roundness": {
+   "type": 3
+  }
+ },
+ {
+  "type": "rectangle",
+  "id": "s4",
+  "x": 940,
+  "y": 170,
+  "width": 260,
+  "height": 130,
+  "strokeWidth": 2,
+  "backgroundColor": "#a5d8ff",
+  "fillStyle": "hachure",
+  "strokeColor": "#1971c2",
+  "label": {
+   "text": "4. Reviews\nlessons, adversarial\nintent, compliance",
+   "fontSize": 20
+  },
+  "roundness": {
+   "type": 3
+  }
+ },
+ {
+  "type": "rectangle",
+  "id": "s5",
+  "x": 940,
+  "y": 470,
+  "width": 260,
+  "height": 130,
+  "strokeWidth": 2,
+  "backgroundColor": "#b2f2bb",
+  "fillStyle": "hachure",
+  "strokeColor": "#2f9e44",
+  "label": {
+   "text": "5. Ready PR\nevery verdict traced,\nledger if kept",
+   "fontSize": 20
+  },
+  "roundness": {
+   "type": 3
+  }
+ },
+ {
+  "type": "rectangle",
+  "id": "s6",
+  "x": 640,
+  "y": 470,
+  "width": 260,
+  "height": 130,
+  "strokeWidth": 2,
+  "backgroundColor": "#ffd8a8",
+  "fillStyle": "hachure",
+  "strokeColor": "#e8590c",
+  "label": {
+   "text": "6. CI and code review\ntests, SAST, SCA,\nsecrets, diff review",
+   "fontSize": 20
+  },
+  "roundness": {
+   "type": 3
+  }
+ },
+ {
+  "type": "rectangle",
+  "id": "s7",
+  "x": 340,
+  "y": 470,
+  "width": 260,
+  "height": 130,
+  "strokeWidth": 2,
+  "backgroundColor": "#b2f2bb",
+  "fillStyle": "hachure",
+  "strokeColor": "#2f9e44",
+  "label": {
+   "text": "7. Merge\nper the project's\npolicy",
+   "fontSize": 20
+  },
+  "roundness": {
+   "type": 3
+  }
+ },
+ {
+  "type": "rectangle",
+  "id": "s8",
+  "x": 40,
+  "y": 470,
+  "width": 260,
+  "height": 130,
+  "strokeWidth": 2,
+  "backgroundColor": "#ffd8a8",
+  "fillStyle": "hachure",
+  "strokeColor": "#e8590c",
+  "label": {
+   "text": "8. Measure\nproblem PRs, effort,\nloops, cost",
+   "fontSize": 20
+  },
+  "roundness": {
+   "type": 3
+  }
+ },
+ {
+  "type": "arrow",
+  "id": "b12",
+  "x": 300,
+  "y": 235,
+  "width": 40,
+  "height": 0,
+  "points": [
+   [
+    0,
+    0
+   ],
+   [
+    40,
+    0
+   ]
+  ],
+  "strokeColor": "#1e1e1e",
+  "strokeWidth": 2,
+  "endArrowhead": "arrow"
+ },
+ {
+  "type": "arrow",
+  "id": "b23",
+  "x": 600,
+  "y": 235,
+  "width": 40,
+  "height": 0,
+  "points": [
+   [
+    0,
+    0
+   ],
+   [
+    40,
+    0
+   ]
+  ],
+  "strokeColor": "#1e1e1e",
+  "strokeWidth": 2,
+  "endArrowhead": "arrow"
+ },
+ {
+  "type": "arrow",
+  "id": "b34",
+  "x": 900,
+  "y": 235,
+  "width": 40,
+  "height": 0,
+  "points": [
+   [
+    0,
+    0
+   ],
+   [
+    40,
+    0
+   ]
+  ],
+  "strokeColor": "#1e1e1e",
+  "strokeWidth": 2,
+  "endArrowhead": "arrow"
+ },
+ {
+  "type": "arrow",
+  "id": "b45",
+  "x": 1070,
+  "y": 300,
+  "width": 0,
+  "height": 170,
+  "points": [
+   [
+    0,
+    0
+   ],
+   [
+    0,
+    170
+   ]
+  ],
+  "strokeColor": "#1e1e1e",
+  "strokeWidth": 2,
+  "endArrowhead": "arrow"
+ },
+ {
+  "type": "arrow",
+  "id": "b56",
+  "x": 940,
+  "y": 535,
+  "width": 40,
+  "height": 0,
+  "points": [
+   [
+    0,
+    0
+   ],
+   [
+    -40,
+    0
+   ]
+  ],
+  "strokeColor": "#1e1e1e",
+  "strokeWidth": 2,
+  "endArrowhead": "arrow"
+ },
+ {
+  "type": "arrow",
+  "id": "b67",
+  "x": 640,
+  "y": 535,
+  "width": 40,
+  "height": 0,
+  "points": [
+   [
+    0,
+    0
+   ],
+   [
+    -40,
+    0
+   ]
+  ],
+  "strokeColor": "#1e1e1e",
+  "strokeWidth": 2,
+  "endArrowhead": "arrow"
+ },
+ {
+  "type": "arrow",
+  "id": "b78",
+  "x": 340,
+  "y": 535,
+  "width": 40,
+  "height": 0,
+  "points": [
+   [
+    0,
+    0
+   ],
+   [
+    -40,
+    0
+   ]
+  ],
+  "strokeColor": "#1e1e1e",
+  "strokeWidth": 2,
+  "endArrowhead": "arrow"
+ },
+ {
+  "type": "arrow",
+  "id": "b81",
+  "x": 170,
+  "y": 470,
+  "width": 0,
+  "height": 170,
+  "points": [
+   [
+    0,
+    0
+   ],
+   [
+    0,
+    -170
+   ]
+  ],
+  "strokeColor": "#1e1e1e",
+  "strokeWidth": 2,
+  "endArrowhead": "arrow",
+  "strokeStyle": "dashed",
+  "label": {
+   "text": "lessons",
+   "fontSize": 16
+  }
+ },
+ {
+  "type": "arrow",
+  "id": "loop",
+  "x": 1070,
+  "y": 170,
+  "width": 300,
+  "height": 40,
+  "points": [
+   [
+    0,
+    0
+   ],
+   [
+    0,
+    -40
+   ],
+   [
+    -300,
+    -40
+   ],
+   [
+    -300,
+    0
+   ]
+  ],
+  "strokeColor": "#1e1e1e",
+  "strokeWidth": 2,
+  "endArrowhead": "arrow",
+  "strokeStyle": "dashed",
+  "label": {
+   "text": "findings: 1 commit per round\nmax 3, a clean round ends it",
+   "fontSize": 16
+  }
+ },
+ {
+  "type": "rectangle",
+  "id": "n2",
+  "x": 340,
+  "y": 330,
+  "width": 260,
+  "height": 90,
+  "strokeWidth": 2,
+  "roundness": {
+   "type": 3
+  },
+  "strokeColor": "#868e96",
+  "strokeStyle": "dashed",
+  "label": {
+   "text": "Missing product decision:\nstatus: needs-decision,\nno coding",
+   "fontSize": 16
+  }
+ },
+ {
+  "type": "arrow",
+  "id": "l2",
+  "x": 470,
+  "y": 300,
+  "width": 0,
+  "height": 30,
+  "points": [
+   [
+    0,
+    0
+   ],
+   [
+    0,
+    30
+   ]
+  ],
+  "strokeColor": "#868e96",
+  "strokeWidth": 2,
+  "endArrowhead": null,
+  "strokeStyle": "dashed"
+ },
+ {
+  "type": "rectangle",
+  "id": "n3",
+  "x": 640,
+  "y": 330,
+  "width": 260,
+  "height": 90,
+  "strokeWidth": 2,
+  "roundness": {
+   "type": 3
+  },
+  "strokeColor": "#868e96",
+  "strokeStyle": "dashed",
+  "label": {
+   "text": "Test green without\nthe change: refused",
+   "fontSize": 16
+  }
+ },
+ {
+  "type": "arrow",
+  "id": "l3",
+  "x": 770,
+  "y": 300,
+  "width": 0,
+  "height": 30,
+  "points": [
+   [
+    0,
+    0
+   ],
+   [
+    0,
+    30
+   ]
+  ],
+  "strokeColor": "#868e96",
+  "strokeWidth": 2,
+  "endArrowhead": null,
+  "strokeStyle": "dashed"
+ },
+ {
+  "type": "rectangle",
+  "id": "n6",
+  "x": 640,
+  "y": 640,
+  "width": 260,
+  "height": 90,
+  "strokeWidth": 2,
+  "roundness": {
+   "type": 3
+  },
+  "strokeColor": "#868e96",
+  "strokeStyle": "dashed",
+  "label": {
+   "text": "CI or review loop:\nstop, diagnose, reassign",
+   "fontSize": 16
+  }
+ },
+ {
+  "type": "arrow",
+  "id": "l6",
+  "x": 770,
+  "y": 600,
+  "width": 0,
+  "height": 40,
+  "points": [
+   [
+    0,
+    0
+   ],
+   [
+    0,
+    40
+   ]
+  ],
+  "strokeColor": "#868e96",
+  "strokeWidth": 2,
+  "endArrowhead": null,
+  "strokeStyle": "dashed"
+ },
+ {
+  "type": "rectangle",
+  "id": "n8",
+  "x": 40,
+  "y": 640,
+  "width": 260,
+  "height": 90,
+  "strokeWidth": 2,
+  "roundness": {
+   "type": 3
+  },
+  "strokeColor": "#868e96",
+  "strokeStyle": "dashed",
+  "label": {
+   "text": "Lesson already known:\ntighten the self-review",
+   "fontSize": 16
+  }
+ },
+ {
+  "type": "arrow",
+  "id": "l8",
+  "x": 170,
+  "y": 600,
+  "width": 0,
+  "height": 40,
+  "points": [
+   [
+    0,
+    0
+   ],
+   [
+    0,
+    40
+   ]
+  ],
+  "strokeColor": "#868e96",
+  "strokeWidth": 2,
+  "endArrowhead": null,
+  "strokeStyle": "dashed"
+ },
+ {
+  "type": "rectangle",
+  "id": "lg0",
+  "x": 340,
+  "y": 760,
+  "width": 28,
+  "height": 20,
+  "strokeWidth": 2,
+  "roundness": {
+   "type": 3
+  },
+  "backgroundColor": "#fff3bf",
+  "fillStyle": "hachure",
+  "strokeColor": "#f08c00"
+ },
+ {
+  "type": "text",
+  "id": "lgt0",
+  "x": 378,
+  "y": 760,
+  "text": "operator",
+  "fontSize": 16
+ },
+ {
+  "type": "rectangle",
+  "id": "lg1",
+  "x": 481,
+  "y": 760,
+  "width": 28,
+  "height": 20,
+  "strokeWidth": 2,
+  "roundness": {
+   "type": 3
+  },
+  "backgroundColor": "#a5d8ff",
+  "fillStyle": "hachure",
+  "strokeColor": "#1971c2"
+ },
+ {
+  "type": "text",
+  "id": "lgt1",
+  "x": 519,
+  "y": 760,
+  "text": "agent",
+  "fontSize": 16
+ },
+ {
+  "type": "rectangle",
+  "id": "lg2",
+  "x": 597,
+  "y": 760,
+  "width": 28,
+  "height": 20,
+  "strokeWidth": 2,
+  "roundness": {
+   "type": 3
+  },
+  "backgroundColor": "#b2f2bb",
+  "fillStyle": "hachure",
+  "strokeColor": "#2f9e44"
+ },
+ {
+  "type": "text",
+  "id": "lgt2",
+  "x": 635,
+  "y": 760,
+  "text": "repository",
+  "fontSize": 16
+ },
+ {
+  "type": "rectangle",
+  "id": "lg3",
+  "x": 754,
+  "y": 760,
+  "width": 28,
+  "height": 20,
+  "strokeWidth": 2,
+  "roundness": {
+   "type": 3
+  },
+  "backgroundColor": "#ffd8a8",
+  "fillStyle": "hachure",
+  "strokeColor": "#e8590c"
+ },
+ {
+  "type": "text",
+  "id": "lgt3",
+  "x": 792,
+  "y": 760,
+  "text": "automation",
+  "fontSize": 16
+ }
 ]

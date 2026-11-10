@@ -5,6 +5,14 @@ moving to this version.
 
 ## Unreleased
 
+- **README diagrams redrawn, exported by Excalidraw** (`docs/diagrams/`): mechanisms, cycle and adoption diagrams
+  checked against the docs (two reviews: intent before "Ready", code on the ready PR; the dashboard reads the
+  repository and CI; the harness enters the repository by a sync PR; loops bounded to 3 review rounds and 6 CI-tested
+  pushes, one clean round ends the loop; four short callouts instead of one long note), one grid and one palette.
+  `render.py` writes scenes in Excalifont and, when `npm ci --prefix scripts/diagrams` has been run, exports the SVG
+  with Excalidraw itself (`export-svg.cjs`: hand-drawn strokes, hachure fills, embedded font subset); `--check`
+  verifies the scene hash the SVG carries, still without Node. Vendored projects keep the built-in renderer.
+
 - **Doc steward at merge, weekly safety net** ([STEWARDS](docs/STEWARDS.md) §2): new reusable `doc-steward.yml`, opt-in
   `steward` job in `harness.yml` (it adds `closed` to the `pull_request` types; the `pr` job skips it). After each
   merge into the integration branch, `doc-steward.py pending` (vendored in `.harness/scripts/`) decides without any

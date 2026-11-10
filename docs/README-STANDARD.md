@@ -77,6 +77,11 @@ python3 .harness/scripts/diagrams-render.py            # renders docs/diagrams/*
 python3 .harness/scripts/diagrams-render.py --check    # CI: exits 1 if a render is stale or a text overflows
 ```
 
+In the harness repository, the SVG is exported by Excalidraw itself (Excalifont, hand-drawn strokes, hachure fills)
+once its dependencies are installed (`npm ci --prefix scripts/diagrams`; `scripts/diagrams/export-svg.cjs`, headless
+Chromium, offline). The SVG carries the hash of its scene, so `--check` stays Python only. Without these
+dependencies, the script draws the SVG itself, close to the Excalidraw look.
+
 The three files are committed together. The diagram shows **what is delivered**; 5 to 9 boxes. Mermaid stays allowed
 for a short flow in an internal doc; for the README, `"architecture": "any"` accepts it too.
 

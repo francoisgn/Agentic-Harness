@@ -1,449 +1,499 @@
 [
-{
-"type": "cameraUpdate",
-"width": 1200,
-"height": 900,
-"x": 0,
-"y": -10
-},
-{
-"type": "text",
-"id": "t",
-"x": 338,
-"y": 20,
-"text": "Belayline: the mechanisms",
-"fontSize": 32
-},
-{
-"type": "text",
-"id": "st",
-"x": 326,
-"y": 64,
-"text": "a versioned harness, for any coding agent and any team",
-"fontSize": 20,
-"strokeColor": "#757575"
-},
-{
-"type": "ellipse",
-"id": "op",
-"x": 40,
-"y": 130,
-"width": 200,
-"height": 90,
-"backgroundColor": "#fff3bf",
-"fillStyle": "solid",
-"strokeColor": "#f59e0b",
-"label": {
-"text": "Operator\n(human)",
-"fontSize": 20
-}
-},
-{
-"type": "rectangle",
-"id": "orc",
-"x": 330,
-"y": 120,
-"width": 430,
-"height": 110,
-"roundness": {
-"type": 3
-},
-"backgroundColor": "#d0bfff",
-"fillStyle": "solid",
-"strokeColor": "#8b5cf6",
-"label": {
-"text": "Orchestrator (SPOC)\nsole long-lived agent:\nroutes, tracks, restarts",
-"fontSize": 20
-}
-},
-{
-"type": "arrow",
-"id": "a1",
-"x": 240,
-"y": 175,
-"width": 90,
-"height": 0,
-"points": [
-[
-0,
-0
-],
-[
-90,
-0
-]
-],
-"startArrowhead": "arrow",
-"endArrowhead": "arrow"
-},
-{
-"type": "rectangle",
-"id": "fw",
-"x": 860,
-"y": 120,
-"width": 300,
-"height": 110,
-"roundness": {
-"type": 3
-},
-"backgroundColor": "#fff3bf",
-"fillStyle": "solid",
-"strokeColor": "#f59e0b",
-"label": {
-"text": "Versioned harness (vX.Y.Z)\nrules, skills, agents, CI",
-"fontSize": 20
-}
-},
-{
-"type": "arrow",
-"id": "a2",
-"x": 860,
-"y": 175,
-"width": -100,
-"height": 0,
-"points": [
-[
-0,
-0
-],
-[
--100,
-0
-]
-],
-"endArrowhead": "arrow",
-"label": {
-"text": "sync by PR",
-"fontSize": 18
-}
-},
-{
-"type": "rectangle",
-"id": "lot",
-"x": 40,
-"y": 310,
-"width": 250,
-"height": 100,
-"roundness": {
-"type": 3
-},
-"backgroundColor": "#a5d8ff",
-"fillStyle": "solid",
-"strokeColor": "#4a9eed",
-"label": {
-"text": "Lot agents\nTDD, right model tier",
-"fontSize": 20
-}
-},
-{
-"type": "rectangle",
-"id": "stw",
-"x": 330,
-"y": 310,
-"width": 250,
-"height": 100,
-"roundness": {
-"type": 3
-},
-"backgroundColor": "#c3fae8",
-"fillStyle": "solid",
-"strokeColor": "#06b6d4",
-"label": {
-"text": "Disposable stewards\nissues, docs, flow",
-"fontSize": 20
-}
-},
-{
-"type": "rectangle",
-"id": "rev",
-"x": 620,
-"y": 310,
-"width": 270,
-"height": 100,
-"roundness": {
-"type": 3
-},
-"backgroundColor": "#ffd8a8",
-"fillStyle": "solid",
-"strokeColor": "#f59e0b",
-"label": {
-"text": "Reviewers\nadversarial, compliance",
-"fontSize": 20
-}
-},
-{
-"type": "arrow",
-"id": "a3",
-"x": 420,
-"y": 230,
-"width": -255,
-"height": 80,
-"points": [
-[
-0,
-0
-],
-[
--255,
-80
-]
-],
-"endArrowhead": "arrow"
-},
-{
-"type": "arrow",
-"id": "a4",
-"x": 480,
-"y": 230,
-"width": 0,
-"height": 80,
-"points": [
-[
-0,
-0
-],
-[
-0,
-80
-]
-],
-"endArrowhead": "arrow"
-},
-{
-"type": "arrow",
-"id": "a5",
-"x": 600,
-"y": 230,
-"width": 155,
-"height": 80,
-"points": [
-[
-0,
-0
-],
-[
-155,
-80
-]
-],
-"endArrowhead": "arrow"
-},
-{
-"type": "rectangle",
-"id": "repo",
-"x": 40,
-"y": 500,
-"width": 850,
-"height": 100,
-"roundness": {
-"type": 3
-},
-"backgroundColor": "#b2f2bb",
-"fillStyle": "solid",
-"strokeColor": "#22c55e",
-"label": {
-"text": "Repository = shared state: issues, PRs, docs, ADRs, lessons\nthe context lives here, not in the agent",
-"fontSize": 20
-}
-},
-{
-"type": "arrow",
-"id": "a7",
-"x": 165,
-"y": 410,
-"width": 0,
-"height": 90,
-"points": [
-[
-0,
-0
-],
-[
-0,
-90
-]
-],
-"startArrowhead": "arrow",
-"endArrowhead": "arrow"
-},
-{
-"type": "arrow",
-"id": "a8",
-"x": 455,
-"y": 410,
-"width": 0,
-"height": 90,
-"points": [
-[
-0,
-0
-],
-[
-0,
-90
-]
-],
-"startArrowhead": "arrow",
-"endArrowhead": "arrow"
-},
-{
-"type": "arrow",
-"id": "a9",
-"x": 755,
-"y": 410,
-"width": 0,
-"height": 90,
-"points": [
-[
-0,
-0
-],
-[
-0,
-90
-]
-],
-"endArrowhead": "arrow",
-"label": {
-"text": "verdicts",
-"fontSize": 16
-}
-},
-{
-"type": "rectangle",
-"id": "ci",
-"x": 960,
-"y": 310,
-"width": 200,
-"height": 100,
-"roundness": {
-"type": 3
-},
-"backgroundColor": "#ffc9c9",
-"fillStyle": "solid",
-"strokeColor": "#ef4444",
-"label": {
-"text": "CI\ntests, SAST, SCA,\nsecrets, AI review",
-"fontSize": 18
-}
-},
-{
-"type": "arrow",
-"id": "a10",
-"x": 890,
-"y": 540,
-"width": 160,
-"height": -130,
-"points": [
-[
-0,
-0
-],
-[
-160,
-0
-],
-[
-160,
--130
-]
-],
-"endArrowhead": "arrow",
-"label": {
-"text": "ready PR",
-"fontSize": 16
-}
-},
-{
-"type": "rectangle",
-"id": "tb",
-"x": 960,
-"y": 640,
-"width": 200,
-"height": 110,
-"roundness": {
-"type": 3
-},
-"backgroundColor": "#eebefa",
-"fillStyle": "solid",
-"strokeColor": "#ec4899",
-"label": {
-"text": "Dashboard\nstalls, loops,\nproblem PRs, cost",
-"fontSize": 18
-}
-},
-{
-"type": "arrow",
-"id": "a11",
-"x": 1120,
-"y": 410,
-"width": 0,
-"height": 230,
-"points": [
-[
-0,
-0
-],
-[
-0,
-230
-]
-],
-"endArrowhead": "arrow"
-},
-{
-"type": "arrow",
-"id": "a12",
-"x": 960,
-"y": 695,
-"width": -945,
-"height": -465,
-"points": [
-[
-0,
-0
-],
-[
--945,
-0
-],
-[
--945,
--440
-],
-[
--610,
--440
-],
-[
--610,
--465
-]
-],
-"endArrowhead": "arrow",
-"strokeColor": "#ec4899",
-"label": {
-"text": "drift: stop, restart, reassign",
-"fontSize": 16
-}
-},
-{
-"type": "rectangle",
-"id": "gf",
-"x": 40,
-"y": 790,
-"width": 1120,
-"height": 60,
-"roundness": {
-"type": 3
-},
-"backgroundColor": "#fff3bf",
-"fillStyle": "solid",
-"strokeColor": "#f59e0b",
-"strokeWidth": 1,
-"label": {
-"text": "Guardrails: nothing guessed, no secret, bounded loops (3 reviews, 6 pushes), every verdict traced",
-"fontSize": 18
-}
-}
+ {
+  "type": "cameraUpdate",
+  "width": 1200,
+  "height": 900,
+  "x": 0,
+  "y": 0
+ },
+ {
+  "type": "text",
+  "id": "title",
+  "x": 40,
+  "y": 20,
+  "text": "Belayline: the mechanisms",
+  "fontSize": 30
+ },
+ {
+  "type": "text",
+  "id": "subtitle",
+  "x": 40,
+  "y": 64,
+  "text": "one long-lived orchestrator, disposable agents, the state in the repository",
+  "fontSize": 18,
+  "strokeColor": "#757575"
+ },
+ {
+  "type": "ellipse",
+  "id": "op",
+  "x": 40,
+  "y": 130,
+  "width": 210,
+  "height": 110,
+  "strokeWidth": 2,
+  "backgroundColor": "#fff3bf",
+  "fillStyle": "hachure",
+  "strokeColor": "#f08c00",
+  "label": {
+   "text": "Operator\n(human)",
+   "fontSize": 20
+  }
+ },
+ {
+  "type": "rectangle",
+  "id": "orc",
+  "x": 330,
+  "y": 120,
+  "width": 540,
+  "height": 130,
+  "strokeWidth": 2,
+  "backgroundColor": "#d0bfff",
+  "fillStyle": "hachure",
+  "strokeColor": "#6741d9",
+  "label": {
+   "text": "Orchestrator\nthe only long-lived agent\nroutes, tracks, restarts",
+   "fontSize": 20
+  },
+  "roundness": {
+   "type": 3
+  }
+ },
+ {
+  "type": "arrow",
+  "id": "a-op",
+  "x": 250,
+  "y": 185,
+  "width": 80,
+  "height": 0,
+  "points": [
+   [
+    0,
+    0
+   ],
+   [
+    80,
+    0
+   ]
+  ],
+  "strokeColor": "#1e1e1e",
+  "strokeWidth": 2,
+  "endArrowhead": "arrow",
+  "startArrowhead": "arrow"
+ },
+ {
+  "type": "rectangle",
+  "id": "lot",
+  "x": 40,
+  "y": 320,
+  "width": 250,
+  "height": 130,
+  "strokeWidth": 2,
+  "backgroundColor": "#a5d8ff",
+  "fillStyle": "hachure",
+  "strokeColor": "#1971c2",
+  "label": {
+   "text": "Lot agents\nTDD, model tier\nmatched to the task",
+   "fontSize": 20
+  },
+  "roundness": {
+   "type": 3
+  }
+ },
+ {
+  "type": "rectangle",
+  "id": "stw",
+  "x": 330,
+  "y": 320,
+  "width": 250,
+  "height": 130,
+  "strokeWidth": 2,
+  "backgroundColor": "#a5d8ff",
+  "fillStyle": "hachure",
+  "strokeColor": "#1971c2",
+  "label": {
+   "text": "Stewards\nissues, docs, flow\none pass, then stop",
+   "fontSize": 20
+  },
+  "roundness": {
+   "type": 3
+  }
+ },
+ {
+  "type": "rectangle",
+  "id": "rev",
+  "x": 620,
+  "y": 320,
+  "width": 250,
+  "height": 130,
+  "strokeWidth": 2,
+  "backgroundColor": "#a5d8ff",
+  "fillStyle": "hachure",
+  "strokeColor": "#1971c2",
+  "label": {
+   "text": "Reviewers\nadversarial intent,\ncompliance",
+   "fontSize": 20
+  },
+  "roundness": {
+   "type": 3
+  }
+ },
+ {
+  "type": "arrow",
+  "id": "a-lot",
+  "x": 370,
+  "y": 250,
+  "width": 120,
+  "height": 70,
+  "points": [
+   [
+    0,
+    0
+   ],
+   [
+    -120,
+    70
+   ]
+  ],
+  "strokeColor": "#1e1e1e",
+  "strokeWidth": 2,
+  "endArrowhead": "arrow"
+ },
+ {
+  "type": "arrow",
+  "id": "a-stw",
+  "x": 455,
+  "y": 250,
+  "width": 0,
+  "height": 70,
+  "points": [
+   [
+    0,
+    0
+   ],
+   [
+    0,
+    70
+   ]
+  ],
+  "strokeColor": "#1e1e1e",
+  "strokeWidth": 2,
+  "endArrowhead": "arrow",
+  "label": {
+   "text": "delegates",
+   "fontSize": 16
+  }
+ },
+ {
+  "type": "arrow",
+  "id": "a-rev",
+  "x": 745,
+  "y": 250,
+  "width": 0,
+  "height": 70,
+  "points": [
+   [
+    0,
+    0
+   ],
+   [
+    0,
+    70
+   ]
+  ],
+  "strokeColor": "#1e1e1e",
+  "strokeWidth": 2,
+  "endArrowhead": "arrow"
+ },
+ {
+  "type": "rectangle",
+  "id": "repo",
+  "x": 40,
+  "y": 520,
+  "width": 830,
+  "height": 130,
+  "strokeWidth": 2,
+  "backgroundColor": "#b2f2bb",
+  "fillStyle": "hachure",
+  "strokeColor": "#2f9e44",
+  "label": {
+   "text": "Repository: the shared state\nissues, PRs, docs, ADRs, lessons\nthe context lives here, not in an agent",
+   "fontSize": 20
+  },
+  "roundness": {
+   "type": 3
+  }
+ },
+ {
+  "type": "arrow",
+  "id": "a-lr",
+  "x": 165,
+  "y": 450,
+  "width": 0,
+  "height": 70,
+  "points": [
+   [
+    0,
+    0
+   ],
+   [
+    0,
+    70
+   ]
+  ],
+  "strokeColor": "#1e1e1e",
+  "strokeWidth": 2,
+  "endArrowhead": "arrow",
+  "startArrowhead": "arrow"
+ },
+ {
+  "type": "arrow",
+  "id": "a-sr",
+  "x": 455,
+  "y": 450,
+  "width": 0,
+  "height": 70,
+  "points": [
+   [
+    0,
+    0
+   ],
+   [
+    0,
+    70
+   ]
+  ],
+  "strokeColor": "#1e1e1e",
+  "strokeWidth": 2,
+  "endArrowhead": "arrow",
+  "startArrowhead": "arrow",
+  "label": {
+   "text": "read, write",
+   "fontSize": 16
+  }
+ },
+ {
+  "type": "arrow",
+  "id": "a-rr",
+  "x": 745,
+  "y": 450,
+  "width": 0,
+  "height": 70,
+  "points": [
+   [
+    0,
+    0
+   ],
+   [
+    0,
+    70
+   ]
+  ],
+  "strokeColor": "#1e1e1e",
+  "strokeWidth": 2,
+  "endArrowhead": "arrow",
+  "startArrowhead": "arrow"
+ },
+ {
+  "type": "rectangle",
+  "id": "ci",
+  "x": 910,
+  "y": 520,
+  "width": 250,
+  "height": 130,
+  "strokeWidth": 2,
+  "backgroundColor": "#ffd8a8",
+  "fillStyle": "hachure",
+  "strokeColor": "#e8590c",
+  "label": {
+   "text": "CI and code review\nready PRs: tests,\nSAST, SCA, secrets",
+   "fontSize": 20
+  },
+  "roundness": {
+   "type": 3
+  }
+ },
+ {
+  "type": "arrow",
+  "id": "a-ci",
+  "x": 870,
+  "y": 585,
+  "width": 40,
+  "height": 0,
+  "points": [
+   [
+    0,
+    0
+   ],
+   [
+    40,
+    0
+   ]
+  ],
+  "strokeColor": "#1e1e1e",
+  "strokeWidth": 2,
+  "endArrowhead": "arrow"
+ },
+ {
+  "type": "rectangle",
+  "id": "dash",
+  "x": 910,
+  "y": 320,
+  "width": 250,
+  "height": 130,
+  "strokeWidth": 2,
+  "backgroundColor": "#ffd8a8",
+  "fillStyle": "hachure",
+  "strokeColor": "#e8590c",
+  "label": {
+   "text": "Dashboard\nstalls, loops,\nproblem PRs, cost",
+   "fontSize": 20
+  },
+  "roundness": {
+   "type": 3
+  }
+ },
+ {
+  "type": "arrow",
+  "id": "a-dci",
+  "x": 1035,
+  "y": 520,
+  "width": 0,
+  "height": 70,
+  "points": [
+   [
+    0,
+    0
+   ],
+   [
+    0,
+    -70
+   ]
+  ],
+  "strokeColor": "#1e1e1e",
+  "strokeWidth": 2,
+  "endArrowhead": "arrow",
+  "label": {
+   "text": "reads",
+   "fontSize": 16
+  }
+ },
+ {
+  "type": "arrow",
+  "id": "a-drepo",
+  "x": 830,
+  "y": 520,
+  "width": 140,
+  "height": 70,
+  "points": [
+   [
+    0,
+    0
+   ],
+   [
+    140,
+    -70
+   ]
+  ],
+  "strokeColor": "#1e1e1e",
+  "strokeWidth": 2,
+  "endArrowhead": "arrow",
+  "label": {
+   "text": "reads",
+   "fontSize": 16
+  }
+ },
+ {
+  "type": "arrow",
+  "id": "a-drift",
+  "x": 1035,
+  "y": 320,
+  "width": 165,
+  "height": 135,
+  "points": [
+   [
+    0,
+    0
+   ],
+   [
+    0,
+    -135
+   ],
+   [
+    -165,
+    -135
+   ]
+  ],
+  "strokeColor": "#e8590c",
+  "strokeWidth": 2,
+  "endArrowhead": "arrow",
+  "strokeStyle": "dashed",
+  "label": {
+   "text": "reports drift",
+   "fontSize": 16
+  }
+ },
+ {
+  "type": "rectangle",
+  "id": "harn",
+  "x": 40,
+  "y": 720,
+  "width": 250,
+  "height": 110,
+  "strokeWidth": 2,
+  "backgroundColor": "#e9ecef",
+  "fillStyle": "hachure",
+  "strokeColor": "#495057",
+  "label": {
+   "text": "Versioned harness\nvX.Y.Z: rules, skills,\nagents, CI",
+   "fontSize": 20
+  },
+  "roundness": {
+   "type": 3
+  }
+ },
+ {
+  "type": "arrow",
+  "id": "a-sync",
+  "x": 165,
+  "y": 720,
+  "width": 0,
+  "height": 70,
+  "points": [
+   [
+    0,
+    0
+   ],
+   [
+    0,
+    -70
+   ]
+  ],
+  "strokeColor": "#1e1e1e",
+  "strokeWidth": 2,
+  "endArrowhead": "arrow",
+  "label": {
+   "text": "sync PR",
+   "fontSize": 16
+  }
+ },
+ {
+  "type": "rectangle",
+  "id": "guard",
+  "x": 330,
+  "y": 720,
+  "width": 830,
+  "height": 110,
+  "strokeWidth": 2,
+  "backgroundColor": "#ffc9c9",
+  "fillStyle": "hachure",
+  "strokeColor": "#e03131",
+  "label": {
+   "text": "Guardrails\nnothing guessed, no secret, every verdict traced\nbounded loops: 3 review rounds, 6 CI-tested pushes per PR",
+   "fontSize": 20
+  },
+  "roundness": {
+   "type": 3
+  },
+  "strokeStyle": "dashed"
+ }
 ]
