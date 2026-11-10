@@ -17,3 +17,5 @@ Before proposing something, search this folder. Reopening a declined idea is wel
 |---|---|
 | [One label per lot](one-label-per-lot.md) | 2026-11-09 |
 | [AI review as a required check](ai-review-required-check.md) | 2026-11-09 |
+| [Skills invoked only by the human](user-vs-model-invoked-skills.md) | 2026-11-10 |
+| [One source compiled into per-tool skill formats](single-source-per-tool.md) | 2026-11-10 |
