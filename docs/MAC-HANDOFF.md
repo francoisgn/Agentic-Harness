@@ -1,8 +1,7 @@
 # Cloud Linux and Mac: who does what, how to hand over
 
-Sources: `CLAUDE.md` ("Linux container: engine yes, app no", #256), `scripts/mac-handoff.sh`,
-`scripts/install-swift-linux.sh` of ios-app_credit-immo; `docs/agents/MAC-SESSIONS.md`, `scripts/cloud-setup.sh`,
-`AGENTS.md` §10 of HFRnow.
+Sources: `docs/agents/MAC-SESSIONS.md`, `scripts/cloud-setup.sh`, `AGENTS.md` §10 of HFRnow; practice proven on
+other projects (rule "Linux container: engine yes, app no", install script, handoff script on the Mac).
 
 ## 1. Division of roles
 
@@ -27,11 +26,11 @@ An install script (pasted into the "setup script" of the cloud environment, or r
 version** of the toolchain as the Linux CI: official archive, **signature verified** (the project's published keys,
 imported block by block if gpg refuses the whole file), then the linter at the CI's version with a verified checksum.
 The required hosts (e.g. `download.swift.org`, `github.com`, `release-assets.githubusercontent.com`) go in the
-environment's allowed domains. Examples: `scripts/install-swift-linux.sh` (credit-immo, Swift 6.1.2 in
-`/opt/swift`), `scripts/cloud-setup.sh` (HFRnow, Swift 6.2.x + SwiftLint).
+environment's allowed domains. Public example: `scripts/cloud-setup.sh` of HFRnow (Swift 6.2.x + SwiftLint);
+install into a fixed folder (e.g. `/opt/swift`) at the version pinned by the CI.
 
 ## 3. Handing over to the Mac: the handoff script
-Model: `scripts/mac-handoff.sh` of credit-immo. Run on the Mac, without interaction, it:
+A model to write in the project (e.g. `scripts/mac-handoff.sh`). Run on the Mac, without interaction, it:
 1. syncs the branch to test (refuses a dirty tree or a diverged local branch: the local head must equal
    `origin/<branch>`);
 2. replays the local CI without the app build (`local-check.sh --no-app`);

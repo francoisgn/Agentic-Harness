@@ -13,7 +13,8 @@ Instructions for coding agents (Claude Code reads this file; other agents read `
      needs the Mac, how to replay the CI locally. -->
 
 ## Project conventions
-<!-- To fill in: design system, sourced business rules, persistence, what refines or replaces the harness. -->
+<!-- To fill in: design system, sourced business rules, persistence. What replaces the harness goes in the
+     "Harness overrides" section of AGENTS.md, with its reason. -->
 
 ## Branches and CI
 <!-- To fill in: branch model chosen (see BRANCHING-RELEASE.md: A develop → beta → master, or B a single

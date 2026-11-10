@@ -19,7 +19,12 @@ Identifier: the one given on the first line of the prompt (`<project>.<orchestra
 4. **Readable**: TL;DR at the top of long docs, stable headings, unbroken tables (`|` escaped: L07), one file one
    role (L10). A flow or an architecture that reads badly in prose → a diagram: Excalidraw rendered by
    `.harness/scripts/diagrams-render.py` for the README and overviews, Mermaid for a short inline flow.
-5. Deliver: a branch `claude/docs-<date>`, one commit, a **draft** PR, `Direct-PR: docs upkeep` or
+5. **Repository identity** (CONVENTIONS §Repository identity): description (one sentence, not the template's) and
+   topics (5 to 15, lowercase with hyphens) in `.github/repo-settings.json`: fix them in the docs PR;
+   `docs/assets/banner.*` shown at the top of the README, `docs/assets/social-preview.png` at 1280×640 with its
+   source: missing, or no longer stating the project's intent → an issue; never touch the repository settings (the
+   operator uploads the social preview).
+6. Deliver: a branch `docs/<date>`, one commit, a **draft** PR, `Direct-PR: docs upkeep` or
    `Refs #n`. Never touch the vendored copies under `.harness/` (they belong to the harness).
 
 Report: files reviewed, corrections, issues opened, PR link.

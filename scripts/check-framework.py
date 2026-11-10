@@ -5,10 +5,12 @@
 - agents: `name` = file name, `description`, `tools`, known `model`; compliance agents with their sections;
 - manifest: every source exists;
 - labels: unique names, `axis: value` format (or one of the plain names), the exclusive axes are all present;
+- repository identity (CONVENTIONS.md §Repository identity): description, topics, README banner, social preview;
 - agent naming (ORCHESTRATION.md §7): every example matches the published regular expression.
 Usage: check-framework.py [--root <repository>]   (exits 1 on any gap, lists every gap)
 """
 import argparse
+import importlib.util
 import json
 import pathlib
 import re
@@ -125,6 +127,29 @@ def check(root):
                     if chk["context"] not in job_names:
                         errors.append(f".github/repo-settings.json: required check \"{chk['context']}\" is not among "
                                       f"the jobs of .github/workflows ({sorted(job_names)})")
+
+    # Repository identity (CONVENTIONS.md §Repository identity): the harness applies its own rule
+    if settings.is_file():
+        spec = importlib.util.spec_from_file_location("repo_settings", root / "scripts/repo-settings.py")
+        rs = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(rs)
+        errors += [f".github/repo-settings.json: {gap}"
+                   for gap in rs.identity_gaps(json.loads(settings.read_text(encoding="utf-8")))]
+    banner, social = root / "docs/assets/banner.svg", root / "docs/assets/social-preview.png"
+    if not banner.is_file():
+        errors.append("docs/assets/banner.svg: README banner not found")
+    readme = root / "README.md"
+    if readme.is_file() and "docs/assets/banner.svg" not in readme.read_text(encoding="utf-8"):
+        errors.append("README.md: the banner docs/assets/banner.svg is not shown in it")
+    if not social.is_file():
+        errors.append("docs/assets/social-preview.png: social preview not found")
+    else:
+        head = social.read_bytes()[:24]  # PNG signature, then IHDR: width and height on 4 bytes each
+        size = (int.from_bytes(head[16:20], "big"), int.from_bytes(head[20:24], "big"))
+        if head[:8] != b"\x89PNG\r\n\x1a\n" or size != (1280, 640):
+            errors.append(f"docs/assets/social-preview.png: 1280×640 PNG expected (read: {size[0]}×{size[1]})")
+        elif social.stat().st_size >= 1_000_000:
+            errors.append("docs/assets/social-preview.png: must weigh less than 1 MB (GitHub limit)")
 
     orch = (root / "docs/ORCHESTRATION.md").read_text(encoding="utf-8")
     section = orch[orch.find("## 7."):]

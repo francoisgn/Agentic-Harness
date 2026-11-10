@@ -130,6 +130,12 @@ class AnalyseTests(unittest.TestCase):
         runs = [run("claude/lot-1", sha=f"a{k}", workflow=w) for k in range(2) for w in range(4)]
         self.assertEqual(self.analyse(pulls=[pull(10)], runs=runs, max_ci_runs=6)["loops"], [])
 
+    def test_ci_loop_ignores_skipped_and_cancelled_runs(self):
+        # Pushing often on a draft (skipped runs) or cancelling a run is not a loop (CI-BUDGET §2)
+        runs = [run("claude/lot-1", sha=f"a{k}", conclusion="skipped") for k in range(8)]
+        runs += [run("claude/lot-1", sha=f"c{k}", conclusion="cancelled") for k in range(8)]
+        self.assertEqual(self.analyse(pulls=[pull(10)], runs=runs, max_ci_runs=6)["loops"], [])
+
     def test_ci_loop_ignores_push_and_schedule_runs_of_promotion_branch(self):
         runs = [run("develop", sha=f"d{k}", event=e) for k in range(8) for e in ("push", "schedule")]
         self.assertEqual(self.analyse(pulls=[pull(20, ref="develop")], runs=runs, max_ci_runs=6)["loops"], [])
@@ -306,6 +312,17 @@ class QualityTests(unittest.TestCase):
         self.assertEqual(q["human"], {"reviewed": 1, "problem": 0})
         self.assertEqual(q["fix_commits_mean"], 1.5)       # PR 1: 2 commits after 02:00; PR 2: 1 after 03:00
         self.assertEqual(q["fix_hours_median"], 21.5)      # first finding → merge: 22 h and 21 h
+
+    def test_agent_detected_by_claim_line_or_footer(self):
+        def merged_with(n, body):
+            p = self.merged(n, "fix/x", [comment("c", ADV_OK)])
+            p["body"] = body
+            return p
+        pulls = [merged_with(1, "Closes #3\nClaim: proj.solo.lot.i3\n"),
+                 merged_with(2, "Closes #4\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)"),
+                 merged_with(3, "Closes #5\nClaim: human/someone\n"), merged_with(4, None)]
+        q = fm.analyse({"issues": [], "pulls": pulls, "runs": []}, now=fm.parse_time(NOW))["quality"]
+        self.assertEqual((q["agent"]["reviewed"], q["human"]["reviewed"]), (2, 2))
 
     def test_verdict_posted_after_merge_is_ignored(self):
         late = self.merged(1, "claude/a", [comment("c", ADV_KO, "2026-11-07T00:00:00Z")])

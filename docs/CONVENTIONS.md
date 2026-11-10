@@ -1,7 +1,7 @@
 # Conventions: commits, PRs, comments, persistence
 
-Sources: `CLAUDE.md` of ios-app_credit-immo (conventions, workflow, version and What's New, decision #244) and
-`AGENTS.md` §8 of HFRnow (PRs, merge, duplicates).
+Sources: `AGENTS.md` §5, §8 of HFRnow (PRs, merge, duplicates, claims, ledger #620); practice proven on other
+projects (commit conventions, version and What's New, save compatibility).
 
 ## Language
 Project language: write the interface, code comments and domain names, commits, issues, PRs and docs in the
@@ -9,8 +9,11 @@ project's language (`.harness/config.json` › `language`, default English). The
 project can decide otherwise: it writes it in its `CLAUDE.md`, which wins.
 
 ## Branches
-`claude/<lot>` for Claude sessions, `feature/<subject>` for a human, `hotfix/<subject>` from the production
-branch. A branch starts from the **up-to-date** integration branch. Detail and promotions: [BRANCHING-RELEASE](BRANCHING-RELEASE.md).
+`<type>/<short-name>` for everyone, agent or human: `lot/` (a lot of the plan, e.g. `lot/082-reader-links`),
+`fix/`, `feat/`, `chore/`, `docs/`; `hotfix/<subject>` from the production branch (model A). The types are set in
+`.harness/config.json` (`branch_types`). The name does not say who is working: the claim (`/claim`) and the PR's
+`Claim:` line say it. A branch starts from the **up-to-date** integration branch.
+Detail and promotions: [BRANCHING-RELEASE](BRANCHING-RELEASE.md).
 
 ## Commits
 - One **atomic commit per issue** (or per logical step of an issue), message in the project's language, present
@@ -22,26 +25,58 @@ branch. A branch starts from the **up-to-date** integration branch. Detail and p
   Claude-Session: https://claude.ai/code/session_…
   ```
 - Never a generated artefact, `DerivedData`, `.build`, or a file ignored by `.gitignore`.
-- Small commits, pushed **once per lot** (CI budget); the local history can be fine-grained, the push is single.
+- Small commits, **pushed often** to the draft PR (a crash loses minutes, not hours); nothing costly runs on a
+  draft ([CI-BUDGET](CI-BUDGET.md) §2). Once the PR is ready: one commit per review round.
 
 ## Pull requests
-- Opened **as a draft** (no CI runs), moved to "Ready for review" when everything is finished, reviewed, compiled.
+- Opened **as a draft** from the first push (nothing costly runs), moved to "Ready for review" when everything is
+  finished, reviewed, compiled.
 - **Title** in the style of the previous PRs: `Area: summary (#n)`, `Review 0.6.0 (3): …`, `LOT-012: …`.
-- **Body**, in this order (template `templates/.github/pull_request_template.md`):
-  1. `Closes #n`, **one line per issue** (`Refs #n` for partial work, saying what is left; `Direct-PR: <reason>`
+- **Body**, short, in this order (template `templates/.github/pull_request_template.md`):
+  1. `LOT-XXX` for a lot PR;
+  2. `Closes #n`, **one line per issue** (`Refs #n` for partial work, saying what is left; `Direct-PR: <reason>`
      for a small fix without an issue, never for a lot);
-  2. summary per issue: the problem, the cause, what changes and why this wide and no wider;
-  3. verification: tests (names, what they check, shown failing without the change), commands run;
-  4. watch points / not tested (e.g. app not compiled in the Linux container, to validate on iPhone);
-  5. **"Changelog"** section: material for What's New, one line per visible change, from the user's side;
-  6. author and reviewer models; the generation line last.
-- Do not merge yourself unless the project's policy says otherwise (credit-immo: the maintainer merges; HFRnow: the author merges a
-  ready PR, except for risky flows).
+  3. `Claim: <id>` on its own line, equal to the issue's active claim (§GitHub comments);
+  4. the problem, the cause, what changes and why this wide and no wider;
+  5. the tests: names, what they check, shown failing without the change; commands run; watch points / not tested
+     (e.g. app not compiled in the Linux container, to validate on iPhone);
+  6. a **`### Ledger`** section only if the project keeps a ledger (§Ledger); otherwise nothing;
+  7. author and reviewer models; the generation line last.
+- Do not merge yourself unless the project's policy says otherwise (depending on the project: the maintainer merges,
+  or the author merges a ready and approved PR, except for risky flows).
 - No new PR while one of your own has a review comment without a reply.
 - Before opening: search for duplicates (issues and PRs, open and closed) and for PRs that touch the same files.
 
+## Ledger: never a conflict on a shared file
+Optional building block, for projects that keep a shared log-like file (CHANGELOG, What's New, gap report, tracking
+table) that many PRs would want to modify at the same time.
+- A work PR **never touches** these files. Its entries go in a `### Ledger` section of the **PR body**, in fenced
+  blocks whose language is the entry type (e.g. ` ```changelog `, ` ```gap-new `), and the PR carries the `ledger`
+  label. No entry: no section, no label.
+- After the merges, a **steward** (upkeep role, [STEWARDS](STEWARDS.md)) runs the project's script that reads the
+  merged PRs labelled `ledger`, **folds** their entries into the files and opens **a single docs PR**, which
+  touches only these files; then it replaces `ledger` with `ledger: done` on each folded PR.
+- This PR is verified without an adversarial review: **the script must reproduce it** (on its base, the command
+  written in its description, then `git diff --exit-code <head>`, shows no difference); it is merged on green CI.
+- No lock, no conflict, no late push to rebase a log, no CI rerun for one line.
+- The adversarial reviewer reviews the `### Ledger` section like code. A malformed entry is reported and skipped by
+  the steward (the others are folded): the author fixes the PR body, not the files.
+
+Wiring the block in: the harness provides the convention and the PR body checks (`pr-hygiene.yml`, input
+`ledger-label`); the project provides its fold script (block format, target files, order, idempotence), declared in
+`.harness/config.json` → `ledger` (`enabled`, `label`, `fold_command`), and a CI check that refuses a PR outside
+the steward's branch touching the ledger files. The labels `ledger` and `ledger: done` go in
+`.github/labels.local.json`. Full example (block format, script, check): `tooling/docs/README.md` of HFRnow
+(branch `dev-swift`, #620). Without a ledger (`ledger.enabled` missing or false), none of this applies.
+
 ## GitHub comments
-- Claim: "Claimed: branch `claude/<lot>`" + a plan in 3 to 5 bullets.
+- **Claim**: a comment whose **first line** is `/claim <id>`, followed by the plan in 3 to 5 bullets. `<id>` is the
+  agent's id ([ORCHESTRATION](ORCHESTRATION.md) §7), or `human/<login>` for a human; it does not change until the
+  end of the work. The issue's comments are **replayed in order**: the first claim wins, another `/claim` is
+  refused while the first holds; `/release` (or `/release <id>`) hands it back. Only the comments of repository
+  members (owner, members, collaborators) count: a contributor without rights asks a member to claim for them. A
+  project can automate the replay (a workflow that sets and removes the status label, and replies to a refused
+  claim); without automation, the orchestrator or the maintainer sets the label.
 - End: done, PR link, what is left, decisions taken, to validate on the device.
 - Issue resolved without `Closes`: "Resolved by #PR". Merge into a branch that does not close issues: "Done in
   #PR (merged as `<sha>`)", then check that it is closed.
@@ -57,8 +92,7 @@ branch. A branch starts from the **up-to-date** integration branch. Detail and p
   ```
 
 ## Persistence: backward compatibility
-Decision #244 of credit-immo (30 October), generalised: **a save written by a published version must stay
-readable by every later version.**
+**A save written by a published version must stay readable by every later version.**
 - New field → optional or with a default value, decoded tolerantly (`decodeIfPresent`).
 - Renamed or removed field → migration on read (old key read then converted, dedicated function such as
   `migrate(legacy:)`), tested with a real save from the old version (frozen test file).
@@ -70,8 +104,9 @@ readable by every later version.**
 
 ## Version and "What's New"
 Lot PRs touch **neither** the version (`MARKETING_VERSION` or equivalent) **nor** the What's New file: both are
-handled at integration (version set on the integration branch by a dedicated PR, What's New written from the
-"Changelog" sections of the PRs), then tag `vX.Y.Z` after the promotion. Detail: [BRANCHING-RELEASE](BRANCHING-RELEASE.md).
+handled at integration (version set on the integration branch by a dedicated PR, What's New folded from the
+`### Ledger` sections of the PRs by the steward, or written from their descriptions without a ledger), then tag
+`vX.Y.Z` after the promotion. Detail: [BRANCHING-RELEASE](BRANCHING-RELEASE.md).
 
 ## Docs
 - One file, one role; `CLAUDE.md` (or `AGENTS.md`) is the single entry point, everything else hangs off it.
@@ -80,6 +115,36 @@ handled at integration (version set on the integration branch by a dedicated PR,
 - A structuring decision = an ADR (`docs/adr/NNNN-title.md`, template [adr/TEMPLATE.md](adr/TEMPLATE.md)). An
   accepted ADR is not rewritten: it is superseded by another.
 - An operator's personal instructions go in an unversioned `CLAUDE.local.md`, not in the repository.
+
+## Repository identity
+Every repository that follows the harness says what it is without anyone opening a file: a **description**,
+**topics**, a **banner** and a **social preview**.
+
+| Item | Where it lives | Rule |
+|---|---|---|
+| **Description** | `.github/repo-settings.json` → `repository.description` | one sentence: what the project does, for whom; not the template's text, not a feature list; kept true when the scope changes |
+| **Topics** | `.github/repo-settings.json` → `topics` | 5 to 15 keywords a visitor would search for: domain, technology, use; lowercase, digits and hyphens, 50 characters at most, 20 topics at most ([GitHub docs](https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/classifying-your-repository-with-topics)); prefer a topic already in wide use to an invented word |
+
+Both are changed by PR and applied at merge ([ADOPTION](ADOPTION.md) §Repository settings "as code");
+`repo-settings.py` warns if they are missing or malformed, and never sends the template's description.
+
+The **two images** state the intent at first glance (what the project does and for whom, not a decorative logo
+or a screenshot):
+
+| Image | File | Format | Where it is used |
+|---|---|---|---|
+| **Banner** | `docs/assets/banner.svg` (or `.png`) | wide (about 3:1), readable at 800 px wide, clean background (light and dark themes), alt text that describes it | first image of `README.md`, under the title |
+| **Social preview** | `docs/assets/social-preview.png`, its source next to it (`.svg` or other) | PNG **1280×640**, under 1 MB, the essentials more than 40 px from the edges | preview of the repository link (social networks, messaging apps) |
+
+- Both share the same motif and the same project name; one sentence of intent at most, no feature list. Their text
+  is in **English** (a link preview travels beyond the project's audience), unless the project's audience speaks
+  only one other language. No secret, no personal data, no third-party trademark.
+- The social preview **is uploaded by hand**: repository → Settings → General → Social preview
+  ([GitHub docs](https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/customizing-your-repositorys-social-media-preview),
+  which also gives the size and the weight). It is a repository setting: the agent prepares the file and reports
+  it, the operator uploads it (ESSENTIALS §Guardrails). `repo-settings.py` does not cover it.
+- They change when the project's intent changes, not at every version. The doc steward checks the four items
+  ([STEWARDS](STEWARDS.md) §2); missing or out of date → an issue.
 
 ## Secrets
 No secret in the repository. CI secrets in GitHub secrets; locally, in configuration files ignored by git;

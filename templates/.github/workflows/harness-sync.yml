@@ -90,7 +90,7 @@ jobs:
           set -euo pipefail
           BASE=$(jq -r '.integration_branch // empty' .harness/config.json 2>/dev/null || true)
           BASE=${BASE:-$DEFAULT_BRANCH}
-          BRANCH="harness/sync-$TAG"
+          BRANCH="chore/harness-sync-$TAG"
           if git ls-remote --exit-code --heads "https://x-access-token:${TOKEN}@github.com/${GITHUB_REPOSITORY}.git" "$BRANCH" >/dev/null; then
             echo "::notice::$BRANCH already exists: the PR is probably open."; exit 0
           fi
@@ -107,7 +107,6 @@ jobs:
             if [ "$SYNC_WORKFLOWS" != "true" ]; then echo "🟠 Files under \`.github/workflows/\` not touched: update the \`@$TAG\` references of \`harness.yml\` by hand."; echo; fi
             echo '```'; sed 's/`//g' "$RUNNER_TEMP/sync.log"; echo '```'
             echo
-            echo "## Changelog"
-            echo "None (tooling)."
+            echo "Direct-PR: automatic update of the harness (tooling, nothing visible: no \`### Ledger\` section)."
           } > "$RUNNER_TEMP/body.md"
           gh pr create --draft --base "$BASE" --head "$BRANCH" --title "Belayline: update to $TAG" --body-file "$RUNNER_TEMP/body.md"

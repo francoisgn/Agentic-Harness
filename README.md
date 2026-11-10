@@ -8,19 +8,19 @@
 ![AGENTS.md](https://img.shields.io/badge/AGENTS.md-any_agent-111111)
 ![Excalidraw](https://img.shields.io/badge/Excalidraw-diagrams-6965DB?logo=excalidraw&logoColor=white)
 
+![Belayline, "the versioned framework that keeps your coding agents on track, from intent to merge": tangled agent trajectories pass through the loop of the harness and come out as held lines, milestone after milestone (intent, TDD, adversarial review, CI), up to the merge; the lessons come back to the harness](docs/assets/banner.svg)
+
 > **Belayline: the open harness for agentic development.** Versioned skills, tools and method: intent and TDD, issues → lots → PRs, adversarial
 > reviews, pluggable compliance, stewards, FinOps and a flow dashboard. For any GitHub repository, any agent (Claude
 > Code, Codex, Cursor, Gemini CLI, Copilot, Aider…) and any team.
-
-![Belayed agents: the agent climbs lot by lot in a harness, the operator holds the rope, each anchor (intent, tests, review, CI) is a guardrail](docs/images/belay.svg)
-
-![The mechanisms of the harness: one operator, one orchestrator, disposable agents, a repository that holds the state, a CI and a dashboard that close the loop](docs/diagrams/mechanisms.svg)
 
 **TL;DR**: agents write fast, but without a harness they drift (lost context, review loops, CI that burns minutes,
 uneven quality). The harness gives every project **the same method, the same guardrails, the same lessons and the
 same checks**, fetched at a given version and updated by PR. The context lives in the repository, not in the agent.
 The operator talks to a single orchestrator, which delegates each task to the right model tier and has it reviewed by
 a stronger model. Each building block can be kept, replaced or extended.
+
+![The mechanisms of the harness: one operator, one orchestrator, disposable agents, a repository that holds the state, a CI and a dashboard that close the loop](docs/diagrams/mechanisms.svg)
 
 ## What it changes, concretely
 
@@ -29,7 +29,7 @@ a stronger model. Each building block can be kept, replaced or extended.
 | The agent guesses the intent | Each issue carries a user story, error behaviours and a definition of done (`/intent`) |
 | Tests written afterwards, sometimes green without the change | TDD: test seen red, then green; proven in the PR |
 | The author reviews their own work | Adversarial review by another model, verdicts recorded on the PR |
-| One push per idea, one CI run per push | Draft, one push per lot, bounded loops (3 review cycles, 6 tested pushes) |
+| One push per idea, one expensive CI run per push | Frequent pushes on a draft without the expensive CI, full CI on the switch to "Ready", one commit per review cycle, bounded loops (3 cycles, 6 tested pushes) |
 | Compliance forgotten or manual | Reviewers for GDPR, AI Act, NIS2, ISO 27001, SOC 2, TISAX, PCI, HDS, or your own, run only when the diff concerns them |
 | A stale README, with no diagram and no progress | README maintained at the end of each lot: badges, Excalidraw diagram, lot table, checked in CI (`/readme-update`) |
 | "Where are we?" | Daily dashboard: milestones, bottlenecks, stalled work, loops, **ratio of PRs with a problem**, cost |
@@ -44,7 +44,7 @@ a stronger model. Each building block can be kept, replaced or extended.
 ![Six steps: fetch, sync, configure, work, steer, update; with any agent; each building block replaceable](docs/diagrams/leverage.svg)
 
 ```bash
-git clone --depth 1 --branch v0.2.0 https://github.com/francoisgn/belayline-agentic-harness.git ../belayline
+git clone --depth 1 --branch v0.3.0 https://github.com/francoisgn/belayline-agentic-harness.git ../belayline
 ../belayline/scripts/harness-sync.sh --target . --dry-run   # look before writing
 ../belayline/scripts/harness-sync.sh --target .
 ```
@@ -119,8 +119,9 @@ Knowledge flows both ways: propose a lesson born in your project through the "Le
 | [`docs/README-STANDARD.md`](docs/README-STANDARD.md) | The README that agents maintain by default: badges, image, Excalidraw diagram, progress, Contributing |
 | [`docs/CI-BASELINE.md`](docs/CI-BASELINE.md), [`docs/CI-BUDGET.md`](docs/CI-BUDGET.md) | Tiered CI baseline; CI minutes, security (SAST, SCA, secrets), variables, agentic volume |
 | [`docs/LESSONS.md`](docs/LESSONS.md) | Lessons by scope, sources cited; how to propose one |
-| [`docs/CONVENTIONS.md`](docs/CONVENTIONS.md), [`docs/BRANCHING-RELEASE.md`](docs/BRANCHING-RELEASE.md), [`docs/MAC-HANDOFF.md`](docs/MAC-HANDOFF.md) | Commits and PRs, branches and versions, split between cloud and local machine |
+| [`docs/CONVENTIONS.md`](docs/CONVENTIONS.md), [`docs/BRANCHING-RELEASE.md`](docs/BRANCHING-RELEASE.md), [`docs/MAC-HANDOFF.md`](docs/MAC-HANDOFF.md) | Commits and PRs, repository identity (description, topics, banner, social preview), branches and versions, split between cloud and local machine |
 | [`docs/adr/`](docs/adr/README.md) | Decisions of the harness |
+| [`docs/assets/`](docs/assets) | Visual identity: README banner (`banner.svg`), social preview (`social-preview.svg` → `.png`, 1280×640) |
 | [`docs/diagrams/`](docs/diagrams) | Diagrams: `.json` source, `.excalidraw` scene (editable on excalidraw.com), `.svg` image |
 | `plugins/harness/` | Claude Code adapter: 11 skills, 13 agents, hooks, plugin |
 | `templates/` | Vendored templates |
@@ -130,17 +131,19 @@ Knowledge flows both ways: propose a lesson born in your project through the "Le
 ## Quality of the harness itself
 
 One CI job (`ci.yml`), each step run even if the previous one fails: harness consistency (skills, agents, manifest,
-labels, naming, required checks), tests (vendoring, hooks, dashboard, compliance, settings, diagrams), ShellCheck,
-versions, actionlint, zizmor, markdownlint, gitleaks. Locally:
+labels, naming, required checks, description, topics, banner and social preview), tests (vendoring, hooks, dashboard,
+compliance, settings, diagrams), ShellCheck, versions, actionlint, zizmor, markdownlint, gitleaks. Locally:
 ```bash
 python3 scripts/check-framework.py && python3 -m unittest discover -s scripts/tests -p 'test_*.py' \
   && scripts/tests/test-harness-sync.sh && python3 scripts/diagrams/render.py --check
 ```
 
 ## Versions
+- Security: report a flaw privately, never in an issue ([SECURITY](SECURITY.md)).
 - Semver, tags `vX.Y.Z` on `master`, [CHANGELOG](CHANGELOG.md) at each version ("Action" section for projects).
   Before 1.0.0, a MINOR may break: the CHANGELOG says so.
-- Origins: distilled from two real projects (an iOS forum client and a mortgage simulator); inspirations cited:
+- Origins: distilled from real projects (including an iOS forum client, the public example of [USAGE](docs/USAGE.md));
+  inspirations cited:
   [OpenHarness](https://github.com/HKUDS/OpenHarness) (MIT) for the bounded repair loop and the dashboard
   ([ADR 0002](docs/adr/0002-specialised-agents-and-dashboard.md)).
 
@@ -148,3 +151,7 @@ python3 scripts/check-framework.py && python3 -m unittest discover -s scripts/te
 
 See [CONTRIBUTING.md](CONTRIBUTING.md): an issue with its intent, a branch, a draft PR, green CI, a review by another
 model. A lesson born in your project: "Lesson" form.
+
+## License
+
+[MIT](LICENSE). `harness-sync.sh` copies it into the project's `.harness/LICENSE`, with the harness files.

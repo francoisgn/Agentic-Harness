@@ -10,6 +10,7 @@ Why this mechanism (vendoring + plugin + reusable workflows) and its limits: [AD
 |---|---|---|
 | `.harness/docs/*.md` | copy | Harness: replaced at each sync (a local modification is detected and refused) |
 | `.harness/labels.json` | copy | Harness: canonical taxonomy |
+| `.harness/LICENSE` | copy | Harness: its licence (MIT), which accompanies the copied files; says nothing about the project's licence |
 | `.harness/hooks/guard-git.py`, `session-start.sh` | copy | Harness |
 | `.claude/skills/<skill>/SKILL.md` | copy | Harness (`/intent`, `/lot-start`, `/lot-finish`, `/review-round`, `/feedback-triage`, `/lessons-check`, `/lesson-propose`, `/compliance-review`, `/status-report`, `/harness-update`) |
 | `.claude/agents/*.md` | copy | Harness: `adversarial-reviewer`, `issue-steward`, `doc-steward`, `flow-monitor`, `compliance-*` (exclude the compliance frameworks you do not need) |
@@ -26,11 +27,11 @@ to the session; on the Mac: `gh auth login && gh auth setup-git`).
 
 1. **Branch** from the up-to-date integration branch:
    ```bash
-   git fetch origin && git switch -c claude/adoption-harness origin/develop
+   git fetch origin && git switch -c chore/adoption-harness origin/develop
    ```
 2. **Fetch the harness** at a tag, next to the project:
    ```bash
-   git clone --depth 1 --branch v0.2.0 https://github.com/francoisgn/belayline-agentic-harness.git ../belayline
+   git clone --depth 1 --branch v0.3.0 https://github.com/francoisgn/belayline-agentic-harness.git ../belayline
    ```
 3. **Look before writing**, then apply:
    ```bash
@@ -43,6 +44,9 @@ to the session; on the Mac: `gh auth login && gh auth setup-git`).
    - `CLAUDE.md`: the harness block was added **at the end** of the file if it existed; move it to the top (markers
      included) and remove from the project part what now duplicates `ESSENTIALS.md` (generic workflow, comment
      footer, generic labels). Keep what is specific: build, design system, domain rules, branch model.
+   - `AGENTS.md`: "Harness overrides" section (created by the template, otherwise add it): every harness rule that
+     the project replaces, with its reason (branch convention, label taxonomy, merge policy…). This is where agents
+     read where the project departs from the harness; the managed block points to it.
    - `.harness/config.json`: `protected_branches`, `integration_branch`, `branch_model` (A or B, BRANCHING-RELEASE.md).
    - `.github/labels.local.json`: the project's own labels (e.g. `area: …`, `calculation`, `regulatory`), in the same
      format as `.harness/labels.json` (`axis` optional, useful for issue hygiene). Remove the old labels file
@@ -50,12 +54,17 @@ to the session; on the Mac: `gh auth login && gh auth setup-git`).
    - `.github/workflows/harness.yml`: `push` branch, `flow` (model A or empty), jobs `docs`, `security` and `review`
      to enable only if the project does not already have the equivalent; the `flow` job (dashboard) is on by default.
    - `.harness/config.json` → `compliance`: compliance frameworks whose reviewers are run ([COMPLIANCE](COMPLIANCE.md)). Delete the workflows it replaces (e.g. `branch-flow.yml`).
+   - **Repository identity** ([CONVENTIONS](CONVENTIONS.md) §Repository identity): in `.github/repo-settings.json`,
+     replace the template's description with one sentence and fill `topics` (5 to 15 keywords); a banner
+     `docs/assets/banner.svg` at the top of `README.md` and a social preview `docs/assets/social-preview.png`
+     (1280×640). Images missing: an issue, they can follow the adoption.
 5. **Verify**: `../belayline/scripts/harness-sync.sh --target . --check` exits with 0; `git diff --stat` shows
    only what is expected; start a Claude session and see the "Belayline" message at startup.
 6. **Single commit**, then draft PR:
-   `Belayline 0.2.0: adoption` (body: what was removed from `CLAUDE.md`, workflows replaced, labels
-   moved; `## Changelog`: "None (tooling)").
+   `Belayline 0.3.0: adoption` (body: what was removed from `CLAUDE.md`, workflows replaced, labels
+   moved; no `### Ledger`: tooling).
 7. **After the merge** (operator): run the "Harness" workflow by hand (`workflow_dispatch`) to create the labels;
+   upload the social preview (Settings → General → Social preview);
    if this harness repository is private, check Actions access ([ADR 0001](adr/0001-distribution-mechanism.md)).
 
 ### Optional: automatic update PR
@@ -78,7 +87,7 @@ ignores it), add to `.claude/settings.json`:
 ```json
 {
   "extraKnownMarketplaces": {
-    "Belayline": { "source": { "source": "github", "repo": "francoisgn/belayline-agentic-harness", "ref": "v0.2.0" } }
+    "Belayline": { "source": { "source": "github", "repo": "francoisgn/belayline-agentic-harness", "ref": "v0.3.0" } }
   },
   "enabledPlugins": { "belay@belayline": true }
 }
@@ -89,7 +98,7 @@ In an adopted repository, prefer **not** to enable it (the skills would exist tw
 ## Updates
 - Skill `/harness-update` (step-by-step guide), or by hand:
   ```bash
-  git switch -c claude/harness-vX.Y.Z origin/develop
+  git switch -c chore/harness-vX.Y.Z origin/develop
   ../belayline/scripts/harness-sync.sh --ref vX.Y.Z --target .     # or --source <clone at that tag>
   ```
   Read the harness's `CHANGELOG.md`, review `git diff`, one commit `Belayline: move to vX.Y.Z`, draft PR.
@@ -106,7 +115,9 @@ the first time):
   "exclude": [".claude/skills/feedback-triage/*", ".github/ISSUE_TEMPLATE/*", "docs/lots/TEMPLATE.md"],
   "protected_branches": ["master", "dev-swift"],
   "integration_branch": "dev-swift",
-  "branch_model": "B"
+  "branch_model": "B",
+  "labels": { "model_prefixes": [], "size_prefixes": ["difficulty:"] },
+  "ledger": { "enabled": true, "label": "ledger", "fold_command": "python3 tooling/docs/ledger.py fold --apply --commit" }
 }
 ```
 - `language`: the project's writing language (default `"en"`): the language agents use for code comments, commits,
@@ -114,6 +125,19 @@ the first time):
 - `exclude`: glob patterns on the **destinations** (`*` crosses `/`). An excluded file is not vendored; if it
   already was and has not been modified, the next sync removes it. Excluding `CLAUDE.md` or `AGENTS.md` turns off
   the management of the corresponding block.
+
+Other keys, read by the hooks and the skills (missing: default values):
+
+| Key | Default | Effect |
+|---|---|---|
+| `protected_branches` | `["main", "master", "develop", "beta"]` | Branches that the `guard-git` hook protects |
+| `branch_types` | `["lot", "fix", "feat", "chore", "docs"]` | Branch types `<type>/<short-name>` offered by `/lot-start` and the hook |
+| `labels.model_prefixes` | `["difficulty:"]` | Prefixes of the model-tier labels; `[]` = no such axis (tier deduced from the text and the routing) |
+| `labels.size_prefixes` | `[]` | Prefixes of the size labels when the project has a separate size axis (e.g. `["size:"]`); `[]` = no such axis |
+| `ledger.enabled`, `ledger.label`, `ledger.fold_command` | `false`, `"ledger"`, `""` | Ledger ([CONVENTIONS](CONVENTIONS.md) §Ledger): `### Ledger` section of the PRs, label, the steward's fold command |
+
+`.harness/config.json` is a project file (created once): a key added by a new version of the harness does not add
+itself to it; without it, the default applies.
 
 ### Example: ezzz/HFRnow (branch `dev-swift`, docs in English, its own lessons and lots)
 1. Branch from `dev-swift` (never `master`, which is the legacy app); create `.harness/config.json` as above,
@@ -125,7 +149,10 @@ the first time):
    already imports `@AGENTS.md`) the block that imports `ESSENTIALS.md`; the harness's `.harness/docs/LESSONS.md`
    complements the project's `docs/agents/LESSONS.md`, which stays the reference (both are read at self-review;
    `/lessons-check` does it).
-3. Keep HFRnow's label taxonomy (`type:`, `priority:`, `difficulty:`…): do not enable `apply-aliases`.
+3. Keep HFRnow's label taxonomy (`type:`, `priority:`, `difficulty:`…): do not enable `apply-aliases`;
+   `labels` above tells the harness that the size is read from `difficulty:` and that the model tier is deduced
+   from the routing of `AGENTS.md` §6. Its branches `lot/`, `fix/`, `feat/`, `chore/`, `docs/` are the harness's;
+   its ledger (#620) is the harness's "ledger" building block, with its own script.
 4. Generic lessons born in HFRnow go up to the harness by PR on Belayline; lessons of the HFR domain
    stay in the project.
 
@@ -155,8 +182,8 @@ script `.harness/scripts/repo-settings.py`) applies it at merge:
 
 | Section | Effect |
 |---|---|
-| `repository` | Description, website, features (wiki, discussions), merge policy, deletion of merged branches |
-| `topics` | Full list of topics |
+| `repository` | Description (mandatory, [CONVENTIONS](CONVENTIONS.md) §Repository identity; the template's is never sent), website, features (wiki, discussions), merge policy, deletion of merged branches |
+| `topics` | Full list of topics (5 to 15 expected; a warning if they are missing or malformed) |
 | `rulesets` | Rulesets managed by name (created or updated, never deleted automatically): default branch protection, required checks |
 
 - **Once, by the owner**: create a fine-grained token limited to the repository, "Administration: read and write",

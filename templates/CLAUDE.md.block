@@ -1,6 +1,8 @@
 ## Shared harness: Belayline {{HARNESS_VERSION}}
 
-This block is managed by `scripts/harness-sync.sh` of the [Belayline](https://github.com/francoisgn/belayline-agentic-harness) harness: do not edit it here (propose changes in the harness). The rest of this file belongs to the project and wins over the harness on any conflict, to be reported in an issue.
+This block is managed by `scripts/harness-sync.sh`, which lives in the [Belayline](https://github.com/francoisgn/belayline-agentic-harness) harness repository, not in this repository: do not edit it here (propose changes in the harness). To update: skill `/harness-update`, or, from the root of this repository, clone the harness at the wanted tag next to it (`git clone --depth 1 --branch vX.Y.Z https://github.com/francoisgn/belayline-agentic-harness.git ../belayline`) then run `../belayline/scripts/harness-sync.sh --target .` (`.harness/docs/ADOPTION.md` §Updates).
+
+**Precedence**: the project rules win over the harness. The project records each deviation from the harness, with its reason, in the "Harness overrides" section of its `AGENTS.md`; its settings go in `.harness/config.json`; everything outside this block belongs to the project. Order on a conflict: "Harness overrides" section, then the rest of the project rules (`AGENTS.md`, `CLAUDE.md`), then `.harness/config.json`, then `.harness/docs/`. Report an unresolved conflict in an issue of the project.
 
 @.harness/docs/ESSENTIALS.md
 

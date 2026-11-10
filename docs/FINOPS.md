@@ -76,9 +76,9 @@ The dashboard (`flow-report.yml`, script `flow-metrics.py`) computes every day, 
 
 | Signal | Default threshold | Reading | Action |
 |---|---|---|---|
-| `status: claimed` issue with no activity | 24 h | Session dead or silently blocked | Watchdog: stop, note the state, release the issue |
+| Claimed issue (`/claim`, label `status: claimed`) with no activity | 24 h | Session dead or silently blocked | Watchdog: stop, note the state, release the issue |
 | Ready PR with no activity / draft | 24 h / 120 h | Review or author stalled | Nudge the right actor |
-| CI-tested pushes on a PR (distinct SHAs) | > 6 | Trial-push loop | Stop, local diagnosis, a single push |
+| CI-tested pushes on a PR (distinct SHAs, skipped or cancelled runs excluded) | > 6 | Trial-push loop | Stop, local diagnosis, one commit per round |
 | Reviews on a PR | > 3 | Review loop (fixes to the instance, not the class) | Cross-check, REVIEW-ROUNDS §3 |
 | `status: blocked`, `status: needs-decision` | any | External bottleneck or product decision | Escalate to the operator, with the exact question |
 | Median time from open to merge | trend | Flow | Compare week over week |

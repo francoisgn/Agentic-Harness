@@ -28,7 +28,8 @@ Definition of the harness's automatic PR review service. It **complements** the 
 A repository where agents push most of the commits multiplies reviews. Levers, from most to least effective:
 1. **Prevent**: `/lessons-check` and the adversarial review **before** "Ready"; the service must find only what
    escaped both. A finding already in LESSONS = the self-review needs tightening.
-2. **One review per ready head**, not per push: draft while working, one push per round.
+2. **One review per ready head**, not per push: frequent pushes to the draft while working (no review), one push per
+   round once it is ready.
 3. **Incremental review**: on the next round, instruct it to review only `last-reviewed-sha...head` (the service reads
    its previous review).
 4. **Bound**: beyond 3 rounds, the orchestrator stops the loop ([FINOPS](FINOPS.md) §3).

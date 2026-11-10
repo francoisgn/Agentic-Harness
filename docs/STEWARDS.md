@@ -18,14 +18,15 @@ workflow, does one pass, reports, and stops ([FINOPS](FINOPS.md) §1). Definitio
 ## 1. Issue steward: a queue ready to be claimed
 
 Goal: a lot agent can claim an issue **without asking a question**.
-- Complete axis labels (type, priority, difficulty, status); `status: needs-decision` with the exact question when a
-  decision is missing; `status: blocked` with the prerequisite; `needs: host` if needed.
+- Complete axis labels (type, priority, status, and difficulty if the project has that axis: METHODOLOGY §4);
+  `status: needs-decision` with the exact question when a decision is missing; `status: blocked` with the
+  prerequisite; `needs: host` if needed.
 - Usable intent: user story, error behaviours, definition of done ([METHODOLOGY](METHODOLOGY.md) §2);
   otherwise a comment that lists what is missing.
 - Duplicates: proposes the merge (the oldest wins), never closes on its own what someone else wrote.
 - Routing: milestone, lot, dependencies (`Depends on #n`), sub-issues of the umbrella issue; `difficulty: hard`
   spanning several layers → proposes a split into lots.
-- Abandoned claims (> 24 h with no activity): reports them to the orchestrator, does not take them over.
+- Abandoned claims (an active `/claim` with no activity for 24 h): reports them to the orchestrator, does not take them over.
 
 ## 2. Doc steward: docs that stay true and readable
 
@@ -36,6 +37,14 @@ Goal: a lot agent can claim an issue **without asking a question**.
   source and render checked in CI; Mermaid in Markdown for a short flow).
 - Keeps the overviews up to date: README to the standard ([README-STANDARD](README-STANDARD.md): badges, image,
   Excalidraw architecture diagram, lot progress, Contributing), lot plan, ADR index.
+- Checks the repository identity ([CONVENTIONS](CONVENTIONS.md) §Repository identity): description and topics filled
+  in `.github/repo-settings.json`, banner shown at the top of the README, social preview versioned (1280×640), all
+  true to the project's intent; missing or out of date → an issue, or the docs PR for the description and topics
+  (uploading the social preview in the settings is the operator's job).
+- If the project keeps a ledger ([CONVENTIONS](CONVENTIONS.md) §Ledger): after a batch of merges, runs the project's
+  fold command (`.harness/config.json` → `ledger.fold_command`), opens **one** docs PR that touches only the ledger
+  files and that the script reproduces, reports malformed entries on their PR, then marks the folded PRs
+  (`ledger: done`).
 
 ## 3. Flow monitor: see drift early
 

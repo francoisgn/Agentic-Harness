@@ -2,7 +2,7 @@
   { "name": "status: needs-triage", "color": "ededed", "axis": "status", "description": "New issue: type, priority and difficulty still to confirm" },
   { "name": "status: needs-decision", "color": "f9d0c4", "axis": "status", "aliases": ["à clarifier"], "description": "Product decision expected before coding" },
   { "name": "status: ready", "color": "0e8a16", "axis": "status", "description": "Triaged, intent complete: can be claimed" },
-  { "name": "status: claimed", "color": "1d76db", "axis": "status", "aliases": ["pris en charge"], "description": "A session claimed the issue (comment \"Claimed: branch …\")" },
+  { "name": "status: claimed", "color": "1d76db", "axis": "status", "aliases": ["pris en charge"], "description": "A session claimed the issue (comment `/claim <id>`, released by `/release`)" },
   { "name": "status: blocked", "color": "000000", "axis": "status", "aliases": ["bloqué"], "description": "Depends on a prerequisite (lot, capture, decision, access)" },
 
   { "name": "type: bug", "color": "d73a4a", "axis": "type", "aliases": ["bug"], "description": "Incorrect behaviour or crash" },

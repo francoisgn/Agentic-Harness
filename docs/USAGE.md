@@ -14,7 +14,7 @@ flowchart TD
   C -- yes --> D["Orchestrator: routes to a lot agent<br/>of the label's model tier (/lot-start)"]
   D --> E["TDD: red test → code → green<br/>atomic commits, local-check"]
   E --> F["/lessons-check + adversarial-reviewer<br/>(+ /compliance-review if enabled)"]
-  F --> G["Draft PR → one push → Ready<br/>CI + security + AI review"]
+  F --> G["Draft PR, frequent pushes → Ready<br/>CI + security + AI review"]
   G -->|/review-round, ≤ 3 cycles| H["Merge (project policy)<br/>/lot-finish: issues, unblocking"]
   H --> I["doc-steward, /lesson-propose"]
   H --> J["flow-report: daily dashboard<br/>/status-report weekly"]
@@ -71,24 +71,26 @@ the maintainer to confirm, not a legal qualification.
 
 **Adoption** (cloud session with `ezzz/HFRnow` and `francoisgn/belayline-agentic-harness` attached, or Mac):
 ```bash
-git fetch origin && git switch -c claude/adoption-harness origin/dev-swift
-git clone --depth 1 --branch v0.2.0 https://github.com/francoisgn/belayline-agentic-harness.git ../belayline
+git fetch origin && git switch -c chore/adoption-harness origin/dev-swift
+git clone --depth 1 --branch v0.3.0 https://github.com/francoisgn/belayline-agentic-harness.git ../belayline
 ../belayline/scripts/harness-sync.sh --target . --dry-run && ../belayline/scripts/harness-sync.sh --target .
 ```
 
 **One lot end to end** (issue #312, `LOT-082`, label `difficulty: easy`):
 1. The orchestrator `hfrnow.orc-0711.orc.dev-swift` reads the dashboard, sees #312 ready, starts the child session
    `[hfrnow] lot LOT-082 #312 · sonnet ← orc-0711` (tags `project:hfrnow`, `orc:orc-0711`, `issue:312`).
-2. The child (`hfrnow.orc-0711.lot.LOT-082`) runs `/lot-start 312 LOT-082`: claim comment with its `Agent:` line,
-   branch `claude/lot-082` from `dev-swift`.
+2. The orchestrator has commented `/claim hfrnow.orc-0711.lot.LOT-082` on #312; the child runs
+   `/lot-start 312 LOT-082`: it sees the claim under its id, posts its plan, branches `lot/082-reader-links` from
+   `dev-swift`.
 3. TDD in `HFRKit` (engine, testable on Linux): red Swift Testing tests, then code, then green
    (`swift test --filter`, checking that tests did run: L01). The SwiftUI UI is reviewed with a compiler's rigour
    (L58); the Xcode build is done on a Mac ([MAC-HANDOFF](MAC-HANDOFF.md)).
 4. `/lessons-check` (lessons of the harness **and** of HFRnow), then the `adversarial-reviewer` subagent on Opus
    (`hfrnow.orc-0711.rev.pr340`), then `/compliance-review`: the diff touches cookie storage → `compliance-gdpr`
    (`hfrnow.orc-0711.conf-gdpr.pr340`).
-5. Draft PR, one push, "Ready": HFRnow's macOS CI, CodeRabbit (already installed on HFRnow); `/review-round`
-   for its findings, at most 3 cycles.
+5. Frequent pushes to the draft PR (body: `LOT-082`, `Closes #312`, `Claim: hfrnow.orc-0711.lot.LOT-082`, and
+   `### Ledger` since HFRnow keeps a ledger), then "Ready": macOS CI, CodeRabbit; `/review-round` for its findings,
+   one commit per cycle, at most 3 cycles.
 6. Merge according to HFRnow's policy; `/lot-finish` unblocks the dependent lots; a generic lesson born here
    → `/lesson-propose` ("Lesson" issue on the harness).
 

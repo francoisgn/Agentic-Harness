@@ -5,8 +5,10 @@ A cloud session cannot change the settings of a repository (LESSONS L56): it cha
 merge, the repo-settings.yml workflow runs this script with an administration token (secret REPO_ADMIN_TOKEN).
 
 Sections (all optional; a missing section is left untouched):
-  "repository": fields of PATCH /repos/{owner}/{repo} listed in REPO_FIELDS;
+  "repository": fields of PATCH /repos/{owner}/{repo} listed in REPO_FIELDS; a description still the one of the
+                template (`<...>`) is not sent;
   "topics":     full list of topics (replaces the existing one);
+  Description or topics missing or invalid: warning, without blocking (CONVENTIONS.md §Repository identity).
   "rulesets":   managed rulesets, identified by their `name` (created or updated; a ruleset missing from the file is
                 never deleted: remove it by hand, on purpose).
 Usage: repo-settings.py --repo owner/name [--file .github/repo-settings.json] [--apply]
@@ -16,6 +18,7 @@ Token: GH_TOKEN variable (fine-grained, "Administration: write" on the repositor
 import argparse
 import json
 import os
+import re
 import sys
 import urllib.error
 import urllib.request
@@ -26,6 +29,32 @@ REPO_FIELDS = {"description", "homepage", "has_issues", "has_projects", "has_wik
                "squash_merge_commit_title", "squash_merge_commit_message"}
 RULESET_KEYS = ("name", "target", "enforcement", "conditions", "rules", "bypass_actors")
 API = "https://api.github.com"
+# GitHub rules for a topic: lowercase letters, digits, hyphens, 50 characters at most, 20 topics at most per repository
+# (https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/classifying-your-repository-with-topics)
+TOPIC = re.compile(r"^[a-z0-9][a-z0-9-]{0,49}$")
+MAX_TOPICS = 20
+
+
+def _placeholder(text):
+    """True for a description that is empty or still the one of the template (`<one sentence: ...>`)."""
+    text = (text or "").strip()
+    return not text or (text.startswith("<") and text.endswith(">"))
+
+
+def identity_gaps(desired):
+    """What is missing for the repository to say what it is (CONVENTIONS.md §Repository identity); pure function."""
+    gaps = []
+    if _placeholder((desired.get("repository") or {}).get("description")):
+        gaps.append("description missing or still the one of the template: one sentence, what the project does and for whom")
+    topics = desired.get("topics") or []
+    bad = [t for t in topics if not isinstance(t, str) or not TOPIC.match(t)]
+    if not topics:
+        gaps.append("topics missing: 5 to 15 keywords (domain, technology, use)")
+    elif bad:
+        gaps.append(f"invalid topics {bad}: lowercase letters, digits and hyphens, 50 characters at most")
+    elif len(set(topics)) > MAX_TOPICS:
+        gaps.append(f"too many topics ({len(set(topics))}): {MAX_TOPICS} at most")
+    return gaps
 
 
 def _covers(actual, wanted):
@@ -62,7 +91,8 @@ def plan(desired, current):
         unknown = sorted(set(repo) - REPO_FIELDS)
         if unknown:
             raise ValueError(f"unmanaged repository fields: {unknown} (allowed: {sorted(REPO_FIELDS)})")
-        fields = {k: v for k, v in repo.items() if current.get("repository", {}).get(k) != v}
+        fields = {k: v for k, v in repo.items() if current.get("repository", {}).get(k) != v
+                  and not (k == "description" and _placeholder(v))}  # the template text never goes to GitHub
         if fields:
             actions.append({"op": "patch-repo", "fields": fields})
     if desired.get("topics") is not None:
@@ -141,6 +171,8 @@ def main():
         raise SystemExit("✘ GH_TOKEN missing (secret REPO_ADMIN_TOKEN: token with \"Administration: write\" on the repository)")
     with open(a.file, encoding="utf-8") as f:
         desired = json.load(f)
+    for gap in identity_gaps(desired):
+        print(f"::warning file={a.file}::{gap}")
     http = github(token)
     actions = plan(desired, read_current(a.repo, http))
     for act in actions:

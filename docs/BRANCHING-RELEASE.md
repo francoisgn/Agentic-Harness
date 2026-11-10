@@ -1,7 +1,7 @@
 # Branches, versions and releases
 
-Sources: `docs/BRANCHING.md` and workflow `branch-flow.yml` of ios-app_credit-immo (model A); `AGENTS.md` §8,
-`CONTRIBUTING.md` §2 and rulesets of HFRnow (model B).
+Sources: practice proven on a published app (model A: branch document and flow-check workflow);
+`AGENTS.md` §8, `CONTRIBUTING.md` §2 and rulesets of HFRnow (model B).
 
 ## Two models, one choice per project
 The project writes its model in `CLAUDE.md` and in `.harness/config.json` (`branch_model`, `integration_branch`,
@@ -9,7 +9,7 @@ The project writes its model in `CLAUDE.md` and in `.harness/config.json` (`bran
 
 ### Model A: integration → candidate → production (published app)
 ```
-claude/*, feature/*, dependabot/*  ──PR──▶  develop  ──PR──▶  beta  ──PR──▶  master
+lot/*, fix/*, feat/*, chore/*, docs/*, dependabot/*  ──PR──▶  develop  ──PR──▶  beta  ──PR──▶  master
                                          integration     TestFlight      App Store
 hotfix/* (from master) ──PR──▶ master, then carried over master → beta → develop
 ```
@@ -31,9 +31,15 @@ hotfix/* (from master) ──PR──▶ master, then carried over master → be
 
 ## Common rules
 - **No direct push** to a protected branch; **never force-push** a shared branch; never bypass a ruleset, push
-  protection or gitleaks (`guard-git` hook on the agent side, rulesets on the GitHub side).
-- Work branches: `claude/<lot>` (Claude sessions), `feature/<subject>`, `fix/`, `docs/`, `hotfix/`. One PR per lot,
-  `Closes #n` for each issue.
+  protection or gitleaks.
+- Two lines of defence: the `guard-git` hook on the agent side refuses, before execution, force pushes, pushes to a
+  protected branch (also `HEAD` or a bare `git push` from it), their deletion and `--no-verify`, through grouped
+  options, `git -C`/`-c` and the common shell wrappers; it lets `--dry-run` through. It fails **open** (unreadable
+  input, python3 missing) and can be bypassed (git alias, intermediate script or one passed on a shell's standard
+  input, API): **the real protection remains the server-side ruleset** (PR required, no force-push, no deletion),
+  always enabled.
+- Work branches: `<type>/<short-name>` with the types `lot`, `fix`, `feat`, `chore`, `docs` (adjustable:
+  `.harness/config.json` → `branch_types`), plus `hotfix/` in model A. One PR per lot, `Closes #n` for each issue.
 - GitHub settings (rulesets, merge commits allowed, Dependabot alerts, auto-merge): versioned like code
   (`.github/rulesets/*.json` + `scripts/configure-repo.sh`, idempotent, run by the maintainer; a cloud session
   cannot change them). Tracked in a `type: chore` issue until it is done.
@@ -48,8 +54,8 @@ hotfix/* (from master) ──PR──▶ master, then carried over master → be
 - The version (`MARKETING_VERSION` of the project's configurations, or `VERSION`) and the "What's New" entry are
   **not** modified by lot PRs. At integration:
   1. a PR "Version: <branch> moves to X.Y.Z" sets the version on the integration branch;
-  2. the What's New entry (or `CHANGELOG.md`) is written from the "Changelog" sections of the PRs merged since the
-     last version;
+  2. the What's New entry (or `CHANGELOG.md`) is folded from the `### Ledger` sections of the merged PRs by the
+     steward ([CONVENTIONS](CONVENTIONS.md) §Ledger), or, without a ledger, written from their descriptions;
   3. promotion (model A) or merge (model B);
   4. annotated tag `vX.Y.Z` on the production branch **after** the merge, by the operator (consequential action);
   5. release tracking issue (`type: chore`) closed, with the link to the tag and to the published build.

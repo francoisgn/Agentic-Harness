@@ -1,0 +1,58 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 640" width="1280" height="640" role="img" aria-labelledby="t d">
+<title id="t">Belayline</title>
+<desc id="d">On the left, tangled agent trajectories; they pass through the harness buckle and come out as parallel lanes that clear four checkpoints (intent, TDD, adversarial review, CI) up to the merge; a dashed return path brings lessons back to the harness.</desc>
+<rect width="1280" height="640" rx="0" fill="#0d1117"/>
+<text x="80" y="132" font-family="'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="68" font-weight="700" fill="#f0f6fc">Belayline</text>
+<text x="80" y="183" font-family="Inter, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="27" fill="#9198a1">The open harness that keeps your coding agents on track, from intent to merge.</text>
+<path d="M70.0 351.5 C71.7 364.3 68.9 407.3 78.3 415.5 C87.7 423.6 91.7 416.2 116.8 392.2 C141.8 368.3 172.8 315.9 203.6 295.7 C234.4 275.6 249.5 291.1 270.7 291.6 C292.0 292.1 301.2 282.5 309.8 298.1 C318.4 313.7 290.9 355.1 313.9 369.8 C336.9 384.4 395.4 372.8 424.8 371.3 C454.2 369.7 453.6 364.0 460.8 362.1 L506.8 362.1 C562.8 362.1 551.6 316.6 607.6 316.6 L1104.8 316.6" fill="none" stroke="#a78bfa" stroke-width="4.4" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M70.0 313.5 C73.5 333.0 55.6 393.3 87.7 410.7 C119.8 428.2 206.6 386.5 230.6 400.6 C254.6 414.7 211.6 469.8 207.6 481.2 C203.7 492.6 194.1 491.0 210.8 457.4 C227.5 423.8 269.8 335.4 291.1 313.1 C312.4 290.9 290.7 332.5 317.4 346.3 C344.2 360.2 396.1 377.0 424.8 382.4 C453.5 387.9 453.6 375.3 460.8 373.6 L506.8 373.6 C562.8 373.6 551.6 350.8 607.6 350.8 L1104.8 350.8" fill="none" stroke="#60a5fa" stroke-width="4.4" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M70.0 324.3 C82.9 342.1 117.1 399.0 134.3 413.1 C151.5 427.1 149.8 418.0 155.8 394.6 C161.8 371.2 149.1 290.7 164.2 296.0 C179.4 301.4 202.6 411.2 231.5 421.4 C260.5 431.7 279.7 356.6 309.0 347.5 C338.4 338.3 355.1 369.2 378.2 375.5 C401.4 381.9 408.3 377.5 424.8 379.4 C441.3 381.3 453.6 383.9 460.8 385.0 L506.8 385.0 C562.8 385.0 551.6 385.0 607.6 385.0 L1104.8 385.0" fill="none" stroke="#22d3ee" stroke-width="4.4" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M70.0 440.9 C85.9 419.4 127.1 343.5 149.6 333.3 C172.0 323.1 158.0 370.5 182.0 390.1 C206.1 409.7 257.8 413.0 269.8 431.3 C281.9 449.7 242.4 494.6 242.2 482.0 C242.0 469.4 237.1 401.9 268.8 368.5 C300.5 335.0 369.3 309.2 400.5 314.7 C431.7 320.2 412.7 379.8 424.8 396.1 C436.9 412.5 453.6 396.4 460.8 396.4 L506.8 396.4 C562.8 396.4 551.6 419.2 607.6 419.2 L1104.8 419.2" fill="none" stroke="#fbbf24" stroke-width="4.4" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M70.0 297.4 C85.1 325.6 123.2 405.8 145.6 438.4 C167.9 471.1 171.6 463.6 181.9 460.8 C192.1 458.0 176.8 436.4 196.8 424.4 C216.9 412.5 258.8 395.3 282.0 401.1 C305.2 407.0 287.0 457.9 312.7 453.7 C338.5 449.4 388.4 388.0 410.8 379.8 C433.2 371.5 414.8 406.9 424.8 412.5 C434.8 418.1 453.6 408.8 460.8 407.9 L506.8 407.9 C562.8 407.9 551.6 453.4 607.6 453.4 L1104.8 453.4" fill="none" stroke="#f472b6" stroke-width="4.4" stroke-linecap="round" stroke-linejoin="round"/>
+<line x1="652.4" y1="297.8" x2="652.4" y2="472.2" stroke="#3d444d" stroke-width="2.6" stroke-dasharray="7.0 7.0"/>
+<circle cx="652.4" cy="316.6" r="7.5" fill="#0d1117" stroke="#a78bfa" stroke-width="3.5"/>
+<circle cx="652.4" cy="350.8" r="7.5" fill="#0d1117" stroke="#60a5fa" stroke-width="3.5"/>
+<circle cx="652.4" cy="385.0" r="7.5" fill="#0d1117" stroke="#22d3ee" stroke-width="3.5"/>
+<circle cx="652.4" cy="419.2" r="7.5" fill="#0d1117" stroke="#fbbf24" stroke-width="3.5"/>
+<circle cx="652.4" cy="453.4" r="7.5" fill="#0d1117" stroke="#f472b6" stroke-width="3.5"/>
+<text x="652.4" y="285.9" font-family="'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="17" fill="#9198a1" text-anchor="middle">intent</text>
+<line x1="769.6" y1="297.8" x2="769.6" y2="472.2" stroke="#3d444d" stroke-width="2.6" stroke-dasharray="7.0 7.0"/>
+<circle cx="769.6" cy="316.6" r="7.5" fill="#0d1117" stroke="#a78bfa" stroke-width="3.5"/>
+<circle cx="769.6" cy="350.8" r="7.5" fill="#0d1117" stroke="#60a5fa" stroke-width="3.5"/>
+<circle cx="769.6" cy="385.0" r="7.5" fill="#0d1117" stroke="#22d3ee" stroke-width="3.5"/>
+<circle cx="769.6" cy="419.2" r="7.5" fill="#0d1117" stroke="#fbbf24" stroke-width="3.5"/>
+<circle cx="769.6" cy="453.4" r="7.5" fill="#0d1117" stroke="#f472b6" stroke-width="3.5"/>
+<text x="769.6" y="285.9" font-family="'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="17" fill="#9198a1" text-anchor="middle">TDD</text>
+<line x1="886.8" y1="297.8" x2="886.8" y2="472.2" stroke="#3d444d" stroke-width="2.6" stroke-dasharray="7.0 7.0"/>
+<circle cx="886.8" cy="316.6" r="7.5" fill="#0d1117" stroke="#a78bfa" stroke-width="3.5"/>
+<circle cx="886.8" cy="350.8" r="7.5" fill="#0d1117" stroke="#60a5fa" stroke-width="3.5"/>
+<circle cx="886.8" cy="385.0" r="7.5" fill="#0d1117" stroke="#22d3ee" stroke-width="3.5"/>
+<circle cx="886.8" cy="419.2" r="7.5" fill="#0d1117" stroke="#fbbf24" stroke-width="3.5"/>
+<circle cx="886.8" cy="453.4" r="7.5" fill="#0d1117" stroke="#f472b6" stroke-width="3.5"/>
+<text x="886.8" y="285.9" font-family="'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="17" fill="#9198a1" text-anchor="middle">review</text>
+<line x1="1004.0" y1="297.8" x2="1004.0" y2="472.2" stroke="#3d444d" stroke-width="2.6" stroke-dasharray="7.0 7.0"/>
+<circle cx="1004.0" cy="316.6" r="7.5" fill="#0d1117" stroke="#a78bfa" stroke-width="3.5"/>
+<circle cx="1004.0" cy="350.8" r="7.5" fill="#0d1117" stroke="#60a5fa" stroke-width="3.5"/>
+<circle cx="1004.0" cy="385.0" r="7.5" fill="#0d1117" stroke="#22d3ee" stroke-width="3.5"/>
+<circle cx="1004.0" cy="419.2" r="7.5" fill="#0d1117" stroke="#fbbf24" stroke-width="3.5"/>
+<circle cx="1004.0" cy="453.4" r="7.5" fill="#0d1117" stroke="#f472b6" stroke-width="3.5"/>
+<text x="1004.0" y="285.9" font-family="'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="17" fill="#9198a1" text-anchor="middle">CI</text>
+<circle cx="1104.8" cy="316.6" r="13.6" fill="#3fb950"/>
+<path d="M1098.7 316.6 l4.4 4.6 l8.2 -9.3" fill="none" stroke="#0d1117" stroke-width="3.3" stroke-linecap="round" stroke-linejoin="round"/>
+<circle cx="1104.8" cy="350.8" r="13.6" fill="#3fb950"/>
+<path d="M1098.7 350.8 l4.4 4.6 l8.2 -9.3" fill="none" stroke="#0d1117" stroke-width="3.3" stroke-linecap="round" stroke-linejoin="round"/>
+<circle cx="1104.8" cy="385.0" r="13.6" fill="#3fb950"/>
+<path d="M1098.7 385.0 l4.4 4.6 l8.2 -9.3" fill="none" stroke="#0d1117" stroke-width="3.3" stroke-linecap="round" stroke-linejoin="round"/>
+<circle cx="1104.8" cy="419.2" r="13.6" fill="#3fb950"/>
+<path d="M1098.7 419.2 l4.4 4.6 l8.2 -9.3" fill="none" stroke="#0d1117" stroke-width="3.3" stroke-linecap="round" stroke-linejoin="round"/>
+<circle cx="1104.8" cy="453.4" r="13.6" fill="#3fb950"/>
+<path d="M1098.7 453.4 l4.4 4.6 l8.2 -9.3" fill="none" stroke="#0d1117" stroke-width="3.3" stroke-linecap="round" stroke-linejoin="round"/>
+<text x="1104.8" y="285.9" font-family="'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="17" fill="#3fb950" text-anchor="middle">merge</text>
+<rect x="460.8" y="342.3" width="46" height="85.4" rx="13.8" fill="#0d1117" fill-opacity=".55" stroke="#f0f6fc" stroke-width="5.1"/>
+<line x1="483.8" y1="351.1" x2="483.8" y2="418.9" stroke="#f0f6fc" stroke-width="5.1" stroke-linecap="round"/>
+<path d="M1104.8 475.4 Q1104.8 489.3 1064.8 489.3 L523.8 489.3 Q483.8 489.3 483.8 445.3" fill="none" stroke="#9198a1" stroke-width="2.6" stroke-dasharray="7.0 7.0" stroke-linecap="round"/>
+<path d="M475.0 450.1 L483.8 438.7 L492.6 450.1" fill="none" stroke="#9198a1" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
+<rect x="748.4" y="472.3" width="91.8" height="34.0" fill="#0d1117"/>
+<text x="794.3" y="495.3" font-family="'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="17" fill="#9198a1" text-anchor="middle">lessons</text>
+<text x="80" y="592" font-family="'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="18" fill="#9198a1">Claude Code · Codex · Cursor · Gemini CLI · Copilot · Aider</text>
+</svg>

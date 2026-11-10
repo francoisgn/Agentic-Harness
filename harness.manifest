@@ -18,6 +18,9 @@
 tree      docs                                        .harness/docs
 copy      templates/.github/labels.json               .harness/labels.json
 
+# Licence of the harness (MIT): it travels with the copied files, the project has nothing to do to comply with it
+copy      LICENSE                                     .harness/LICENSE
+
 # Skills: copied into the repository so they also work in a cloud session (which does not load the repository's plugins)
 tree      plugins/harness/skills                      .claude/skills
 

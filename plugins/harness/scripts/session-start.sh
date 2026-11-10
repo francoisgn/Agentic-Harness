@@ -32,9 +32,9 @@ if [ -n "$VENDORED" ]; then
 else
   echo "- Plugin ${PLUGIN:-?}; this repository has not adopted the harness (.harness/ missing): see the harness's docs/ADOPTION.md."
 fi
-echo "- Current branch: ${BRANCH}. Work = a claimed issue, a claude/<lot> branch from the up-to-date integration branch, a draft PR."
+echo "- Current branch: ${BRANCH}. Work = an issue claimed with \`/claim <id>\`, a <type>/<short-name> branch (lot, fix, feat, chore, docs) from the up-to-date integration branch."
 if [ "${CLAUDE_CODE_REMOTE:-}" = "true" ]; then
   echo "- Cloud session (Linux): no Xcode build here; reread app code with compiler-level rigour, handoff to the Mac (MAC-HANDOFF.md)."
 fi
-echo "- Before the PR: self-review against LESSONS.md, review by another model, a single push per lot."
+echo "- Push early and often to a draft PR (no costly CI); \"Ready\" after self-review (LESSONS.md) and review by another model; then one commit per review round."
 exit 0

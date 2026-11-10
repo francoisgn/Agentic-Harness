@@ -190,7 +190,7 @@
 "fillStyle": "solid",
 "strokeColor": "#8b5cf6",
 "label": {
-"text": "5. Ready PR\na single push,\ntraced verdicts",
+"text": "5. Ready PR\nfull CI,\ntraced verdicts",
 "fontSize": 20
 }
 },

@@ -17,7 +17,7 @@ on:
     - cron: "17 5 * * *"   # daily dashboard
     - cron: "47 5 * * 1"   # weekly: settings drift, security (CVE without a commit) if the security job is enabled
   pull_request:
-    types: [opened, edited, reopened, synchronize, ready_for_review]
+    types: [opened, edited, reopened, synchronize, ready_for_review, labeled, unlabeled]   # labels: ledger check
   workflow_dispatch:
 
 permissions: {}
@@ -28,7 +28,7 @@ jobs:
     permissions:
       contents: read
       issues: write
-    uses: francoisgn/belayline-agentic-harness/.github/workflows/labels-sync.yml@v0.2.0
+    uses: francoisgn/belayline-agentic-harness/.github/workflows/labels-sync.yml@v0.3.0
     with:
       apply-aliases: false   # true to rename old labels (e.g. `P1 🔴` → `priority: high`), once the project's workflows and docs use the new names
 
@@ -37,7 +37,7 @@ jobs:
     permissions:
       contents: read
       issues: write
-    uses: francoisgn/belayline-agentic-harness/.github/workflows/issue-hygiene.yml@v0.2.0
+    uses: francoisgn/belayline-agentic-harness/.github/workflows/issue-hygiene.yml@v0.3.0
 
   pr:
     if: github.event_name == 'pull_request'
@@ -45,11 +45,12 @@ jobs:
       contents: read
       issues: write
       pull-requests: read
-    uses: francoisgn/belayline-agentic-harness/.github/workflows/pr-hygiene.yml@v0.2.0
+    uses: francoisgn/belayline-agentic-harness/.github/workflows/pr-hygiene.yml@v0.3.0
     with:
       # Model A (develop → beta → master). Model B (one integration branch): leave empty.
       flow: "beta:develop beta:hotfix/* master:beta master:hotfix/*"
-      require-changelog: true
+      # Ledger (CONVENTIONS.md §Ledger): name of the label if the project keeps one ("ledger"), otherwise empty.
+      ledger-label: ""
 
   # Repository settings "as code" (.github/repo-settings.json): applied on push, drift checked on Monday.
   # Secret REPO_ADMIN_TOKEN (fine-grained, this repository only, "Administration: write"); missing → warning only.
@@ -57,7 +58,7 @@ jobs:
     if: github.event_name == 'push' || github.event_name == 'workflow_dispatch' || (github.event_name == 'schedule' && github.event.schedule == '47 5 * * 1')
     permissions:
       contents: read
-    uses: francoisgn/belayline-agentic-harness/.github/workflows/repo-settings.yml@v0.2.0
+    uses: francoisgn/belayline-agentic-harness/.github/workflows/repo-settings.yml@v0.3.0
     with:
       apply: ${{ github.event_name != 'schedule' }}
     secrets:
@@ -71,33 +72,33 @@ jobs:
       issues: write
       pull-requests: read
       actions: read
-    uses: francoisgn/belayline-agentic-harness/.github/workflows/flow-report.yml@v0.2.0
+    uses: francoisgn/belayline-agentic-harness/.github/workflows/flow-report.yml@v0.3.0
 
   # Docs + security baseline, if the project does not have it already (otherwise delete these jobs: do not pay twice).
   # docs:
-  #   if: github.event_name == 'pull_request' && github.event.action != 'edited'
+  #   if: github.event_name == 'pull_request' && !contains(fromJSON('["edited", "labeled", "unlabeled"]'), github.event.action)
   #   permissions:
   #     contents: read
-  #   uses: francoisgn/belayline-agentic-harness/.github/workflows/docs-security.yml@v0.2.0
+  #   uses: francoisgn/belayline-agentic-harness/.github/workflows/docs-security.yml@v0.3.0
   #   with:
   #     gitleaks: false   # already in the security job
   # security:   # SAST (Semgrep) + SCA (Trivy) + secrets (gitleaks), CI-BUDGET.md §3
-  #   if: (github.event_name == 'pull_request' && github.event.action != 'edited') || (github.event_name == 'schedule' && github.event.schedule == '47 5 * * 1')
+  #   if: (github.event_name == 'pull_request' && !contains(fromJSON('["edited", "labeled", "unlabeled"]'), github.event.action)) || (github.event_name == 'schedule' && github.event.schedule == '47 5 * * 1')
   #   permissions:
   #     contents: read
-  #   uses: francoisgn/belayline-agentic-harness/.github/workflows/security.yml@v0.2.0
+  #   uses: francoisgn/belayline-agentic-harness/.github/workflows/security.yml@v0.3.0
   #   with:
   #     semgrep-configs: "p/default p/secrets p/github-actions"   # + p/swift, p/python…
 
   # AI review service (REVIEW-SERVICE.md): secret ANTHROPIC_API_KEY or CLAUDE_CODE_OAUTH_TOKEN; never required.
   # review:
-  #   if: github.event_name == 'pull_request' && github.event.action != 'edited'
+  #   if: github.event_name == 'pull_request' && !contains(fromJSON('["edited", "labeled", "unlabeled"]'), github.event.action)
   #   permissions:
   #     contents: read
   #     pull-requests: write
   #     issues: read
   #     id-token: write
-  #   uses: francoisgn/belayline-agentic-harness/.github/workflows/ai-review.yml@v0.2.0
+  #   uses: francoisgn/belayline-agentic-harness/.github/workflows/ai-review.yml@v0.3.0
   #   secrets:
   #     ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
   #   with:

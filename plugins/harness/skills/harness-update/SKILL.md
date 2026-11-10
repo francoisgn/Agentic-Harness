@@ -11,7 +11,7 @@ Target version: $ARGUMENTS (empty = latest `vX.Y.Z` tag of `francoisgn/belayline
 1. Current version: `.harness/VERSION`. Latest tag: `git ls-remote --tags --refs https://github.com/francoisgn/belayline-agentic-harness.git 'v*'`
    (in a cloud session, the harness repository must be attached to the session). Read the harness's `CHANGELOG.md`
    between the two.
-2. Branch from the up-to-date integration branch: `git switch -c claude/harness-<tag> origin/<integration>`.
+2. Branch from the up-to-date integration branch: `git switch -c chore/harness-<tag> origin/<integration>`.
 3. Fetch the harness at the tag into a throwaway folder (`git clone --depth 1 --branch <tag> … "$TMPDIR/belayline"`),
    then `"$TMPDIR/belayline/scripts/harness-sync.sh" --target . --dry-run`, and without `--dry-run` if the
    result is as expected.
@@ -20,5 +20,6 @@ Target version: $ARGUMENTS (empty = latest `vX.Y.Z` tag of `francoisgn/belayline
    out of the harness, or `--force`.
 5. Reread the whole `git diff` (LESSONS L17); check that `harness-sync.sh --check` exits 0; the `@vX.Y.Z` references
    in `.github/workflows/harness.yml` follow.
-6. One commit `Belayline: update to <tag>`, one push, a draft PR (`## Changelog`: "None (tooling)"), with, in
-   the body, the items of the harness CHANGELOG that require an action in the project.
+6. One commit `Belayline: update to <tag>`, one push, a draft PR (`Refs #n` of the update issue, or
+   `Direct-PR: harness update`; no `### Ledger`: nothing visible to the user), with, in the body, the items of the
+   harness CHANGELOG that require an action in the project ("Action" lines).

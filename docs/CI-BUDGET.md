@@ -2,8 +2,8 @@
 
 What to put in CI, by tiers: [CI-BASELINE](CI-BASELINE.md). This file says what it costs and how to tool it.
 
-Sources: `docs/CI.md`, `ci.yml`, `security.yml`, `scripts/ci/local-check.sh` of ios-app_credit-immo; `ci.yml`,
-ADR 0005 (and its amendment of 5 November, #477), `CONTRIBUTING.md` §4, `.pre-commit-config.yaml` of HFRnow.
+Sources: `ci.yml`, ADR 0005 (and its amendment of 5 November, #477), `CONTRIBUTING.md` §4, `.pre-commit-config.yaml`
+of HFRnow; practice proven on other projects (CI and security workflows, local CI script).
 
 ## 1. The two billing rules
 On a private repository, the free quota is 2,000 minutes per month, and:
@@ -14,10 +14,57 @@ A **public repository consumes no minutes** (standard runners, macOS included) a
 secret scanning for free: this is the strongest lever when the project can be public.
 
 ## 2. Rules 🟢
-- **Draft PR** while working: nothing runs (jobs conditioned on `github.event.pull_request.draft != true`,
-  and `ready_for_review` in the event types to start CI on the move to "Ready for review").
-- **A single push per lot**, after the local checks (`scripts/ci/local-check.sh` or equivalent) and the Mac build if
-  the app changes. No trial push.
+
+### Push often, pay on the move to "Ready"
+A push must cost nothing; what costs is the CI it triggers. So:
+- **Push early and often to a draft PR**: the work survives a session crash, and it is visible to the other sessions
+  and to the operator. On a draft, **nothing costly runs** (macOS, long jobs, heavy security); at most a Linux check
+  of a few seconds if the project wants one.
+- **The costly CI runs on the move to "Ready for review"**, or on demand through an **explicit label** (e.g.
+  `ci: full`) set on a draft when a macOS verdict is really needed before the end.
+- **One commit per review round**: all the findings of a round fixed, checked locally, then a single push.
+- **Never a push "to see if CI passes" on a ready PR**: the fast checks run locally first (`local-check.sh` or
+  equivalent, pre-commit, Mac build if the app changes); CI confirms, it does not discover. Need to try? Move the PR
+  back to draft, or set the label on the draft.
+- **No minute wasted**: a cancelled run, a skipped job or a docs PR must not start a macOS runner.
+
+The mechanism (a recommendation to adapt; the label name is the project's choice): CI is a reusable workflow, called
+by two separate triggers.
+```yaml
+# .github/workflows/ci.yml: pushes and the move to "Ready"; a draft runs only if it carries the label
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+concurrency:
+  group: ci-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+jobs:
+  ci:
+    if: ${{ !github.event.pull_request.draft || contains(github.event.pull_request.labels.*.name, 'ci: full') }}
+    uses: ./.github/workflows/ci-jobs.yml   # jobs `linux` then `macos` (needs: linux), names = required checks
+---
+# .github/workflows/ci-label.yml: the label set on a draft starts the full CI right away
+on:
+  pull_request:
+    types: [labeled]
+jobs:
+  ci-label:   # another name: its checks (`ci-label / …`) never replace the required checks
+    if: ${{ github.event.label.name == 'ci: full' && github.event.pull_request.draft }}
+    concurrency:   # at job level: a skipped job (another label) joins no group, cancels nothing
+      group: ci-label-${{ github.event.pull_request.number }}
+      cancel-in-progress: true
+    uses: ./.github/workflows/ci-jobs.yml
+```
+- `ready_for_review` in the types: CI starts by itself on the move to "Ready".
+- Labels are handled in a **separate workflow**, with no workflow-level `concurrency`: another label (`ledger`,
+  `status: claimed`…) only produces a skipped job under another name there, which does not cancel the CI in progress
+  and does not publish a "skipped" required check on the head (a skipped job counts as passed for a required check,
+  §4). The required checks come only from `ci.yml`, which starts again on the move to "Ready".
+- A skipped job on a draft does no harm: a draft is not merged, and the move to "Ready" reruns everything.
+- Variant when macOS runners are scarce and the macOS job is required: on a draft, run it on a Linux runner that
+  fails right away ("draft: macOS CI on the move to Ready") rather than waiting for a runner.
+
+### The rest
 - **Group** the Linux checks into one job per workflow (tests + coverage + lint; a single security job).
 - **The macOS job depends on the Linux job** (`needs:`): a red lint or test does not start a macOS runner.
 - **Change detection**: the iOS build starts only if the app or the engine changes (`git diff --quiet BASE...HEAD --
@@ -31,13 +78,12 @@ secret scanning for free: this is the strongest lever when the project can be pu
 - Review bots: no review of drafts or of generated files.
 - When the quota is exhausted: replay the CI locally before every merge (`local-check.sh` reports "INCOMPLETE" when
   a tool is missing, rather than calling itself green).
+- CodeQL and heavy analysis can run only on the integration branch and on the PRs of a dedicated label (risky
+  flows).
 
-HFRnow variant (scarce macOS runners): on a draft, the required macOS jobs fail **immediately** on a
-Linux runner ("Draft PR") instead of waiting; they run for real on the move to "Ready for review". CodeQL Swift
-runs only on the integration branch and on PRs labelled `codeql` (risky flows).
-
-**Order of magnitude (credit-immo, measured on 1 November)**: a push on a PR cost 19 min of quota whatever it touched;
-it costs 4 with no change to the app (or on a Linux failure), 14 otherwise. A promotion costs 4 + 30 min.
+**Order of magnitude**: measure what a push on a ready PR costs, with and without a change to the app; the figure
+guides the settings (change detection, `needs:`, steps reserved for promotions). The dashboard
+([FINOPS](FINOPS.md) §4) tracks the billed minutes.
 
 ## 3. Security baseline
 All free, with no third-party account. Reusable workflow of the harness: `docs-security.yml` (markdownlint, gitleaks,
@@ -96,8 +142,8 @@ the review take care of those (LESSONS L44).
 
 Agents produce far more commits than a human (ratio tracked by the dashboard, [FINOPS](FINOPS.md) §4).
 CI must cost per **ready lot**, not per commit:
-- commits stay local and small; **one push per lot**, as a draft (nothing runs); CI starts on the move to
-  "Ready for review";
+- commits stay small and are **pushed often to the draft** (nothing costly runs there); the full CI starts on the
+  move to "Ready for review" or on the explicit label (§2); after that, one push per review round;
 - fast checks (lint, secrets, unit tests) run **locally before the push** (pre-commit,
   `local-check.sh`): CI confirms, it does not discover;
 - change detection and `paths-ignore`: a docs PR does not start the build; heavy security (SAST, SCA)

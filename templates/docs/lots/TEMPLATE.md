@@ -1,7 +1,7 @@
 # LOT-XXX: <short name>
 
 - **Module / layer:** <engine | app | tooling | docs>
-- **Model:** <author> → <reviewer> (never the same; `difficulty:` label of the issue)
+- **Model:** <author> → <reviewer> (never the same; tier label of the issue, `difficulty:` by default, otherwise deduced from the project's routing)
 - **Difficulty:** trivial | easy | medium | hard (hard spanning several layers = split into lots before starting)
 - **Issue:** #…  ·  **Depends on:** #… (or none)
 

@@ -15,7 +15,7 @@ Identifier: the one given on the first line of the prompt (`<project>.<orchestra
 2. For each signal, reread the real state before concluding (L18, L19): last comment, PR head, CI.
 3. Return a table `Signal | Item | Probable cause | Action | Who`:
    - stalled claimed issue → stop the session, note the state on the issue, hand it back (orchestrator);
-   - CI loop → stop, local diagnosis, a single push; review loop → counter-check, class fix;
+   - CI loop → stop, local diagnosis, one commit per round; review loop → counter-check, class fix;
    - `status: blocked` / `status: needs-decision` → the exact question and the person who decides;
    - cost drift (minutes, failure rate) → the cause (job, PR) and the CI-BUDGET rule that applies.
 4. Overall status 🟢/🟠/🔴 on the first line. You write nothing on GitHub: the orchestrator decides.

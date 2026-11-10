@@ -17,6 +17,6 @@ Request: $ARGUMENTS. Reference: `.harness/docs/METHODOLOGY.md` §2 (otherwise `$
    - `### Definition of done`: tests (written first, seen red), docs updated, review by another model, compliance if
      the scope requires it, what will be validated on the device;
    - `### Out of scope` and `### Sources` (nothing guessed).
-3. Labels: type, priority, difficulty, status; `status: needs-decision` + the exact question if a product decision is
-   missing.
+3. Labels: type, priority, status, and difficulty if the project has that axis (prefixes: `.harness/config.json` →
+   `labels`, METHODOLOGY §4); `status: needs-decision` + the exact question if a product decision is missing.
 4. **Show the text to the operator before creating the issue**; after approval, create it and give the link.

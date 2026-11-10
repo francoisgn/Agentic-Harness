@@ -24,6 +24,19 @@ moving to this version.
   expensive, heavy security, process; six workflow invariants; survey of three real projects.
 - The harness applies its own standard: README with badges and progress block, `CONTRIBUTING.md`, checked in CI.
 - `scripts/diagrams/render.py`: `--dir` option.
+- **Repository identity** (CONVENTIONS §Repository identity): every repository that follows the harness carries a
+  description (one sentence), topics (5 to 15), a banner at the top of the README (`docs/assets/banner.svg`) and a
+  social preview (`docs/assets/social-preview.png`, 1280×640, text in English, uploaded by hand by the operator). The
+  doc steward checks all four (STEWARDS §2, agent `doc-steward`), ADOPTION plans for it.
+- `repo-settings.py`: warns (without blocking) if the description or the topics are missing or malformed; a
+  description left as the template's (`<…>`) is no longer sent to GitHub.
+- The harness applies the rule to itself: description rewritten (any coding agent, no longer only Claude Code),
+  topics widened to the agents covered, banner and social preview added; `check-framework.py` checks description,
+  topics and images.
+- **MIT licence** (`LICENSE`): the harness had none; `harness-sync.sh` copies it into `.harness/LICENSE` with the
+  vendored files.
+- **`SECURITY.md`**: versions covered, private report (never a public issue), response times, scope; direct link
+  from the issue template chooser.
 
 **Action**: point `uses:` references and the clone URL at `francoisgn/belayline-agentic-harness` (the sync rewrites
 `harness.yml`); reinstall the plugin as `belay@belayline`. Then run `harness-sync.sh` again; rename the markers `harness:begin cadre`/`harness:end cadre` to `harness`,
@@ -32,6 +45,60 @@ and `avancement` to `progress` in README; run the label sync once with `apply-al
 An existing README is not touched: `python3 .harness/scripts/readme-check.py` lists the gaps; to switch it off,
 `"readme": false` in `.harness/config.json`. The `docs` job of `harness.yml`, if enabled, now checks the README
 (`readme: false` to avoid it).
+Fill in the description and the topics in `.github/repo-settings.json`, add the two images (an issue is enough to
+start); the operator uploads the social preview in the repository settings. The next sync adds `.harness/LICENSE`.
+
+## 0.3.0 — 2026-11-09
+
+Feedback from the first consumer project: a neutral harness, rules that no longer contradict each other. **Breaking
+convention change** (before 1.0.0, a MINOR may break): branches, claims and PR bodies change.
+
+- **Neutral**: no more reference to the maintainer's other projects (names, decision numbers, measured costs,
+  anecdotes); their lessons stay, reworded to hold everywhere (source "field" in LESSONS).
+- **Push often, pay at "Ready"** (CI-BUDGET §2): replaces "one push per lot, no trial push". Push early and often on
+  a draft PR (backup, visibility); the expensive CI only runs on the switch to "Ready" or on an explicit label
+  (workflow pattern provided); one commit per review cycle; never a push "to see" on a ready PR. The dashboard no
+  longer counts skipped or cancelled runs as tested pushes.
+- **Claim** = comment `/claim <id>` (first line), replayed in order: the first claim wins, only repository members
+  count, `/release [<id>]` gives it back; the PR carries `Claim: <id>`. Replaces "Claimed: branch …" (ESSENTIALS,
+  METHODOLOGY, CONVENTIONS, ORCHESTRATION, skills, label, session-start).
+- **Configurable label axes**: `.harness/config.json` → `labels.model_prefixes`, `labels.size_prefixes`;
+  `/lot-start` no longer stops on a missing tier or size label (deduced from the text and the routing, stated in the
+  claim).
+- **Ledger**, optional building block (CONVENTIONS §Ledger): PRs no longer touch the shared logs, their entries go
+  in a `### Ledger` section of the body (label `ledger`), which a steward folds after the merge into a docs PR
+  reproduced by the project's script. `pr-hygiene.yml`: input `ledger-label` (section ↔ label check). `/lot-finish`
+  and the PR template: issue line, `Claim:`, lot, problem / cause / change / tests, `### Ledger` only if the project
+  keeps one, instead of `## Changelog`.
+- **Branches** `<type>/<short-name>` (`lot`, `fix`, `feat`, `chore`, `docs`; `branch_types` in `config.json`)
+  instead of `claude/<lot>`, everywhere (skills, docs, templates, sync workflow, hook message). The dashboard
+  recognises an agent PR by its `Claim:` line or its generation footer.
+- **guard-git** hardened: grouped options (`-fu`, `-uf`, `-nm`), abbreviations, `--force-with-lease`, `+refspec`,
+  `--mirror`, `--all`, deletion of a protected branch (`--delete`, `-d`, `:branch`), `git -C`, `git -c`,
+  wrappers (`env`, `command`, `exec`, `sudo`, `xargs`, `eval`, `bash -c`, `sh -c`…), subshells, groups,
+  substitutions, here-documents, every separator; bare `git push`, `git push origin` and `HEAD` resolved against the
+  current branch (`rev-parse`, or the branch chosen earlier on the line by `git switch` / `git checkout`), `@` as
+  `HEAD`, `--tags` alone allowed, wildcard refspecs covering a protected branch refused; falls back to a cautious
+  expression if the command cannot be split. Lets through `--dry-run`, `--force-if-includes` alone and unprotected
+  branches; stays open on unreadable input. The server-side ruleset remains the real protection (BRANCHING-RELEASE
+  §Common rules). Tests: `scripts/tests/test_guard_git.py`.
+- **Managed blocks** of `CLAUDE.md` / `AGENTS.md`: `harness-sync.sh` lives in the harness repository (how to run it
+  from a project); explicit precedence, project deviations in a "Harness overrides" section of its `AGENTS.md`
+  (added to the template).
+
+**Action**:
+- `/harness-update` to v0.3.0; the update PR shows the new managed blocks.
+- Create the "Harness overrides" section in `AGENTS.md` and write there what the project keeps its own way
+  (branches, labels, claims, merge policy).
+- `.harness/config.json` (project file, not rewritten): add as needed `branch_types`, `labels`
+  (`model_prefixes`, `size_prefixes`; `[]` if the axis does not exist), `ledger` (`enabled`, `label`,
+  `fold_command`).
+- Branches and claims: move to `<type>/<short-name>` and `/claim <id>` (or record the deviation).
+- `harness.yml`: remove `require-changelog: true` from the `pr` job (the PR template no longer has a "Changelog"
+  section); set `ledger-label: ledger` if the project keeps a ledger, and create the labels `ledger` and
+  `ledger: done` in `.github/labels.local.json`. `.github/pull_request_template.md` (project file): take over the
+  new template as needed.
+- Project CI: apply the pattern of CI-BUDGET §2 (expensive jobs skipped on a draft, unless an explicit label).
 
 ## 0.2.0 — 2026-11-07
 
@@ -89,7 +156,7 @@ the `flow` job (see the template), enable `security` and `review` as needed. Fil
 
 ## 0.1.0 — 2026-11-07
 
-First version, distilled from HFRnow (`dev-swift`) and ios-app_credit-immo (`develop`).
+First version, distilled from HFRnow (`dev-swift`) and another project.
 
 - Docs (French): ESSENTIALS (rules loaded in every session), METHODOLOGY, CONVENTIONS, LESSONS (82 scoped lessons,
   sources cited), ORCHESTRATION, REVIEW-ROUNDS, BRANCHING-RELEASE, CI-BUDGET, MAC-HANDOFF, ADOPTION, ADR 0001 and

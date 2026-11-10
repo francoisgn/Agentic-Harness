@@ -20,7 +20,7 @@ class CheckFrameworkTests(unittest.TestCase):
         self.tmp = pathlib.Path(tempfile.mkdtemp())
         for d in ("plugins", "docs", "templates", "scripts", ".github"):
             shutil.copytree(ROOT / d, self.tmp / d)
-        for f in ("harness.manifest", "VERSION", "CHANGELOG.md"):
+        for f in ("harness.manifest", "VERSION", "CHANGELOG.md", "README.md", "LICENSE"):
             shutil.copy(ROOT / f, self.tmp / f)
 
     def tearDown(self):
@@ -79,6 +79,30 @@ class CheckFrameworkTests(unittest.TestCase):
 
     def test_copy_passes(self):
         self.assertEqual(run(self.tmp).returncode, 0)
+
+    def test_banner_must_exist(self):
+        (self.tmp / "docs/assets/banner.svg").unlink()
+        r = run(self.tmp)
+        self.assertEqual(r.returncode, 1)
+        self.assertIn("banner.svg", r.stdout)
+
+    def test_readme_must_show_banner(self):
+        p = self.tmp / "README.md"
+        p.write_text(p.read_text().replace("docs/assets/banner.svg", "docs/assets/other.svg"))
+        self.assertIn("README.md", run(self.tmp).stdout)
+
+    def test_social_preview_must_be_1280_by_640(self):
+        p = self.tmp / "docs/assets/social-preview.png"
+        data = bytearray(p.read_bytes())
+        data[16:20] = (1200).to_bytes(4, "big")
+        p.write_bytes(bytes(data))
+        self.assertIn("1280×640", run(self.tmp).stdout)
+
+    def test_repository_needs_description_and_topics(self):
+        p = self.tmp / ".github/repo-settings.json"
+        p.write_text(p.read_text().replace('"topics": [', '"topics_": ['))
+        out = run(self.tmp).stdout
+        self.assertIn("topics", out)
 
     def test_agent_name_must_match_file(self):
         p = self.tmp / "plugins/harness/agents/issue-steward.md"

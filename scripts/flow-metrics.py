@@ -21,7 +21,10 @@ import subprocess
 import sys
 import time
 
+# Agent PR: `Claim: <id>` of an agent (a human claims with `human/<login>`, CONVENTIONS.md §PR), generation footer,
+# or old `claude/...` branch (convention before 0.3.0, kept for history).
 AGENT_PREFIXES = ("claude/",)
+AGENT_BODY_RE = re.compile(r"^Claim:[ \t]*(?!human/)\S+|Generated with \[Claude Code\]", re.M)
 LABEL_CLAIMED = "status: claimed"
 BOTTLENECK_LABELS = ("status: blocked", "status: needs-decision")
 HIGH_PRIORITY_LABELS = ("priority: critical", "priority: high")
@@ -83,7 +86,7 @@ def quality(merged):
         if not events:
             q["untraced"] += 1
             continue
-        side = q["agent"] if p["head"]["ref"].startswith(AGENT_PREFIXES) else q["human"]
+        side = q["agent"] if is_agent(p) else q["human"]
         q["reviewed"] += 1
         side["reviewed"] += 1
         problems = [e for e in events if e["problem"]]
@@ -105,6 +108,11 @@ def quality(merged):
     q["fix_commits_mean"] = round(sum(fix_commits) / len(fix_commits), 1) if fix_commits else None
     q["fix_hours_median"] = round(statistics.median(fix_hours), 1) if fix_hours else None
     return q
+
+
+def is_agent(pull):
+    """PR written by an agent (AGENT_BODY_RE), rather than by a human."""
+    return pull["head"]["ref"].startswith(AGENT_PREFIXES) or bool(AGENT_BODY_RE.search(pull.get("body") or ""))
 
 
 def parse_time(value):
@@ -147,10 +155,11 @@ def analyse(data, now, stall_hours=24, draft_stall_hours=120, max_ci_runs=6, max
                             "high_priority": False, "url": p.get("html_url")})
 
     # One CI run = one tested push on the PR: distinct SHAs of the `pull_request` runs of its branch. Neither the number
-    # of workflows per push nor the push/schedule runs of a promotion branch (develop) count.
+    # of workflows per push nor the push/schedule runs of a promotion branch (develop) count, nor do runs that were
+    # entirely skipped or cancelled: pushing often on a draft costs nothing and is not a loop (CI-BUDGET §2).
     pushes_by_branch = {}
     for r in runs:
-        if r.get("event") == "pull_request":
+        if r.get("event") == "pull_request" and r.get("conclusion") not in ("skipped", "cancelled"):
             pushes_by_branch.setdefault(r.get("head_branch"), set()).add(r.get("head_sha"))
     loops = []
     for p in open_pulls:
@@ -201,7 +210,7 @@ def analyse(data, now, stall_hours=24, draft_stall_hours=120, max_ci_runs=6, max
 
     window_start = now - window_days * 86400
     merged = [p for p in pulls if p.get("merged_at") and parse_time(p["merged_at"]) >= window_start]
-    agent = [p for p in merged if p["head"]["ref"].startswith(AGENT_PREFIXES)]
+    agent = [p for p in merged if is_agent(p)]
     leads = [_hours(parse_time(p["merged_at"]) - parse_time(p["created_at"])) for p in merged]
 
     durations = []

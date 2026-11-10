@@ -1,11 +1,11 @@
 {
   "$comment": "Repository settings of the harness, applied on merge by .github/workflows/settings.yml (scripts/repo-settings.py). Change them by PR, never by hand in Settings (drift is reported every week).",
   "repository": {
-    "description": "Versioned harness to steer agentic development (Claude Code): intent and TDD, issues → lots → PRs, adversarial reviews, pluggable compliance, stewards, FinOps and flow dashboard.",
+    "description": "Belayline: versioned, open harness for building software with coding agents (Claude Code, Codex, Cursor, Gemini CLI, Copilot, Aider): intent and TDD, issues → lots → PRs, adversarial reviews, pluggable compliance, stewards, FinOps and a flow dashboard.",
     "has_wiki": false,
     "delete_branch_on_merge": true
   },
-  "topics": ["agentic", "claude-code", "ai-agents", "devops", "code-review", "compliance", "finops", "tdd", "github-actions", "framework"],
+  "topics": ["ai-agents", "coding-agents", "agentic-coding", "claude-code", "codex", "cursor", "gemini-cli", "github-copilot", "aider", "agents-md", "tdd", "code-review", "compliance", "finops", "github-actions"],
   "rulesets": [
     {
       "name": "protected master",

@@ -1,7 +1,7 @@
 # Orchestration: parallel sessions, subagents, model choice
 
-Sources: `docs/agents/ORCHESTRATION.md`, `AGENTS.md` §6 and `docs/agents/EXTERNAL-AGENTS.md` §7–§8 of HFRnow;
-model labels and the rule "the label value is authoritative" of ios-app_credit-immo.
+Sources: `docs/agents/ORCHESTRATION.md` (§Claims), `AGENTS.md` §6 and `docs/agents/EXTERNAL-AGENTS.md` §7–§8 of
+HFRnow; practice proven on other projects (model-tier labels, "the label value is authoritative").
 
 Costs, model routing and quotas: [FINOPS](FINOPS.md). Upkeep roles (issues, docs, flow):
 [STEWARDS](STEWARDS.md). Ready-to-use agents: `.claude/agents/` (`adversarial-reviewer`, `issue-steward`,
@@ -21,8 +21,10 @@ finish, then report to the operator: what is done (with the link of every public
 resumes.
 
 ## 2. Model choice
-A starting point, adjusted with use. **The value of the issue's `difficulty:` label is authoritative**; when in doubt,
-take the tier above.
+A starting point, adjusted with use. **The value of the issue's tier label is authoritative** (prefix `difficulty:`
+by default, adjustable: `.harness/config.json` → `labels.model_prefixes`, [METHODOLOGY](METHODOLOGY.md) §4); when in
+doubt, take the tier above. **Without a label**, do not stop: the tier is deduced from the project's routing table
+(its `AGENTS.md`), otherwise from the table below applied to the issue text, and the claim says which one was chosen.
 
 | Label | Typical work | Reviewed by |
 |---|---|---|
@@ -72,8 +74,9 @@ Before moving the PR to "Ready for review":
   APPROVED. Bot findings follow [REVIEW-ROUNDS](REVIEW-ROUNDS.md).
 
 ## 4. Child sessions (orchestrator)
-- **One task per session**: one issue (or one lot), claimed by the orchestrator on behalf of the child, with the same
-  session id; the child claims nothing else.
+- **One task per session**: one issue (or one lot), claimed by the orchestrator on behalf of the child
+  (`/claim <child's id>`), with the same id from start to finish; the child claims nothing else, and its PR carries
+  `Claim: <id>`.
 - Every child gets an **id** (§7): first line of its prompt, title and tags of its session.
 - A **child's prompt is self-sufficient**: guardrails restated (ESSENTIALS.md and the operator's rules), exact
   task, stop conditions ("if X contradicts the plan, stop and report"), fixed report format, text to post word for
@@ -93,13 +96,13 @@ Before moving the PR to "Ready for review":
 - A cloud session's GitHub access covers only the repositories attached to it (`add_repo` to add one).
 
 ## 5. Lots in parallel
-- One lot = one branch = **one worktree** (`git worktree add ../<project>-<lot> -b claude/<lot> origin/<integration>`),
+- One lot = one branch = **one worktree** (`git worktree add ../<project>-<lot> -b lot/<short-name> origin/<integration>`),
   removed at the end (`git worktree remove`), with its build directories.
 - Parallelise what is independent; serialise what touches the same files. A shared doc section: common heading
   first, one subsection per lot (LESSONS L41).
-- The CI budget bounds parallelism: HFRnow has 5 concurrent macOS jobs; an app PR takes 2, an engine PR 1, so
-  at most 2 app PRs + 1 other in CI at a time ([CI-BUDGET](CI-BUDGET.md)).
-- Limit of open PRs per contributor (HFRnow: 5): a ready PR does not stay open; at the limit, prepare the
+- The CI budget bounds parallelism: count the account's concurrent macOS jobs and what a PR takes of them (e.g. 5
+  jobs, 2 per app PR, 1 per engine PR: at most 2 app PRs + 1 other in CI at a time) ([CI-BUDGET](CI-BUDGET.md)).
+- Limit of open PRs per contributor (e.g. 5): a ready PR does not stay open; at the limit, prepare the
   next one on a pushed branch without a PR and say so on the issue ("Handoff: branch `<name>` at `<sha>`, done: …,
   left: …").
 - Push refused because another session pushed: `fetch`, merge or rebase on top (never losing your
@@ -124,10 +127,10 @@ its project, its orchestrator, its role and its task, and find it everywhere
    │          │            │        └─ what it works on: i312 (issue), LOT-082, pr231, or a word (docs, quotidien)
    │          │            └─ role, fixed vocabulary below
    │          └─ orchestrator that started it: orc-<ddmm>[a|b…] (start date, letter when several on the same day); "solo" without an orchestrator
-   └─ short project name, stable: hfrnow, credit, harness
+   └─ short project name, stable: hfrnow, shop, harness
 ```
 
-Examples: `hfrnow.orc-0711.lot.LOT-082` · `hfrnow.orc-0711.rev.pr231` · `credit.orc-0711.conf-gdpr.pr88` ·
+Examples: `hfrnow.orc-0711.lot.LOT-082` · `hfrnow.orc-0711.rev.pr231` · `shop.orc-0711.conf-gdpr.pr88` ·
 `hfrnow.orc-0711.st-issues.quotidien` · `harness.solo.lot.i12` · `hfrnow.orc-0711.lot.LOT-082.2` (restart).
 
 | Role | Agent | Role | Agent |
@@ -145,8 +148,9 @@ Display rules, from shortest to most complete:
   (e.g. `[hfrnow] lot LOT-082 #312 · sonnet ← orc-0711`).
 - **Session tags**: `project:<project>`, `orc:<orchestrator>`, `role:<role>`, `issue:<n>`, `lot:<LOT-xxx>`,
   `model:<tier>` (filterable with `list_sessions`).
-- **Branch and worktree**: unchanged (`claude/<lot>`, `../<project>-<lot>`); the id links them.
-- **Claim, closing comments, review verdicts**: the line `Agent: <id> (<model>)`.
+- **Branch and worktree**: `<type>/<short-name>`, `../<project>-<lot>`; the id links them through the claim.
+- **Claim**: `/claim <id>` on the first line; **PR**: `Claim: <id>`.
+- **Closing comments, review verdicts**: the line `Agent: <id> (<model>)`.
 - **Commits**: trailer `Agent: <id>` under the attribution. **PR**: the agent ids in the model line
   (`Author model: sonnet (hfrnow.orc-0711.lot.LOT-082) · reviewer: opus (hfrnow.orc-0711.rev.pr231)`).
 - The orchestrator keeps the **list of its live agents** (id, issue, status, started at) in its

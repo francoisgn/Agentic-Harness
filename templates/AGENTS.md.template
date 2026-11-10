@@ -2,3 +2,8 @@
 
 <!-- harness:begin harness -->
 <!-- harness:end harness -->
+
+## Harness overrides
+<!-- Deviations of the project from the Belayline harness, each with its reason (they win over .harness/docs/).
+     E.g.: "Branches: `<host>/<name>` instead of `<type>/<short-name>`, because…"; "No difficulty label: the
+     tier is read in docs/LOTS.md". Empty if the project follows the harness as is. -->
