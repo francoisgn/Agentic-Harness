@@ -68,7 +68,7 @@ and can be taken without the rest.
 |---|---|---|
 | Understand the method in 5 minutes | [ESSENTIALS](docs/ESSENTIALS.md), then the three diagrams above | "Read `docs/ESSENTIALS.md` and tell me what my project is missing" |
 | Avoid mistakes already made | [LESSONS](docs/LESSONS.md): 82 lessons sorted by scope, each one sourced | "Review my diff against `docs/LESSONS.md`" (skill `/lessons-check`) |
-| Set up a lean, safe CI | [CI-BASELINE](docs/CI-BASELINE.md) (tiers, invariants), [CI-BUDGET](docs/CI-BUDGET.md) (costs, tools) | "Compare my workflows with the six invariants of `docs/CI-BASELINE.md`" |
+| Set up a lean, safe CI | [CI-BASELINE](docs/CI-BASELINE.md) (tiers, invariants), [CI-BUDGET](docs/CI-BUDGET.md) (costs, tools) | "Compare my workflows with the six invariants of `docs/CI-BASELINE.md`"; skill `/local-check` (one local command = the CI) |
 | A README that stays true | [README-STANDARD](docs/README-STANDARD.md) | `/readme-update`, or `python3 scripts/readme-check.py --root <project>` |
 | Have an agent's work reviewed | [REVIEW-ROUNDS](docs/REVIEW-ROUNDS.md), [ORCHESTRATION](docs/ORCHESTRATION.md) §3 | Agent `adversarial-reviewer`, skill `/review-round` |
 | Frame an issue before coding | [METHODOLOGY](docs/METHODOLOGY.md) §2 bis | Skill `/intent` |
@@ -123,7 +123,7 @@ Knowledge flows both ways: propose a lesson born in your project through the "Le
 | [`docs/adr/`](docs/adr/README.md) | Decisions of the harness |
 | [`docs/assets/`](docs/assets) | Visual identity: README banner (`banner.svg` → `.png`), social preview (`social-preview.svg` → `.png`, 1280×640) |
 | [`docs/diagrams/`](docs/diagrams) | Diagrams: `.json` source, `.excalidraw` scene (editable on excalidraw.com), `.svg` image |
-| `plugins/harness/` | Claude Code adapter: 11 skills, 13 agents, hooks, plugin |
+| `plugins/harness/` | Claude Code adapter: 12 skills, 13 agents, hooks, plugin |
 | `templates/` | Vendored templates |
 | `.github/workflows/` | Reusable workflows (labels, hygiene, security, AI review, dashboard, settings) and the harness CI |
 | `scripts/` | Sync, dashboard, compliance, settings, diagram rendering, README check, consistency checks, tests |
@@ -132,10 +132,10 @@ Knowledge flows both ways: propose a lesson born in your project through the "Le
 
 One CI job (`ci.yml`), each step run even if the previous one fails: harness consistency (skills, agents, manifest,
 labels, naming, required checks, description, topics, banner and social preview), tests (vendoring, hooks, dashboard,
-compliance, settings, diagrams), ShellCheck, versions, actionlint, zizmor, markdownlint, gitleaks. Locally:
+compliance, settings, diagrams), ShellCheck, versions, actionlint, zizmor, markdownlint, gitleaks. Locally, the same
+steps (a test keeps them in line with `ci.yml`; a missing tool gives INCOMPLETE, never green):
 ```bash
-python3 scripts/check-framework.py && python3 -m unittest discover -s scripts/tests -p 'test_*.py' \
-  && scripts/tests/test-harness-sync.sh && python3 scripts/diagrams/render.py --check
+scripts/local-check.sh            # everything CI runs; --quick: only the steps whose files changed
 ```
 
 ## Versions

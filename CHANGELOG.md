@@ -27,6 +27,11 @@ moving to this version.
   label. New `doc-links.py` (vendored as `.harness/scripts/doc-links.py`): relative links and cross-file anchors in
   Markdown resolve, run in the docs job of `docs-security.yml` (input `doc-links`) and in the harness CI. STEWARDS §2
   describes three levels: per PR, at merge, weekly safety net.
+- **Local check = the CI** ([CI-BASELINE](docs/CI-BASELINE.md) §3): skill `/local-check` writes
+  `scripts/local-check.sh` from the project's workflows (`--quick` for what changed, full by default), seeded as a
+  skeleton that reports INCOMPLETE until it has steps; summary and result OK / FAILED / INCOMPLETE (exit 0 / 1 / 2),
+  a missing tool or another host is never green. `/lot-finish` step 1 runs it. The harness's own script replays
+  `ci.yml` (drift tested).
 - **Lesson classes**: `/lesson-propose` classifies each item as mechanical (proposed check as an issue, no line),
   judgment (a lesson line) or one-off (nothing); the "Lesson" form asks for the class and the check; header of
   `docs/LESSONS.md` explains them.
@@ -95,6 +100,8 @@ start); the operator uploads the social preview in the repository settings. The 
 Add a `Docs:` line to `.github/pull_request_template.md` (a project file, not rewritten; see the template's). The
 `docs` job, if enabled, now checks relative links and cross-file anchors once the sync vendors `doc-links.py`: fix
 what it lists, or `doc-links: false`; `docs-code-paths: ""` in the `pr` job silences the doc impact warning.
+The next sync also seeds `scripts/local-check.sh`, which reports INCOMPLETE until `/local-check` fills in its steps
+(a project with its own command names it in `CLAUDE.md` and adds `scripts/local-check.sh` to `exclude`).
 
 ## 0.3.0 — 2026-11-09
 

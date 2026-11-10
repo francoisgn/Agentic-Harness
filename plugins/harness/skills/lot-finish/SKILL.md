@@ -11,8 +11,9 @@ References: `.harness/docs/CONVENTIONS.md` (§Pull requests, §Ledger, §GitHub 
 §3 (adversarial review), `.harness/docs/CI-BUDGET.md` §2 (otherwise the same files under
 `${CLAUDE_PLUGIN_ROOT}/docs/`).
 
-1. **Local checks**: tests, lint, coverage, the project's local CI script (`CLAUDE.md` › Build and tests).
-   `git status`: no tracked file forgotten, no artefact. Each new test has been seen **failing** without the
+1. **Local checks**: the project's local check, `scripts/local-check.sh` (or the command `CLAUDE.md` › Build and
+   tests names; none: `/local-check`). FAILED: fix. INCOMPLETE: the lot is **not** called verified; the PR's
+   **Tests** says which steps did not run and why (from the summary). `git status`: no tracked file forgotten, no artefact. Each new test has been seen **failing** without the
    change. App code that cannot be compiled here (Linux cloud): reread with compiler-level rigour, and noted.
 2. **Self-review**: skill `/lessons-check` (or by hand against `LESSONS.md`). Docs, plan, regulation updated in the
    same commits; **README**: `/readme-update` (the lot's row in the progress table, badges, architecture diagram if
