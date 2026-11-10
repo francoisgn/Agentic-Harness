@@ -5,6 +5,10 @@ moving to this version.
 
 ## Unreleased
 
+- **Two explicit reviews** ([REVIEW-ROUNDS](docs/REVIEW-ROUNDS.md) §The two reviews): the adversarial review
+  (intent: issue + diff + lessons, isolated fresh sub-agent that refuses to give a verdict if it cannot be isolated)
+  and the code review (diff only, by the review service) are named separately; one clean round on the current head
+  ends the loop (within 3 cycles) and settled findings are listed in the PR, not reopened without new evidence.
 - **Renamed to Belayline** (formerly agentic-harness): repository `francoisgn/belayline-agentic-harness`, plugin
   `belay` in marketplace `belayline` (`claude plugin install belay@belayline`). The vendored folder `.harness/`,
   `harness-sync.sh`, `harness.yml` and the `harness:` markers keep their names.
