@@ -35,10 +35,12 @@ checks the change against the **intent**, the second checks the **code** on its 
   confirmation from the same reviewer, on the delta only, posted as a verdict on the new head with the usual first
   line (`**Adversarial review (<model>): APPROVED** — head <sha>`, or `CHANGES REQUESTED`). Any other delta (code,
   tests, configuration, a sourced fact, anything security-related) gets a full re-review.
-- **Settled findings are listed in the PR**, each with its recorded reason (fixed in a commit, or not fixed and why).
-  A reviewer that reopens one is answered by pointing to that record: it counts as a new finding only with **new
-  evidence** (a new failure path, a changed head, a new input). A security finding is never settled this way: it
-  stays open until the maintainer decides.
+- **Settled findings are listed in the PR**, each with its recorded reason and an **outcome tag** at the start of the
+  line: `[fixed]` (fixed in a commit, cite it), `[declined: false positive]` (the claim does not hold, say why) or
+  `[declined: not worth it]` (real but not worth the change, say why). The tags make the value of reviews searchable
+  later ([FINOPS](FINOPS.md) §5); the harness computes nothing from them. A reviewer that reopens one is answered
+  by pointing to that record: it counts as a new finding only with **new evidence** (a new failure path, a changed
+  head, a new input). A security finding is never settled this way: it stays open until the maintainer decides.
 
 1. **Read everything first**: inline comments, "Outside diff range", details, the "Prompt for AI agents" block, every
    open thread of the PR.

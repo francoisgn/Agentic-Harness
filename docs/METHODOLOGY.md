@@ -156,10 +156,25 @@ spanning several layers must be split into lots.
 - Parallel lots that write the same section of a shared doc: create the common heading first, each lot adds only
   its sub-section (LESSONS L41).
 
+**Size: split as much as possible, no cap.** Lots legitimately differ in size (a migration, a rename across the
+repository), so there is no line or file limit. The rule is a recommendation:
+- **Split as much as possible**: a lot that a reviewer cannot read in one sitting, or that mixes layers, becomes
+  several lots.
+- **A stream has a head, and the head is an issue**: related lots are sub-issues of one `type: epic` issue, which
+  holds the plan, the order, the dependencies and the progress. Not an agent: an agent kept alive to "own" a stream
+  goes stale, costs context and has to be watched. The only long-lived agents are the orchestrator and the stewards
+  ([ORCHESTRATION](ORCHESTRATION.md)).
+- **Splitting is done by a disposable agent**: a `plan` agent splits at the start of a stream, or when it must be
+  re-planned, writes the result in the epic issue and its sub-issues, then stops.
+- **A lot that stays big says why**, in one line of the PR (e.g. "one atomic rename, cannot be split"); its review
+  can then go area by area or commit by commit.
+
 ## 6. Work discovered along the way
 
 TODO, pending decision, debt, bug seen in another lot: **a labelled issue**, never only a line in a `.md`, nor
 only a session message. A problem in someone else's lot is reported on their issue or PR.
+A bug found in merged work names its origin when it is known: the line `Introduced by #NNN` (the PR) in the
+`type: bug` issue. It is how a project later sees which defects got through review ([FINOPS](FINOPS.md) §5).
 
 ## 7. External contributions
 

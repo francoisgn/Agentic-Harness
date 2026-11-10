@@ -51,6 +51,10 @@ Rules:
 3. **A stronger model reviews, a fitting model writes.** Measure: if a fast tier needs more than two review
    rounds on a type of task, raise the label for that type; if a frontier tier never finds anything to fix
    in a solid author's work, the review can go down one notch for that type.
+   **This moves with the models.** As models improve, the adversarial review should find fewer real defects, and a
+   lower tier can take it over. Lowering the reviewer tier is the operator's decision, taken on the data of §5 (few
+   `[fixed]` findings, few bugs `Introduced by` a PR the review approved), never an automatic rule. Raise it back
+   when post-merge bugs come back.
 
 ## 3. Quotas, parallelism and resuming
 
@@ -94,3 +98,31 @@ The problem-PR ratio also feeds routing (§2 rule 3): a model tier whose PRs oft
 findings is under-assigned for that type of task. What the script does not
 see (tokens consumed per session) is read by hand in the provider's console and carried into the
 orchestrator's weekly report.
+
+## 5. What reviews are worth: the data, not a metric
+
+Does the adversarial review prevent real defects, or does it cost tokens and rounds for little? The harness does not
+compute an answer: it keeps the data readable, and the operator draws the conclusion for their own project.
+
+The data, written as part of the normal flow:
+- **Outcome of each finding**: the settled findings listed in the PR start with `[fixed]`,
+  `[declined: false positive]` or `[declined: not worth it]` ([REVIEW-ROUNDS](REVIEW-ROUNDS.md), convergence).
+- **Defects that got through**: a bug found after a merge carries the line `Introduced by #NNN` (the PR that brought
+  it, when known; [METHODOLOGY](METHODOLOGY.md) §6).
+- **Context**: the verdict line names the reviewer's model, the PR's model line names the author's
+  ([REVIEW-ROUNDS](REVIEW-ROUNDS.md), traceability).
+
+Reading it (GitHub CLI; replace `OWNER/REPO`):
+
+```bash
+# Merged PRs where a review finding was fixed, or declined as a false positive
+gh search prs --repo OWNER/REPO --merged '"[fixed]"' --json number,title,closedAt
+gh search prs --repo OWNER/REPO --merged '"declined: false positive"' --json number,title,closedAt
+# Bugs that got through, and the PR that introduced them
+gh search issues --repo OWNER/REPO --label "type: bug" '"Introduced by"' --json number,title,createdAt
+# Reviews done by a given model
+gh search prs --repo OWNER/REPO --merged '"Adversarial review (sonnet)"' --json number,title
+```
+
+Search matches words, not exact punctuation: open the PRs found to count findings, and compare periods (before and
+after a model change) rather than reading one number. The trend feeds §2 rule 3.

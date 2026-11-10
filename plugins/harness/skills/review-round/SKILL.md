@@ -27,8 +27,9 @@ Follow `.harness/docs/REVIEW-ROUNDS.md` (otherwise `${CLAUDE_PLUGIN_ROOT}/docs/R
    the head, fall back as REVIEW-ROUNDS §The two reviews says (`review` job, else a fresh sub-agent of another model
    on the diff only) and say in the PR which one was used.
 8. **Convergence**: a round with no finding on the current head ends the loop (one clean round, within 3 cycles).
-   List the settled findings in the PR with their reason; a reopened one is answered by pointing to that record and
-   counts as new only with new evidence. A security finding stays open until the maintainer decides.
+   List the settled findings in the PR with their reason, each line starting with `[fixed]`,
+   `[declined: false positive]` or `[declined: not worth it]`; a reopened one is answered by pointing to that record
+   and counts as new only with new evidence. A security finding stays open until the maintainer decides.
 9. A check that fails within seconds with no log = infrastructure, not "CI red"; one rerun at most.
 10. **Lessons**: each finding already covered by `LESSONS.md` = a self-review step to tighten; a new kind = propose a
    row (to the project, or to the harness by PR if it applies elsewhere).
