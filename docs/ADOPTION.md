@@ -10,6 +10,7 @@ Pourquoi ce mécanisme (vendorisation + plugin + workflows réutilisables) et se
 |---|---|---|
 | `.harness/docs/*.md` | copie | Cadre : remplacé à chaque synchro (modification locale détectée et refusée) |
 | `.harness/labels.json` | copie | Cadre : taxonomie canonique |
+| `.harness/LICENSE` | copie | Cadre : sa licence (MIT), qui accompagne les fichiers copiés ; ne dit rien de la licence du projet |
 | `.harness/hooks/guard-git.py`, `session-start.sh` | copie | Cadre |
 | `.claude/skills/<skill>/SKILL.md` | copie | Cadre (`/intent`, `/lot-start`, `/lot-finish`, `/review-round`, `/feedback-triage`, `/lessons-check`, `/lesson-propose`, `/compliance-review`, `/status-report`, `/harness-update`) |
 | `.claude/agents/*.md` | copie | Cadre : `adversarial-reviewer`, `issue-steward`, `doc-steward`, `flow-monitor`, `compliance-*` (exclure les référentiels inutiles) |

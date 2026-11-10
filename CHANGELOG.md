@@ -14,9 +14,14 @@ faire en passant à cette version.
 - Le cadre s'applique la règle : description réécrite en anglais (tout agent de code, plus seulement Claude Code),
   topics élargis aux agents couverts, bannière et social preview ajoutées ; `check-framework.py` contrôle description,
   topics et images.
+- **Licence MIT** (`LICENSE`) : le cadre n'en avait pas ; `harness-sync.sh` la copie dans `.harness/LICENSE` avec les
+  fichiers vendorisés.
+- **`SECURITY.md`** : versions couvertes, signalement privé (jamais d'issue publique), délais, périmètre ; lien direct
+  depuis le choix de gabarit d'issue.
 
 Action : remplir la description et les topics dans `.github/repo-settings.json`, ajouter les deux images (une issue
-suffit pour commencer) ; l'opérateur dépose la social preview dans les réglages du dépôt.
+suffit pour commencer) ; l'opérateur dépose la social preview dans les réglages du dépôt. La prochaine synchro
+ajoute `.harness/LICENSE`.
 
 ## 0.3.0 — 2026-11-09
 
