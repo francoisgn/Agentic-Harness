@@ -18,6 +18,15 @@ moving to this version.
   default branch once this version is synced, or make the integration branch the default; to keep two branches by
   hand on purpose, set `"default_branch_check": false`.
 
+- **`status:` labels kept true without any workflow** ([METHODOLOGY](docs/METHODOLOGY.md) §4,
+  [ORCHESTRATION](docs/ORCHESTRATION.md) §1): `issue-reconcile.py` (vendored as `.harness/scripts/issue-reconcile.py`,
+  standard library) removes the status of closed issues, sets `claimed` on an issue with an open linked PR or a live
+  `/claim`, moves a `blocked` issue whose cited blockers are all closed to `ready`, and reports what it cannot decide
+  (stale claims, several or no `status:`, no `type:`, blocked without blocker); `needs-decision` and `on-hold` are
+  never moved. Dry run by default, `--apply` to change, a `summary:` line with the count per status; a dry run costs
+  one API call per 100 issues and PRs plus the comment pages. Offered by the session-start hook, run after each merge
+  by `/lot-finish`, and callable on `schedule` / `workflow_dispatch` through the reusable `issue-reconcile.yml`.
+  **Action**: none required; an orchestrator runs it at session start (`--apply` once the dry run looks right).
 - **Ledger: one folder at a time, and a rule for a contested place** ([CONVENTIONS](docs/CONVENTIONS.md) §Ledger,
   #61): only the steward folds, on its one branch (`docs/steward`); `doc-steward.py fold-guard` (exit 0 free, 1
   refused with the open PR's link, 2 could not check) refuses a second fold while a PR from that branch is open, in
@@ -51,6 +60,15 @@ moving to this version.
   `Open questions` of the report marked `<!-- harness:report -->`, required and security labels, PR body lines);
   "may merge" prints the head sha to merge with, "could not check" exits 2. Settings: `.harness/config.json` ›
   `merge_gate` (`required_labels` default empty). The verdict parsing is shared with `flow-metrics.py`.
+
+- **Orchestrator memory: one State comment, rewritten by script; the thread is a log**
+  ([ORCHESTRATION](docs/ORCHESTRATION.md) §8): `scripts/orch-state.py` (vendored as `.harness/scripts/orch-state.py`)
+  rewrites the comment marked `<!-- harness:state -->` on the memory issue (`--issue` or `.harness/config.json` ›
+  `orchestration.memory_issue`): decisions in force by scope key, open PRs by stage with their head, children from
+  `/claim` comments and `Claim:` lines (verdicts parsed as the merge gate parses them), decisions waiting with their age, counts per `status:` label; bounded to
+  6,000 characters, refuses a hand-edited State unless `--force`, prints it when it cannot write. Child reports go on
+  the child's PR in `.harness/templates/child-report.md` (`<!-- harness:report -->`, `Open questions`); resuming
+  starts from the State.
 
 - **What reviews are worth, readable without a metric**, and **lot size as a recommendation**
   ([FINOPS](docs/FINOPS.md) §2 and §5, [REVIEW-ROUNDS](docs/REVIEW-ROUNDS.md), [METHODOLOGY](docs/METHODOLOGY.md)

@@ -14,7 +14,12 @@ state.
 
 **Session start**: `git fetch`, switch to the integration branch; read `CLAUDE.md` (and `ESSENTIALS.md`); list your
 claimed issues and what moved on your PRs (reviews, CI, merges, comments) **before** starting anything new; then take a
-ready issue that nobody has claimed (not `needs: host` in the cloud).
+ready issue that nobody has claimed (not `needs: host` in the cloud). The orchestrator first brings the `status:` labels
+in line with the facts: `python3 .harness/scripts/issue-reconcile.py` (dry run, then `--apply`; offered by the
+session-start hook when vendored) and keeps its `summary:` line in its state; it runs it again after each merge.
+
+**Orchestrator resuming**: the first step is §8's resuming procedure (read the State comment, run the label
+reconcile and the state script, then act), never a re-read of the memory issue's thread.
 
 **Session end**: issues and PRs up to date (state, links, a "next" note on every open item), release what you will not
 finish, then report to the operator: what is done (with the link of every public action) and where the next session
@@ -92,8 +97,8 @@ Before moving the PR to "Ready for review":
   `Claim: <id>`.
 - Every child gets an **id** (§7): first line of its prompt, title and tags of its session.
 - A **child's prompt is self-sufficient**: guardrails restated (ESSENTIALS.md and the operator's rules), exact
-  task, stop conditions ("if X contradicts the plan, stop and report"), fixed report format, text to post word for
-  word when there is one.
+  task, stop conditions ("if X contradicts the plan, stop and report"), fixed report format (§8: on its PR), text
+  to post word for word when there is one.
 - Say explicitly whether the child may act on an approval relayed by the parent (the operator's choice).
 - A read-only child (reviewer, auditor) is told so in writing. A large deliverable comes back between fixed
   markers (`=====BEGIN DELIVERABLE=====` … `=====END DELIVERABLE=====`) so it can be extracted as is.
@@ -180,3 +185,44 @@ Display rules, from shortest to most complete:
   report and copies it to the umbrella issue or the dashboard; a stopped agent stays there with its final status.
 
 Check: `^[a-z0-9-]+\.(orc-[0-9]{4}[a-z]?|solo)\.(orc|lot|plan|rech|rev|ci|st-issues|st-docs|flux|conf-[a-z0-9-]+)\.[A-Za-z0-9-]+(\.[0-9]+)?$`.
+
+## 8. Orchestrator memory: one State, the rest is a log
+
+Observed on the first consumer: the orchestrator's memory issue reached 287 comments in 10 days (about 100 k tokens)
+with the state, the rules and the decisions in scattered comments; resuming meant re-reading the thread, and PRs were
+merged before their reports had been read.
+
+- **Memory issue**: one per orchestrator (or per project), its number in `.harness/config.json` ›
+  `orchestration.memory_issue`. It holds **one State comment** (first line `<!-- harness:state -->`) written only by
+  `.harness/scripts/orch-state.py`: rules in force (a pointer to `ESSENTIALS.md` and the scope keys of the rows
+  `in force` of `docs/DECISIONS.md`, never a copy of a rule), open PRs by stage (draft, CI red, waiting for CI,
+  review or merge, the verdicts read as `merge-gate.py` reads them) with their head sha and report link, children and what each holds, decisions waiting for the
+  operator with their age, counts per `status:` label, its write time and the script version. At most 6,000
+  characters: a list longer than 20 lines (fewer if needed) links its older lines instead of inlining them.
+- **The State is the only thing a resuming session must read.** Everything else in the thread is a log that nobody
+  is required to re-read. A standing rule goes to `docs/DECISIONS.md` (§4), discovered work to an issue.
+- **Rewritten by the script, never by hand**: the orchestrator runs it after each event that changes the facts
+  (child started or stopped, PR opened or merged, decision asked) and before ending its session. The comment carries
+  the hash of what the script wrote: a State edited by hand is not overwritten, the difference is printed; move what
+  matters to an issue or `docs/DECISIONS.md`, then `--force`. No token or no network: nothing is written, the State is
+  printed locally (exit 2). A section with nothing in it says "none recorded"; a section that cannot be read stops
+  the write, so nothing stale is published.
+- **What the script knows about children**, from visible state only: the `/claim <id>` comments on open issues
+  labelled `status: claimed` (replayed as [CONVENTIONS](CONVENTIONS.md) §GitHub comments says) and the
+  `Claim: <id>` lines of open PRs. It does not know whether a session is alive, its link or its last activity: the
+  orchestrator checks those with its session tools (e.g. `list_sessions`) and applies the watchdog (§4). A child
+  started without a claim does not appear: claim first.
+- **Child reports go on the child's PR** (on its issue when there is no PR), in the template
+  `.harness/templates/child-report.md`: marker `<!-- harness:report -->`, head sha, verdicts with the sha each was
+  given on, required labels, what is left, and an `Open questions` section (empty or `none` before a merge). The
+  memory issue gets **one line** with the link: `<id>: report on #<pr>, <link>`.
+- **Bots are never mentioned in the memory issue**: a mention summons the bot and its replies fill the log. The
+  script defuses `@` in every text it copies from GitHub.
+- Off: no `orchestration.memory_issue` and no `--issue`: the script prints the State and writes nothing.
+
+**Resuming procedure** (orchestrator, first step of every session):
+1. read the State comment of the memory issue, and nothing else of its thread;
+2. run the label reconcile script (when vendored), then `python3 .harness/scripts/orch-state.py`, which rewrites the
+   State from the facts;
+3. act on that State: a PR waiting for merge (read its report, then merge by the project's policy), a decision
+   waiting, a child whose session is gone (watchdog, §4).
