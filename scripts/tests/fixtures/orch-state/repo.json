@@ -1,0 +1,461 @@
+{
+ "$comment": "Shapes of the GitHub REST API (docs.github.com/en/rest: issues, pulls, checks/runs, commits/statuses, issues/events); scenario invented for the tests.",
+ "responses": {
+  "/repos/acme/app/issues?state=open&per_page=100&page=1": [
+   {
+    "number": 10,
+    "title": "Engine rounding",
+    "state": "open",
+    "labels": [
+     {
+      "name": "status: claimed",
+      "color": "ededed",
+      "default": false
+     },
+     {
+      "name": "type: feature",
+      "color": "ededed",
+      "default": false
+     }
+    ],
+    "created_at": "2026-11-01T09:00:00Z",
+    "updated_at": "2026-11-01T09:00:00Z",
+    "html_url": "https://github.com/acme/app/issues/10",
+    "user": {
+     "login": "maint"
+    }
+   },
+   {
+    "number": 11,
+    "title": "Export CSV",
+    "state": "open",
+    "labels": [
+     {
+      "name": "status: claimed",
+      "color": "ededed",
+      "default": false
+     }
+    ],
+    "created_at": "2026-11-01T09:00:00Z",
+    "updated_at": "2026-11-01T09:00:00Z",
+    "html_url": "https://github.com/acme/app/issues/11",
+    "user": {
+     "login": "maint"
+    }
+   },
+   {
+    "number": 12,
+    "title": "Pick a pricing rule",
+    "state": "open",
+    "labels": [
+     {
+      "name": "status: needs-decision",
+      "color": "ededed",
+      "default": false
+     }
+    ],
+    "created_at": "2026-10-20T09:00:00Z",
+    "updated_at": "2026-10-20T09:00:00Z",
+    "html_url": "https://github.com/acme/app/issues/12",
+    "user": {
+     "login": "maint"
+    }
+   },
+   {
+    "number": 13,
+    "title": "Docs upkeep",
+    "state": "open",
+    "labels": [
+     {
+      "name": "status: ready",
+      "color": "ededed",
+      "default": false
+     }
+    ],
+    "created_at": "2026-11-01T09:00:00Z",
+    "updated_at": "2026-11-01T09:00:00Z",
+    "html_url": "https://github.com/acme/app/issues/13",
+    "user": {
+     "login": "maint"
+    }
+   },
+   {
+    "number": 14,
+    "title": "Untriaged report",
+    "state": "open",
+    "labels": [],
+    "created_at": "2026-11-01T09:00:00Z",
+    "updated_at": "2026-11-01T09:00:00Z",
+    "html_url": "https://github.com/acme/app/issues/14",
+    "user": {
+     "login": "maint"
+    }
+   },
+   {
+    "number": 100,
+    "title": "Orchestrator memory",
+    "state": "open",
+    "labels": [
+     {
+      "name": "type: task",
+      "color": "ededed",
+      "default": false
+     }
+    ],
+    "created_at": "2026-11-01T09:00:00Z",
+    "updated_at": "2026-11-01T09:00:00Z",
+    "html_url": "https://github.com/acme/app/issues/100",
+    "user": {
+     "login": "maint"
+    }
+   },
+   {
+    "number": 41,
+    "title": "Export CSV",
+    "state": "open",
+    "labels": [],
+    "created_at": "2026-11-01T09:00:00Z",
+    "updated_at": "2026-11-01T09:00:00Z",
+    "html_url": "https://github.com/acme/app/issues/41",
+    "user": {
+     "login": "maint"
+    },
+    "pull_request": {
+     "url": "https://api.github.com/repos/acme/app/pulls/41"
+    }
+   }
+  ],
+  "/repos/acme/app/pulls?state=open&per_page=100&page=1": [
+   {
+    "number": 40,
+    "title": "Engine rounding",
+    "state": "open",
+    "draft": true,
+    "body": "Closes #10\nClaim: app.orc-1011.lot.i10",
+    "created_at": "2026-11-04T09:00:00Z",
+    "html_url": "https://github.com/acme/app/pull/40",
+    "head": {
+     "sha": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+     "ref": "feat/x40"
+    },
+    "user": {
+     "login": "maint"
+    }
+   },
+   {
+    "number": 41,
+    "title": "Export CSV, ping @dependabot",
+    "state": "open",
+    "draft": false,
+    "body": "Closes #11\r\nClaim: app.orc-1011.lot.i11.2",
+    "created_at": "2026-11-05T09:00:00Z",
+    "html_url": "https://github.com/acme/app/pull/41",
+    "head": {
+     "sha": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+     "ref": "feat/x41"
+    },
+    "user": {
+     "login": "maint"
+    }
+   },
+   {
+    "number": 42,
+    "title": "Docs upkeep",
+    "state": "open",
+    "draft": false,
+    "body": "Closes #13\nClaim: human/maint",
+    "created_at": "2026-11-06T09:00:00Z",
+    "html_url": "https://github.com/acme/app/pull/42",
+    "head": {
+     "sha": "cccccccccccccccccccccccccccccccccccccccc",
+     "ref": "feat/x42"
+    },
+    "user": {
+     "login": "maint"
+    }
+   },
+   {
+    "number": 43,
+    "title": "Flaky export",
+    "state": "open",
+    "draft": false,
+    "body": "Refs #11",
+    "created_at": "2026-11-07T09:00:00Z",
+    "html_url": "https://github.com/acme/app/pull/43",
+    "head": {
+     "sha": "dddddddddddddddddddddddddddddddddddddddd",
+     "ref": "feat/x43"
+    },
+    "user": {
+     "login": "maint"
+    }
+   },
+   {
+    "number": 44,
+    "title": "Settings screen",
+    "state": "open",
+    "draft": false,
+    "body": "Closes #15\nClaim: app.orc-1011.lot.i15",
+    "created_at": "2026-11-08T09:00:00Z",
+    "html_url": "https://github.com/acme/app/pull/44",
+    "head": {
+     "sha": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+     "ref": "feat/x44"
+    },
+    "user": {
+     "login": "maint"
+    }
+   }
+  ],
+  "/repos/acme/app/commits/bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb/check-runs?per_page=100&page=1": {
+   "total_count": 2,
+   "check_runs": [
+    {
+     "name": "tests",
+     "status": "completed",
+     "conclusion": "success"
+    },
+    {
+     "name": "lint",
+     "status": "completed",
+     "conclusion": "skipped"
+    }
+   ]
+  },
+  "/repos/acme/app/commits/bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb/status": {
+   "state": "pending",
+   "total_count": 0,
+   "sha": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+   "statuses": []
+  },
+  "/repos/acme/app/commits/cccccccccccccccccccccccccccccccccccccccc/check-runs?per_page=100&page=1": {
+   "total_count": 1,
+   "check_runs": [
+    {
+     "name": "tests",
+     "status": "in_progress",
+     "conclusion": null
+    }
+   ]
+  },
+  "/repos/acme/app/commits/cccccccccccccccccccccccccccccccccccccccc/status": {
+   "state": "pending",
+   "total_count": 0,
+   "sha": "cccccccccccccccccccccccccccccccccccccccc",
+   "statuses": []
+  },
+  "/repos/acme/app/commits/dddddddddddddddddddddddddddddddddddddddd/check-runs?per_page=100&page=1": {
+   "total_count": 1,
+   "check_runs": [
+    {
+     "name": "tests",
+     "status": "completed",
+     "conclusion": "failure"
+    }
+   ]
+  },
+  "/repos/acme/app/commits/dddddddddddddddddddddddddddddddddddddddd/status": {
+   "state": "success",
+   "total_count": 1,
+   "sha": "dddddddddddddddddddddddddddddddddddddddd",
+   "statuses": [
+    {
+     "context": "ci/legacy",
+     "state": "success"
+    }
+   ]
+  },
+  "/repos/acme/app/commits/eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee/check-runs?per_page=100&page=1": {
+   "total_count": 1,
+   "check_runs": [
+    {
+     "name": "tests",
+     "status": "completed",
+     "conclusion": "success"
+    }
+   ]
+  },
+  "/repos/acme/app/commits/eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee/status": {
+   "state": "success",
+   "total_count": 1,
+   "sha": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+   "statuses": [
+    {
+     "context": "ci/legacy",
+     "state": "success"
+    }
+   ]
+  },
+  "/repos/acme/app/pulls/41/reviews?per_page=100&page=1": [],
+  "/repos/acme/app/pulls/42/reviews?per_page=100&page=1": [],
+  "/repos/acme/app/pulls/43/reviews?per_page=100&page=1": [],
+  "/repos/acme/app/pulls/44/reviews?per_page=100&page=1": [
+   {
+    "id": 1,
+    "state": "APPROVED",
+    "commit_id": "9999999999999999999999999999999999999999",
+    "user": {
+     "login": "maint"
+    }
+   }
+  ],
+  "/repos/acme/app/issues/41/comments?per_page=100&page=1": [
+   {
+    "id": 4101,
+    "body": "**Adversarial review (opus): CHANGES REQUESTED** \u2014 head 1234567\n1. High ...",
+    "author_association": "MEMBER",
+    "created_at": "2026-11-02T09:00:00Z",
+    "html_url": "https://github.com/acme/app/issues/1#issuecomment-4101",
+    "user": {
+     "login": "maint"
+    }
+   },
+   {
+    "id": 4102,
+    "body": "**Adversarial review (opus): APPROVED** \u2014 head bbbbbbb\n**Verified** ...",
+    "author_association": "MEMBER",
+    "created_at": "2026-11-02T09:00:00Z",
+    "html_url": "https://github.com/acme/app/issues/1#issuecomment-4102",
+    "user": {
+     "login": "maint"
+    }
+   },
+   {
+    "id": 4103,
+    "body": "<!-- harness:report -->\n## Report\nHead: `bbbbbbb`\n### Open questions\nnone",
+    "author_association": "MEMBER",
+    "created_at": "2026-11-02T09:00:00Z",
+    "html_url": "https://github.com/acme/app/issues/1#issuecomment-4103",
+    "user": {
+     "login": "maint"
+    }
+   }
+  ],
+  "/repos/acme/app/issues/42/comments?per_page=100&page=1": [],
+  "/repos/acme/app/issues/43/comments?per_page=100&page=1": [],
+  "/repos/acme/app/issues/44/comments?per_page=100&page=1": [
+   {
+    "id": 4401,
+    "body": "**Adversarial review (opus): APPROVED** \u2014 head 9999999",
+    "author_association": "MEMBER",
+    "created_at": "2026-11-02T09:00:00Z",
+    "html_url": "https://github.com/acme/app/issues/1#issuecomment-4401",
+    "user": {
+     "login": "maint"
+    }
+   },
+   {
+    "id": 4402,
+    "body": "> **Adversarial review (opus): APPROVED** \u2014 head eeeeeee\nQuoting a verdict is not one.",
+    "author_association": "MEMBER",
+    "created_at": "2026-11-02T09:00:00Z",
+    "html_url": "https://github.com/acme/app/issues/1#issuecomment-4402",
+    "user": {
+     "login": "maint"
+    }
+   }
+  ],
+  "/repos/acme/app/issues/10/comments?per_page=100&page=1": [
+   {
+    "id": 1002,
+    "body": "/claim intruder.solo.lot.i10",
+    "author_association": "NONE",
+    "created_at": "2026-11-02T08:00:00Z",
+    "html_url": "https://github.com/acme/app/issues/1#issuecomment-1002",
+    "user": {
+     "login": "drive-by"
+    }
+   },
+   {
+    "id": 1001,
+    "body": "/claim app.orc-1011.lot.i10\n- plan",
+    "author_association": "MEMBER",
+    "created_at": "2026-11-03T08:00:00Z",
+    "html_url": "https://github.com/acme/app/issues/1#issuecomment-1001",
+    "user": {
+     "login": "maint"
+    }
+   }
+  ],
+  "/repos/acme/app/issues/11/comments?per_page=100&page=1": [
+   {
+    "id": 1101,
+    "body": "/claim app.orc-1011.lot.i11\n- plan",
+    "author_association": "MEMBER",
+    "created_at": "2026-11-01T08:00:00Z",
+    "html_url": "https://github.com/acme/app/issues/1#issuecomment-1101",
+    "user": {
+     "login": "maint"
+    }
+   },
+   {
+    "id": 1102,
+    "body": "/release app.orc-1011.lot.i11",
+    "author_association": "MEMBER",
+    "created_at": "2026-11-02T08:00:00Z",
+    "html_url": "https://github.com/acme/app/issues/1#issuecomment-1102",
+    "user": {
+     "login": "maint"
+    }
+   },
+   {
+    "id": 1103,
+    "body": "/claim app.orc-1011.lot.i11.2\n- restart",
+    "author_association": "MEMBER",
+    "created_at": "2026-11-04T08:00:00Z",
+    "html_url": "https://github.com/acme/app/issues/1#issuecomment-1103",
+    "user": {
+     "login": "maint"
+    }
+   },
+   {
+    "id": 1104,
+    "body": "/claim other.solo.lot.i11",
+    "author_association": "MEMBER",
+    "created_at": "2026-11-04T09:00:00Z",
+    "html_url": "https://github.com/acme/app/issues/1#issuecomment-1104",
+    "user": {
+     "login": "maint"
+    }
+   }
+  ],
+  "/repos/acme/app/issues/12/events?per_page=100&page=1": [
+   {
+    "event": "labeled",
+    "label": {
+     "name": "type: feature"
+    },
+    "created_at": "2026-10-20T09:00:00Z"
+   },
+   {
+    "event": "labeled",
+    "label": {
+     "name": "status: needs-decision"
+    },
+    "created_at": "2026-11-05T10:00:00Z"
+   }
+  ],
+  "/repos/acme/app/issues/100/comments?per_page=100&page=1": [
+   {
+    "id": 9001,
+    "body": "Log: started LOT-1, child app.orc-1011.lot.i10",
+    "author_association": "MEMBER",
+    "created_at": "2026-11-02T09:00:00Z",
+    "html_url": "https://github.com/acme/app/issues/1#issuecomment-9001",
+    "user": {
+     "login": "maint"
+    }
+   },
+   {
+    "id": 9002,
+    "body": "Log: report of #41 posted on the PR",
+    "author_association": "MEMBER",
+    "created_at": "2026-11-02T09:00:00Z",
+    "html_url": "https://github.com/acme/app/issues/1#issuecomment-9002",
+    "user": {
+     "login": "maint"
+    }
+   }
+  ]
+ }
+}
