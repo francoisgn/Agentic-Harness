@@ -45,7 +45,8 @@ copy      scripts/doc-steward.py                      .harness/scripts/doc-stewa
 # Operator decisions file: at most one decision in force per scope key (docs-security.yml; off when docs/DECISIONS.md is absent)
 copy      scripts/decisions-check.py                  .harness/scripts/decisions-check.py
 # Orchestrator State: one comment of the memory issue rewritten from the facts (ORCHESTRATION.md §8); reads the
-# decisions through decisions-check.py, next to it. The child report template goes on the child's PR.
+# decisions through decisions-check.py and the verdicts through flow-metrics.py, next to it. The child report
+# template goes on the child's PR.
 copy      scripts/orch-state.py                       .harness/scripts/orch-state.py
 copy      templates/comments/child-report.md          .harness/templates/child-report.md
 

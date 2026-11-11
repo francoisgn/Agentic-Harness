@@ -33,7 +33,7 @@ moving to this version.
   ([ORCHESTRATION](docs/ORCHESTRATION.md) §8): `scripts/orch-state.py` (vendored as `.harness/scripts/orch-state.py`)
   rewrites the comment marked `<!-- harness:state -->` on the memory issue (`--issue` or `.harness/config.json` ›
   `orchestration.memory_issue`): decisions in force by scope key, open PRs by stage with their head, children from
-  `/claim` comments and `Claim:` lines, decisions waiting with their age, counts per `status:` label; bounded to
+  `/claim` comments and `Claim:` lines (verdicts parsed as the merge gate parses them), decisions waiting with their age, counts per `status:` label; bounded to
   6,000 characters, refuses a hand-edited State unless `--force`, prints it when it cannot write. Child reports go on
   the child's PR in `.harness/templates/child-report.md` (`<!-- harness:report -->`, `Open questions`); resuming
   starts from the State.

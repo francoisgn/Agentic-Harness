@@ -6,7 +6,9 @@ one whose first line is MARKER; the script creates it on the first run, then rew
   Rules in force   a pointer: the harness rules, then `docs/DECISIONS.md` and the scope keys of its rows `in force`
                    (never the text of a rule; read with decisions-check.py, vendored next to this script)
   Open PRs         stage and head sha: draft · CI red · waiting for CI · waiting for review · waiting for merge
-                   (approved on the head: a GitHub approval on that sha or the latest adversarial verdict naming it);
+                   (approved on the head: the latest adversarial verdict is APPROVED and names that sha, parsed
+                   by flow-metrics.py's `verdict_matches` and `HEAD_RE`, vendored next to this script, as
+                   merge-gate.py and the dashboard do);
                    link to the report (a PR comment carrying `<!-- harness:report -->`). The merge gate decides.
   Children         who holds what. Source, and the only one: `/claim <id>` comments on open issues labelled
                    `status: claimed` (replayed: members only, first claim wins, `/release` hands it back) and the
@@ -64,8 +66,18 @@ STAGES = ("waiting for merge", "waiting for review", "waiting for CI", "CI red",
 CLAIM_RE = re.compile(r"^/claim[ \t]+(\S+)")
 RELEASE_RE = re.compile(r"^/release(?:[ \t]+(\S+))?[ \t]*$")
 CLAIM_LINE_RE = re.compile(r"^Claim:[ \t]*(\S+)", re.M)
-VERDICT_RE = re.compile(r"Adversarial review\b[^\n]*?\b(APPROVED|CHANGES REQUESTED)\b[^\n]*?\bhead\s+`?([0-9a-f]{7,40})",
-                        re.I)
+
+
+def _load_flow():
+    """flow-metrics.py, vendored in the same folder: the single parser of verdict lines (as in merge-gate.py)."""
+    path = pathlib.Path(__file__).resolve().with_name("flow-metrics.py")
+    spec = importlib.util.spec_from_file_location("flow_metrics_shared", path)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
+flow = _load_flow()
 
 
 class FetchError(Exception):
@@ -145,11 +157,23 @@ def ci_state(runs, combined):
 
 
 def approved_on(head, reviews, comments):
-    """True when a GitHub approval was given on `head`, or the latest adversarial verdict is APPROVED on it."""
-    if any(r.get("state") == "APPROVED" and r.get("commit_id") == head for r in reviews):
-        return True
-    verdicts = [m for c in comments for m in VERDICT_RE.findall(c.get("body") or "")]
-    return bool(verdicts) and verdicts[-1][0].upper() == "APPROVED" and head.lower().startswith(verdicts[-1][1].lower())
+    """True when the latest adversarial verdict (reviews and comments, by time) is APPROVED and names `head`.
+
+    Same reading as merge-gate.py's approval line: verdict lines through flow.verdict_matches, the sha through
+    flow.HEAD_RE; a GitHub approval without a harness verdict line does not count.
+    """
+    items = [(r.get("body") or "", r["submitted_at"]) for r in reviews if r.get("submitted_at")]
+    items += [(c.get("body") or "", c.get("created_at") or "") for c in comments]
+    verdicts = []
+    for body, at in items:
+        for m in flow.verdict_matches(body):
+            if m.group(1) == "Adversarial":
+                named = flow.HEAD_RE.search(m.string[m.end():])
+                verdicts.append((at, m.group(2), named.group(1).lower() if named else None))
+    if not verdicts:
+        return False
+    _, verdict, named = sorted(verdicts, key=lambda v: v[0])[-1]
+    return verdict == "APPROVED" and bool(named) and head.lower().startswith(named)
 
 
 def pull_facts(repo, http, p):

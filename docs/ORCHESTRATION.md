@@ -194,7 +194,7 @@ merged before their reports had been read.
   `orchestration.memory_issue`. It holds **one State comment** (first line `<!-- harness:state -->`) written only by
   `.harness/scripts/orch-state.py`: rules in force (a pointer to `ESSENTIALS.md` and the scope keys of the rows
   `in force` of `docs/DECISIONS.md`, never a copy of a rule), open PRs by stage (draft, CI red, waiting for CI,
-  review or merge) with their head sha and report link, children and what each holds, decisions waiting for the
+  review or merge, the verdicts read as `merge-gate.py` reads them) with their head sha and report link, children and what each holds, decisions waiting for the
   operator with their age, counts per `status:` label, its write time and the script version. At most 6,000
   characters: a list longer than 20 lines (fewer if needed) links its older lines instead of inlining them.
 - **The State is the only thing a resuming session must read.** Everything else in the thread is a log that nobody

@@ -107,7 +107,7 @@ class RenderTests(unittest.TestCase):
         self.assertIn("issuecomment-4103", lines[41])   # the report is linked
         self.assertIn("waiting for CI", lines[42])
         self.assertIn("CI red", lines[43])
-        self.assertIn("waiting for review", lines[44])  # approvals were given on another sha
+        self.assertIn("waiting for review", lines[44])  # approved on another sha; a quoted verdict is not one
         self.assertIn("draft", lines[40])
         self.assertIn("`aaaaaaa`", lines[40])
 

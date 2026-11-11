@@ -18,7 +18,7 @@ Why this mechanism (vendoring + plugin + reusable workflows) and its limits: [AD
 | `.harness/scripts/merge-gate.py` | copy | Harness: merge gate, "may merge now" or why not (CONVENTIONS.md §Pull requests); needs `flow-metrics.py` next to it |
 | `.harness/scripts/readme-progress.py` | copy | Harness: README progress table generated from the issues (`/readme-update`) |
 | `.harness/scripts/decisions-check.py` | copy | Harness: `docs/DECISIONS.md` has at most one decision in force per scope key (`docs-security.yml`, input `decisions`) |
-| `.harness/scripts/orch-state.py`, `.harness/templates/child-report.md` | copy | Harness: the orchestrator's State comment on its memory issue, and the report template a child posts on its PR ([ORCHESTRATION](ORCHESTRATION.md) §8); the script reads `decisions-check.py` next to it |
+| `.harness/scripts/orch-state.py`, `.harness/templates/child-report.md` | copy | Harness: the orchestrator's State comment on its memory issue, and the report template a child posts on its PR ([ORCHESTRATION](ORCHESTRATION.md) §8); the script needs `decisions-check.py` and `flow-metrics.py` next to it |
 | `.harness/scripts/doc-steward.py` | copy | Harness: doc steward's "anything to fold?" decision, docs PR body and weekly audit issues (`doc-steward.yml`) |
 | `.claude/settings.json` | merge | Project; the harness only **adds** its two hooks if they are missing |
 | `CLAUDE.md`, `AGENTS.md` | marked block | Project, except the block `<!-- harness:begin harness -->…<!-- harness:end harness -->` |
