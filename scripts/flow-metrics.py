@@ -28,6 +28,7 @@ AGENT_BODY_RE = re.compile(r"^Claim:[ \t]*(?!human/)\S+|Generated with \[Claude 
 LABEL_CLAIMED = "status: claimed"
 BOTTLENECK_LABELS = ("status: blocked", "status: needs-decision")
 HIGH_PRIORITY_LABELS = ("priority: critical", "priority: high")
+ON_HOLD_LABEL = "status: on-hold"   # held by a decision: listed apart, neither a bottleneck nor ready
 STATUS_PREFIX = "status: "
 
 
@@ -38,8 +39,21 @@ VERDICT_PROBLEMS = ("CHANGES REQUESTED", "GAPS")
 VERDICT_IGNORED = "OUT OF SCOPE"
 # "· unverified: N" at the end of a verdict line: points the reviewer could not check (REVIEW-ROUNDS §Traceability)
 UNVERIFIED_RE = re.compile(r"·\s*unverified:\s*(\d+)\W*$", re.I)
+# "— head <sha>" on a verdict line: the commit the verdict was given on (REVIEW-ROUNDS §Traceability; merge-gate.py)
+HEAD_RE = re.compile(r"\bhead\s+`?([0-9a-f]{7,40})\b", re.I)
 ACTIONABLE_RE = re.compile(r"Actionable comments posted:\s*(\d+)")
 MIN_QUALITY_SAMPLE = 3
+
+
+def verdict_matches(body):
+    """Harness verdict lines of a comment or review body, in order: one VERDICT_RE match per line.
+
+    At the start of a line only (possibly a `- ` bullet or a `1. ` item): a quote (`>`) or a table row (`|`) does not
+    count; one body can carry several (consolidation by /compliance-review). `m.string` is the whole line, so
+    UNVERIFIED_RE and HEAD_RE apply to it. Shared with merge-gate.py: the verdict format is parsed in one place.
+    """
+    return [m for line in body.splitlines() if not line.lstrip().startswith((">", "|"))
+            for m in [VERDICT_RE.match(re.sub(r"^(?:[-*]|\d+[.)])\s+", "", line.strip()))] if m]
 
 
 def review_events(pull):
@@ -55,10 +69,7 @@ def review_events(pull):
     items += [(c.get("body") or "", None, (c.get("user") or {}).get("login", ""), c.get("created_at"))
               for c in pull.get("comments", [])]
     for body, state, login, at in items:
-        # Verdicts at the start of a line only: a quote (`>`) or a table row (`|`) does not count;
-        # one body can carry several (consolidation by /compliance-review).
-        verdicts = [m for line in body.splitlines() if not line.lstrip().startswith((">", "|"))
-                    for m in [VERDICT_RE.match(re.sub(r"^(?:[-*]|\d+[.)])\s+", "", line.strip()))] if m]
+        verdicts = verdict_matches(body)
         if verdicts:
             events += [{"source": VERDICT_SOURCE[m.group(1)], "at": at,
                         "problem": m.group(2) in VERDICT_PROBLEMS,
@@ -190,6 +201,9 @@ def analyse(data, now, stall_hours=24, draft_stall_hours=120, max_ci_runs=6, max
         if numbers:
             bottlenecks[label] = numbers
 
+    on_hold = [{"number": i["number"], "title": i["title"]}
+               for i in sorted(open_issues, key=lambda i: i["number"]) if ON_HOLD_LABEL in _labels(i)]
+
     # An open issue carries exactly one `status:` label: count them per value, list the issues with none or several.
     status_counts, status_anomalies = {}, []
     for i in sorted(open_issues, key=lambda i: i["number"]):
@@ -258,6 +272,7 @@ def analyse(data, now, stall_hours=24, draft_stall_hours=120, max_ci_runs=6, max
         "loops": loops,
         "bottlenecks": bottlenecks,
         "bottleneck_items": bottleneck_items,
+        "on_hold": on_hold,
         "status_counts": dict(sorted(status_counts.items())),
         "status_anomalies": status_anomalies,
         "merged": {"total": len(merged), "agent": len(agent), "human": len(merged) - len(agent),
@@ -315,6 +330,10 @@ def render_markdown(r, repo):
         out += [f"| #{b['number']} | {_cell(b['title'])} | {', '.join(b['labels'])} |" for b in r["bottleneck_items"]]
     else:
         out.append("- No `status: blocked` or `status: needs-decision` item.")
+    if r["on_hold"]:
+        out += ["", "## On hold", "", "Held by a decision, not by a dependency (`status: on-hold`).", "",
+                "| Issue | Title |", "|---|---|"]
+        out += [f"| #{h['number']} | {_cell(h['title'])} |" for h in r["on_hold"]]
     out += ["", "## Stalled (no activity)", ""]
     if r["stalled"]:
         out += ["| Item | Title | Idle for |", "|---|---|---|"]

@@ -46,6 +46,12 @@ Detail and promotions: [BRANCHING-RELEASE](BRANCHING-RELEASE.md).
   7. author and reviewer models; the generation line last.
 - Do not merge yourself unless the project's policy says otherwise (depending on the project: the maintainer merges,
   or the author merges a ready and approved PR, except for risky flows).
+- **Merge procedure** (whoever merges): run the gate, `python3 .harness/scripts/merge-gate.py <pr>` (read-only; `ok`
+  / `missing` per line: draft, mergeable, CI green on the head, adversarial APPROVED naming the head, open threads,
+  `Open questions` of the report, `merge_gate` labels, body lines). Merge only on "may merge", **with the head sha it
+  prints** as the expected head (`gh pr merge <pr> --match-head-commit <sha>`); "could not check" (exit 2) is never a
+  go. Then run the label reconcile, once the project has it (#62). A report (a PR comment carrying
+  `<!-- harness:report -->`, otherwise the PR body) keeps its `Open questions` section empty or `none`.
 - No new PR while one of your own has a review comment without a reply.
 - Before opening: search for duplicates (issues and PRs, open and closed) and for PRs that touch the same files.
 

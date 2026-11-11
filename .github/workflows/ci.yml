@@ -83,6 +83,10 @@ jobs:
         if: ${{ !cancelled() }}
         run: python3 scripts/doc-links.py
 
+      - name: Operator decisions template passes its own check
+        if: ${{ !cancelled() }}
+        run: python3 scripts/decisions-check.py --file templates/docs/DECISIONS.md
+
       - name: Secrets · gitleaks
         if: ${{ !cancelled() }}
         env:

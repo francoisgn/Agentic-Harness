@@ -20,7 +20,7 @@ For each targeted open issue (or all those modified since your last run):
    question).
 3. **Duplicates**: titles, bodies, synonyms, open and closed. Propose the merge (the oldest stays); never close an
    issue written by someone else yourself.
-4. **Routing**: milestone, lot, `Depends on #n`, sub-issue of an umbrella, `needs: host`, `status: blocked` with
+4. **Routing**: milestone, lot, `### Blocked by` (`#n`), sub-issue of an umbrella, `needs: host`, `status: blocked` with
    the prerequisite. When an issue is ready to take, move it from `status: needs-triage` to `status: ready`.
 5. **Claims** (active `/claim`, label `status: claimed`) with no activity for 24 h: report them, do not take them over.
 
