@@ -101,10 +101,19 @@ Format: `axis: value`, lowercase ASCII, no emoji.
 | `type:` | `type: bug` · `type: feature` · `type: docs` · `type: chore` · `type: security` · `type: epic` (umbrella or lot) | exactly one on every open issue |
 | `priority:` | `priority: critical` data loss or crash · `priority: high` blocking or wrong · `priority: medium` next iteration · `priority: low` later | exactly one after triage |
 | `difficulty:` | `difficulty: trivial` fast tier · `difficulty: easy` solid tier · `difficulty: medium` strong tier · `difficulty: hard` frontier tier, reviewed by another model ([ORCHESTRATION](ORCHESTRATION.md) §2) | exactly one after triage, unless configured otherwise |
-| `status:` | `status: needs-triage` · `status: ready` · `status: claimed` (follows the `/claim`) · `status: blocked` (external prerequisite) · `status: needs-decision` (product decision) | exactly one on every open issue; removed on close |
+| `status:` | `status: needs-triage` · `status: ready` · `status: claimed` (follows the `/claim`) · `status: blocked` (waits on something nameable that will end) · `status: on-hold` (held by a decision, not a dependency) · `status: needs-decision` (product decision) | exactly one on every open issue; removed on close |
 | `needs:` | `needs: host` requires the Mac, cloud sessions do not touch it · `needs: info` · `needs: review` | as needed |
 | Other | `direct-pr` · `dependencies` | as needed |
 | Project | in `labels.local.json`, e.g. `area: ux`, `type: lot`, `dashboard` (issue kept by `flow-report.yml`), `review: skip` (skips the review service), `compliance` (forces the compliance framework review, [COMPLIANCE](COMPLIANCE.md)) | per project |
+
+The six `status:` states: `needs-triage` (not yet confirmed), `needs-decision` (a product decision is missing: do not
+code), `ready` (can be claimed), `claimed` (someone works on it), `blocked` (waits on a prerequisite that can be named
+and will end: an issue or PR, a capture, access, a third party's decision) and `on-hold` (held back by a decision of
+the operator, such as a milestone not open yet: no script can unblock it, only that decision). A `status: blocked`
+issue says what it waits on in a **`### Blocked by`** section of its description, one line per blocker: `#n` for an
+issue or PR, or the external thing in words (the task form has the field). `issue-hygiene` reports a blocked issue
+without it, never relabels it. A blocker that is closed, or a decision behind it, means the issue is not `blocked`:
+`ready` or `on-hold`. A project that does not want `on-hold` aliases or drops it in its local labels.
 
 `lesson` (proposal for the lessons table) exists only in the harness repository's own `.github/labels.local.json`.
 
@@ -130,6 +139,7 @@ waiting for it. The `required-axes` input of `issue-hygiene.yml` is set the same
 | In progress | `is:issue is:open label:"status: claimed"` + open PRs (`is:pr is:open`) |
 | Ready to take | `is:issue is:open label:"status: ready"`, sorted by priority (`priority: critical` → `priority: low`) |
 | Blocked | `is:issue is:open label:"status: blocked"` |
+| On hold | `is:issue is:open label:"status: on-hold"` |
 | Needs a human decision | `is:issue is:open label:"status: needs-decision"` |
 | To triage | `is:issue is:open label:"status: needs-triage"` |
 | Out of reach of a cloud session | `is:issue is:open label:"needs: host"` |
