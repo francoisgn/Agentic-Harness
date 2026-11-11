@@ -53,8 +53,12 @@ Detail and promotions: [BRANCHING-RELEASE](BRANCHING-RELEASE.md).
 Optional building block, for projects that keep a shared log-like file (CHANGELOG, What's New, gap report, tracking
 table) that many PRs would want to modify at the same time.
 - A work PR **never touches** these files. Its entries go in a `### Ledger` section of the **PR body**, in fenced
-  blocks whose language is the entry type (e.g. ` ```changelog `, ` ```gap-new `), and the PR carries the `ledger`
-  label. No entry: no block, no label.
+  blocks whose language is the entry type (e.g. ` ```changelog `, ` ```gap-new `). **The section is the entry,
+  labels are bookkeeping done by the steward**: the author sets no label (child and cloud sessions often cannot).
+  No entry: no block, or the line `None (<reason>)` (`None (tests only)`), the one spelling of an empty section.
+- `pr-hygiene.yml` (input `ledger-label`) fails a ready PR whose section is malformed (a block without a type, a
+  block not closed, `None` without a reason, `None (…)` next to blocks), quoting the entry and the expected format;
+  a PR that carries the label without entry blocks gets one notice (stale label), never a failure.
 - **Doc impact**: the section always has a `Docs:` line, outside the blocks, listing the doc files the PR makes
   untrue (`Docs: README.md, docs/USAGE.md`), or `Docs: none (<reason>)` (`Docs: none (internal refactor)`). Docs
   never drift further than one merge: the steward reads the line at merge time. `pr-hygiene.yml` warns, never
@@ -62,22 +66,23 @@ table) that many PRs would want to modify at the same time.
   off) and has no `Docs:` line, when `none` has no reason, or when a listed file does not exist on the PR head.
   Without a ledger, the same line lives in the PR body; nothing else changes.
 - After each merge, a **steward** (upkeep role, [STEWARDS](STEWARDS.md) §2, `doc-steward.yml`) runs the project's
-  script that reads the merged PRs labelled `ledger` and **folds** their entries into the files, in **a single draft
-  docs PR**; once that PR is merged, the next pass replaces `ledger` with `ledger: done` on each folded PR. The
+  script that reads the `### Ledger` sections of the PRs merged since its last pass (the `ledger` label, if a project
+  still sets it, is only a hint) and **folds** their entries into the files, in **a single draft docs PR**; once
+  that PR is merged, the next pass marks each folded PR `ledger: done`, the only label the harness writes. The
   script gets the pending PR numbers in `STEWARD_LEDGER_PRS` and may write the ones it folded to the file
-  `$STEWARD_FOLDED` (otherwise all count as folded); the others stay in their PR and are listed in the docs PR.
+  `$STEWARD_FOLDED` (otherwise all count as folded); the others stay in their PR, are listed in the docs PR and stay pending for the next pass.
 - The fold is that PR's **"Fold the ledger" commit**, verified without an adversarial review: **the script must
   reproduce it** (on its base, the command written in the commit message, then `git diff --exit-code <commit>`, shows
   no difference). The PR's other commits (docs named by the `Docs:` lines) are reviewed like any change.
 - No lock, no conflict, no late push to rebase a log, no CI rerun for one line.
-- The adversarial reviewer reviews the `### Ledger` section like code. A malformed entry is reported and skipped by
-  the steward (the others are folded): the author fixes the PR body, not the files.
+- The adversarial reviewer reviews the `### Ledger` section like code. A malformed entry is reported in the docs PR,
+  quoted with the expected format, and not folded (the others are): the author fixes the PR body, not the files.
 
 Wiring the block in: the harness provides the convention and the PR body checks (`pr-hygiene.yml`, inputs
 `ledger-label` and `docs-code-paths`); the project provides its fold script (block format, target files, order, idempotence), declared in
 `.harness/config.json` → `ledger` (`enabled`, `label`, `fold_command`), and a CI check that refuses a PR outside
-the steward's branch touching the ledger files. The labels `ledger` and `ledger: done` go in
-`.github/labels.local.json`. Full example (block format, script, check): `tooling/docs/README.md` of HFRnow
+the steward's branch touching the ledger files (it must not require the label either). The label `ledger: done` goes
+in `.github/labels.local.json` (`ledger` too while older PRs carry it). Full example (block format, script, check): `tooling/docs/README.md` of HFRnow
 (branch `dev-swift`, #620). Without a ledger (`ledger.enabled` missing or false), none of this applies.
 
 ## GitHub comments
