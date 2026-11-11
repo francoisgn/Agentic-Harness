@@ -206,7 +206,9 @@ ok "guard-git"
 CLAUDE_PROJECT_DIR="$T" bash "$SS" vendored >"$WORK/ss.out" 2>&1
 grep -qF "$(cat "$ROOT/VERSION") (.harness/VERSION)" "$WORK/ss.out" || fail "session-start"
 grep -qF 'python3 .harness/scripts/issue-reconcile.py' "$WORK/ss.out" || fail "session-start: reconcile command not offered"
-CLAUDE_PROJECT_DIR="$T3" bash "$SS" vendored >"$WORK/ss.out" 2>&1
+# A project that vendored the harness without the reconcile script (its own directory: other groups reuse $T3)
+NR="$WORK/no-reconcile"; mkdir -p "$NR"; cp -R "$T/.harness" "$NR/.harness"; rm -f "$NR/.harness/scripts/issue-reconcile.py"
+CLAUDE_PROJECT_DIR="$NR" bash "$SS" vendored >"$WORK/ss.out" 2>&1
 ! grep -qF 'issue-reconcile' "$WORK/ss.out" || fail "session-start: reconcile offered while the script is not vendored"
 CLAUDE_PROJECT_DIR="$T" bash "$SS" plugin >"$WORK/ss.out" 2>&1
 [ ! -s "$WORK/ss.out" ] || fail "session-start plugin should stay silent"
