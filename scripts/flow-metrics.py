@@ -28,6 +28,7 @@ AGENT_BODY_RE = re.compile(r"^Claim:[ \t]*(?!human/)\S+|Generated with \[Claude 
 LABEL_CLAIMED = "status: claimed"
 BOTTLENECK_LABELS = ("status: blocked", "status: needs-decision")
 HIGH_PRIORITY_LABELS = ("priority: critical", "priority: high")
+ON_HOLD_LABEL = "status: on-hold"   # held by a decision: listed apart, neither a bottleneck nor ready
 STATUS_PREFIX = "status: "
 
 
@@ -190,6 +191,9 @@ def analyse(data, now, stall_hours=24, draft_stall_hours=120, max_ci_runs=6, max
         if numbers:
             bottlenecks[label] = numbers
 
+    on_hold = [{"number": i["number"], "title": i["title"]}
+               for i in sorted(open_issues, key=lambda i: i["number"]) if ON_HOLD_LABEL in _labels(i)]
+
     # An open issue carries exactly one `status:` label: count them per value, list the issues with none or several.
     status_counts, status_anomalies = {}, []
     for i in sorted(open_issues, key=lambda i: i["number"]):
@@ -258,6 +262,7 @@ def analyse(data, now, stall_hours=24, draft_stall_hours=120, max_ci_runs=6, max
         "loops": loops,
         "bottlenecks": bottlenecks,
         "bottleneck_items": bottleneck_items,
+        "on_hold": on_hold,
         "status_counts": dict(sorted(status_counts.items())),
         "status_anomalies": status_anomalies,
         "merged": {"total": len(merged), "agent": len(agent), "human": len(merged) - len(agent),
@@ -315,6 +320,10 @@ def render_markdown(r, repo):
         out += [f"| #{b['number']} | {_cell(b['title'])} | {', '.join(b['labels'])} |" for b in r["bottleneck_items"]]
     else:
         out.append("- No `status: blocked` or `status: needs-decision` item.")
+    if r["on_hold"]:
+        out += ["", "## On hold", "", "Held by a decision, not by a dependency (`status: on-hold`).", "",
+                "| Issue | Title |", "|---|---|"]
+        out += [f"| #{h['number']} | {_cell(h['title'])} |" for h in r["on_hold"]]
     out += ["", "## Stalled (no activity)", ""]
     if r["stalled"]:
         out += ["| Item | Title | Idle for |", "|---|---|---|"]

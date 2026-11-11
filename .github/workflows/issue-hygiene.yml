@@ -4,6 +4,9 @@ name: Issue hygiene (reusable)
 # once everything is in order (never a pile of reminders):
 #   - an open issue carries exactly one `status:` label and exactly one `type:` label;
 #   - once triaged (no `status: needs-triage`), exactly one `priority:` and one `difficulty:` label;
+#   - a `status: blocked` issue names what it waits on in a `### Blocked by` section of its description (one line per
+#     blocker: `#n`, or free text for an external thing); it is reported, never relabelled (a decision-held issue is
+#     `status: on-hold`, which needs no blocker);
 #   - an umbrella issue (`type: epic`) does not need a difficulty.
 # A newly opened or reopened issue without a status gets `status: needs-triage`. On close, every `status:` label is
 # removed (a closed issue carries none).
@@ -32,6 +35,10 @@ on:
         description: Status set on a new issue that has none; while an issue carries it, `triage-axes` are not required
         type: string
         default: "status: needs-triage"
+      blocked-label:
+        description: Status that needs a `### Blocked by` section in the description
+        type: string
+        default: "status: blocked"
       umbrella-label:
         type: string
         default: "type: epic"
@@ -70,6 +77,7 @@ jobs:
           REQUIRED_AXES: ${{ inputs.required-axes }}
           TRIAGE_AXES: ${{ inputs.triage-axes }}
           TRIAGE_LABEL: ${{ inputs.triage-label }}
+          BLOCKED_LABEL: ${{ inputs.blocked-label }}
           UMBRELLA_LABEL: ${{ inputs.umbrella-label }}
           UMBRELLA_AXES: ${{ inputs.umbrella-axes }}
           EXEMPT_LABELS: ${{ inputs.exempt-labels }}
@@ -89,6 +97,17 @@ jobs:
             const axisOf = (name) => declared.get(name) || (/^([a-z][a-z-]*): /.exec(name) || [])[1];
             const examples = (axis) => [...declared].filter(([, a]) => a === axis).map(([n]) => '`' + n + '`').join(', ');
             const namesOf = (issue) => issue.labels.map((l) => (typeof l === 'string' ? l : l.name));
+            // begin blocker
+            // The `### Blocked by` section of an issue body (the issue forms render their field that way): the lines
+            // up to the next heading, bullets stripped, joined by \n; null when absent or empty (`none`, `_No response_`).
+            function blockerOf(body) {
+              const m = /^#{2,4}[ \t]*Blocked by[ \t]*\r?\n([\s\S]*?)(?=^#{1,6}[ \t]|(?![\s\S]))/im.exec(body || '');
+              if (!m) return null;
+              const lines = m[1].split(/\r?\n/).map((l) => l.replace(/^\s*[-*][ \t]+/, '').trim())
+                .filter((l) => l && !/^(none|n\/a|tbd|-|_no response_)$/i.test(l));
+              return lines.length ? lines.join('\n') : null;
+            }
+            // end blocker
             const triageLabel = process.env.TRIAGE_LABEL;
             const { owner, repo } = context.repo;
 
@@ -104,6 +123,11 @@ jobs:
                 const found = names.filter((n) => axisOf(n) === axis);
                 if (found.length === 0) out.push(`axis **${axis}** has no label (${examples(axis)})`);
                 else if (found.length > 1) out.push(`axis **${axis}** has several labels (${found.join(', ')}): keep exactly one`);
+              }
+              if (names.includes(process.env.BLOCKED_LABEL) && !blockerOf(issue.body)) {
+                out.push(`\`${process.env.BLOCKED_LABEL}\` names no blocker: add a \`### Blocked by\` section to the description, ` +
+                  'one line per blocker (`#n` for an issue or PR, or the external thing: capture, access, third-party decision); ' +
+                  'if a decision holds it back rather than a dependency, use `status: on-hold` instead');
               }
               if (process.env.REQUIRE_SUMMARY === 'true' && !umbrella &&
                   !/^###[ \t]*Summary[ \t]*\r?\n\s*[^#\s]/im.test(issue.body || '')) {

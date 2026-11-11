@@ -20,7 +20,7 @@ the same files under `${CLAUDE_PLUGIN_ROOT}/docs/`) and the project's rules (`AG
    `/claim` from our identifier) → stop and say so. Held by our identifier (the orchestrator claimed for us) →
    continue without claiming again.
 3. **Ready?** For each issue, stop and say so if:
-   - it carries `status: needs-decision` or `status: blocked`, or a dependency (`Depends on`, lot plan) is not
+   - it carries `status: needs-decision` or `status: blocked`, or a dependency (`### Blocked by`, lot plan) is not
      closed;
    - it carries `needs: host` and the session runs in the cloud (`CLAUDE_CODE_REMOTE=true`);
    - its inputs do not exist (data, screenshots, regulatory sources, access).
