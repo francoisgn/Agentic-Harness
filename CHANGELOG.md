@@ -5,6 +5,19 @@ moving to this version.
 
 ## Unreleased
 
+- **Integration branch that is not the default branch: the first adoption stops, and a relay workflow**
+  ([ADOPTION](docs/ADOPTION.md#integration-branch-that-is-not-the-default-branch), [CI-BASELINE](docs/CI-BASELINE.md)
+  §6): on a first adoption (no `.harness/lock`), `harness-sync.sh` exits with code 4 before writing anything when
+  `integration_branch` is not the default branch, names the `issues` / `issue_comment` / `schedule` jobs that would
+  never run, and gives the two ways out: make it the default branch, or commit the new
+  `templates/.github/workflows/harness-relay.yml` on the default branch (issue hygiene and dashboard run from there
+  on the integration branch's files; label reconcile left disabled until #62). Never seeded; `refbump` pins a copy kept
+  on the integration branch. `issue-hygiene.yml` and `flow-report.yml` take a new optional `ref` input. Later syncs
+  keep the warning, which now names the relay; `"default_branch_check": false` still silences everything.
+  **Action** (projects already adopted whose integration branch is not the default branch): install the relay on the
+  default branch once this version is synced, or make the integration branch the default; to keep two branches by
+  hand on purpose, set `"default_branch_check": false`.
+
 - **`status:` labels kept true without any workflow** ([METHODOLOGY](docs/METHODOLOGY.md) §4,
   [ORCHESTRATION](docs/ORCHESTRATION.md) §1): `issue-reconcile.py` (vendored as `.harness/scripts/issue-reconcile.py`,
   standard library) removes the status of closed issues, sets `claimed` on an issue with an open linked PR or a live
@@ -31,6 +44,12 @@ moving to this version.
   **Action**: run the label sync (`labels-sync`) to create `status: on-hold`, then move the issues held by a
   decision from `status: blocked` to `status: on-hold` and give each remaining blocked issue a `### Blocked by`
   section.
+- **Merge gate** (`scripts/merge-gate.py <pr>`, vendored to `.harness/scripts/`, [CONVENTIONS](docs/CONVENTIONS.md)
+  §Pull requests): read-only, one `ok` / `missing` line per check (draft, mergeable, CI green on the head sha,
+  adversarial APPROVED naming the head, a "stale approval" otherwise, open review threads read through GraphQL, the
+  `Open questions` of the report marked `<!-- harness:report -->`, required and security labels, PR body lines);
+  "may merge" prints the head sha to merge with, "could not check" exits 2. Settings: `.harness/config.json` ›
+  `merge_gate` (`required_labels` default empty). The verdict parsing is shared with `flow-metrics.py`.
 
 - **What reviews are worth, readable without a metric**, and **lot size as a recommendation**
   ([FINOPS](docs/FINOPS.md) §2 and §5, [REVIEW-ROUNDS](docs/REVIEW-ROUNDS.md), [METHODOLOGY](docs/METHODOLOGY.md)
@@ -94,6 +113,18 @@ moving to this version.
   (Claude Code, Codex, Antigravity, Gemini CLI, Gemini Code Assist, Copilot, Cursor), what does not combine, and why
   "we approved tool X" needs one answer per layer. Two Excalidraw diagrams. Every product fact is sourced and dated
   (read 2026-11-10). Vendored with the other docs into `.harness/docs/ai-layers/`.
+
+- **Ledger: the section alone is the entry, no label asked of the author** (#60,
+  [CONVENTIONS](docs/CONVENTIONS.md) §Ledger): child and cloud sessions often cannot set labels. `pr-hygiene.yml` no
+  longer fails on "entry blocks without the `ledger` label" nor on "label without a section": a stale label is one
+  notice. It fails a malformed section instead (block without a type, block not closed, `None` without a reason),
+  quoting the entry and the expected format; `None (<reason>)` is the one spelling of an empty section.
+  `doc-steward.py pending` finds the PRs to fold from their `### Ledger` section (the label is only read as a hint),
+  keeps the entries a pass did not fold pending, and lists malformed entries in the docs PR; the fold pass writes
+  `ledger: done`, the only label the harness sets.
+
+  **Action** (projects that keep a ledger): stop asking authors for the `ledger` label; a project CI check that
+  requires it must drop that rule. Keep `ledger: done` in `.github/labels.local.json`.
 
 - **README diagrams redrawn, exported by Excalidraw** (`docs/diagrams/`): mechanisms, cycle and adoption diagrams
   checked against the docs (two reviews: intent before "Ready", code on the ready PR; the dashboard reads the
