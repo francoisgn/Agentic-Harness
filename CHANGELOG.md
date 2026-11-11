@@ -5,6 +5,15 @@ moving to this version.
 
 ## Unreleased
 
+- **The version number tells the gap** ([BRANCHING-RELEASE](docs/BRANCHING-RELEASE.md#versions-and-tags),
+  [CONTRIBUTING](CONTRIBUTING.md)): `VERSION` and the plugin manifest on `master` are the next version with a `-dev`
+  mark (`0.4.0-dev`) until the release, which removes it. The "Valid JSON and consistent versions" step fails on a
+  non-empty `## Unreleased` under a released number. `harness-sync.sh --check` and the session-start hook print
+  "vendored X (commit) · harness now Y, N commits ahead, see CHANGELOG Actions" when a harness clone is at hand
+  (`HARNESS_CLONE`, or `../belayline`), and "could not compare" when not; offline. A `-dev` version is a harness
+  state, not a tag: a sync from a clone of `master` pins workflow references as `@<sha> # v0.4.0-dev`.
+  **Action**: none.
+
 - **Integration branch that is not the default branch: the first adoption stops, and a relay workflow**
   ([ADOPTION](docs/ADOPTION.md#integration-branch-that-is-not-the-default-branch), [CI-BASELINE](docs/CI-BASELINE.md)
   §6): on a first adoption (no `.harness/lock`), `harness-sync.sh` exits with code 4 before writing anything when

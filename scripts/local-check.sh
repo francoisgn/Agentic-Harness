@@ -157,7 +157,15 @@ step "Valid JSON and consistent versions" "git jq" "*.json VERSION CHANGELOG.md"
 for f in $(git ls-files '*.json'); do jq empty "$f" || exit 1; done
 V=$(cat VERSION); P=$(jq -r .version plugins/harness/.claude-plugin/plugin.json)
 [ "$V" = "$P" ] || { echo "::error::VERSION ($V) ≠ plugin.json ($P)"; exit 1; }
-grep -q "^## $V " CHANGELOG.md || { echo "::error::CHANGELOG.md has no section $V"; exit 1; }
+printf '%s\n' "$V" | grep -Eq '^[0-9]+\.[0-9]+\.[0-9]+(-dev)?$' || { echo "::error::VERSION ($V) is neither X.Y.Z nor X.Y.Z-dev"; exit 1; }
+B=${V%-dev}
+if [ "$B" != "$V" ]; then
+  ! grep -q "^## $B " CHANGELOG.md || { echo "::error::VERSION $V is the pre-release of $B, which CHANGELOG.md already lists as released"; exit 1; }
+else
+  grep -q "^## $V " CHANGELOG.md || { echo "::error::CHANGELOG.md has no section $V"; exit 1; }
+  N=$(awk '/^## /{u=($0=="## Unreleased");next} u&&NF{n++} END{print n+0}' CHANGELOG.md)
+  [ "$N" = 0 ] || { echo "::error::CHANGELOG.md has changes under Unreleased but VERSION $V is already released: master carries the next version, X.Y.Z-dev (docs/BRANCHING-RELEASE.md)"; exit 1; }
+fi
 CMD
 step "Tests of harness-sync.sh and the hooks" "git jq python3" "" <<'CMD'
 scripts/tests/test-harness-sync.sh
