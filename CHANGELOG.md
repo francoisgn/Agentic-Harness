@@ -5,6 +5,14 @@ moving to this version.
 
 ## Unreleased
 
+- **Operator decisions live in a versioned file, not in comments** ([ORCHESTRATION](docs/ORCHESTRATION.md) §4,
+  [ESSENTIALS](docs/ESSENTIALS.md)): seeded `docs/DECISIONS.md` (date, scope key, decision, source, status; only rows
+  `in force` bind) and `decisions-check.py` (vendored as `.harness/scripts/decisions-check.py`), run in the docs job of
+  `docs-security.yml` (input `decisions`): at most one `in force` row per scope key, a date and a source on every row.
+  Off when the file is absent. A decision received in a comment or chat is recorded in the next commit.
+  **Action**: none required; a project that wants the rule keeps the seeded `docs/DECISIONS.md` after the sync, one
+  that does not deletes it (or `decisions: false`).
+
 - **What reviews are worth, readable without a metric**, and **lot size as a recommendation**
   ([FINOPS](docs/FINOPS.md) §2 and §5, [REVIEW-ROUNDS](docs/REVIEW-ROUNDS.md), [METHODOLOGY](docs/METHODOLOGY.md)
   §5 and §6):

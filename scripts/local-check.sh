@@ -174,6 +174,9 @@ CMD
 step "Markdown · relative links and cross-file anchors" "python3" "*.md scripts/doc-links.py" <<'CMD'
 python3 scripts/doc-links.py
 CMD
+step "Operator decisions template passes its own check" "python3" "templates/docs/DECISIONS.md scripts/decisions-check.py" <<'CMD'
+python3 scripts/decisions-check.py --file templates/docs/DECISIONS.md
+CMD
 step "Secrets · gitleaks" "git docker" "" <<'CMD'
 if [ -n "$BASE_SHA" ]; then LOG_OPTS="$BASE_SHA..HEAD"; else LOG_OPTS=--all; fi
 docker run --rm -v "$PWD":/repo ghcr.io/gitleaks/gitleaks:v8.30.1 \
