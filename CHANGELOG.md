@@ -5,6 +5,16 @@ moving to this version.
 
 ## Unreleased
 
+- **Ledger: one folder at a time, and a rule for a contested place** ([CONVENTIONS](docs/CONVENTIONS.md) §Ledger,
+  #61): only the steward folds, on its one branch (`docs/steward`); `doc-steward.py fold-guard` (exit 0 free, 1
+  refused with the open PR's link, 2 could not check) refuses a second fold while a PR from that branch is open, in
+  `doc-steward.yml` (before deciding and before pushing; the open PR is no longer rebuilt) and for a fold run by hand.
+  `STEWARD_LEDGER_PRS` comes in merge order; two entries on the same place: the first merged wins, the fold command
+  writes the other to `$STEWARD_CONTESTED` and the docs PR quotes both under "Contested entries", apart from
+  "Unplaced entries". New harness entry type `note` (text outside the tables, `<file> § <heading>` then the text),
+  folded without waiting for an operator, with the helper `doc-steward.py note`.
+  **Action** (projects that keep a ledger): make the fold command honour the contract (report contested places to
+  `$STEWARD_CONTESTED`, fold `note` entries) and merge or close an open steward PR before the next pass.
 - **Operator decisions live in a versioned file, not in comments** ([ORCHESTRATION](docs/ORCHESTRATION.md) §4,
   [ESSENTIALS](docs/ESSENTIALS.md)): seeded `docs/DECISIONS.md` (date, scope key, decision, source, status; only rows
   `in force` bind) and `decisions-check.py` (vendored as `.harness/scripts/decisions-check.py`), run in the docs job of

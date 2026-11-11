@@ -2,7 +2,10 @@
 """Deterministic half of the doc steward (STEWARDS.md §2; standard library only): decides, files issues, writes text.
 
 Subcommands, called by doc-steward.yml (the agent only starts when `pending` says there is something to fold):
-  pending  anything to fold since the last pass? The last pass is the last merged PR from the steward's branch: its
+  fold-guard  one fold at a time, on one branch (CONVENTIONS.md §Ledger): refused while a PR from the steward's branch
+           is open (its link is printed), or when `--head-branch` is another branch. Also called by `pending` and before
+           the push; a project's own fold command can call it first. Exit 0 free, 1 refused, 2 could not check.
+  pending  anything to fold since the last pass? Refused (`open_fold`, nothing else read) while a fold PR is open. The last pass is the last merged PR from the steward's branch: its
            body carries `Steward-Through: <time>`, `Folded: #a #b` and `Pending entries: #a #b #c.`. The `### Ledger`
            section is the entry (CONVENTIONS.md §Ledger), no label is needed from the author. Pending ledger: PRs
            merged into the base since then whose section has entry blocks (minus those marked `<label>: done`), the
@@ -11,17 +14,24 @@ Subcommands, called by doc-steward.yml (the agent only starts when `pending` say
            folded that do not carry `<label>: done` yet (the workflow sets it, the steward's only label). Docs: PRs
            merged since then whose `Docs:` line names files (`Docs: none (…)` and a missing line ask for nothing).
            First pass: the last `--since-days` days. Writes a JSON report (`fold`, `since`, `through`, `ledger`,
-           `malformed`, `docs`, `mark_done`).
+           `ledger_order` (merge order, for "first merged wins"), `malformed`, `docs`, `mark_done`).
   body     the body of the steward's draft docs PR from that report: the markers, the PRs handled, the output of
-           the fold command, and every entry the steward could not place (left in place, never dropped).
+           the fold command, then two sections: contested entries (`--contested`, the JSON lines the fold command
+           wrote to $STEWARD_CONTESTED, both texts quoted) and unplaced entries (left in place, never dropped).
+  note     folds one `note` entry (text outside the tables): first line `<file>` or `<file> § <heading>`, then the
+           text, appended at the end of that section (or of the file); already there = nothing changes. Exit 0
+           placed, 1 unplaced (the reason on one line, for the fold command's unplaced list).
   audit    weekly safety net: one issue per gap found by the deterministic checks (`--report NAME=FILE`, the output
            of a failed check: readme, links, diagrams, progress), none for a gap that already has an open issue
            (same title); at most MAX_ISSUES per run.
 Usage: doc-steward.py pending --repo o/r --base develop [--branch docs/steward] [--ledger-label ledger]
                               [--since-days 7] [--protected "main master develop beta"] [--json-out f]
-       doc-steward.py body --pending f [--folded f] [--fold-log f] [--unplaced f]
+       doc-steward.py fold-guard --repo o/r [--branch docs/steward] [--head-branch "$(git branch --show-current)"]
+       doc-steward.py body --pending f [--folded f] [--fold-log f] [--unplaced f] [--contested f]
+       doc-steward.py note --entry f|- [--root .]
        doc-steward.py audit --repo o/r --report readme=f [--report links=f …] [--label "type: docs"] [--dry-run]
-Exit codes: 0 done (whatever the decision); 2 nothing decided: no token, API error, the branch is protected.
+Exit codes: 0 done (whatever the decision); 1 refused (fold-guard) or unplaced (note); 2 nothing decided: no
+token, API error, the branch is protected.
 Token: GH_TOKEN (or GITHUB_TOKEN): read pull requests and issues; `audit` also writes issues.
 API (REST, 2022-11-28): GET /repos/{o}/{r}/pulls (state, head, base, sort), GET and POST /repos/{o}/{r}/issues,
 GET /repos/{o}/{r}/issues/{n} (docs.github.com/en/rest/pulls/pulls, /rest/issues/issues).
@@ -52,6 +62,8 @@ NONE_LINE = re.compile(r"^\s*(?:[-*]\s+)?None\b(.*)$", re.I)
 SECTION_END = re.compile(r"^#{1,3}\s")
 LEDGER_FORMAT = ("expected: one fenced block per entry whose language is the entry type (```changelog … ```), "
                  "or the line `None (<reason>)` when the PR has no entry")
+NOTE_TARGET = re.compile(r"^\s*(\S+)\s*(?:§\s*(.*?))?\s*$")
+HEADING = re.compile(r"^(#{1,6})\s+(.*?)\s*#*\s*$")
 REPRODUCE = {"readme": "python3 .harness/scripts/readme-check.py",
              "links": "python3 .harness/scripts/doc-links.py",
              "diagrams": "python3 .harness/scripts/diagrams-render.py --check",
@@ -217,7 +229,7 @@ def pending(repo, base, branch, ledger_label, http, now=None, since_days=7, ledg
                             f"&direction=desc&per_page={PER_PAGE}", stop=older)
     heading = ledger_heading if ledger_label else None
     done = f"{ledger_label}: done"
-    docs, through, sections, malformed = [], since, set(), []
+    docs, through, sections, malformed, merged_at_of = [], since, set(), [], {}
     for p in merged:
         if not p.get("merged_at") or (p.get("head") or {}).get("ref") == branch:
             continue
@@ -225,6 +237,7 @@ def pending(repo, base, branch, ledger_label, http, now=None, since_days=7, ledg
         if merged_at <= since:
             continue
         through = max(through, merged_at)
+        merged_at_of[p["number"]] = p["merged_at"]
         files = docs_files(p.get("body"), heading)
         if files:
             docs.append({"number": p["number"], "title": p.get("title", ""), "files": files})
@@ -242,6 +255,8 @@ def pending(repo, base, branch, ledger_label, http, now=None, since_days=7, ledg
         issues = paginate(http, f"/repos/{repo}/issues?state=closed&labels={q(ledger_label, safe='')}"
                                 f"&per_page={PER_PAGE}")
         labelled = {i["number"] for i in issues if (i.get("pull_request") or {}).get("merged_at")}
+        for i in issues:
+            merged_at_of.setdefault(i["number"], (i.get("pull_request") or {}).get("merged_at") or "")
         for n in folded[:MAX_PAGES * PER_PAGE]:
             item = http(f"/repos/{repo}/issues/{n}")
             if not isinstance(item, dict):
@@ -251,11 +266,101 @@ def pending(repo, base, branch, ledger_label, http, now=None, since_days=7, ledg
                 mark_done.append(n)
         ledger = sorted((labelled | sections | carried) - set(folded))
     malformed.sort(key=lambda m: m["number"])
+    # "First merged wins" (CONVENTIONS.md §Ledger): the fold command gets the entries in merge order; those carried
+    # from the last pass merged before it, so they come first.
+    order = sorted(ledger, key=lambda n: (parse_time(merged_at_of[n]) if merged_at_of.get(n) else since, n))
     return {"fold": bool(docs or ledger or malformed), "since": iso(since), "through": iso(through),
-            "ledger": ledger, "malformed": malformed, "docs": docs, "mark_done": sorted(set(mark_done))}
+            "ledger": ledger, "ledger_order": order, "malformed": malformed, "docs": docs,
+            "mark_done": sorted(set(mark_done))}
 
 
-def body(result, folded=None, fold_log="", unplaced=""):
+def open_fold(repo, branch, http):
+    """The open PR from the steward's branch ({number, url}), or None: while it is open, no second fold starts."""
+    owner = repo.split("/")[0]
+    prs = http(f"/repos/{repo}/pulls?state=open&head={urllib.parse.quote(owner + ':' + branch, safe='')}"
+               f"&per_page={PER_PAGE}&page=1")
+    if not isinstance(prs, list):
+        raise FetchError("open steward PRs: a list was expected")
+    if not prs:
+        return None
+    first = min(prs, key=lambda p: p.get("number", 0))
+    return {"number": first.get("number"), "url": first.get("html_url", "")}
+
+
+def contested_lines(text):
+    """List items for the contested entries the fold command reported (one JSON object per line: `place`, `first`,
+    `first_text`, `second`, `second_text`); a line that cannot be read is kept verbatim, never dropped."""
+    def quoted(label, value):
+        block = str(value if value is not None else "").replace("```", "'''").rstrip() or "(empty)"
+        return [f"  - {label}:", "", "    ```text", *[f"    {line}" for line in block.splitlines()], "    ```", ""]
+
+    items = []
+    for raw in (text or "").splitlines():
+        if not raw.strip():
+            continue
+        try:
+            entry = json.loads(raw)
+            first, second = int(entry["first"]), int(entry["second"])
+        except (ValueError, TypeError, KeyError):
+            items += [f"- unreadable contested report, kept as written: {raw.strip()}", ""]
+            continue
+        items += [f"- {entry.get('place') or '(place not given)'}: contested: #{first} vs #{second}. #{first} merged "
+                  f"first and is folded; #{second} is reported here: settle it in this PR before merging.", ""]
+        items += quoted(f"#{first} (folded)", entry.get("first_text")) + quoted(f"#{second} (reported)",
+                                                                                entry.get("second_text"))
+    return items
+
+
+def place_note(text, heading, note):
+    """`text` with `note` appended at the end of the section `heading` (to the next heading of the same or a higher
+    level), or at the end of the file without a heading. Already present: unchanged. ValueError: heading missing."""
+    note = note.strip()
+    if note in text:
+        return text
+    lines = text.splitlines()
+    end = len(lines)
+    if heading:
+        wanted = heading.strip().lower()
+        at = next((i for i, line in enumerate(lines)
+                   if (m := HEADING.match(line)) and m.group(2).strip().lower() == wanted), None)
+        if at is None:
+            raise ValueError(f"no heading \"{heading}\"")
+        level = len(HEADING.match(lines[at]).group(1))
+        end = next((i for i in range(at + 1, len(lines))
+                    if (m := HEADING.match(lines[i])) and len(m.group(1)) <= level), len(lines))
+    before = lines[:end]
+    while before and not before[-1].strip():
+        before.pop()
+    after = lines[end:]
+    return "\n".join(before + ["", *note.splitlines()] + ([""] + after if after else [])) + "\n"
+
+
+def fold_note(entry, root="."):
+    """Folds one `note` entry under `root`; returns (True, message) or (False, why it stays unplaced)."""
+    head, _, note = (entry or "").partition("\n")
+    m = NOTE_TARGET.match(head)
+    if not m or not note.strip():
+        return False, "unplaced note: expected a first line `<file>` or `<file> § <heading>`, then the text"
+    path, heading = m.group(1), m.group(2) or None
+    parts = path.replace("\\", "/").split("/")
+    if path.startswith("/") or ".." in parts or parts[0] in (".github", ".harness"):
+        return False, f"unplaced note: {path} is outside the files a fold may write"
+    target = os.path.join(root, *parts)
+    try:
+        with open(target, encoding="utf-8") as f:
+            text = f.read()
+        new = place_note(text, heading, note)
+    except OSError as e:
+        return False, f"unplaced note: {path}: {e.strerror or e}"
+    except ValueError as e:
+        return False, f"unplaced note: {path}: {e}"
+    if new != text:
+        with open(target, "w", encoding="utf-8") as f:
+            f.write(new)
+    return True, f"note folded in {path}" + (f" § {heading}" if heading else "")
+
+
+def body(result, folded=None, fold_log="", unplaced="", contested=""):
     """Body of the steward's draft docs PR; the two marker lines are read back by the next pass."""
     ledger = result.get("ledger", [])
     folded = ledger if folded is None else [n for n in folded if n in ledger]
@@ -273,8 +378,12 @@ def body(result, folded=None, fold_log="", unplaced=""):
                   (fold_log or "(no output)").replace("```", "'''").rstrip(), "```"]
     else:
         lines.append("Nothing to fold.")
-    lines += ["", "## Entries left in place", "",
-              "What the steward could not place stays in its PR and is listed here, never dropped:", ""]
+    lines += ["", "## Contested entries", "",
+              "Two entries of this pass target the same place: the first merged wins, the other is quoted here",
+              "with both texts, never dropped (CONVENTIONS.md §Ledger):", ""]
+    lines += contested_lines(contested) or ["None.", ""]
+    lines += ["## Unplaced entries", "",
+              "What the steward could not place is left in place in its PR and listed here, never dropped:", ""]
     left = [f"- #{n}: ledger entry not folded (see the fold output); it stays in its PR" for n in ledger
             if n not in folded]
     left += [f"- #{m['number']}: malformed ledger entry, the author fixes the PR body: {problem}"
@@ -357,6 +466,14 @@ def run(argv=None, http=None, env=None, out=sys.stdout):
     b.add_argument("--folded")
     b.add_argument("--fold-log")
     b.add_argument("--unplaced")
+    b.add_argument("--contested")
+    g = sub.add_parser("fold-guard")
+    g.add_argument("--repo", default=env.get("GITHUB_REPOSITORY"))
+    g.add_argument("--branch", default="docs/steward")
+    g.add_argument("--head-branch", default="", help="branch the fold would push (refused if not --branch)")
+    n = sub.add_parser("note")
+    n.add_argument("--entry", required=True, help="file holding the note block's content, `-` for stdin")
+    n.add_argument("--root", default=".")
     a = sub.add_parser("audit")
     a.add_argument("--repo", default=env.get("GITHUB_REPOSITORY"))
     a.add_argument("--report", action="append", default=[], help="NAME=FILE, output of a failed check")
@@ -374,8 +491,15 @@ def run(argv=None, http=None, env=None, out=sys.stdout):
             say(f"✘ {args.pending}: {e}")
             return 2
         folded = [int(n) for n in re.findall(r"\d+", _read(args.folded))] if args.folded else None
-        out.write(body(result, folded, _read(args.fold_log), _read(args.unplaced)))
+        out.write(body(result, folded, _read(args.fold_log), _read(args.unplaced), _read(args.contested)))
         return 0
+    if args.cmd == "note":
+        placed, message = fold_note(sys.stdin.read() if args.entry == "-" else _read(args.entry), args.root)
+        say(message)
+        return 0 if placed else 1
+    if args.cmd == "fold-guard" and args.head_branch and args.head_branch != args.branch:
+        say(f"✘ refused: a fold runs on {args.branch} only, not on {args.head_branch} (one folder at a time)")
+        return 1
 
     if args.cmd == "pending" and (args.branch == args.base or args.branch in args.protected.split()):
         say(f"✘ the steward branch {args.branch} is protected or is the base: it never pushes there")
@@ -389,6 +513,21 @@ def run(argv=None, http=None, env=None, out=sys.stdout):
         return 2
     http = http or github(token)
     try:
+        if args.cmd in ("fold-guard", "pending"):
+            busy = open_fold(args.repo, args.branch, http)
+            if busy:
+                say(f"✘ refused: fold PR #{busy['number']} from {args.branch} is still open ({busy['url']}); merge or "
+                    "close it first, the next pass covers every merge since. Nothing pushed.")
+                if args.cmd == "fold-guard":
+                    return 1
+                if args.json_out:
+                    with open(args.json_out, "w", encoding="utf-8") as f:
+                        json.dump({"fold": False, "open_fold": busy, "ledger": [], "ledger_order": [], "malformed": [],
+                                   "docs": [], "mark_done": []}, f, indent=2)
+                return 0
+            if args.cmd == "fold-guard":
+                say(f"🟢 no open fold PR from {args.branch}: the fold may start")
+                return 0
         if args.cmd == "audit":
             reports = {}
             for item in args.report:
