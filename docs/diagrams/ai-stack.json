@@ -155,7 +155,7 @@
   "fillStyle": "solid",
   "strokeColor": "#2f9e44",
   "label": {
-   "text": "the harness: a loop where the model\nasks for an action, a tool does it",
+   "text": "Claude Code, Codex, Copilot agent:\nthe model asks, a tool acts, repeat",
    "fontSize": 17
   }
  },
@@ -173,7 +173,7 @@
   "fillStyle": "solid",
   "strokeColor": "#adb5bd",
   "label": {
-   "text": "none",
+   "text": "no loop:\nit only answers",
    "fontSize": 17
   },
   "strokeStyle": "dashed"
@@ -246,7 +246,7 @@
   "fillStyle": "solid",
   "strokeColor": "#adb5bd",
   "label": {
-   "text": "none",
+   "text": "its own sandbox\nat most",
    "fontSize": 17
   },
   "strokeStyle": "dashed"
@@ -265,7 +265,7 @@
   "fillStyle": "solid",
   "strokeColor": "#e8590c",
   "label": {
-   "text": "acts in your\nfiles, with\nyour rights",
+   "text": "acts with your\nrights, on your\nmachine or cloud",
    "fontSize": 17
   }
  },
@@ -301,7 +301,7 @@
   "fillStyle": "solid",
   "strokeColor": "#9c36b5",
   "label": {
-   "text": "model vendor, cloud platform or tool\nvendor: the seller sets the contract",
+   "text": "model vendor, cloud platform or tool\nvendor: who sells and operates it\nsets the contract",
    "fontSize": 17
   }
  },

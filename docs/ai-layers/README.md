@@ -5,7 +5,7 @@ of four layers: where you talk to it, what decides and acts, where it acts, and 
 by whom. Each layer is a separate choice, with its own risks and its own contract. This guide takes the layers apart,
 one audience at a time.
 
-![The four layers of an AI product, one question each: presentation (where do I talk to it), agent (what decides and acts), execution (where does it act), inference (which model answers); a chatbot has only the first and the last, an agent working on your behalf has all four and acts in your files with your rights; whoever sells and operates the inference sets the contract that governs your data](../diagrams/ai-stack.svg)
+![The four layers of an AI product, one question each: presentation (where do I talk to it), agent (what decides and acts), execution (where does it act), inference (which model answers), each with a typical answer; a chatbot answers and has no action loop, with its own sandbox at most; an agent working on your behalf has all four and acts with your rights, on your machine or in a cloud; whoever sells and operates the inference sets the contract that governs your data](../diagrams/ai-stack.svg)
 
 | Part | For whom | Status |
 |---|---|---|
