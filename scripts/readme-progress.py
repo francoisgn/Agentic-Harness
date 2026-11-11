@@ -10,6 +10,7 @@ Lot state, first rule that applies (open issues with zero or several `status:` l
   🟠 in review    a linked PR is open and not a draft
   🔵 in progress  `status: claimed` on the epic or an open sub-issue
   🔴 blocked      `status: blocked` or `status: needs-decision` on the epic or an open sub-issue
+  ⏸ on hold      `status: on-hold` (held by a decision, not a dependency), when none of the above applies
   ⚪ to do        otherwise;   ⚠ no sub-issue: the epic has none (never guessed)
 A PR belongs to a lot when its body names the epic or one of its sub-issues after Closes/Fixes/Resolves/Refs (`#n`);
 a PR closed without merge is not linked.
@@ -38,6 +39,7 @@ EPIC_LABEL = "type: epic"
 STATUS_PREFIX = "status: "
 CLAIMED = "status: claimed"
 BLOCKED = ("status: blocked", "status: needs-decision")
+ON_HOLD = "status: on-hold"
 PER_PAGE = 100
 MAX_PAGES = 50   # 5,000 items per list: a bound, so a misbehaving API cannot loop forever
 # Closing keywords of GitHub (docs.github.com/en/issues/tracking-your-work-with-issues/linking-a-pull-request-to-an-issue)
@@ -115,6 +117,8 @@ def lot_row(epic, subs, pulls):
         state = "🔵 in progress"
     elif statuses & set(BLOCKED):
         state = "🔴 blocked"
+    elif ON_HOLD in statuses:
+        state = "⏸ on hold"
     else:
         state = "⚪ to do"
     row["state"] = state + (" ⚠ " + "; ".join(warnings) if warnings and state != "🟢 shipped" else "")

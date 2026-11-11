@@ -12,6 +12,16 @@ moving to this version.
   Off when the file is absent. A decision received in a comment or chat is recorded in the next commit.
   **Action**: none required; a project that wants the rule keeps the seeded `docs/DECISIONS.md` after the sync, one
   that does not deletes it (or `decisions: false`).
+- **`status: on-hold` apart from `status: blocked`; a blocked issue names its blocker**
+  ([METHODOLOGY](docs/METHODOLOGY.md) §4, [ADR 0003](docs/adr/0003-labels-readable-by-axis.md) amendment):
+  - new base label `status: on-hold` (held by a decision, not a dependency), shown apart by `flow-metrics.py` (an
+    "On hold" section, not a bottleneck) and `readme-progress.py` (`⏸ on hold`);
+  - a `status: blocked` issue carries a `### Blocked by` section, one line per blocker (`#n` or free text); the task
+    form has the field (formerly "Depends on"); `issue-hygiene` reports a blocked issue without it and never
+    relabels it (input `blocked-label`).
+  **Action**: run the label sync (`labels-sync`) to create `status: on-hold`, then move the issues held by a
+  decision from `status: blocked` to `status: on-hold` and give each remaining blocked issue a `### Blocked by`
+  section.
 
 - **What reviews are worth, readable without a metric**, and **lot size as a recommendation**
   ([FINOPS](docs/FINOPS.md) §2 and §5, [REVIEW-ROUNDS](docs/REVIEW-ROUNDS.md), [METHODOLOGY](docs/METHODOLOGY.md)

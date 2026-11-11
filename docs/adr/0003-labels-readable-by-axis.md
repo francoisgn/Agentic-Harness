@@ -82,3 +82,16 @@ Reading the state of a project:
   with `apply-aliases: true`.
 - To watch: the "French everywhere" rule no longer applies to label names; say so in CONVENTIONS.
 - To do first, whatever the option: apply `labels.json` to the harness repository.
+
+## Amendment 2026-11-11: `status: on-hold`
+The first consumer showed `status: blocked` carrying two meanings: 21 issues were blocked with every cited blocker
+closed (held by a decision, a milestone not yet open) and 21 more named no blocker. A label that encodes a policy
+cannot be cleared by a script. The `status:` axis now has six states, still exclusive and mandatory:
+- `status: blocked`: waits on something nameable that will end (issue or PR, capture, access, a third party's
+  decision). The description names it in a `### Blocked by` section, one line per blocker; `issue-hygiene` reports a
+  blocked issue without one and never relabels it.
+- `status: on-hold` (new): held by a decision of the operator (milestone not open, operator's call), not by a
+  dependency. `flow-metrics.py` and `readme-progress.py` show it apart: not a bottleneck, not ready.
+- Reading the state: `label:"status: on-hold"` next to the blocked / needs-decision query.
+- Consequence: one more label (25); a project that does not want it aliases or drops it in `labels.local.json`.
+The decision above is unchanged; this only adds a state.
