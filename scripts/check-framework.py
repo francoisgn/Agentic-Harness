@@ -8,14 +8,17 @@
 - repository identity (CONVENTIONS.md §Repository identity): description, topics, README banner, social preview;
 - anti-bloat (CONTRIBUTING.md §Size limits): body size of skills, agents and ESSENTIALS.md; doc links that must resolve;
   skill/agent counts in the README and the skill list of `templates/CLAUDE.md.block` = what `plugins/harness/` holds;
-- agent naming (ORCHESTRATION.md §7): every example matches the published regular expression.
+- agent naming (ORCHESTRATION.md §7): every example matches the published regular expression;
+- no dependency (CONTRIBUTING.md §What does not go in): no dependency manifest or lockfile outside `templates/`.
 Usage: check-framework.py [--root <repository>]   (exits 1 on any gap, lists every gap)
 """
 import argparse
 import importlib.util
 import json
 import pathlib
+import fnmatch
 import re
+import subprocess
 import sys
 
 GENERIC_REVIEWER = "compliance-reviewer"
@@ -35,6 +38,10 @@ ESSENTIALS_BODY_LIMIT = 5600  # current size (5.2 kB) + ~7 %: tighter, because i
 # Path relative to the root -> (limit, reason). Empty on purpose: a file that needs more is listed here, never by
 # raising a global limit above.
 SIZE_EXCEPTIONS = {}
+# The harness holds no dependency (SCOPE.md, CONTRIBUTING.md): a manifest or lockfile is a gap wherever it is tracked,
+# except under templates/, which a project copies and may need one day.
+DEPENDENCY_MANIFESTS = ("package.json", "package-lock.json", "yarn.lock", "pnpm-lock.yaml", "requirements*.txt",
+                        "pyproject.toml", "Pipfile*", "Gemfile*", "go.mod", "Cargo.toml")
 DOC_LINK_RE = re.compile(r"(?:\.harness|\$\{CLAUDE_PLUGIN_ROOT\})/docs/([A-Za-z0-9_-]+(?:\.[A-Za-z0-9_-]+)*)")
 
 
@@ -94,6 +101,24 @@ def anti_bloat_gaps(root):
         errors += [f"templates/CLAUDE.md.block: lists /{n}, which plugins/harness/skills/ does not hold"
                    for n in sorted(listed - actual)]
     return errors
+
+
+def tracked_files(root):
+    """Files tracked by git under `root`; every file (outside .git) when `root` is not a git work tree."""
+    try:
+        top = subprocess.run(["git", "-C", str(root), "rev-parse", "--show-toplevel"], capture_output=True, text=True)
+        if top.returncode == 0 and pathlib.Path(top.stdout.strip()).resolve() == pathlib.Path(root).resolve():
+            out = subprocess.run(["git", "-C", str(root), "ls-files", "-z"], capture_output=True, text=True, check=True)
+            return [f for f in out.stdout.split("\0") if f]
+    except (OSError, subprocess.CalledProcessError):
+        pass
+    return [p.relative_to(root).as_posix() for p in root.rglob("*") if p.is_file() and ".git" not in p.parts]
+
+
+def dependency_manifest_gaps(root):
+    return [f"{rel}: dependency manifest or lockfile; the harness holds no dependency (CONTRIBUTING.md)"
+            for rel in sorted(tracked_files(root)) if not rel.startswith("templates/")
+            and any(fnmatch.fnmatchcase(rel.rsplit("/", 1)[-1], pat) for pat in DEPENDENCY_MANIFESTS)]
 
 
 def pull_request_job_names(text):
@@ -221,7 +246,7 @@ def check(root):
         if not examples:
             errors.append("docs/ORCHESTRATION.md §7: no identifier example")
         errors += [f"docs/ORCHESTRATION.md §7: non-matching example \"{e}\"" for e in examples if not rx.match(e)]
-    return errors + anti_bloat_gaps(root)
+    return errors + anti_bloat_gaps(root) + dependency_manifest_gaps(root)
 
 
 def main():

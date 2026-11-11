@@ -69,7 +69,7 @@ its source is versioned JSON that CI can render and check.
 | File | Role |
 |---|---|
 | `docs/diagrams/<name>.json` | Source: list of elements (rectangle, ellipse, text, arrow, `label`) |
-| `docs/diagrams/<name>.svg` | Image shown in the README, deterministic render |
+| `docs/diagrams/<name>.svg` | Image shown in the README: built-in render, or stamped Excalidraw export |
 | `docs/diagrams/<name>.excalidraw` | Native scene, to open on excalidraw.com |
 
 ```bash
@@ -77,11 +77,17 @@ python3 .harness/scripts/diagrams-render.py            # renders docs/diagrams/*
 python3 .harness/scripts/diagrams-render.py --check    # CI: exits 1 if a render is stale or a text overflows
 ```
 
-In the harness repository, the SVG is exported by Excalidraw itself (Excalifont, hand-drawn strokes, hachure fills)
-once its dependencies are installed (`npm ci --prefix scripts/diagrams`, then
-`npx --prefix scripts/diagrams playwright install chromium` if no Chromium is installed; `export-svg.cjs`, offline).
-The SVG carries the hash of its scene and of its own body, so `--check` stays Python only. Without these
-dependencies, or if the export fails, the script draws the SVG itself, close to the Excalidraw look.
+Two ways to produce the SVG, neither needs any tooling beyond Python:
+
+- **Built-in renderer** (default): the script draws the SVG itself, close to the Excalidraw look; `--check` draws it
+  again and compares.
+- **Excalidraw export**: open `<name>.excalidraw` on excalidraw.com (or an Excalidraw MCP), Export image → SVG,
+  save it as `docs/diagrams/<name>.svg`, then run `diagrams-render.py --stamp <name>`. The script verifies the file
+  (well-formed SVG, Excalidraw's `<!-- svg-source:excalidraw -->` marker, scene up to date, not stamped for another
+  scene) and writes a stamp with the hash of the scene and of the SVG's body, which `--check` verifies. The stamp
+  records which scene the author exported from; it cannot prove the image matches it: the reviewer looks at the
+  image. The rendering never overwrites an export: when the scene changes, `--check` and the rendering fail and say
+  the two ways out (export and stamp again, or `--engine builtin <name>` to draw it).
 
 The three files are committed together. The diagram shows **what is delivered**; 5 to 9 boxes. Mermaid stays allowed
 for a short flow in an internal doc; for the README, `"architecture": "any"` accepts it too.
