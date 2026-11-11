@@ -5,6 +5,9 @@ moving to this version.
 
 ## Unreleased
 
+- **AI stack diagram: the execution split** (`docs/diagrams/ai-stack.*`): three columns (chatbot, agent in a vendor's
+  cloud, agent on your machine); the chatbot has none of your files, the cloud agent a copy of the repository and only
+  what it was given, the local agent your files, tools, network and credentials (#88).
 - **The version number tells the gap** ([BRANCHING-RELEASE](docs/BRANCHING-RELEASE.md#versions-and-tags),
   [CONTRIBUTING](CONTRIBUTING.md)): `VERSION` and the plugin manifest on `master` are the next version with a `-dev`
   mark (`0.4.0-dev`) until the release, which removes it. The "Valid JSON and consistent versions" step fails on a
