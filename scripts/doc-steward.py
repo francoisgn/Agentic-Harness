@@ -547,11 +547,11 @@ def run(argv=None, http=None, env=None, out=sys.stdout):
     if result["fold"]:
         say(f"🟠 to fold since {result['since']}: ledger {result['ledger'] or 'none'}, "
             f"Docs: lines in {[d['number'] for d in result['docs']] or 'none'}")
+    else:
+        say(f"🟢 nothing to fold since {result['since']}: no agent started")
     for m in result["malformed"]:
         for problem in m["problems"]:
             say(f"✘ #{m['number']}: malformed ledger entry: {problem}")
-    else:
-        say(f"🟢 nothing to fold since {result['since']}: no agent started")
     if result["mark_done"]:
         say(f"Folded by the last steward PR, label to swap: {result['mark_done']}")
     return 0

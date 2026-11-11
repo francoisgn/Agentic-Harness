@@ -18,7 +18,7 @@ Why this mechanism (vendoring + plugin + reusable workflows) and its limits: [AD
 | `.harness/scripts/merge-gate.py` | copy | Harness: merge gate, "may merge now" or why not (CONVENTIONS.md §Pull requests); needs `flow-metrics.py` next to it |
 | `.harness/scripts/readme-progress.py` | copy | Harness: README progress table generated from the issues (`/readme-update`) |
 | `.harness/scripts/decisions-check.py` | copy | Harness: `docs/DECISIONS.md` has at most one decision in force per scope key (`docs-security.yml`, input `decisions`) |
-| `.harness/scripts/doc-steward.py` | copy | Harness: doc steward's "anything to fold?" decision, docs PR body and weekly audit issues (`doc-steward.yml`) |
+| `.harness/scripts/doc-steward.py` | copy | Harness: doc steward's "anything to fold?" decision, the one-fold-at-a-time guard (`fold-guard`), the `note` helper, docs PR body and weekly audit issues (`doc-steward.yml`) |
 | `.claude/settings.json` | merge | Project; the harness only **adds** its two hooks if they are missing |
 | `CLAUDE.md`, `AGENTS.md` | marked block | Project, except the block `<!-- harness:begin harness -->…<!-- harness:end harness -->` |
 | `.harness/config.json`, `.github/labels.local.json`, issue and PR templates, `docs/lots/TEMPLATE.md`, `docs/DECISIONS.md`, `.markdownlint-cli2.jsonc`, `.github/workflows/harness.yml`, `.github/workflows/harness-sync.yml` | seed | Project: created if missing, never rewritten (except the `@vX.Y.Z` references of `harness.yml`) |

@@ -348,6 +348,17 @@ class FoldGuardTests(unittest.TestCase):
             self.assertEqual(result["open_fold"]["number"], 41)
             self.assertIn("https://github.com/acme/app/pull/41", out.getvalue())
 
+    def test_pending_says_to_fold_and_never_nothing_to_fold_when_there_is_work(self):
+        # Regression: a for/else printed "nothing to fold … no agent started" on every run, work or not
+        yesterday = (datetime.datetime.now(datetime.timezone.utc) - datetime.timedelta(days=1)).strftime("%Y-%m-%dT%H:%M:%SZ")
+        responses = {OPEN_FOLD: [], STEWARD: [], LEDGER: [], MERGED: [pr(5, yesterday, "Docs: README.md")]}
+        out = io.StringIO()
+        code = ds.run(["pending", "--repo", REPO, "--base", "develop", "--ledger-label", "ledger"],
+                      http=FakeGitHub(responses), env={"GH_TOKEN": "t"}, out=out)
+        self.assertEqual(code, 0)
+        self.assertIn("to fold since", out.getvalue())
+        self.assertNotIn("nothing to fold", out.getvalue())
+
     def test_publish_checks_the_guard_before_pushing(self):
         publish = WORKFLOW.split("\n  publish:")[1].split("\n  audit:")[0]
         self.assertIn("fold-guard", publish)
