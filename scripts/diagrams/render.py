@@ -330,8 +330,11 @@ def scene_only_gap(ddir, name, shown):
     """A scene-only diagram (<name>.excalidraw with no <name>.json: drawn in Excalidraw, the scene is the source):
     its SVG must be the stamped Excalidraw export of that very scene. Returns the problem, or None."""
     scene_path, svg_path = ddir / f"{name}.excalidraw", ddir / f"{name}.svg"
-    scene = scene_path.read_text(encoding="utf-8")
-    svg = svg_path.read_text(encoding="utf-8") if svg_path.exists() else None
+    try:
+        scene = scene_path.read_text(encoding="utf-8")
+        svg = svg_path.read_text(encoding="utf-8") if svg_path.exists() else None
+    except (OSError, UnicodeDecodeError) as e:
+        return f"{shown(scene_path)} or its SVG cannot be read as text ({e})"
     found = STAMP.search(svg) if svg else None
     if found and found.group(1) == scene_hash(scene) and found.group(2) == body_hash(svg):
         return None
@@ -359,7 +362,10 @@ def run_stamp(ddir, name, shown):
         if not scene_path.is_file() or scene_path.read_text(encoding="utf-8") != scene:
             return [f"{shown(scene_path)}: not up to date: run render.py first, then export from the new scene"]
     else:   # scene-only diagram: the .excalidraw file is the source
-        source, scene = None, scene_path.read_text(encoding="utf-8")
+        try:
+            source, scene = None, scene_path.read_text(encoding="utf-8")
+        except (OSError, UnicodeDecodeError) as e:
+            return [f"{shown(scene_path)}: not a scene ({e})"]
     try:
         svg = svg_path.read_text(encoding="utf-8") if svg_path.exists() else None
     except (OSError, UnicodeDecodeError) as e:

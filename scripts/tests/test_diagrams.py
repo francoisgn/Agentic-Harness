@@ -262,6 +262,13 @@ class SceneOnlyTests(unittest.TestCase):
             self.assertEqual(rd.run_stamp(d, self.NAME, str), [])
         self.assertEqual(svg.read_text(encoding="utf-8"), committed)
 
+    def test_unreadable_files_are_reported_not_raised(self):
+        d = self.copy()
+        (d / f"{self.NAME}.svg").write_bytes(b"\xff\xfe not utf-8")
+        self.assertIn("cannot be read", rd.scene_only_gap(d, self.NAME, str))
+        (d / f"{self.NAME}.excalidraw").write_bytes(b"\xff\xfe")
+        self.assertTrue(rd.run_stamp(d, self.NAME, str))
+
     def test_stamp_refuses_an_export_of_another_scene(self):
         d = self.copy()
         scene = d / f"{self.NAME}.excalidraw"
