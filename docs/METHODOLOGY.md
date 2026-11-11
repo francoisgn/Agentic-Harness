@@ -115,6 +115,15 @@ issue or PR, or the external thing in words (the task form has the field). `issu
 without it, never relabels it. A blocker that is closed, or a decision behind it, means the issue is not `blocked`:
 `ready` or `on-hold`. A project that does not want `on-hold` aliases or drops it in its local labels.
 
+**Keeping the transitions true** does not depend on a workflow: `.harness/scripts/issue-reconcile.py` reads the
+issues, PRs and `/claim` comments and prints what is out of line (dry run; `--apply` performs it): a closed issue
+loses its `status:`; an open PR that closes or refs an issue, or a live claim, makes it `claimed`; a `blocked` issue
+whose cited blockers (`#n`) are all closed becomes `ready`. It reports, never guesses: a stale `claimed` (no PR, no
+live claim, no activity for 24 h), a claim with no PR after 24 h, zero or several `status:`, no `type:`, a blocked
+issue without blocker. It never moves `needs-decision` or `on-hold`. Run at the orchestrator's session start, after
+each merge (`/lot-finish`), and on `schedule` where workflows run (reusable `issue-reconcile.yml`); its last line
+counts the issues per status.
+
 `lesson` (proposal for the lessons table) exists only in the harness repository's own `.github/labels.local.json`.
 
 A milestone is a GitHub milestone. A lot is a `type: epic` issue with sub-issues and `LOT-NNN` in its title.

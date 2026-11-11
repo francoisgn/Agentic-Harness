@@ -105,5 +105,9 @@ if [ "${CLAUDE_CODE_REMOTE:-}" = "true" ]; then
   echo "- Cloud session (Linux): no Xcode build here; reread app code with compiler-level rigour, handoff to the Mac (MAC-HANDOFF.md)."
 fi
 default_branch_alert "$PROJECT"
+# Offered only (no network call from the hook): an orchestrator runs it to bring the status labels in line with the facts.
+if [ -f "$PROJECT/.harness/scripts/issue-reconcile.py" ]; then
+  echo "- Orchestrator: bring the \`status:\` labels in line with issues, PRs and claims: \`python3 .harness/scripts/issue-reconcile.py\` (dry run; \`--apply\` to change; ORCHESTRATION.md §1)."
+fi
 echo "- Push early and often to a draft PR (no costly CI); \"Ready\" after self-review (LESSONS.md) and review by another model; then one commit per review round."
 exit 0

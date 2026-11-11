@@ -1,0 +1,543 @@
+{
+ "$comment": "Shaped on real responses of GET /repos/{owner}/{repo}/issues?state=all and /issues/comments (REST 2022-11-28); fields trimmed to those the script reads, numbers and labels made up for the scenario. Now = 2026-11-11T12:00:00Z.",
+ "responses": {
+  "/repos/acme/app/issues?state=all&per_page=100&page=1": [
+   {
+    "number": 1,
+    "title": "Issue 1",
+    "state": "closed",
+    "labels": [
+     {
+      "name": "status: claimed",
+      "color": "ededed"
+     },
+     {
+      "name": "type: feature",
+      "color": "ededed"
+     }
+    ],
+    "body": "",
+    "updated_at": "2026-11-08T09:00:00Z",
+    "comments": 0,
+    "html_url": "https://github.com/acme/app/issues/1"
+   },
+   {
+    "number": 2,
+    "title": "Issue 2",
+    "state": "closed",
+    "labels": [
+     {
+      "name": "type: feature",
+      "color": "ededed"
+     }
+    ],
+    "body": "",
+    "updated_at": "2026-11-08T09:00:00Z",
+    "comments": 0,
+    "html_url": "https://github.com/acme/app/issues/2"
+   },
+   {
+    "number": 3,
+    "title": "Issue 3",
+    "state": "open",
+    "labels": [
+     {
+      "name": "status: ready",
+      "color": "ededed"
+     },
+     {
+      "name": "type: feature",
+      "color": "ededed"
+     }
+    ],
+    "body": "",
+    "updated_at": "2026-11-08T09:00:00Z",
+    "comments": 0,
+    "html_url": "https://github.com/acme/app/issues/3"
+   },
+   {
+    "number": 4,
+    "title": "Issue 4",
+    "state": "open",
+    "labels": [
+     {
+      "name": "status: ready",
+      "color": "ededed"
+     },
+     {
+      "name": "type: bug",
+      "color": "ededed"
+     }
+    ],
+    "body": "",
+    "updated_at": "2026-11-08T09:00:00Z",
+    "comments": 1,
+    "html_url": "https://github.com/acme/app/issues/4"
+   },
+   {
+    "number": 5,
+    "title": "Issue 5",
+    "state": "open",
+    "labels": [
+     {
+      "name": "status: ready",
+      "color": "ededed"
+     },
+     {
+      "name": "type: feature",
+      "color": "ededed"
+     }
+    ],
+    "body": "",
+    "updated_at": "2026-11-08T09:00:00Z",
+    "comments": 1,
+    "html_url": "https://github.com/acme/app/issues/5"
+   },
+   {
+    "number": 6,
+    "title": "Issue 6",
+    "state": "open",
+    "labels": [
+     {
+      "name": "status: ready",
+      "color": "ededed"
+     },
+     {
+      "name": "type: feature",
+      "color": "ededed"
+     }
+    ],
+    "body": "",
+    "updated_at": "2026-11-08T09:00:00Z",
+    "comments": 2,
+    "html_url": "https://github.com/acme/app/issues/6"
+   },
+   {
+    "number": 7,
+    "title": "Issue 7",
+    "state": "open",
+    "labels": [
+     {
+      "name": "status: claimed",
+      "color": "ededed"
+     },
+     {
+      "name": "type: feature",
+      "color": "ededed"
+     }
+    ],
+    "body": "",
+    "updated_at": "2026-11-08T09:00:00Z",
+    "comments": 0,
+    "html_url": "https://github.com/acme/app/issues/7"
+   },
+   {
+    "number": 8,
+    "title": "Issue 8",
+    "state": "open",
+    "labels": [
+     {
+      "name": "status: claimed",
+      "color": "ededed"
+     },
+     {
+      "name": "type: feature",
+      "color": "ededed"
+     }
+    ],
+    "body": "",
+    "updated_at": "2026-11-11T10:00:00Z",
+    "comments": 0,
+    "html_url": "https://github.com/acme/app/issues/8"
+   },
+   {
+    "number": 9,
+    "title": "Issue 9",
+    "state": "open",
+    "labels": [
+     {
+      "name": "status: blocked",
+      "color": "ededed"
+     },
+     {
+      "name": "type: feature",
+      "color": "ededed"
+     }
+    ],
+    "body": "### Summary\nx\n\n### Blocked by\n\n- #2\n- #1\n\n### Out of scope\ny",
+    "updated_at": "2026-11-08T09:00:00Z",
+    "comments": 0,
+    "html_url": "https://github.com/acme/app/issues/9"
+   },
+   {
+    "number": 10,
+    "title": "Issue 10",
+    "state": "open",
+    "labels": [
+     {
+      "name": "status: blocked",
+      "color": "ededed"
+     },
+     {
+      "name": "type: feature",
+      "color": "ededed"
+     }
+    ],
+    "body": "### Blocked by\n#3",
+    "updated_at": "2026-11-08T09:00:00Z",
+    "comments": 0,
+    "html_url": "https://github.com/acme/app/issues/10"
+   },
+   {
+    "number": 11,
+    "title": "Issue 11",
+    "state": "open",
+    "labels": [
+     {
+      "name": "status: blocked",
+      "color": "ededed"
+     },
+     {
+      "name": "type: feature",
+      "color": "ededed"
+     }
+    ],
+    "body": "### Blocked by\n\naccess to the vendor sandbox",
+    "updated_at": "2026-11-08T09:00:00Z",
+    "comments": 0,
+    "html_url": "https://github.com/acme/app/issues/11"
+   },
+   {
+    "number": 12,
+    "title": "Issue 12",
+    "state": "open",
+    "labels": [
+     {
+      "name": "status: ready",
+      "color": "ededed"
+     },
+     {
+      "name": "status: blocked",
+      "color": "ededed"
+     },
+     {
+      "name": "type: feature",
+      "color": "ededed"
+     }
+    ],
+    "body": "",
+    "updated_at": "2026-11-08T09:00:00Z",
+    "comments": 0,
+    "html_url": "https://github.com/acme/app/issues/12"
+   },
+   {
+    "number": 13,
+    "title": "Issue 13",
+    "state": "open",
+    "labels": [
+     {
+      "name": "status: needs-decision",
+      "color": "ededed"
+     },
+     {
+      "name": "type: feature",
+      "color": "ededed"
+     }
+    ],
+    "body": "",
+    "updated_at": "2026-11-08T09:00:00Z",
+    "comments": 0,
+    "html_url": "https://github.com/acme/app/issues/13"
+   },
+   {
+    "number": 14,
+    "title": "Issue 14",
+    "state": "open",
+    "labels": [
+     {
+      "name": "status: on-hold",
+      "color": "ededed"
+     },
+     {
+      "name": "type: feature",
+      "color": "ededed"
+     }
+    ],
+    "body": "",
+    "updated_at": "2026-11-08T09:00:00Z",
+    "comments": 1,
+    "html_url": "https://github.com/acme/app/issues/14"
+   },
+   {
+    "number": 15,
+    "title": "Issue 15",
+    "state": "open",
+    "labels": [
+     {
+      "name": "status: ready",
+      "color": "ededed"
+     }
+    ],
+    "body": "",
+    "updated_at": "2026-11-08T09:00:00Z",
+    "comments": 0,
+    "html_url": "https://github.com/acme/app/issues/15"
+   },
+   {
+    "number": 16,
+    "title": "Issue 16",
+    "state": "open",
+    "labels": [
+     {
+      "name": "status: claimed",
+      "color": "ededed"
+     },
+     {
+      "name": "type: feature",
+      "color": "ededed"
+     }
+    ],
+    "body": "",
+    "updated_at": "2026-11-08T09:00:00Z",
+    "comments": 1,
+    "html_url": "https://github.com/acme/app/issues/16"
+   },
+   {
+    "number": 17,
+    "title": "Issue 17",
+    "state": "open",
+    "labels": [
+     {
+      "name": "type: feature",
+      "color": "ededed"
+     }
+    ],
+    "body": "",
+    "updated_at": "2026-11-08T09:00:00Z",
+    "comments": 0,
+    "html_url": "https://github.com/acme/app/issues/17"
+   },
+   {
+    "number": 18,
+    "title": "Issue 18",
+    "state": "open",
+    "labels": [
+     {
+      "name": "status: blocked",
+      "color": "ededed"
+     },
+     {
+      "name": "type: feature",
+      "color": "ededed"
+     }
+    ],
+    "body": "### Blocked by\n#1",
+    "updated_at": "2026-11-08T09:00:00Z",
+    "comments": 0,
+    "html_url": "https://github.com/acme/app/issues/18"
+   },
+   {
+    "number": 19,
+    "title": "Issue 19",
+    "state": "open",
+    "labels": [
+     {
+      "name": "status: ready",
+      "color": "ededed"
+     },
+     {
+      "name": "type: epic",
+      "color": "ededed"
+     }
+    ],
+    "body": "",
+    "updated_at": "2026-11-08T09:00:00Z",
+    "comments": 0,
+    "html_url": "https://github.com/acme/app/issues/19"
+   },
+   {
+    "number": 20,
+    "title": "Issue 20",
+    "state": "open",
+    "labels": [
+     {
+      "name": "status: ready",
+      "color": "ededed"
+     },
+     {
+      "name": "type: feature",
+      "color": "ededed"
+     }
+    ],
+    "body": "",
+    "updated_at": "2026-11-08T09:00:00Z",
+    "comments": 2,
+    "html_url": "https://github.com/acme/app/issues/20"
+   },
+   {
+    "number": 21,
+    "title": "Issue 21",
+    "state": "open",
+    "labels": [
+     {
+      "name": "status: blocked",
+      "color": "ededed"
+     },
+     {
+      "name": "type: feature",
+      "color": "ededed"
+     }
+    ],
+    "body": "",
+    "updated_at": "2026-11-08T09:00:00Z",
+    "comments": 0,
+    "html_url": "https://github.com/acme/app/issues/21"
+   },
+   {
+    "number": 22,
+    "title": "Issue 22",
+    "state": "open",
+    "labels": [
+     {
+      "name": "status: needs-triage",
+      "color": "ededed"
+     },
+     {
+      "name": "type: feature",
+      "color": "ededed"
+     }
+    ],
+    "body": "",
+    "updated_at": "2026-11-08T09:00:00Z",
+    "comments": 0,
+    "html_url": "https://github.com/acme/app/issues/22"
+   },
+   {
+    "number": 50,
+    "title": "Issue 50",
+    "state": "open",
+    "labels": [],
+    "body": "Closes #3\nRefs #17\nRefs #19",
+    "updated_at": "2026-11-08T09:00:00Z",
+    "comments": 0,
+    "html_url": "https://github.com/acme/app/pull/50",
+    "pull_request": {
+     "url": "https://api.github.com/repos/acme/app/pulls/50"
+    }
+   },
+   {
+    "number": 51,
+    "title": "Issue 51",
+    "state": "open",
+    "labels": [],
+    "body": "Refs #13",
+    "updated_at": "2026-11-08T09:00:00Z",
+    "comments": 0,
+    "html_url": "https://github.com/acme/app/pull/51",
+    "pull_request": {
+     "url": "https://api.github.com/repos/acme/app/pulls/51"
+    }
+   },
+   {
+    "number": 52,
+    "title": "Issue 52",
+    "state": "closed",
+    "labels": [],
+    "body": "Closes #15",
+    "updated_at": "2026-11-08T09:00:00Z",
+    "comments": 0,
+    "html_url": "https://github.com/acme/app/pull/52",
+    "pull_request": {
+     "url": "https://api.github.com/repos/acme/app/pulls/52"
+    }
+   },
+   {
+    "number": 53,
+    "title": "Issue 53",
+    "state": "open",
+    "labels": [],
+    "body": "Fixes #18",
+    "updated_at": "2026-11-08T09:00:00Z",
+    "comments": 0,
+    "html_url": "https://github.com/acme/app/pull/53",
+    "pull_request": {
+     "url": "https://api.github.com/repos/acme/app/pulls/53"
+    }
+   }
+  ],
+  "/repos/acme/app/issues/comments?sort=created&direction=asc&per_page=100&page=1": [
+   {
+    "issue_url": "https://api.github.com/repos/acme/app/issues/4",
+    "body": "/claim acme.orc-1111.lot.i4\n- plan",
+    "author_association": "MEMBER",
+    "created_at": "2026-11-11T10:00:00Z",
+    "user": {
+     "login": "dev"
+    }
+   },
+   {
+    "issue_url": "https://api.github.com/repos/acme/app/issues/5",
+    "body": "/claim outsider.solo.lot.i5",
+    "author_association": "CONTRIBUTOR",
+    "created_at": "2026-11-08T09:00:00Z",
+    "user": {
+     "login": "dev"
+    }
+   },
+   {
+    "issue_url": "https://api.github.com/repos/acme/app/issues/6",
+    "body": "/claim acme.orc-1111.lot.i6",
+    "author_association": "MEMBER",
+    "created_at": "2026-11-08T09:00:00Z",
+    "user": {
+     "login": "dev"
+    }
+   },
+   {
+    "issue_url": "https://api.github.com/repos/acme/app/issues/6",
+    "body": "/release",
+    "author_association": "MEMBER",
+    "created_at": "2026-11-08T09:00:00Z",
+    "user": {
+     "login": "dev"
+    }
+   },
+   {
+    "issue_url": "https://api.github.com/repos/acme/app/issues/14",
+    "body": "/claim acme.orc-1111.lot.i14",
+    "author_association": "MEMBER",
+    "created_at": "2026-11-08T09:00:00Z",
+    "user": {
+     "login": "dev"
+    }
+   },
+   {
+    "issue_url": "https://api.github.com/repos/acme/app/issues/16",
+    "body": "/claim acme.orc-1111.lot.i16\n- plan",
+    "author_association": "MEMBER",
+    "created_at": "2026-11-08T09:00:00Z",
+    "user": {
+     "login": "dev"
+    }
+   },
+   {
+    "issue_url": "https://api.github.com/repos/acme/app/issues/20",
+    "body": "/claim acme.orc-1111.lot.i20",
+    "author_association": "OWNER",
+    "created_at": "2026-11-11T10:00:00Z",
+    "user": {
+     "login": "dev"
+    }
+   },
+   {
+    "issue_url": "https://api.github.com/repos/acme/app/issues/20",
+    "body": "/release acme.orc-1111.lot.other",
+    "author_association": "MEMBER",
+    "created_at": "2026-11-11T10:00:00Z",
+    "user": {
+     "login": "dev"
+    }
+   }
+  ]
+ }
+}
