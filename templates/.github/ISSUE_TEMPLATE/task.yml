@@ -32,7 +32,7 @@ body:
       label: Error behaviours and definition of done
       description: "Expected failure cases; what must be true to close (tests, docs, review, compliance)."
   - type: textarea
-    id: dependencies
+    id: blocked-by
     attributes:
-      label: Depends on
-      description: "Prerequisite issues or lots (#n), captures, decisions. Empty if none."
+      label: Blocked by
+      description: "One line per blocker: `#n` (issue or PR) or the external thing (capture, access, third-party decision). Empty if none; required once the issue is `status: blocked`."

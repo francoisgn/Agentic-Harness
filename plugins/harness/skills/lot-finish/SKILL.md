@@ -49,8 +49,8 @@ References: `.harness/docs/CONVENTIONS.md` (§Pull requests, §Ledger, §GitHub 
    Author model: … (<identifier>) · reviewer: … (<reviewer's identifier>)
    <generation line>
    ````
-   Ledger (`CONVENTIONS.md` §Ledger): entries go in the blocks of `### Ledger`, in the format of the project's
-   script, and the PR gets the label `ledger` (or the one in `ledger.label`); no entry → neither section nor label.
+   Ledger (`CONVENTIONS.md` §Ledger): the section is the entry, labels are the steward's bookkeeping: entries go in
+   the blocks of `### Ledger`, in the format of the project's script; no entry → `None (<reason>)`; no label to set.
    Project without a ledger: no section at all.
 6. **Ready for review** when everything is finished and reviewed: this is when the costly CI runs. After that, one
    commit and one push per review round (`/review-round`); never a push "to see" on a ready PR.
@@ -59,6 +59,7 @@ References: `.harness/docs/CONVENTIONS.md` (§Pull requests, §Ledger, §GitHub 
    Update the PR column of the umbrella issue's table; close it if all its points are closed. Work stopped before
    the end: say so, then `/release`.
 8. **Discovered work**: one labelled issue per subject (never only a note).
-9. Merge only according to the project's policy (otherwise the operator's approval). After a merge that does not
+9. Merge only according to the project's policy (otherwise the operator's approval), after `merge-gate.py <pr>`
+   says "may merge", with the head sha it prints (CONVENTIONS.md §Pull requests). After a merge that does not
    close the issue: "Done in #PR (merged at `<sha>`)", then check that it is closed. Report: PR link, what is left,
    what must be checked on the Mac (`/review-round` for what follows).

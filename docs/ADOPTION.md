@@ -15,6 +15,7 @@ Why this mechanism (vendoring + plugin + reusable workflows) and its limits: [AD
 | `.claude/skills/<skill>/SKILL.md` | copy | Harness (`/intent`, `/lot-start`, `/lot-finish`, `/review-round`, `/feedback-triage`, `/lessons-check`, `/lesson-propose`, `/compliance-review`, `/status-report`, `/harness-update`) |
 | `.claude/agents/*.md` | copy | Harness: `adversarial-reviewer`, `issue-steward`, `doc-steward`, `flow-monitor`, `compliance-*` (exclude the compliance frameworks you do not need) |
 | `.harness/scripts/flow-metrics.py` | copy | Harness: flow dashboard (`flow-report.yml`, `/status-report`) |
+| `.harness/scripts/merge-gate.py` | copy | Harness: merge gate, "may merge now" or why not (CONVENTIONS.md §Pull requests); needs `flow-metrics.py` next to it |
 | `.harness/scripts/readme-progress.py` | copy | Harness: README progress table generated from the issues (`/readme-update`) |
 | `.harness/scripts/decisions-check.py` | copy | Harness: `docs/DECISIONS.md` has at most one decision in force per scope key (`docs-security.yml`, input `decisions`) |
 | `.harness/scripts/doc-steward.py` | copy | Harness: doc steward's "anything to fold?" decision, docs PR body and weekly audit issues (`doc-steward.yml`) |
@@ -176,7 +177,8 @@ Other keys, read by the hooks and the skills (missing: default values):
 | `labels.model_prefixes` | `["difficulty:"]` | Prefixes of the model-tier labels; `[]` = no such axis (tier deduced from the text and the routing) |
 | `labels.size_prefixes` | `[]` | Prefixes of the size labels when the project has a separate size axis (e.g. `["size:"]`); `[]` = no such axis |
 | `default_branch_check` | `true` | When `integration_branch` is not the repository's default branch (GitHub runs `issues`, `issue_comment`, `pull_request_target` and `schedule` workflows from the default branch only), a first adoption stops and later syncs, the session start and `pr-hygiene.yml` print a 🟠 warning ([above](#integration-branch-that-is-not-the-default-branch)); `false` does neither (the adoption says once what will not run) |
-| `ledger.enabled`, `ledger.label`, `ledger.fold_command` | `false`, `"ledger"`, `""` | Ledger ([CONVENTIONS](CONVENTIONS.md) §Ledger): `### Ledger` section of the PRs, label, the steward's fold command |
+| `merge_gate.required_labels`, `merge_gate.security_labels`, `merge_gate.body_lines` | `[]`, `["type: security"]`, `["issue", "claim", "docs"]` | Merge gate (`merge-gate.py`, [CONVENTIONS](CONVENTIONS.md) §Pull requests): labels a PR needs before merge, labels that block until the operator decides, PR body lines checked; `[]` leaves the line out |
+| `ledger.enabled`, `ledger.label`, `ledger.fold_command` | `false`, `"ledger"`, `""` | Ledger ([CONVENTIONS](CONVENTIONS.md) §Ledger): `### Ledger` section of the PRs (the entry), label the steward marks `<label>: done`, the steward's fold command |
 
 `.harness/config.json` is a project file (created once): a key added by a new version of the harness does not add
 itself to it; without it, the default applies.

@@ -115,6 +115,22 @@ class RowsTests(unittest.TestCase):
         self.assertEqual(calls, ["/x?per_page=100&page=1", "/x?per_page=100&page=2"])
 
 
+class OnHoldTests(unittest.TestCase):
+    EPIC = {"number": 1, "title": "LOT-1", "state": "open", "html_url": f"{R}/issues/1", "labels": [{"name": "type: epic"}]}
+
+    def row(self, *sub_status):
+        subs = [{"number": 10 + n, "title": "s", "state": "open", "html_url": "", "labels": [{"name": s}]}
+                for n, s in enumerate(sub_status)]
+        return rp.lot_row(self.EPIC | {"labels": [{"name": "status: ready"}]}, subs, [])["state"]
+
+    def test_on_hold_is_its_own_state_not_blocked_not_to_do(self):
+        self.assertEqual(self.row("status: on-hold"), "⏸ on hold")
+
+    def test_blocked_and_claimed_win_over_on_hold(self):
+        self.assertEqual(self.row("status: on-hold", "status: blocked"), "🔴 blocked")
+        self.assertEqual(self.row("status: on-hold", "status: claimed"), "🔵 in progress")
+
+
 class CommandTests(unittest.TestCase):
     def setUp(self):
         self.tmp = tempfile.TemporaryDirectory()

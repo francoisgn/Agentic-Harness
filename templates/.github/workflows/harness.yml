@@ -50,7 +50,8 @@ jobs:
     with:
       # Model A (develop → beta → master). Model B (one integration branch): leave empty.
       flow: "beta:develop beta:hotfix/* master:beta master:hotfix/*"
-      # Ledger (CONVENTIONS.md §Ledger): name of the label if the project keeps one ("ledger"), otherwise empty.
+      # Ledger (CONVENTIONS.md §Ledger): "ledger" if the project keeps one, otherwise empty. The `### Ledger` section
+      # is the entry; this label is never asked of the author (the steward writes `ledger: done`).
       ledger-label: ""
       # Integration branch of .harness/config.json: warns if it is not the default branch (needs a harness version
       # that has this input; uncomment after the next version bump).

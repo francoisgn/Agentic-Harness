@@ -30,6 +30,7 @@ Follow `.harness/docs/REVIEW-ROUNDS.md` (otherwise `${CLAUDE_PLUGIN_ROOT}/docs/R
    List the settled findings in the PR with their reason, each line starting with `[fixed]`,
    `[declined: false positive]` or `[declined: not worth it]`; a reopened one is answered by pointing to that record
    and counts as new only with new evidence. A security finding stays open until the maintainer decides.
+   Round done: `.harness/scripts/merge-gate.py <PR>` lists what still blocks a merge (stale approval, open thread…).
 9. A check that fails within seconds with no log = infrastructure, not "CI red"; one rerun at most.
 10. **Lessons**: each finding already covered by `LESSONS.md` = a self-review step to tighten; a new kind = propose a
    row (to the project, or to the harness by PR if it applies elsewhere).
