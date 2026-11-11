@@ -22,6 +22,12 @@ moving to this version.
   **Action**: run the label sync (`labels-sync`) to create `status: on-hold`, then move the issues held by a
   decision from `status: blocked` to `status: on-hold` and give each remaining blocked issue a `### Blocked by`
   section.
+- **Merge gate** (`scripts/merge-gate.py <pr>`, vendored to `.harness/scripts/`, [CONVENTIONS](docs/CONVENTIONS.md)
+  §Pull requests): read-only, one `ok` / `missing` line per check (draft, mergeable, CI green on the head sha,
+  adversarial APPROVED naming the head, a "stale approval" otherwise, open review threads read through GraphQL, the
+  `Open questions` of the report marked `<!-- harness:report -->`, required and security labels, PR body lines);
+  "may merge" prints the head sha to merge with, "could not check" exits 2. Settings: `.harness/config.json` ›
+  `merge_gate` (`required_labels` default empty). The verdict parsing is shared with `flow-metrics.py`.
 
 - **What reviews are worth, readable without a metric**, and **lot size as a recommendation**
   ([FINOPS](docs/FINOPS.md) §2 and §5, [REVIEW-ROUNDS](docs/REVIEW-ROUNDS.md), [METHODOLOGY](docs/METHODOLOGY.md)
