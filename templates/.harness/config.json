@@ -7,6 +7,7 @@
   "branch_types": ["lot", "fix", "feat", "chore", "docs"],
   "labels": { "model_prefixes": ["difficulty:"], "size_prefixes": [] },
   "ledger": { "enabled": false, "label": "ledger", "fold_command": "" },
+  "merge_gate": { "required_labels": [], "security_labels": ["type: security"], "body_lines": ["issue", "claim", "docs"] },
   "compliance": [],
   "readme": { "badges": true, "image": true, "architecture": "excalidraw", "progress": true, "quickstart": true, "contributing": true }
 }
