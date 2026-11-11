@@ -61,5 +61,6 @@ References: `.harness/docs/CONVENTIONS.md` (§Pull requests, §Ledger, §GitHub 
 8. **Discovered work**: one labelled issue per subject (never only a note).
 9. Merge only according to the project's policy (otherwise the operator's approval), after `merge-gate.py <pr>`
    says "may merge", with the head sha it prints (CONVENTIONS.md §Pull requests). After a merge that does not
-   close the issue: "Done in #PR (merged at `<sha>`)", then check that it is closed. Report: PR link, what is left,
+   close the issue: "Done in #PR (merged at `<sha>`)", then check that it is closed;
+   then `python3 .harness/scripts/issue-reconcile.py --apply` (status labels). Report: PR link, what is left,
    what must be checked on the Mac (`/review-round` for what follows).

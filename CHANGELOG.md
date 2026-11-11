@@ -5,6 +5,28 @@ moving to this version.
 
 ## Unreleased
 
+- **Integration branch that is not the default branch: the first adoption stops, and a relay workflow**
+  ([ADOPTION](docs/ADOPTION.md#integration-branch-that-is-not-the-default-branch), [CI-BASELINE](docs/CI-BASELINE.md)
+  §6): on a first adoption (no `.harness/lock`), `harness-sync.sh` exits with code 4 before writing anything when
+  `integration_branch` is not the default branch, names the `issues` / `issue_comment` / `schedule` jobs that would
+  never run, and gives the two ways out: make it the default branch, or commit the new
+  `templates/.github/workflows/harness-relay.yml` on the default branch (issue hygiene and dashboard run from there
+  on the integration branch's files; label reconcile left disabled until #62). Never seeded; `refbump` pins a copy kept
+  on the integration branch. `issue-hygiene.yml` and `flow-report.yml` take a new optional `ref` input. Later syncs
+  keep the warning, which now names the relay; `"default_branch_check": false` still silences everything.
+  **Action** (projects already adopted whose integration branch is not the default branch): install the relay on the
+  default branch once this version is synced, or make the integration branch the default; to keep two branches by
+  hand on purpose, set `"default_branch_check": false`.
+
+- **`status:` labels kept true without any workflow** ([METHODOLOGY](docs/METHODOLOGY.md) §4,
+  [ORCHESTRATION](docs/ORCHESTRATION.md) §1): `issue-reconcile.py` (vendored as `.harness/scripts/issue-reconcile.py`,
+  standard library) removes the status of closed issues, sets `claimed` on an issue with an open linked PR or a live
+  `/claim`, moves a `blocked` issue whose cited blockers are all closed to `ready`, and reports what it cannot decide
+  (stale claims, several or no `status:`, no `type:`, blocked without blocker); `needs-decision` and `on-hold` are
+  never moved. Dry run by default, `--apply` to change, a `summary:` line with the count per status; a dry run costs
+  one API call per 100 issues and PRs plus the comment pages. Offered by the session-start hook, run after each merge
+  by `/lot-finish`, and callable on `schedule` / `workflow_dispatch` through the reusable `issue-reconcile.yml`.
+  **Action**: none required; an orchestrator runs it at session start (`--apply` once the dry run looks right).
 - **Operator decisions live in a versioned file, not in comments** ([ORCHESTRATION](docs/ORCHESTRATION.md) §4,
   [ESSENTIALS](docs/ESSENTIALS.md)): seeded `docs/DECISIONS.md` (date, scope key, decision, source, status; only rows
   `in force` bind) and `decisions-check.py` (vendored as `.harness/scripts/decisions-check.py`), run in the docs job of

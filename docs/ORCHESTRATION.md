@@ -14,7 +14,9 @@ state.
 
 **Session start**: `git fetch`, switch to the integration branch; read `CLAUDE.md` (and `ESSENTIALS.md`); list your
 claimed issues and what moved on your PRs (reviews, CI, merges, comments) **before** starting anything new; then take a
-ready issue that nobody has claimed (not `needs: host` in the cloud).
+ready issue that nobody has claimed (not `needs: host` in the cloud). The orchestrator first brings the `status:` labels
+in line with the facts: `python3 .harness/scripts/issue-reconcile.py` (dry run, then `--apply`; offered by the
+session-start hook when vendored) and keeps its `summary:` line in its state; it runs it again after each merge.
 
 **Orchestrator resuming**: the first step is §8's resuming procedure (read the State comment, run the label
 reconcile and the state script, then act), never a re-read of the memory issue's thread.

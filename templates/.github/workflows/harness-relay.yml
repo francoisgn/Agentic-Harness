@@ -1,0 +1,130 @@
+name: Harness relay
+
+# For a project whose integration branch is NOT the repository's default branch (docs/ADOPTION.md §Integration branch
+# that is not the default branch). GitHub starts `issues`, `issue_comment` and `schedule` workflows only from the copy
+# present on the DEFAULT branch, so the `issue` and `flow` jobs of harness.yml (on the integration branch) never run.
+# This file goes on the default branch, by a PR to that branch; a copy anywhere else does nothing. harness-sync.sh never
+# creates it; it only pins the `@…` references of a copy kept on the integration branch (refbump), to carry over.
+#
+# What it runs, all reusable workflows of the harness reading the project's files on the integration branch:
+#   - issue hygiene on `issues` (and a sweep on `workflow_dispatch`);
+#   - the daily dashboard on `schedule` (and on `workflow_dispatch`);
+#   - the label reconcile from claims on `issue_comment`: disabled until it exists (issue #62), see the `reconcile` job.
+# Security (docs/CI-BASELINE.md §2): no project code here; no `pull_request_target`; `permissions: {}` at the top, each
+# job gets only what it needs; one job checks out the integration branch, without a token and running nothing from it,
+# to check that the branch exists and that its .harness/config.json names it; never a PR's code (a comment on a PR runs
+# nothing); event data only through `env:`. The called workflows check out the integration branch the same way.
+# Needs a harness version whose issue-hygiene.yml and flow-report.yml have the `ref` input (after 0.3.0).
+# Settings: INTEGRATION_BRANCH below; the inputs of the `issue` and `flow` jobs, copied from those of harness.yml.
+# The day the integration branch becomes the default branch, this relay stops (notice) and can be deleted.
+on:
+  issues:
+    types: [opened, edited, labeled, unlabeled, reopened, closed]
+  # zizmor flags every issue_comment trigger: here no job runs on it until `reconcile` is enabled (a skipped run, no
+  # runner minute), and none ever checks out or runs anything from the comment or from a PR.
+  issue_comment:   # zizmor: ignore[dangerous-triggers]
+    types: [created]
+  schedule:
+    - cron: "17 5 * * *"   # daily dashboard
+  workflow_dispatch:
+
+permissions: {}
+
+concurrency:
+  group: harness-relay-${{ github.event.issue.number || github.event_name }}
+  cancel-in-progress: false
+
+jobs:
+  config:
+    name: Integration branch
+    # Add `|| (github.event_name == 'issue_comment' && !github.event.issue.pull_request)` when enabling `reconcile`.
+    if: github.event_name != 'issue_comment'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+    outputs:
+      branch: ${{ steps.check.outputs.branch }}
+      relay: ${{ steps.check.outputs.relay }}
+    env:
+      INTEGRATION_BRANCH: develop   # ← the project's integration branch (.harness/config.json › integration_branch)
+      DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - name: The integration branch exists
+        id: exists
+        run: |
+          set -euo pipefail
+          case "$INTEGRATION_BRANCH" in
+            ''|-*|*[!A-Za-z0-9._/-]*) echo "::error::INTEGRATION_BRANCH \"$INTEGRATION_BRANCH\" is not a branch name. Nothing was changed."; exit 1 ;;
+          esac
+          if [ "$INTEGRATION_BRANCH" = "$DEFAULT_BRANCH" ]; then
+            echo "::notice::\"$INTEGRATION_BRANCH\" is the default branch: harness.yml runs these jobs itself, this relay does nothing and can be deleted."
+            echo "needed=false" >>"$GITHUB_OUTPUT"; exit 0
+          fi
+          if ! gh api "repos/$GITHUB_REPOSITORY/git/ref/heads/$INTEGRATION_BRANCH" --silent; then
+            echo "::error::Integration branch \"$INTEGRATION_BRANCH\" not found (deleted or renamed?): set INTEGRATION_BRANCH in .github/workflows/harness-relay.yml on \"$DEFAULT_BRANCH\". Nothing was changed."
+            exit 1
+          fi
+          echo "needed=true" >>"$GITHUB_OUTPUT"
+
+      # Read-only, no token kept, only .harness/config.json; nothing from this checkout is executed.
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        if: steps.exists.outputs.needed == 'true'
+        with:
+          ref: ${{ env.INTEGRATION_BRANCH }}
+          persist-credentials: false
+          sparse-checkout: .harness/config.json
+          sparse-checkout-cone-mode: false
+
+      - name: Its .harness/config.json names it
+        id: check
+        if: steps.exists.outputs.needed == 'true'
+        run: |
+          set -euo pipefail
+          CFG=.harness/config.json
+          [ -f "$CFG" ] || { echo "::error::$CFG missing on \"$INTEGRATION_BRANCH\": adopt the harness there first. Nothing was changed."; exit 1; }
+          DECLARED=$(jq -r 'if type == "object" then (.integration_branch // "") else "" end' "$CFG") \
+            || { echo "::error::$CFG on \"$INTEGRATION_BRANCH\" is not valid JSON. Nothing was changed."; exit 1; }
+          if [ "$DECLARED" != "$INTEGRATION_BRANCH" ]; then
+            echo "::error::$CFG on \"$INTEGRATION_BRANCH\" names integration branch \"$DECLARED\": align it with INTEGRATION_BRANCH of this relay. Nothing was changed."
+            exit 1
+          fi
+          { echo "branch=$INTEGRATION_BRANCH"; echo "relay=true"; } >>"$GITHUB_OUTPUT"
+
+  issue:
+    needs: config
+    if: needs.config.outputs.relay == 'true' && (github.event_name == 'issues' || github.event_name == 'workflow_dispatch')
+    permissions:
+      contents: read
+      issues: write
+    uses: francoisgn/belayline-agentic-harness/.github/workflows/issue-hygiene.yml@v0.3.0
+    with:
+      ref: ${{ needs.config.outputs.branch }}
+
+  # Flow dashboard (FINOPS.md §4): a "Project dashboard" issue updated every day. It runs the vendored
+  # .harness/scripts/flow-metrics.py of the integration branch, as harness.yml does on a project with one branch.
+  flow:
+    needs: config
+    if: needs.config.outputs.relay == 'true' && (github.event_name == 'schedule' || github.event_name == 'workflow_dispatch')
+    permissions:
+      contents: read
+      issues: write
+      pull-requests: read
+      actions: read
+    uses: francoisgn/belayline-agentic-harness/.github/workflows/flow-report.yml@v0.3.0
+    with:
+      ref: ${{ needs.config.outputs.branch }}
+
+  # Label reconcile from claims (`/claim`, `/release`) and PRs: DISABLED, the harness does not ship it yet (issue #62).
+  # When a harness version has it: uncomment, pin it like the jobs above, extend the `if` of `config`. It must take the
+  # comment through the API, never check out a PR.
+  # reconcile:
+  #   needs: config
+  #   if: needs.config.outputs.relay == 'true' && !github.event.issue.pull_request && contains(fromJSON('["issues", "issue_comment", "schedule"]'), github.event_name)
+  #   permissions:
+  #     contents: read
+  #     issues: write
+  #   uses: <the reconcile workflow of #62, pinned like the jobs above>
+  #   with:
+  #     ref: ${{ needs.config.outputs.branch }}
