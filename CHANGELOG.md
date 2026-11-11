@@ -5,6 +5,19 @@ moving to this version.
 
 ## Unreleased
 
+- **Integration branch that is not the default branch: the first adoption stops, and a relay workflow**
+  ([ADOPTION](docs/ADOPTION.md#integration-branch-that-is-not-the-default-branch), [CI-BASELINE](docs/CI-BASELINE.md)
+  §6): on a first adoption (no `.harness/lock`), `harness-sync.sh` exits with code 4 before writing anything when
+  `integration_branch` is not the default branch, names the `issues` / `issue_comment` / `schedule` jobs that would
+  never run, and gives the two ways out: make it the default branch, or commit the new
+  `templates/.github/workflows/harness-relay.yml` on the default branch (issue hygiene and dashboard run from there
+  on the integration branch's files; label reconcile left disabled until #62). Never seeded; `refbump` pins a copy kept
+  on the integration branch. `issue-hygiene.yml` and `flow-report.yml` take a new optional `ref` input. Later syncs
+  keep the warning, which now names the relay; `"default_branch_check": false` still silences everything.
+  **Action** (projects already adopted whose integration branch is not the default branch): install the relay on the
+  default branch once this version is synced, or make the integration branch the default; to keep two branches by
+  hand on purpose, set `"default_branch_check": false`.
+
 - **Ledger: one folder at a time, and a rule for a contested place** ([CONVENTIONS](docs/CONVENTIONS.md) §Ledger,
   #61): only the steward folds, on its one branch (`docs/steward`); `doc-steward.py fold-guard` (exit 0 free, 1
   refused with the open PR's link, 2 could not check) refuses a second fold while a PR from that branch is open, in
