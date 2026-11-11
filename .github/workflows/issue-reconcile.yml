@@ -1,0 +1,55 @@
+name: Issue reconcile (reusable)
+
+# Brings the `status:` labels back in line with the facts (closed issues, open PRs, live `/claim`, closed blockers) with
+# the vendored script .harness/scripts/issue-reconcile.py (METHODOLOGY.md §4). The same script runs by hand at the
+# orchestrator's session start and after each merge: this job is only for projects where workflows do run.
+# Call it on `schedule` (daily) and `workflow_dispatch`, never on `issues` events. Dry run by default: the changes and
+# the cases to check go to the job summary; input `apply: true` performs them. Cost: one Linux job of under a minute.
+on:
+  workflow_call:
+    inputs:
+      apply:
+        description: "Perform the changes (default false: dry run, report only)"
+        type: boolean
+        default: false
+      script:
+        type: string
+        default: ".harness/scripts/issue-reconcile.py"
+
+permissions:
+  contents: read
+
+jobs:
+  reconcile:
+    name: Status labels
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    concurrency:
+      group: issue-reconcile-${{ github.repository }}
+      cancel-in-progress: false
+    permissions:
+      contents: read
+      issues: write
+      pull-requests: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Reconcile
+        env:
+          GH_TOKEN: ${{ github.token }}
+          SCRIPT: ${{ inputs.script }}
+          APPLY: ${{ inputs.apply }}
+        run: |
+          if [ ! -f "$SCRIPT" ]; then echo "::notice::$SCRIPT not vendored: skipped"; exit 0; fi
+          ARGS=()
+          [ "$APPLY" = true ] && ARGS+=(--apply)
+          rc=0
+          python3 "$SCRIPT" "${ARGS[@]}" >reconcile.txt || rc=$?
+          { echo "## Status labels"; echo; echo '```text'; cat reconcile.txt; echo '```'; } >>"$GITHUB_STEP_SUMMARY"
+          case "$rc" in
+            0) ;;
+            1) echo "::notice::status labels differ from the facts: see the summary (input apply: true to fix)" ;;
+            *) echo "::error::issue-reconcile could not run to the end (see the summary)"; exit 1 ;;
+          esac

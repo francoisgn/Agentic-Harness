@@ -37,6 +37,8 @@ copy      scripts/repo-settings.py                    .harness/scripts/repo-sett
 # Project README: standard check, progress table generated from the issues and rendering of the Excalidraw diagrams (README-STANDARD.md)
 copy      scripts/readme-check.py                     .harness/scripts/readme-check.py
 copy      scripts/readme-progress.py                  .harness/scripts/readme-progress.py
+# Status labels kept true without any workflow (METHODOLOGY.md §4); imports readme-progress.py, its neighbour
+copy      scripts/issue-reconcile.py                  .harness/scripts/issue-reconcile.py
 copy      scripts/diagrams/render.py                  .harness/scripts/diagrams-render.py
 # Relative links and cross-file anchors in Markdown (docs-security.yml; in-file anchors are markdownlint's MD051)
 copy      scripts/doc-links.py                        .harness/scripts/doc-links.py

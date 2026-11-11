@@ -17,6 +17,7 @@ Why this mechanism (vendoring + plugin + reusable workflows) and its limits: [AD
 | `.harness/scripts/flow-metrics.py` | copy | Harness: flow dashboard (`flow-report.yml`, `/status-report`) |
 | `.harness/scripts/merge-gate.py` | copy | Harness: merge gate, "may merge now" or why not (CONVENTIONS.md §Pull requests); needs `flow-metrics.py` next to it |
 | `.harness/scripts/readme-progress.py` | copy | Harness: README progress table generated from the issues (`/readme-update`) |
+| `.harness/scripts/issue-reconcile.py` | copy | Harness: `status:` labels brought in line with issues, PRs and claims, no workflow needed (session start, after a merge, `issue-reconcile.yml`); imports `readme-progress.py` |
 | `.harness/scripts/decisions-check.py` | copy | Harness: `docs/DECISIONS.md` has at most one decision in force per scope key (`docs-security.yml`, input `decisions`) |
 | `.harness/scripts/doc-steward.py` | copy | Harness: doc steward's "anything to fold?" decision, docs PR body and weekly audit issues (`doc-steward.yml`) |
 | `.claude/settings.json` | merge | Project; the harness only **adds** its two hooks if they are missing |
