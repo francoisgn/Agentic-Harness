@@ -17,6 +17,9 @@ moving to this version.
   state, not a tag: a sync from a clone of `master` pins workflow references as `@<sha> # v0.4.0-dev`.
   **Action**: none.
 
+- **Factory guide: index page** ([`docs/factory/`](docs/factory/README.md)), the frame of a stream in parts on the
+  software factory rethought for agents (#81, umbrella #80): the six parts with question, audience and status, and the
+  six words every part uses. **Action**: none.
 - **AI layers guide: a picture of the four layers** on its index page (`docs/diagrams/ai-stack.svg`), drawn in
   Excalidraw from the scene of the coding-agent diagram, so both share one font, stroke and colour code (#76).
   **Scene-only diagrams**: a diagram may have no `.json`; `<name>.excalidraw` is then the source and `<name>.svg`

@@ -23,3 +23,6 @@ Words used in every part:
   per seat.
 - **Harness**: the program around the model that turns its answers into actions (read a file, run a command) and
   enforces permissions. Belayline is a method and a set of rules on top of such harnesses.
+
+Next: [the software factory, rethought for agents](../factory/README.md), what happens to CI, review and access
+when one person runs many agents.
