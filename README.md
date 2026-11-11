@@ -124,6 +124,7 @@ Knowledge flows both ways: propose a lesson born in your project through the "Le
 | [`docs/CONVENTIONS.md`](docs/CONVENTIONS.md), [`docs/BRANCHING-RELEASE.md`](docs/BRANCHING-RELEASE.md), [`docs/MAC-HANDOFF.md`](docs/MAC-HANDOFF.md) | Commits and PRs, repository identity (description, topics, banner, social preview), branches and versions, split between cloud and local machine |
 | [`docs/POSITIONING.md`](docs/POSITIONING.md) | Where Belayline sits among agent harnesses: process vs runtime, sources |
 | [`docs/ai-layers/`](docs/ai-layers/README.md) | The layers of AI tools, by audience: presentation, agent, execution, inference and the contract behind it |
+| [`docs/factory/`](docs/factory/README.md) | The software factory rethought for agents, by audience: the pace, CI choices, review and scanning, running only when needed, identity, the economics of spawning |
 | [`docs/adr/`](docs/adr/README.md) | Decisions of the harness |
 | [`docs/assets/`](docs/assets) | Visual identity: README banner (`banner.svg` → `.png`), social preview (`social-preview.svg` → `.png`, 1280×640) |
 | [`docs/diagrams/`](docs/diagrams) | Diagrams: `.json` source, `.excalidraw` scene (editable on excalidraw.com), `.svg` image |
