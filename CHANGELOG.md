@@ -50,11 +50,16 @@ moving to this version.
   rules in the author's projects dated from commits (SwiftHFR, 2026-10-24). Six audited projects and one paper,
   sourced and dated (read 2026-11-10); the ideas taken are tracked in the "Landscape audit" umbrella issue.
 
-- **Security: Excalidraw exporter dependencies** (`scripts/diagrams/package.json`): `overrides` pin patched versions
-  of transitive dependencies flagged by Dependabot (nanoid 3.3.20 and 5.1.16, lodash-es 4.18.1, katex 0.19.1);
-  `npm audit` reports 0 vulnerabilities. Exported SVGs are byte-identical. katex 0.19 brings commander 15, so the
-  exporter now declares `engines.node >=22.12`. Exposure was low (optional, offline tool, never installed by CI or
-  vendored).
+- **No dependency left: the Node exporter of the diagrams is gone** (#57): `scripts/diagrams/package.json`, its
+  3 300-line lockfile and `export-svg.cjs` (Excalidraw, React, esbuild, Playwright) are removed, with the security
+  overrides they had already needed. The repository holds no dependency, as `SCOPE.md` and `CONTRIBUTING.md` say,
+  and `check-framework.py` now reports any tracked dependency manifest or lockfile (`package.json`, `requirements*.txt`,
+  `pyproject.toml`, `go.mod`, `Cargo.toml`…) outside `templates/`. An Excalidraw look now comes from a manual export
+  (excalidraw.com → Export image → SVG, or an Excalidraw MCP) stamped by `render.py --stamp <name>`, which verifies
+  the file and writes the same scene and body hashes as before: the committed SVGs are unchanged and still pass
+  `--check`. The stamp records which scene the author exported from, not that the image matches it. A stale export
+  is never overwritten silently: the rendering fails and names both ways out (export and stamp again, or
+  `--engine builtin <name>`); `--engine excalidraw` is removed ([README-STANDARD](docs/README-STANDARD.md) §4).
 
 - **Guide: the layers of AI** ([`docs/ai-layers/`](docs/ai-layers/README.md)), a series by audience; first part
   [apps and CLIs](docs/ai-layers/obo-agents.md): chatbot vs agent working on your behalf, four layers (presentation,
@@ -67,11 +72,10 @@ moving to this version.
   checked against the docs (two reviews: intent before "Ready", code on the ready PR; the dashboard reads the
   repository and CI; the harness enters the repository by a sync PR; loops bounded to 3 review rounds and 6 CI-tested
   pushes, one clean round ends the loop; four short callouts instead of one long note), one grid and one palette.
-  `render.py` writes scenes in Excalifont and, when `npm ci --prefix scripts/diagrams` has been run, exports the SVG
-  with Excalidraw itself (`export-svg.cjs`: hand-drawn strokes, hachure fills, embedded font subset); `--check`
-  verifies the two hashes the SVG carries (its scene, its own body), still without Node. A failed export falls back
-  to the built-in renderer. Vendored projects keep the built-in renderer. The overflow estimate now uses the
-  Excalifont width (0.58 em per character instead of 0.52).
+  `render.py` writes scenes in Excalifont; the SVGs are exported by Excalidraw itself (hand-drawn strokes, hachure
+  fills, embedded font subset) and `--check` verifies the two hashes they carry (their scene, their own body), in
+  Python (stamping: see the entry above). Vendored projects keep the built-in renderer. The overflow estimate now
+  uses the Excalifont width (0.58 em per character instead of 0.52).
 
 - **Doc steward at merge, weekly safety net** ([STEWARDS](docs/STEWARDS.md) §2): new reusable `doc-steward.yml`, opt-in
   `steward` job in `harness.yml` (it adds `closed` to the `pull_request` types; the `pr` job skips it). After each

@@ -248,5 +248,28 @@ class CheckFrameworkTests(unittest.TestCase):
         self.assertIn("status-report", run(self.tmp).stdout)
 
 
+    def test_tracked_dependency_manifest_is_a_gap(self):
+        for rel in ("package.json", "scripts/x/package-lock.json", "yarn.lock", "pnpm-lock.yaml",
+                    "requirements.txt", "requirements-dev.txt", "pyproject.toml", "Pipfile", "Pipfile.lock",
+                    "Gemfile", "Gemfile.lock", "tools/go.mod", "Cargo.toml"):
+            path = self.tmp / rel
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_text("{}")
+            r = run(self.tmp)
+            self.assertEqual(r.returncode, 1, rel)
+            self.assertIn(f"{rel}: dependency manifest", r.stdout)
+            path.unlink()
+
+    def test_dependency_manifest_under_templates_is_allowed(self):
+        (self.tmp / "templates/package.json").write_text("{}")
+        r = run(self.tmp)
+        self.assertEqual(r.returncode, 0, r.stdout)
+
+    def test_repository_tracks_no_dependency_manifest(self):
+        spec = __import__("importlib.util").util.spec_from_file_location("cf4", CHECK)
+        cf = __import__("importlib.util").util.module_from_spec(spec)
+        spec.loader.exec_module(cf)
+        self.assertEqual(cf.dependency_manifest_gaps(ROOT), [])
+
 if __name__ == "__main__":
     unittest.main()

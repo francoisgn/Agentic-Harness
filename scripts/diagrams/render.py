@@ -3,16 +3,20 @@
 
   docs/diagrams/<name>.json        source: Excalidraw elements (rectangle, ellipse, text, arrow, built-in `label`)
   → docs/diagrams/<name>.excalidraw  native scene, to open and edit on excalidraw.com (File → Open), font Excalifont
-  → docs/diagrams/<name>.svg         README image, deterministic:
-      - exported by Excalidraw itself (export-svg.cjs: Excalifont, hand-drawn strokes, hachure fills) when its
-        dependencies are installed (`npm ci --prefix scripts/diagrams`); the SVG carries the hash of its scene;
-      - otherwise drawn by this script (built-in renderer, close to the Excalidraw look).
+  → docs/diagrams/<name>.svg         README image, either:
+      - drawn by this script (built-in renderer, default, deterministic, close to the Excalidraw look); or
+      - exported by Excalidraw itself from the .excalidraw scene (excalidraw.com → Export image → SVG, or an
+        Excalidraw MCP), saved as <name>.svg, then stamped with --stamp <name>.
 
-Usage: render.py [--check] [--engine auto|excalidraw|builtin] [--dir <directory>] [name...]
-  --check:  exits 1 if a scene or an SVG is not up to date, or if a text overflows. Python only: an exported SVG is
-            checked through the hashes it carries (its scene, its own body), a built-in one by drawing it again.
-  --engine: auto (default) exports with Excalidraw when available, else (or if the export fails) draws;
-            excalidraw requires the export (and replaces a built-in SVG); builtin always draws.
+Usage: render.py [--check] [--engine auto|builtin] [--stamp <name>] [--dir <directory>] [name...]
+  --check:  exits 1 if a scene or an SVG is not up to date, or if a text overflows. An Excalidraw export is checked
+            through the hashes its stamp carries (its scene, its own body), a built-in one by drawing it again.
+  --engine: auto (default) draws the SVG, but keeps an Excalidraw export: current, it stays; stale, the render
+            refuses and says the two ways out. builtin draws the SVG and replaces an Excalidraw export.
+  --stamp:  verifies <name>.svg is an SVG exported by Excalidraw (well-formed SVG, `<!-- svg-source:excalidraw -->`
+            marker, scene up to date, not stamped for another scene) and writes the stamp that --check reads:
+            `<!-- belayline-scene-sha256:<scene> svg-sha256:<body> -->`. The stamp records which scene the author
+            exported from; it cannot prove the image matches the scene: the reviewer looks at the image.
   --dir:    directory of the diagrams (default: docs/diagrams of the current repository, otherwise the harness's).
             Vendored into a project as .harness/scripts/diagrams-render.py (README-STANDARD.md §4).
 Changing a diagram: edit the .json (or the .excalidraw, then carry it over), run render.py again, commit all three.
@@ -24,9 +28,8 @@ import math
 import pathlib
 import random
 import re
-import shutil
-import subprocess
 import sys
+import xml.etree.ElementTree as ET
 from xml.sax.saxutils import escape
 
 ROOT = pathlib.Path(__file__).resolve().parents[2]
@@ -37,7 +40,7 @@ FIT_CHAR_W = 0.58  # widest line width per character measured in Excalifont, the
 LINE_H = 1.25
 PAD = 24
 EXCALIFONT = 5   # Excalidraw font family id of Excalifont, the hand-drawn font of excalidraw.com
-EXPORTER = pathlib.Path(__file__).resolve().parent / "export-svg.cjs"
+EXCALIDRAW_MARKER = "<!-- svg-source:excalidraw -->"  # written by Excalidraw in every SVG it exports
 STAMP = re.compile(r"<!-- belayline-scene-sha256:([0-9a-f]{64}) svg-sha256:([0-9a-f]{64}) -->")
 ANY_STAMP = re.compile(r"<!-- belayline-scene-sha256:[^>]*-->")
 
@@ -261,7 +264,7 @@ def to_scene(source):
 
 
 def scene_hash(scene):
-    # LF only, as written by write_lf(): the same bytes export-svg.cjs hashes, on every OS
+    # LF only, as written by write_lf(): the same hash on every OS
     return hashlib.sha256(scene.replace("\r\n", "\n").encode("utf-8")).hexdigest()
 
 
@@ -287,35 +290,89 @@ def svg_is_current(svg, source):
     return svg == render_svg(source)
 
 
-def export_hint():
-    """How to enable the Excalidraw export; empty where the exporter is not shipped (a vendored copy)."""
-    if not EXPORTER.is_file():
-        return ""
-    d = EXPORTER.parent
-    return (f"Excalidraw export: npm ci --prefix {d} && npx --prefix {d} playwright install chromium")
+def stamp(svg, scene):
+    """Stamps an Excalidraw export: the body ends with one newline, the stamp goes right after the first `>` (the end
+    of the `<svg ...>` tag), and carries the hash of the scene and of the body (the SVG without the stamp)."""
+    body = svg if svg.endswith("\n") else svg + "\n"
+    end = body.index(">") + 1
+    return (f"{body[:end]}<!-- belayline-scene-sha256:{scene_hash(scene)} "
+            f"svg-sha256:{hashlib.sha256(body.encode('utf-8')).hexdigest()} -->{body[end:]}")
 
 
-def exporter_available():
-    return (shutil.which("node") is not None and EXPORTER.is_file()
-            and (EXPORTER.parent / "node_modules" / "@excalidraw" / "excalidraw").is_dir())
+def stamp_refusal(svg, source):
+    """Why `svg` cannot be stamped as the Excalidraw export of the scene `source` produces; None if it can."""
+    if svg is None:
+        return "not found: export it from Excalidraw and save it under this name first"
+    try:
+        root = ET.fromstring(svg)
+    except ET.ParseError as e:
+        return f"not a well-formed SVG ({e})"
+    if root.tag != "{http://www.w3.org/2000/svg}svg":
+        return f"not an SVG (root element {root.tag})"
+    if EXCALIDRAW_MARKER not in svg:
+        return f"not an Excalidraw export (no {EXCALIDRAW_MARKER} marker)"
+    if ANY_STAMP.search(svg):
+        found = STAMP.search(svg)
+        if not found:
+            return "carries a malformed stamp"
+        if found.group(1) != scene_hash(to_scene(source)):
+            return "already stamped for another scene: export it again from the current scene"
+        if found.group(2) != body_hash(svg):
+            return "stamped, then edited: export it again from the current scene"
+    return None
+
+
+def stale_export(path, name):
+    return (f"{path}: Excalidraw export of an older scene. Either export it again from {name}.excalidraw "
+            f"(excalidraw.com → Export image → SVG, saved as {name}.svg) and run render.py --stamp {name}, "
+            f"or draw it with the built-in renderer: render.py --engine builtin {name}")
+
+
+def run_stamp(ddir, name, shown):
+    """--stamp: writes the stamp of docs/diagrams/<name>.svg, or refuses with the reason; nothing written then."""
+    src_path, scene_path, svg_path = (ddir / f"{name}{ext}" for ext in (".json", ".excalidraw", ".svg"))
+    if not src_path.is_file():
+        return [f"{name}: source {shown(src_path)} not found"]
+    source = json.loads(src_path.read_text(encoding="utf-8"))
+    bad = invalid(source)
+    if bad:
+        return [f"{name}: {b}" for b in bad]
+    scene = to_scene(source)
+    if not scene_path.is_file() or scene_path.read_text(encoding="utf-8") != scene:
+        return [f"{shown(scene_path)}: not up to date: run render.py first, then export from the new scene"]
+    try:
+        svg = svg_path.read_text(encoding="utf-8") if svg_path.exists() else None
+    except (OSError, UnicodeDecodeError) as e:
+        return [f"{shown(svg_path)}: not an SVG ({e})"]
+    refusal = stamp_refusal(svg, source)
+    if refusal:
+        return [f"{shown(svg_path)}: {refusal}; nothing written"]
+    if STAMP.search(svg):
+        print(f"✔ {shown(svg_path)} (already stamped for this scene)")
+        return []
+    write_lf(svg_path, stamp(svg, scene))
+    print(f"✔ {shown(svg_path)} (Excalidraw export, stamped)")
+    return []
 
 
 def main():
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     ap.add_argument("--check", action="store_true")
-    ap.add_argument("--engine", choices=("auto", "excalidraw", "builtin"), default="auto")
+    ap.add_argument("--engine", choices=("auto", "builtin"), default="auto")
+    ap.add_argument("--stamp", metavar="NAME")
     ap.add_argument("--dir", type=pathlib.Path)
     ap.add_argument("names", nargs="*")
     a = ap.parse_args()
     cwd = pathlib.Path.cwd() / "docs" / "diagrams"
     ddir = a.dir or (cwd if cwd.is_dir() else DIR)
     shown = lambda path: path.relative_to(ROOT) if path.is_relative_to(ROOT) else path  # noqa: E731
+    if a.stamp:
+        problems = run_stamp(ddir, a.stamp, shown)
+        for p in problems:
+            print(f"✘ {p}")
+        return 1 if problems else 0
     names = a.names or sorted(p.stem for p in ddir.glob("*.json"))
-    export = not a.check and a.engine != "builtin" and exporter_available()
-    if a.engine == "excalidraw" and not a.check and not export:
-        print(f"✘ the Excalidraw export is not available. {export_hint() or 'export-svg.cjs is not shipped here.'}")
-        return 1
-    problems, to_export = [], []
+    problems = []
     for name in names:
         if not (ddir / f"{name}.json").is_file():
             problems.append(f"{name}: source {shown(ddir / (name + '.json'))} not found")
@@ -331,36 +388,23 @@ def main():
         current_scene = scene_path.read_text(encoding="utf-8") if scene_path.exists() else None
         current_svg = svg_path.read_text(encoding="utf-8") if svg_path.exists() else None
         svg_ok = svg_is_current(current_svg, source)
+        exported = current_svg is not None and bool(ANY_STAMP.search(current_svg))
         if a.check:
-            for path, ok in ((scene_path, current_scene == scene), (svg_path, svg_ok)):
-                if not ok:
-                    problems.append(f"{shown(path)}: not up to date (run the diagram rendering again without --check)")
+            if current_scene != scene:
+                problems.append(f"{shown(scene_path)}: not up to date (run the diagram rendering again without --check)")
+            if not svg_ok:
+                problems.append(stale_export(shown(svg_path), name) if exported else
+                                f"{shown(svg_path)}: not up to date (run the diagram rendering again without --check)")
             continue
         if current_scene != scene:
             write_lf(scene_path, scene)
             print(f"✔ {shown(scene_path)}")
-        builtin_svg = current_svg is not None and not ANY_STAMP.search(current_svg)
-        if export and (not svg_ok or (a.engine == "excalidraw" and builtin_svg)):
-            to_export.append((svg_path, source))
-        elif not svg_ok:
+        if exported and a.engine != "builtin":
+            if not svg_ok:
+                problems.append(stale_export(shown(svg_path), name))
+        elif not svg_ok or exported:
             write_lf(svg_path, render_svg(source))
-            hint = export_hint()
-            print(f"✔ {shown(svg_path)} (built-in renderer{'; ' + hint if hint else ''})")
-    if to_export:
-        done = subprocess.run(["node", str(EXPORTER)] + [str(p.with_suffix(".excalidraw")) for p, _ in to_export])
-        if done.returncode and a.engine == "excalidraw":
-            problems.append(f"Excalidraw export failed (see above). {export_hint()}")
-        elif done.returncode:
-            print(f"⚠ Excalidraw export failed (see above): built-in renderer used. {export_hint()}")
-        for path, source in to_export:
-            current = path.read_text(encoding="utf-8") if path.exists() else None
-            if svg_is_current(current, source):
-                print(f"✔ {shown(path)} (Excalidraw)")
-            elif a.engine != "excalidraw":
-                write_lf(path, render_svg(source))
-                print(f"✔ {shown(path)} (built-in renderer)")
-            elif not done.returncode:
-                problems.append(f"{shown(path)}: the export did not produce an up-to-date SVG")
+            print(f"✔ {shown(svg_path)} (built-in renderer)")
     for p in problems:
         print(f"✘ {p}")
     return 1 if problems else 0

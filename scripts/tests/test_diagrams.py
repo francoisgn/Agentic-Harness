@@ -1,12 +1,13 @@
-"""Tests of scripts/diagrams/render.py: deterministic rendering, valid Excalidraw scene, overflows detected."""
+"""Tests of scripts/diagrams/render.py: deterministic rendering, valid Excalidraw scene, overflows detected, stamping
+of Excalidraw exports."""
 import contextlib
 import hashlib
 import importlib.util
 import io
 import json
 import pathlib
+import re
 import shutil
-import subprocess
 import sys
 import tempfile
 import unittest
@@ -19,6 +20,8 @@ rd = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(rd)
 
 BOX = {"type": "rectangle", "id": "b", "x": 0, "y": 0, "width": 200, "height": 80, "label": {"text": "Short", "fontSize": 20}}
+EXPORT = ('<svg version="1.1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10 10"><!-- svg-source:excalidraw -->'
+          '<text>Short</text></svg>')
 ARROW = {"type": "arrow", "id": "a", "x": 200, "y": 40, "width": 100, "height": 0, "points": [[0, 0], [100, 0]],
          "label": {"text": "link", "fontSize": 16}}
 
@@ -72,8 +75,9 @@ class RenderTests(unittest.TestCase):
             self.assertTrue(rd.svg_is_current(src.with_suffix(".svg").read_text(encoding="utf-8"), source), src.name)
 
     @staticmethod
-    def exported(src, body='<svg viewBox="0 0 10 10"><text>Short</text></svg>'):
-        """An SVG stamped the way export-svg.cjs stamps it."""
+    def exported(src, body=None):
+        """An Excalidraw export stamped as the stamp is defined (written independently of render.stamp)."""
+        body = body or EXPORT
         body += "\n"
         stamp = (f"<!-- belayline-scene-sha256:{rd.scene_hash(rd.to_scene(src))} "
                  f"svg-sha256:{hashlib.sha256(body.encode()).hexdigest()} -->")
@@ -104,95 +108,37 @@ class RenderTests(unittest.TestCase):
 
 
 class EngineTests(unittest.TestCase):
-    """main(): built-in fallback, required export, staleness through the command line."""
+    """main(): built-in renderer, Excalidraw exports kept, --stamp, staleness through the command line."""
 
     def setUp(self):
         self.tmp = pathlib.Path(tempfile.mkdtemp())
         self.addCleanup(shutil.rmtree, self.tmp)
         (self.tmp / "d.json").write_text(json.dumps([BOX, ARROW]), encoding="utf-8")
 
-    def run_main(self, *args, available=False, export_rc=None):
-        calls = []
-
-        def fake_run(cmd, **kw):
-            calls.append(cmd)
-            return subprocess.CompletedProcess(cmd, export_rc)
-
+    def run_main(self, *args):
         out = io.StringIO()
-        with mock.patch.object(rd, "exporter_available", return_value=available), \
-                mock.patch.object(rd.subprocess, "run", side_effect=fake_run), \
-                mock.patch.object(sys, "argv", ["render.py", "--dir", str(self.tmp), *args]), \
+        with mock.patch.object(sys, "argv", ["render.py", "--dir", str(self.tmp), *args]), \
                 contextlib.redirect_stdout(out):
             rc = rd.main()
-        return rc, out.getvalue(), calls
+        return rc, out.getvalue()
 
-    def test_without_the_exporter_the_svg_is_drawn_and_checks(self):
-        rc, out, calls = self.run_main()
-        self.assertEqual((rc, calls), (0, []))
+    def svg(self):
+        path = self.tmp / "d.svg"
+        return path.read_bytes() if path.exists() else None
+
+    def test_the_svg_is_drawn_and_checks(self):
+        rc, out = self.run_main()
+        self.assertEqual(rc, 0)
         self.assertEqual((self.tmp / "d.svg").read_text(encoding="utf-8"), rd.render_svg([BOX, ARROW]))
         self.assertEqual(self.run_main("--check")[0], 0)
-
-    def test_a_failed_export_falls_back_to_the_built_in_renderer(self):
-        rc, out, calls = self.run_main(available=True, export_rc=1)
-        self.assertEqual(rc, 0)
-        self.assertEqual(len(calls), 1)
-        self.assertIn("built-in renderer used", out)
-        self.assertEqual(self.run_main("--check")[0], 0)
-
-    def test_a_required_export_that_fails_or_is_missing_exits_1(self):
-        self.assertEqual(self.run_main("--engine", "excalidraw", available=True, export_rc=1)[0], 1)
-        rc, out, _ = self.run_main("--engine", "excalidraw")
-        self.assertEqual(rc, 1)
-        self.assertIn("not available", out)
 
     def test_a_changed_source_makes_check_fail(self):
         self.run_main()
         (self.tmp / "d.json").write_text(json.dumps([dict(BOX, x=10), ARROW]), encoding="utf-8")
-        rc, out, _ = self.run_main("--check")
+        rc, out = self.run_main("--check")
         self.assertEqual(rc, 1)
         self.assertIn("d.svg: not up to date", out)
         self.assertIn("d.excalidraw: not up to date", out)
-
-    def fake_export(self, write=True):
-        """A run of export-svg.cjs that writes the stamped SVG of each scene it is given."""
-        def run(cmd, **kw):
-            if write:
-                for scene in cmd[2:]:
-                    src = json.loads((self.tmp / "d.json").read_text(encoding="utf-8"))
-                    pathlib.Path(scene).with_suffix(".svg").write_text(RenderTests.exported(src), encoding="utf-8")
-            return subprocess.CompletedProcess(cmd, 0)
-        return run
-
-    def run_export(self, *args, write=True):
-        out = io.StringIO()
-        with mock.patch.object(rd, "exporter_available", return_value=True), \
-                mock.patch.object(rd.subprocess, "run", side_effect=self.fake_export(write)), \
-                mock.patch.object(sys, "argv", ["render.py", "--dir", str(self.tmp), *args]), \
-                contextlib.redirect_stdout(out):
-            return rd.main(), out.getvalue()
-
-    def test_a_successful_export_is_kept_and_checks(self):
-        rc, out = self.run_export()
-        self.assertEqual(rc, 0)
-        self.assertIn("(Excalidraw)", out)
-        self.assertIn("belayline-scene-sha256", (self.tmp / "d.svg").read_text(encoding="utf-8"))
-        self.assertEqual(self.run_main("--check")[0], 0)
-
-    def test_required_export_replaces_a_built_in_svg(self):
-        self.run_main()
-        self.assertEqual(self.run_export()[0], 0)  # auto keeps a current built-in SVG
-        self.assertNotIn("belayline-scene-sha256", (self.tmp / "d.svg").read_text(encoding="utf-8"))
-        rc, out = self.run_export("--engine", "excalidraw")
-        self.assertEqual(rc, 0)
-        self.assertIn("belayline-scene-sha256", (self.tmp / "d.svg").read_text(encoding="utf-8"))
-
-    def test_an_export_that_writes_nothing_is_reported(self):
-        rc, out = self.run_export("--engine", "excalidraw", write=False)
-        self.assertEqual(rc, 1)
-        self.assertIn("did not produce an up-to-date SVG", out)
-        rc, out = self.run_export(write=False)
-        self.assertEqual(rc, 0)
-        self.assertIn("(built-in renderer)", out)
 
     def test_files_are_written_with_lf_and_crlf_scenes_hash_the_same(self):
         self.run_main()
@@ -200,13 +146,78 @@ class EngineTests(unittest.TestCase):
         scene = rd.to_scene([BOX, ARROW])
         self.assertEqual(rd.scene_hash(scene.replace("\n", "\r\n")), rd.scene_hash(scene))
 
-    def test_no_install_hint_where_the_exporter_is_not_shipped(self):
-        with mock.patch.object(rd, "EXPORTER", self.tmp / "absent.cjs"):
-            self.assertEqual(rd.export_hint(), "")
-            rc, out, _ = self.run_main()
-        self.assertEqual(rc, 0)
-        self.assertNotIn("npm", out)
-        self.assertIn("playwright install chromium", rd.export_hint())
+    def export(self, text=EXPORT):
+        """The scene is rendered, then the author saves an Excalidraw export as d.svg."""
+        self.run_main()
+        (self.tmp / "d.svg").write_text(text, encoding="utf-8")
+
+    def test_stamp_accepts_an_excalidraw_export_that_then_checks(self):
+        self.export()
+        rc, out = self.run_main("--stamp", "d")
+        self.assertEqual(rc, 0, out)
+        svg = (self.tmp / "d.svg").read_text(encoding="utf-8")
+        self.assertEqual(svg, RenderTests.exported([BOX, ARROW]))
+        self.assertEqual(self.run_main("--check")[0], 0)
+        self.assertEqual(self.run_main()[0], 0)
+        self.assertEqual((self.tmp / "d.svg").read_text(encoding="utf-8"), svg, "a current export is kept")
+        self.assertEqual(self.run_main("--stamp", "d"), (0, f"✔ {self.tmp / 'd.svg'} (already stamped for this scene)\n"))
+
+    def test_stamp_reproduces_the_committed_exports_byte_for_byte(self):
+        committed = [p for p in sorted((ROOT / "docs/diagrams").glob("*.svg")) if rd.STAMP.search(p.read_text("utf-8"))]
+        self.assertTrue(committed)
+        for svg in committed:
+            for ext in (".json", ".excalidraw"):
+                shutil.copy(svg.with_suffix(ext), self.tmp / f"x{ext}")
+            (self.tmp / "x.svg").write_text(rd.ANY_STAMP.sub("", svg.read_text("utf-8"), count=1), encoding="utf-8")
+            rc, out = self.run_main("--stamp", "x")
+            self.assertEqual(rc, 0, out)
+            self.assertEqual((self.tmp / "x.svg").read_bytes(), svg.read_bytes(), svg.name)
+
+    def assert_refused(self, reason, *args):
+        before = self.svg()
+        rc, out = self.run_main("--stamp", "d", *args)
+        self.assertEqual(rc, 1, out)
+        self.assertIn(reason, out)
+        self.assertIn("✘", out)
+        self.assertEqual(self.svg(), before, "nothing written")
+
+    def test_stamp_refuses_what_is_not_an_export_of_the_current_scene(self):
+        self.run_main()
+        (self.tmp / "d.svg").unlink()
+        self.assert_refused("not found")
+        for text, reason in (("not svg at all", "not a well-formed SVG"),
+                             ('<html><!-- svg-source:excalidraw --></html>', "not an SVG"),
+                             (rd.render_svg([BOX, ARROW]), "not an Excalidraw export"),
+                             (RenderTests.exported([dict(BOX, x=10), ARROW]), "already stamped for another scene"),
+                             (EXPORT.replace("-->", "--><!-- belayline-scene-sha256:x -->", 1), "malformed stamp"),
+                             (RenderTests.exported([BOX, ARROW]).replace(">Short<", ">Edited<"), "edited")):
+            (self.tmp / "d.svg").write_text(text, encoding="utf-8")
+            self.assert_refused(reason)
+        (self.tmp / "d.svg").write_text(EXPORT, encoding="utf-8")
+        (self.tmp / "d.json").write_text(json.dumps([dict(BOX, x=10), ARROW]), encoding="utf-8")
+        self.assert_refused("d.excalidraw: not up to date")
+
+    def test_a_stale_export_fails_check_with_both_ways_out_and_is_never_overwritten_silently(self):
+        self.export()
+        self.run_main("--stamp", "d")
+        stamped = self.svg()
+        (self.tmp / "d.json").write_text(json.dumps([dict(BOX, x=10), ARROW]), encoding="utf-8")
+        for args in (("--check",), ()):
+            rc, out = self.run_main(*args)
+            self.assertEqual(rc, 1, args)
+            self.assertIn("Excalidraw export of an older scene", out)
+            self.assertIn("render.py --stamp d", out)
+            self.assertIn("render.py --engine builtin d", out)
+            self.assertEqual(self.svg(), stamped, args)
+        rc, out = self.run_main("--engine", "builtin")
+        self.assertEqual(rc, 0, out)
+        self.assertEqual(self.svg().decode("utf-8"), rd.render_svg([dict(BOX, x=10), ARROW]))
+
+    def test_no_exporter_tooling_is_mentioned(self):
+        text = (ROOT / "scripts/diagrams/render.py").read_text(encoding="utf-8")
+        self.assertIsNone(re.search(r"\bnpm\b|\bnpx\b|\bnode\b|playwright|export-svg", text, re.I))
+        self.assertEqual(sorted(p.name for p in (ROOT / "scripts/diagrams").iterdir() if p.name != "__pycache__"),
+                         ["render.py"])
 
 
 if __name__ == "__main__":
