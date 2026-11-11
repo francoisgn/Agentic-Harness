@@ -6,7 +6,8 @@
 #   --source DIR       copy of the harness to vendor (default: the repository that contains this script)
 #   --ref vX.Y.Z       clones the harness at this tag ($HARNESS_URL, default https://github.com/$HARNESS_REPO.git)
 #   --target DIR       root of the consumer repository (default: current directory)
-#   --check            writes nothing; exits 1 if a sync would change something (drift check in CI)
+#   --check            writes nothing; exits 1 if a sync would change something (drift check in CI). Also says how far
+#                      the vendored copy is behind this harness clone ("N commits ahead"), without any network call
 #   --dry-run          writes nothing; lists what would change
 #   --force            also replaces harness files that were modified locally or already exist
 #   --skip-workflows   touches nothing under .github/workflows/ (a GITHUB_TOKEN cannot push these files)
@@ -81,6 +82,11 @@ with open(sys.argv[2], "w", encoding="utf-8") as f:
     for pattern in config.get("exclude", []):
         f.write(str(pattern) + "\n")
 PY
+fi
+LOCK_VERSION="" LOCK_COMMIT=""
+if [ -f "$TARGET/$LOCK_REL" ]; then
+  LOCK_VERSION="$(awk -F'\t' '$1 == "version" { print $2; exit }' "$TARGET/$LOCK_REL")"
+  LOCK_COMMIT="$(awk -F'\t' '$1 == "commit" { print $2; exit }' "$TARGET/$LOCK_REL")"
 fi
 OLD="$WORK/old" NEW="$WORK/new"
 : >"$NEW"
@@ -301,6 +307,33 @@ default_branch_alert() {
   return 0
 }
 
+# How far the project is behind this harness clone (#68), from the version and commit the lock recorded. Offline: only
+# the clone's own history is read, never a fetch. Says "could not compare" whenever it cannot count, never a guess.
+gap_report() {
+  local base head n what lead
+  [ -f "$TARGET/$LOCK_REL" ] || return 0
+  base="${LOCK_COMMIT%-modified}"
+  head="${COMMIT%-modified}"
+  lead="vendored ${LOCK_VERSION:-?} (${base:0:12})"
+  if [ -z "$base" ] || [ "$base" = unknown ]; then
+    echo "🟠 vendored ${LOCK_VERSION:-?} (commit unknown) · harness now $VERSION: could not compare."
+  elif [ "$head" = unknown ]; then
+    echo "🟠 $lead · harness now $VERSION: could not compare (the harness source is not a git clone)."
+  elif ! git -C "$SRC" cat-file -e "$base^{commit}" 2>/dev/null; then
+    echo "🟠 $lead · harness now $VERSION (${head:0:12}): could not compare (this harness clone does not hold that commit: shallow or other history)."
+  elif [ "$base" = "$head" ]; then
+    echo "🟢 $lead · harness now $VERSION, same commit."
+  else
+    n="$(git -C "$SRC" rev-list --count "$base..$head" 2>/dev/null)" || n=""
+    case "$n" in
+      ''|*[!0-9]*) echo "🟠 $lead · harness now $VERSION (${head:0:12}): could not compare." ;;
+      0) echo "🟠 $lead · harness now $VERSION (${head:0:12}): this clone is not ahead of the vendored commit, could not compare." ;;
+      *) what="commits"; [ "$n" = 1 ] && what="commit"
+         echo "🟠 $lead · harness now $VERSION, $n $what ahead, see CHANGELOG Actions." ;;
+    esac
+  fi
+}
+
 printf 'Belayline %s (%s) → %s [%s]\n' "$VERSION" "${COMMIT:0:12}" "$TARGET" "$MODE"
 while read -r kind src rel id tpl; do
   case "$kind" in ''|'#'*) continue ;; esac
@@ -341,6 +374,7 @@ put ".harness/VERSION" "$WORK/version"
 put "$LOCK_REL" "$WORK/lock"
 
 default_branch_alert
+[ "$MODE" != check ] || gap_report
 [ "$SKIPPED" = 0 ] || printf '  (%s entry(ies) under .github/workflows/ skipped: --skip-workflows)\n' "$SKIPPED"
 if [ "$CONFLICTS" -gt 0 ]; then
   printf '🟠 %s conflict(s), affected files left as they are; %s change(s).\n' "$CONFLICTS" "$CHANGES"

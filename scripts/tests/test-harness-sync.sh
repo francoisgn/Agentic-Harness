@@ -191,6 +191,43 @@ grep -q 'default_branch' "$ROOT/.github/workflows/pr-hygiene.yml" && grep -q '::
   || fail "pr-hygiene: default branch warning missing"
 ok "integration branch vs default branch: first adoption stopped, relay, silenced, later sync warns, match, undeterminable"
 
+# The gap between a project and the harness (#68): the lock records version and commit; with the harness clone at hand,
+# --check and the session-start hook say how many commits the project is behind. No network, never misleading.
+GAPENV=(GIT_AUTHOR_NAME=t GIT_AUTHOR_EMAIL=t@example.invalid GIT_COMMITTER_NAME=t GIT_COMMITTER_EMAIL=t@example.invalid)
+H="$WORK/harness-clone"
+mkdir -p "$H" && (cd "$ROOT" && git ls-files -z | xargs -0 tar -cf -) | tar -xf - -C "$H"
+git -C "$H" init -q -b master && git -C "$H" add -A && env "${GAPENV[@]}" git -C "$H" commit -q -m base
+TG="$WORK/gap"
+mkdir -p "$TG" && git -C "$TG" init -q -b develop
+"$SYNC" --source "$H" --target "$TG" >"$WORK/gap.out" 2>&1 || fail "gap: first sync: $(cat "$WORK/gap.out")"
+LOCKED="$(git -C "$H" rev-parse HEAD)"
+gapcheck() { "$SYNC" --source "$H" --target "$TG" --check >"$WORK/gap.out" 2>&1; }
+gaphook() { HARNESS_CLONE="$H" CLAUDE_PROJECT_DIR="$TG" bash "$SS" vendored >"$WORK/gap.hook" 2>&1; }
+gapcheck; grep -qF "vendored $(cat "$H/VERSION") (${LOCKED:0:12})" "$WORK/gap.out" && grep -qF 'same commit' "$WORK/gap.out" \
+  || fail "gap: same commit: $(cat "$WORK/gap.out")"
+for i in 1 2 3; do env "${GAPENV[@]}" git -C "$H" commit -q --allow-empty -m "later $i"; done
+gapcheck; grep -qF "vendored $(cat "$H/VERSION") (${LOCKED:0:12}) · harness now $(cat "$H/VERSION"), 3 commits ahead, see CHANGELOG Actions" "$WORK/gap.out" \
+  || fail "gap: --check line: $(cat "$WORK/gap.out")"
+gaphook; grep -qF '3 commits ahead' "$WORK/gap.hook" || fail "gap: session-start line: $(cat "$WORK/gap.hook")"
+# Clone not available: the hook still shows what is vendored and says it could not compare (nothing else, no network).
+HARNESS_CLONE="$WORK/nowhere" CLAUDE_PROJECT_DIR="$TG" bash "$SS" vendored >"$WORK/gap.hook" 2>&1
+grep -qF "vendored $(cat "$H/VERSION") (${LOCKED:0:12})" "$WORK/gap.hook" && grep -qF 'could not compare' "$WORK/gap.hook" \
+  && ! grep -q 'commits ahead' "$WORK/gap.hook" || fail "gap: hook without clone: $(cat "$WORK/gap.hook")"
+# A clone that does not hold the vendored commit (shallow, other history): could not compare, no count.
+H2="$WORK/harness-other"
+cp -R "$H" "$H2" && rm -rf "$H2/.git" && git -C "$H2" init -q -b master && git -C "$H2" add -A && env "${GAPENV[@]}" git -C "$H2" commit -q -m other
+"$SYNC" --source "$H2" --target "$TG" --check >"$WORK/gap.out" 2>&1
+grep -qF 'could not compare' "$WORK/gap.out" && ! grep -q 'commits ahead' "$WORK/gap.out" || fail "gap: foreign clone: $(cat "$WORK/gap.out")"
+# A source that is not a git clone (copied folder): same.
+rm -rf "$H2/.git"
+"$SYNC" --source "$H2" --target "$TG" --check >"$WORK/gap.out" 2>&1
+grep -qF 'could not compare' "$WORK/gap.out" && ! grep -q 'commits ahead' "$WORK/gap.out" || fail "gap: no git: $(cat "$WORK/gap.out")"
+# No lock (first adoption, nothing vendored): no gap line.
+TN="$WORK/gap-none" && mkdir -p "$TN" && git -C "$TN" init -q -b develop
+"$SYNC" --source "$H" --target "$TN" --check >"$WORK/gap.out" 2>&1
+! grep -qE 'commits? ahead|could not compare' "$WORK/gap.out" || fail "gap: line without a lock: $(cat "$WORK/gap.out")"
+ok "gap between the project and the harness: --check, session-start, no clone, foreign clone, no lock"
+
 # Hooks
 g() { printf '{"tool_input":{"command":%s},"cwd":"%s"}' "$(jq -Rn --arg c "$1" '$c')" "$T" | CLAUDE_PROJECT_DIR="$T" python3 "$GUARD" 2>/dev/null; echo $?; }
 [ "$(g 'git push --force origin fix/x')" = 2 ] || fail "guard: force"

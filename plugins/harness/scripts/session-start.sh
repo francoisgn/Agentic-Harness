@@ -49,12 +49,54 @@ if isinstance(c, dict) and c.get("default_branch_check") is not False and isinst
   return 0
 }
 
+# How far the project is behind the harness (#68), from the version and commit in .harness/lock and a local clone of the
+# harness: $HARNESS_CLONE, a sibling ../belayline (docs/ADOPTION.md), or the plugin's own checkout. Offline: reads the
+# clone's history, never fetches. No clone, or one that lacks the vendored commit: says it could not compare.
+# The counting twin is gap_report in scripts/harness-sync.sh (--check).
+gap_alert() {
+  local lock="$1/.harness/lock" lv lc clone c now head n what lead
+  [ -f "$lock" ] || return 0
+  lv="$(awk -F'\t' '$1 == "version" { print $2; exit }' "$lock")"
+  lc="$(awk -F'\t' '$1 == "commit" { print $2; exit }' "$lock")"
+  lc="${lc%-modified}"
+  lead="vendored ${lv:-?} (${lc:0:12})"
+  if [ -z "$lc" ] || [ "$lc" = unknown ]; then
+    echo "- 🟠 vendored ${lv:-?} (commit unknown): could not compare with the harness."
+    return 0
+  fi
+  clone=""
+  for c in "${HARNESS_CLONE:-}" "$1/../belayline" "${CLAUDE_PLUGIN_ROOT:+$CLAUDE_PLUGIN_ROOT/../..}"; do
+    [ -n "$c" ] && [ -f "$c/harness.manifest" ] && [ -f "$c/VERSION" ] \
+      && git -C "$c" rev-parse --git-dir >/dev/null 2>&1 && { clone="$c"; break; }
+  done
+  if [ -z "$clone" ]; then
+    echo "- 🟠 $lead · harness clone not available here: could not compare (set HARNESS_CLONE to a clone of the harness)."
+    return 0
+  fi
+  now="$(head -1 "$clone/VERSION" | tr -d '[:space:]')"
+  head="$(git -C "$clone" rev-parse HEAD 2>/dev/null)" || head=""
+  if [ -z "$head" ] || ! git -C "$clone" cat-file -e "$lc^{commit}" 2>/dev/null; then
+    echo "- 🟠 $lead · harness now $now: could not compare (the clone does not hold that commit: shallow or other history)."
+  elif [ "$lc" = "$head" ]; then
+    echo "- 🟢 $lead · harness now $now, same commit."
+  else
+    n="$(git -C "$clone" rev-list --count "$lc..$head" 2>/dev/null)" || n=""
+    case "$n" in
+      ''|*[!0-9]*|0) echo "- 🟠 $lead · harness now $now: could not compare." ;;
+      *) what="commits"; [ "$n" = 1 ] && what="commit"
+         echo "- 🟠 $lead · harness now $now, $n $what ahead, see CHANGELOG Actions." ;;
+    esac
+  fi
+  return 0
+}
+
 echo "## Belayline"
 if [ -n "$VENDORED" ]; then
   echo "- Vendored version: ${VENDORED} (.harness/VERSION)${PLUGIN:+; plugin: ${PLUGIN}}. Rules: .harness/docs/ESSENTIALS.md."
   if [ -n "$PLUGIN" ] && [ "$PLUGIN" != "$VENDORED" ]; then
     echo "- 🟠 Plugin and vendored copy differ: the copy in the repository is authoritative (update: skill harness-update)."
   fi
+  gap_alert "$PROJECT"
 else
   echo "- Plugin ${PLUGIN:-?}; this repository has not adopted the harness (.harness/ missing): see the harness's docs/ADOPTION.md."
 fi
