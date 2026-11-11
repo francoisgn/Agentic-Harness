@@ -75,8 +75,27 @@ table) that many PRs would want to modify at the same time.
   script that reads the `### Ledger` sections of the PRs merged since its last pass (the `ledger` label, if a project
   still sets it, is only a hint) and **folds** their entries into the files, in **a single draft docs PR**; once
   that PR is merged, the next pass marks each folded PR `ledger: done`, the only label the harness writes. The
-  script gets the pending PR numbers in `STEWARD_LEDGER_PRS` and may write the ones it folded to the file
-  `$STEWARD_FOLDED` (otherwise all count as folded); the others stay in their PR, are listed in the docs PR and stay pending for the next pass.
+  script gets the pending PR numbers in `STEWARD_LEDGER_PRS`, **in merge order** (oldest first), and may write the
+  ones it folded to the file `$STEWARD_FOLDED` (otherwise all count as folded); the others stay in their PR, are
+  listed in the docs PR's "Unplaced entries" section and stay pending for the next pass.
+- **One folder at a time.** Only the steward folds, on **one fixed branch**: `doc-steward.yml`'s `branch` input
+  (default `docs/steward`); no session folds on a branch of its own. While a PR from that branch is open, a second
+  fold is **refused** with its link and nothing is pushed; merging it starts the next pass, which covers every merge
+  since. The harness enforces it in `doc-steward.yml` (before deciding and before pushing); a fold run by hand calls
+  the same guard first: `python3 .harness/scripts/doc-steward.py fold-guard --repo <owner/name> --branch docs/steward
+  --head-branch "$(git branch --show-current)"` (exit 0 free, 1 refused, 2 could not check: no fold either).
+- **Entry types.** The fence language is the type. Table types (one row or cell of a named table: ` ```changelog `,
+  ` ```gap-new `…) are the project's, defined by its fold script. The **`note`** type is the harness's, for text
+  outside the tables: first line `<file>` or `<file> § <heading>`, then the text, appended at the end of that
+  section (or of the file); already there, nothing changes. A note is folded at the next pass like any entry, never
+  held for an operator "yes". The fold script may call `doc-steward.py note --entry <file>` (exit 0 placed, 1
+  unplaced with the reason, which goes to the unplaced list).
+- **Contested place: the first merged wins.** Two entries of one pass that target the same place (a cell, a row)
+  with different texts: neither is dropped. The fold script applies the first merged, counts both PRs as folded,
+  and writes one JSON line per contested place to `$STEWARD_CONTESTED`
+  (`{"place": "docs/gaps.md: row Export, column Status", "first": 9, "first_text": "…", "second": 12, "second_text":
+  "…"}`). The docs PR lists them in a "Contested entries" section, as "contested: #9 vs #12" with both texts; a human
+  or the orchestrator settles each in that PR (a reviewed commit) before merging it.
 - The fold is that PR's **"Fold the ledger" commit**, verified without an adversarial review: **the script must
   reproduce it** (on its base, the command written in the commit message, then `git diff --exit-code <commit>`, shows
   no difference). The PR's other commits (docs named by the `Docs:` lines) are reviewed like any change.
@@ -84,8 +103,9 @@ table) that many PRs would want to modify at the same time.
 - The adversarial reviewer reviews the `### Ledger` section like code. A malformed entry is reported in the docs PR,
   quoted with the expected format, and not folded (the others are): the author fixes the PR body, not the files.
 
-Wiring the block in: the harness provides the convention and the PR body checks (`pr-hygiene.yml`, inputs
-`ledger-label` and `docs-code-paths`); the project provides its fold script (block format, target files, order, idempotence), declared in
+Wiring the block in: the harness provides the convention, the PR body checks (`pr-hygiene.yml`, inputs
+`ledger-label` and `docs-code-paths`), the fold guard and the `note` helper; the project provides its fold script
+(block format, target files, order, idempotence, the contract above: `$STEWARD_FOLDED`, `$STEWARD_CONTESTED`), declared in
 `.harness/config.json` → `ledger` (`enabled`, `label`, `fold_command`), and a CI check that refuses a PR outside
 the steward's branch touching the ledger files (it must not require the label either). The label `ledger: done` goes
 in `.github/labels.local.json` (`ledger` too while older PRs carry it). Full example (block format, script, check): `tooling/docs/README.md` of HFRnow

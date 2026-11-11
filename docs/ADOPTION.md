@@ -20,7 +20,7 @@ Why this mechanism (vendoring + plugin + reusable workflows) and its limits: [AD
 | `.harness/scripts/issue-reconcile.py` | copy | Harness: `status:` labels brought in line with issues, PRs and claims, no workflow needed (session start, after a merge, `issue-reconcile.yml`); imports `readme-progress.py` |
 | `.harness/scripts/decisions-check.py` | copy | Harness: `docs/DECISIONS.md` has at most one decision in force per scope key (`docs-security.yml`, input `decisions`) |
 | `.harness/scripts/orch-state.py`, `.harness/templates/child-report.md` | copy | Harness: the orchestrator's State comment on its memory issue, and the report template a child posts on its PR ([ORCHESTRATION](ORCHESTRATION.md) §8); the script needs `decisions-check.py` and `flow-metrics.py` next to it |
-| `.harness/scripts/doc-steward.py` | copy | Harness: doc steward's "anything to fold?" decision, docs PR body and weekly audit issues (`doc-steward.yml`) |
+| `.harness/scripts/doc-steward.py` | copy | Harness: doc steward's "anything to fold?" decision, the one-fold-at-a-time guard (`fold-guard`), the `note` helper, docs PR body and weekly audit issues (`doc-steward.yml`) |
 | `.claude/settings.json` | merge | Project; the harness only **adds** its two hooks if they are missing |
 | `CLAUDE.md`, `AGENTS.md` | marked block | Project, except the block `<!-- harness:begin harness -->…<!-- harness:end harness -->` |
 | `.harness/config.json`, `.github/labels.local.json`, issue and PR templates, `docs/lots/TEMPLATE.md`, `docs/DECISIONS.md`, `.markdownlint-cli2.jsonc`, `.github/workflows/harness.yml`, `.github/workflows/harness-sync.yml` | seed | Project: created if missing, never rewritten (except the `@vX.Y.Z` references of `harness.yml`) |
