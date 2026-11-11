@@ -12,6 +12,22 @@ moving to this version.
   Off when the file is absent. A decision received in a comment or chat is recorded in the next commit.
   **Action**: none required; a project that wants the rule keeps the seeded `docs/DECISIONS.md` after the sync, one
   that does not deletes it (or `decisions: false`).
+- **`status: on-hold` apart from `status: blocked`; a blocked issue names its blocker**
+  ([METHODOLOGY](docs/METHODOLOGY.md) §4, [ADR 0003](docs/adr/0003-labels-readable-by-axis.md) amendment):
+  - new base label `status: on-hold` (held by a decision, not a dependency), shown apart by `flow-metrics.py` (an
+    "On hold" section, not a bottleneck) and `readme-progress.py` (`⏸ on hold`);
+  - a `status: blocked` issue carries a `### Blocked by` section, one line per blocker (`#n` or free text); the task
+    form has the field (formerly "Depends on"); `issue-hygiene` reports a blocked issue without it and never
+    relabels it (input `blocked-label`).
+  **Action**: run the label sync (`labels-sync`) to create `status: on-hold`, then move the issues held by a
+  decision from `status: blocked` to `status: on-hold` and give each remaining blocked issue a `### Blocked by`
+  section.
+- **Merge gate** (`scripts/merge-gate.py <pr>`, vendored to `.harness/scripts/`, [CONVENTIONS](docs/CONVENTIONS.md)
+  §Pull requests): read-only, one `ok` / `missing` line per check (draft, mergeable, CI green on the head sha,
+  adversarial APPROVED naming the head, a "stale approval" otherwise, open review threads read through GraphQL, the
+  `Open questions` of the report marked `<!-- harness:report -->`, required and security labels, PR body lines);
+  "may merge" prints the head sha to merge with, "could not check" exits 2. Settings: `.harness/config.json` ›
+  `merge_gate` (`required_labels` default empty). The verdict parsing is shared with `flow-metrics.py`.
 
 - **Orchestrator memory: one State comment, rewritten by script; the thread is a log**
   ([ORCHESTRATION](docs/ORCHESTRATION.md) §8): `scripts/orch-state.py` (vendored as `.harness/scripts/orch-state.py`)
@@ -84,6 +100,18 @@ moving to this version.
   (Claude Code, Codex, Antigravity, Gemini CLI, Gemini Code Assist, Copilot, Cursor), what does not combine, and why
   "we approved tool X" needs one answer per layer. Two Excalidraw diagrams. Every product fact is sourced and dated
   (read 2026-11-10). Vendored with the other docs into `.harness/docs/ai-layers/`.
+
+- **Ledger: the section alone is the entry, no label asked of the author** (#60,
+  [CONVENTIONS](docs/CONVENTIONS.md) §Ledger): child and cloud sessions often cannot set labels. `pr-hygiene.yml` no
+  longer fails on "entry blocks without the `ledger` label" nor on "label without a section": a stale label is one
+  notice. It fails a malformed section instead (block without a type, block not closed, `None` without a reason),
+  quoting the entry and the expected format; `None (<reason>)` is the one spelling of an empty section.
+  `doc-steward.py pending` finds the PRs to fold from their `### Ledger` section (the label is only read as a hint),
+  keeps the entries a pass did not fold pending, and lists malformed entries in the docs PR; the fold pass writes
+  `ledger: done`, the only label the harness sets.
+
+  **Action** (projects that keep a ledger): stop asking authors for the `ledger` label; a project CI check that
+  requires it must drop that rule. Keep `ledger: done` in `.github/labels.local.json`.
 
 - **README diagrams redrawn, exported by Excalidraw** (`docs/diagrams/`): mechanisms, cycle and adoption diagrams
   checked against the docs (two reviews: intent before "Ready", code on the ready PR; the dashboard reads the

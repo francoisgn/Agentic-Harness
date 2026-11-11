@@ -3,8 +3,9 @@ name: PR hygiene (reusable)
 # Cheap checks of a PR, in a single job (each job is billed per started minute, CI-BUDGET.md):
 #   - branch flow: the base ← head pair must be listed in `flow` (empty = no check);
 #   - issue link: `Closes #n` / `Refs #n` (or `Direct-PR: <reason>`, which sets the `direct-pr` label);
-#   - ledger (`ledger-label` not empty, CONVENTIONS.md §Ledger): a PR that carries this label has a `### Ledger`
-#     section with at least one fenced block, and a PR whose section has entry blocks carries the label;
+#   - ledger (`ledger-label` not empty, CONVENTIONS.md §Ledger): the `### Ledger` section alone is the entry, no label
+#     is asked of the author; a malformed entry (block without a type, block not closed, `None` without a reason)
+#     fails with the entry and the expected format; the label without entry blocks is one notice (stale label);
 #   - doc impact (`docs-code-paths` not empty): a PR that changes code paths has a `Docs:` line (in the ledger
 #     section, else in the body) naming existing doc files or `none (<reason>)`; one warning, never a failure;
 #   - warning (never a failure) if `integration-branch` is not the repository default branch: GitHub runs
@@ -28,7 +29,7 @@ on:
         type: boolean
         default: true
       ledger-label:
-        description: Ledger label (e.g. `ledger`); empty = the project keeps no ledger, nothing is checked
+        description: Ledger label (e.g. `ledger`); empty = the project keeps no ledger, nothing is checked. Not required on a PR (the section is the entry); a stale one gets a notice
         type: string
         default: ""
       ledger-heading:
@@ -126,19 +127,37 @@ jobs:
                 const heading = process.env.LEDGER_HEADING.trim().toLowerCase();
                 const lines = body.split(/\r?\n/);
                 const at = lines.findIndex((l) => l.trim().toLowerCase() === heading);
-                // The section runs to the next heading of level 1 to 3, outside fenced blocks; count its typed blocks
-                let blocks = 0, fence = null;
+                // The section runs to the next heading of level 1 to 3, outside fenced blocks. It alone is the entry
+                // (same parsing as doc-steward.py ledger_section): typed blocks are entries, `None (<reason>)` the
+                // explicit empty section; the label is the steward's bookkeeping, never asked of the author.
+                const name = process.env.LEDGER_HEADING.trim();
+                const format = 'expected: one fenced block per entry whose language is the entry type (```changelog … ```), or the line `None (<reason>)` when the PR has no entry';
+                const quote = (s) => `"${(s || '').trim().slice(0, 80)}"`;
+                let blocks = 0, fence = null, kind = '', first = null, none = null;
+                const bad = [];
                 docsWhere = [];
                 for (const l of at < 0 ? [] : lines.slice(at + 1)) {
                   const m = l.match(/^\s*(```+|~~~+)(\S*)/);
-                  if (fence) { if (m && m[1][0] === fence[0] && m[1].length >= fence.length && !m[2]) fence = null; continue; }
-                  if (m) { fence = m[1]; if (m[2]) blocks += 1; continue; }
+                  if (fence) {
+                    if (m && m[1][0] === fence[0] && m[1].length >= fence.length && !m[2]) {
+                      if (kind) blocks += 1; else bad.push(`block without an entry type (\`${fence}\` then ${quote(first)})`);
+                      fence = null;
+                    } else if (first === null) first = l;
+                    continue;
+                  }
+                  if (m) { fence = m[1]; kind = m[2]; first = null; continue; }
                   if (/^#{1,3}\s/.test(l)) break;
+                  const n = l.match(/^\s*(?:[-*]\s+)?None\b(.*)$/i);
+                  if (n && none === null) none = n[1];
                   docsWhere.push(l);
                 }
-                const labelled = pr.labels.some((l) => l.name === ledgerLabel);
-                if (labelled && !blocks) errors.push(`label \`${ledgerLabel}\` without a "${process.env.LEDGER_HEADING.trim()}" section or an entry block`);
-                if (!labelled && blocks) errors.push(`entry blocks in "${process.env.LEDGER_HEADING.trim()}" without the label \`${ledgerLabel}\` (ask a member: setting or removing the label reruns this check)`);
+                if (fence) bad.push(`block \`${fence}${kind}\` not closed (${quote(first)})`);
+                if (none !== null && !/^\s*\(\s*\S[^)]*\)/.test(none)) bad.push('`None` without a reason');
+                else if (none !== null && blocks) bad.push('`None (…)` next to entry blocks');
+                if (bad.length) errors.push(`malformed "${name}" section: ${bad.join('; ')}; ${format}`);
+                if (!blocks && pr.labels.some((l) => l.name === ledgerLabel)) {
+                  core.notice(`Stale label \`${ledgerLabel}\`: no entry block in "${name}". The section is the entry; the steward handles the labels (CONVENTIONS.md §Ledger).`);
+                }
               }
               // Doc impact (CONVENTIONS.md §Ledger): warn once, never fail
               const codeGlobs = words(process.env.DOCS_CODE_PATHS).map(glob);

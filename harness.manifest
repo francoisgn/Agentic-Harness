@@ -29,6 +29,8 @@ tree      plugins/harness/agents                      .claude/agents
 
 # Flow dashboard script (called by flow-report.yml and /status-report)
 copy      scripts/flow-metrics.py                     .harness/scripts/flow-metrics.py
+# Merge gate: "may merge now" or why not (CONVENTIONS.md §Pull requests); reads the verdicts through flow-metrics.py
+copy      scripts/merge-gate.py                       .harness/scripts/merge-gate.py
 copy      scripts/compliance-plan.py                  .harness/scripts/compliance-plan.py
 copy      scripts/repo-settings.py                    .harness/scripts/repo-settings.py
 

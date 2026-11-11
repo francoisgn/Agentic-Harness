@@ -29,8 +29,8 @@ section of its own `AGENTS.md`, its settings in `.harness/config.json`; report a
 3. Branch **`<type>/<short-name>`** (`lot`, `fix`, `feat`, `chore`, `docs`) from the **up-to-date integration
    branch**, atomic commits per issue. **Push early and often to a draft PR** (nothing costly runs there).
 4. **PR**: `Closes #n` (or `Refs #n` + what is left), `Claim: <id>`, the lot if there is one, problem / cause /
-   change / tests, a `Docs:` line (doc files made untrue, or `none (<reason>)`; in the `### Ledger` section if the
-   project keeps a ledger) (CONVENTIONS.md §Pull requests).
+   change / tests, a `Docs:` line (doc files made untrue, or `none (<reason>)`) (CONVENTIONS.md §Pull requests).
+   With a ledger, the `### Ledger` section holds it and is the entry; labels are the steward's bookkeeping.
    "Ready for review" only when everything is finished and reviewed. Do not merge outside the project's policy.
 5. **End**: comment on each issue (done, PR link, what is left, to validate on the device), update the umbrella
    issue. Work discovered along the way → **an issue**, never only a line in a `.md`.

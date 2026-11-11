@@ -3,12 +3,16 @@
 
 Subcommands, called by doc-steward.yml (the agent only starts when `pending` says there is something to fold):
   pending  anything to fold since the last pass? The last pass is the last merged PR from the steward's branch: its
-           body carries `Steward-Through: <time>` and `Folded: #a #b`. Pending: merged PRs still labelled with the
-           ledger label (minus those the last steward PR folded: `mark_done`, whose label the workflow swaps for
-           `<label>: done`), and PRs merged into the base since then whose `Docs:` line names files
-           (CONVENTIONS.md §Ledger; `Docs: none (…)` and a missing line ask for nothing). First pass: the last
-           `--since-days` days. Writes a JSON report (`fold`, `since`, `through`, `ledger`, `docs`, `mark_done`).
-  body     the body of the steward's draft docs PR from that report: the two markers, the PRs handled, the output of
+           body carries `Steward-Through: <time>`, `Folded: #a #b` and `Pending entries: #a #b #c.`. The `### Ledger`
+           section is the entry (CONVENTIONS.md §Ledger), no label is needed from the author. Pending ledger: PRs
+           merged into the base since then whose section has entry blocks (minus those marked `<label>: done`), the
+           entries the last pass did not fold, and, as a hint, merged PRs still carrying the ledger label. Malformed
+           entries are reported (`malformed`), never skipped silently. `mark_done`: the PRs the last steward PR
+           folded that do not carry `<label>: done` yet (the workflow sets it, the steward's only label). Docs: PRs
+           merged since then whose `Docs:` line names files (`Docs: none (…)` and a missing line ask for nothing).
+           First pass: the last `--since-days` days. Writes a JSON report (`fold`, `since`, `through`, `ledger`,
+           `malformed`, `docs`, `mark_done`).
+  body     the body of the steward's draft docs PR from that report: the markers, the PRs handled, the output of
            the fold command, and every entry the steward could not place (left in place, never dropped).
   audit    weekly safety net: one issue per gap found by the deterministic checks (`--report NAME=FILE`, the output
            of a failed check: readme, links, diagrams, progress), none for a gap that already has an open issue
@@ -19,8 +23,8 @@ Usage: doc-steward.py pending --repo o/r --base develop [--branch docs/steward] 
        doc-steward.py audit --repo o/r --report readme=f [--report links=f …] [--label "type: docs"] [--dry-run]
 Exit codes: 0 done (whatever the decision); 2 nothing decided: no token, API error, the branch is protected.
 Token: GH_TOKEN (or GITHUB_TOKEN): read pull requests and issues; `audit` also writes issues.
-API (REST, 2022-11-28): GET /repos/{o}/{r}/pulls (state, head, base, sort), GET and POST /repos/{o}/{r}/issues
-(docs.github.com/en/rest/pulls/pulls, /rest/issues/issues).
+API (REST, 2022-11-28): GET /repos/{o}/{r}/pulls (state, head, base, sort), GET and POST /repos/{o}/{r}/issues,
+GET /repos/{o}/{r}/issues/{n} (docs.github.com/en/rest/pulls/pulls, /rest/issues/issues).
 """
 import argparse
 import datetime
@@ -43,6 +47,11 @@ DOCS_LINE = re.compile(r"^\s*(?:[-*]\s+)?Docs:[ \t]*(.*)$", re.I)
 FENCE = re.compile(r"^\s*(```+|~~~+)(\S*)")
 THROUGH = re.compile(r"^\s*Steward-Through:\s*(\S+)", re.M)
 FOLDED = re.compile(r"^\s*Folded:\s*(.*)$", re.M)
+PENDING = re.compile(r"^\s*Pending entries:\s*(.*)$", re.M)
+NONE_LINE = re.compile(r"^\s*(?:[-*]\s+)?None\b(.*)$", re.I)
+SECTION_END = re.compile(r"^#{1,3}\s")
+LEDGER_FORMAT = ("expected: one fenced block per entry whose language is the entry type (```changelog … ```), "
+                 "or the line `None (<reason>)` when the PR has no entry")
 REPRODUCE = {"readme": "python3 .harness/scripts/readme-check.py",
              "links": "python3 .harness/scripts/doc-links.py",
              "diagrams": "python3 .harness/scripts/diagrams-render.py --check",
@@ -131,6 +140,48 @@ def docs_files(body, ledger_heading=None):
     return [p for p in re.split(r"[,\s]+", value) if p][:MAX_DOCS]
 
 
+def ledger_section(body, heading="### Ledger"):
+    """The `### Ledger` section of a PR body (to the next heading of level 1 to 3, outside fenced blocks and HTML
+    comments): `present`, `entries` (fenced blocks with a type) and `problems` (malformed entries, each quoting the
+    entry and the expected format). An explicit empty section is the line `None (<reason>)`."""
+    lines = re.sub(r"<!--[\s\S]*?-->", "", body or "").splitlines()
+    wanted = heading.strip().lower()
+    at = next((i for i, line in enumerate(lines) if line.strip().lower() == wanted), None)
+    result = {"present": at is not None, "entries": 0, "problems": []}
+    if at is None:
+        return result
+    fence, kind, first, none = None, "", None, None
+    for line in lines[at + 1:]:
+        m = FENCE.match(line)
+        if fence:
+            if m and m.group(1)[0] == fence[0] and len(m.group(1)) >= len(fence) and not m.group(2):
+                if kind:
+                    result["entries"] += 1
+                else:
+                    result["problems"].append(f"block without an entry type (`{fence}` then "
+                                              f"\"{(first or '').strip()[:80]}\"); {LEDGER_FORMAT}")
+                fence = None
+            elif first is None:
+                first = line
+            continue
+        if m:
+            fence, kind, first = m.group(1), m.group(2), None
+            continue
+        if SECTION_END.match(line):
+            break
+        n = NONE_LINE.match(line)
+        if n and none is None:
+            none = n.group(1)
+    if fence:
+        result["problems"].append(f"block `{fence}{kind}` not closed (\"{(first or '').strip()[:80]}\"); {LEDGER_FORMAT}")
+    if none is not None:
+        if not re.match(r"^\s*\(\s*\S[^)]*\)", none):
+            result["problems"].append(f"`None` without a reason; {LEDGER_FORMAT}")
+        elif result["entries"]:
+            result["problems"].append(f"`None (…)` next to entry blocks; {LEDGER_FORMAT}")
+    return result
+
+
 def markers(body):
     """(`Steward-Through` value or None, PR numbers of the `Folded:` line) of a steward PR body."""
     through = THROUGH.search(body or "")
@@ -149,12 +200,13 @@ def pending(repo, base, branch, ledger_label, http, now=None, since_days=7, ledg
     if not isinstance(steward_prs, list):
         raise FetchError("steward PRs: a list was expected")
     merged_steward = sorted((p for p in steward_prs if p.get("merged_at")), key=lambda p: p["merged_at"])
-    mark_done = []
+    folded, carried = [], set()
     if merged_steward:
         last = merged_steward[-1]
         through, folded = markers(last.get("body"))
         since = parse_time(through or last["merged_at"])
-        mark_done = folded
+        left = PENDING.search(last.get("body") or "")
+        carried = {int(n) for n in re.findall(r"#(\d+)", left.group(1))} - set(folded) if left else set()
     else:
         since = now - datetime.timedelta(days=since_days)
 
@@ -164,7 +216,8 @@ def pending(repo, base, branch, ledger_label, http, now=None, since_days=7, ledg
     merged = paginate(http, f"/repos/{repo}/pulls?state=closed&base={q(base, safe='')}&sort=updated"
                             f"&direction=desc&per_page={PER_PAGE}", stop=older)
     heading = ledger_heading if ledger_label else None
-    docs, through = [], since
+    done = f"{ledger_label}: done"
+    docs, through, sections, malformed = [], since, set(), []
     for p in merged:
         if not p.get("merged_at") or (p.get("head") or {}).get("ref") == branch:
             continue
@@ -175,19 +228,31 @@ def pending(repo, base, branch, ledger_label, http, now=None, since_days=7, ledg
         files = docs_files(p.get("body"), heading)
         if files:
             docs.append({"number": p["number"], "title": p.get("title", ""), "files": files})
+        if ledger_label and done not in {(lab or {}).get("name") for lab in p.get("labels") or []}:
+            section = ledger_section(p.get("body"), ledger_heading)
+            if section["entries"]:
+                sections.add(p["number"])
+            if section["problems"]:
+                malformed.append({"number": p["number"], "title": p.get("title", ""), "problems": section["problems"]})
     docs.sort(key=lambda d: d["number"])
 
-    ledger = []
+    ledger, mark_done = [], []
     if ledger_label:
+        # The label is only a hint now (projects that still set it); the section decides.
         issues = paginate(http, f"/repos/{repo}/issues?state=closed&labels={q(ledger_label, safe='')}"
                                 f"&per_page={PER_PAGE}")
         labelled = {i["number"] for i in issues if (i.get("pull_request") or {}).get("merged_at")}
-        mark_done = [n for n in mark_done if n in labelled]   # already swapped: nothing left to do
-        ledger = sorted(labelled - set(mark_done))
-    else:
-        mark_done = []
-    return {"fold": bool(docs or ledger), "since": iso(since), "through": iso(through), "ledger": ledger,
-            "docs": docs, "mark_done": sorted(mark_done)}
+        for n in folded[:MAX_PAGES * PER_PAGE]:
+            item = http(f"/repos/{repo}/issues/{n}")
+            if not isinstance(item, dict):
+                raise FetchError(f"/repos/{repo}/issues/{n}: an object was expected")
+            names = {(lab or {}).get("name") for lab in item.get("labels") or []}
+            if done not in names or ledger_label in names:
+                mark_done.append(n)
+        ledger = sorted((labelled | sections | carried) - set(folded))
+    malformed.sort(key=lambda m: m["number"])
+    return {"fold": bool(docs or ledger or malformed), "since": iso(since), "through": iso(through),
+            "ledger": ledger, "malformed": malformed, "docs": docs, "mark_done": sorted(set(mark_done))}
 
 
 def body(result, folded=None, fold_log="", unplaced=""):
@@ -212,6 +277,8 @@ def body(result, folded=None, fold_log="", unplaced=""):
               "What the steward could not place stays in its PR and is listed here, never dropped:", ""]
     left = [f"- #{n}: ledger entry not folded (see the fold output); it stays in its PR" for n in ledger
             if n not in folded]
+    left += [f"- #{m['number']}: malformed ledger entry, the author fixes the PR body: {problem}"
+             for m in result.get("malformed", []) for problem in m.get("problems", [])]
     if unplaced and unplaced.strip():
         left.append(unplaced.strip())
     lines += left or ["None."]
@@ -341,6 +408,9 @@ def run(argv=None, http=None, env=None, out=sys.stdout):
     if result["fold"]:
         say(f"🟠 to fold since {result['since']}: ledger {result['ledger'] or 'none'}, "
             f"Docs: lines in {[d['number'] for d in result['docs']] or 'none'}")
+    for m in result["malformed"]:
+        for problem in m["problems"]:
+            say(f"✘ #{m['number']}: malformed ledger entry: {problem}")
     else:
         say(f"🟢 nothing to fold since {result['since']}: no agent started")
     if result["mark_done"]:

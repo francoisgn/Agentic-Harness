@@ -2,13 +2,14 @@ name: Doc steward (reusable)
 
 # Docs never drift further than one merge (STEWARDS.md §2, CONVENTIONS.md §Ledger). Two modes, chosen by the caller:
 #   - `merge` (after a PR is merged into the integration branch, or by hand): `doc-steward.py pending` decides, without
-#     any agent, whether there is anything to fold since the last steward PR: merged PRs still labelled `ledger`, or
-#     merged PRs whose `Docs:` line names files. Nothing → the run ends there (one short Linux job). Otherwise the
-#     project's `ledger.fold_command` folds the ledger, `readme-progress.py` refreshes the README progress block, and a
+#     any agent, whether there is anything to fold since the last steward PR: merged PRs whose `### Ledger` section
+#     has entry blocks (no label needed; the `ledger` label is still read as a hint), or whose `Docs:` line names
+#     files. Nothing → the run ends there (one short Linux job). Otherwise the project's `ledger.fold_command` folds the ledger, `readme-progress.py` refreshes the README progress block, and a
 #     Claude agent updates the files the `Docs:` lines name (only when there are some). A last job, without any agent,
 #     opens or updates ONE draft docs PR from the branch `docs/steward` (rebuilt from the integration branch at every
 #     pass), never a push to a protected branch. Entries it cannot place are listed in the PR, never dropped. After
-#     that PR is merged, the next pass swaps `ledger` for `ledger: done` on the PRs its `Folded:` line names.
+#     that PR is merged, the next pass sets `ledger: done` (and drops `ledger` if present) on the PRs its `Folded:`
+#     line names: the only label the harness writes.
 #   - `audit` (weekly safety net): README standard, relative links, diagram renders and progress block are checked;
 #     one issue per gap (doc-steward.py audit), docs are never rewritten. No agent, no secret.
 # Security (CI-BASELINE.md §2): the agent job has a read-only token; only the `publish` job can write, and it runs no
@@ -78,7 +79,7 @@ jobs:
     permissions:
       contents: read
       pull-requests: read
-      issues: write   # swaps `ledger` for `ledger: done` on the PRs the last merged steward PR folded
+      issues: write   # sets `ledger: done` on the PRs the last merged steward PR folded
     outputs:
       fold: ${{ steps.pending.outputs.fold }}
       base: ${{ steps.config.outputs.base }}
@@ -154,9 +155,14 @@ jobs:
           [ -s "$RUNNER_TEMP/mark_done.txt" ] || exit 0
           ENCODED=$(jq -rn --arg l "$LEDGER" '$l | @uri')
           while read -r n; do
-            gh api -X POST "repos/$GITHUB_REPOSITORY/issues/$n/labels" -f "labels[]=$LEDGER: done" >/dev/null \
-              && gh api -X DELETE "repos/$GITHUB_REPOSITORY/issues/$n/labels/$ENCODED" >/dev/null \
-              && echo "#$n: $LEDGER → $LEDGER: done" || echo "::warning::#$n: label not swapped"
+            # The author never had to set `$LEDGER` (the section is the entry): drop it only where it is present.
+            if ! gh api -X POST "repos/$GITHUB_REPOSITORY/issues/$n/labels" -f "labels[]=$LEDGER: done" --jq '.[].name' >"$RUNNER_TEMP/labels.txt"; then
+              echo "::warning::#$n: $LEDGER: done not set"; continue
+            fi
+            if grep -qxF "$LEDGER" "$RUNNER_TEMP/labels.txt"; then
+              gh api -X DELETE "repos/$GITHUB_REPOSITORY/issues/$n/labels/$ENCODED" >/dev/null || echo "::warning::#$n: $LEDGER not removed"
+            fi
+            echo "#$n: $LEDGER: done"
           done <"$RUNNER_TEMP/mark_done.txt"
 
   steward:

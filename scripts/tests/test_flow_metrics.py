@@ -162,6 +162,14 @@ class AnalyseTests(unittest.TestCase):
         self.assertEqual(r["bottlenecks"], {"status: blocked": [1], "status: needs-decision": [2]})
         self.assertEqual(r["status"], "🟠")
 
+    def test_on_hold_is_listed_apart_and_is_not_a_bottleneck(self):
+        r = self.analyse(issues=[issue(1, ["status: on-hold"]), issue(2, ["status: ready"]),
+                                 issue(3, ["status: on-hold"], state="closed")])
+        self.assertEqual(r["on_hold"], [{"number": 1, "title": "Issue 1"}])
+        self.assertEqual(r["bottlenecks"], {})
+        self.assertEqual(r["status_counts"], {"status: on-hold": 1, "status: ready": 1})
+        self.assertEqual(r["status"], "🟢")
+
     def test_milestone_progress(self):
         r = self.analyse(issues=[issue(1, milestone="Milestone 1", state="closed"), issue(2, milestone="Milestone 1"),
                                  issue(3, milestone="Milestone 1", state="closed"), issue(4)])
@@ -410,6 +418,14 @@ class RenderTests(unittest.TestCase):
         self.assertIn("2 open issue(s) without exactly one `status:` label", md)
         self.assertIn("| #3 | No status | none |", md)
         self.assertIn("| #4 | Issue 4 | status: ready, status: blocked |", md)
+
+    def test_markdown_shows_on_hold_apart_from_bottlenecks(self):
+        r = fm.analyse({"issues": [issue(1, ["status: on-hold"], title="Wait | milestone")], "pulls": [], "runs": []},
+                       now=fm.parse_time(NOW))
+        md = fm.render_markdown(r, repo="o/r")
+        self.assertIn("## On hold", md)
+        self.assertIn("| #1 | Wait \\| milestone |", md)
+        self.assertIn("- No `status: blocked` or `status: needs-decision` item.", md)
 
     def test_markdown_without_any_status_label(self):
         md = fm.render_markdown(fm.analyse({"issues": [], "pulls": [], "runs": []}, now=fm.parse_time(NOW)), "o/r")
