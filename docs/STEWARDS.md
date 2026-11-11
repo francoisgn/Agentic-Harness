@@ -39,16 +39,17 @@ Docs are kept true at three levels, from the cheapest to the widest:
 | **Weekly safety net** | every week | `doc-steward.yml`, mode `audit` | audit only: README standard, links, diagram renders, progress block; **one issue per gap**, no doc rewritten |
 
 **At merge** (reusable `doc-steward.yml`, job `steward` of `harness.yml`, opt-in):
-- `doc-steward.py pending` decides **without an agent**: merged PRs still labelled `ledger`, or merged since the last
-  steward PR with a `Docs:` line that names files. Nothing → the run ends after one short Linux job.
+- `doc-steward.py pending` decides **without an agent**: PRs merged since the last steward PR whose `### Ledger`
+  section has entry blocks (no label needed; `ledger` still read as a hint) or whose `Docs:` line names files, plus
+  the entries the last pass did not fold. Nothing → the run ends after one short Linux job.
 - Otherwise: the project's `ledger.fold_command` folds the ledger, `readme-progress.py` rewrites the progress block,
   and the agent (`doc-steward`, read-only token) edits only the files the `Docs:` lines name. A job without an agent
   then opens or updates **one** draft PR from `docs/steward`, rebuilt from the integration branch at every pass; it
   never pushes to a protected branch, never touches `.github/` or `.harness/`, and does not overwrite a branch that
   carries someone else's commits.
 - The PR body carries `Steward-Through: <time>` (the next pass starts there) and `Folded: #a #b` (after its merge,
-  the next pass swaps `ledger` for `ledger: done` on these PRs). Entries it cannot place stay in their PR and are
-  listed in the docs PR, never dropped. Several merges queue in one concurrency group: one pass covers them all.
+  the next pass marks these PRs `ledger: done`, the only label the harness writes). Entries it cannot place, and
+  malformed ones (quoted with the expected format), stay in their PR and are listed in the docs PR, never dropped. Several merges queue in one concurrency group: one pass covers them all.
 - No `ANTHROPIC_API_KEY` or `CLAUDE_CODE_OAUTH_TOKEN`: skipped with a notice; never a required check. A merged fork
   PR has no secret: the next pass folds it. A pass that changes nothing opens no PR (and does not move the marker).
 

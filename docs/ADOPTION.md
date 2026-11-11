@@ -144,7 +144,7 @@ Other keys, read by the hooks and the skills (missing: default values):
 | `labels.size_prefixes` | `[]` | Prefixes of the size labels when the project has a separate size axis (e.g. `["size:"]`); `[]` = no such axis |
 | `default_branch_check` | `true` | `false` silences the 🟠 warning (session start, `harness-sync.sh`, `pr-hygiene.yml`) printed when `integration_branch` is not the repository's default branch: GitHub runs `issues`, `issue_comment`, `pull_request_target` and `schedule` workflows from the default branch only |
 | `merge_gate.required_labels`, `merge_gate.security_labels`, `merge_gate.body_lines` | `[]`, `["type: security"]`, `["issue", "claim", "docs"]` | Merge gate (`merge-gate.py`, [CONVENTIONS](CONVENTIONS.md) §Pull requests): labels a PR needs before merge, labels that block until the operator decides, PR body lines checked; `[]` leaves the line out |
-| `ledger.enabled`, `ledger.label`, `ledger.fold_command` | `false`, `"ledger"`, `""` | Ledger ([CONVENTIONS](CONVENTIONS.md) §Ledger): `### Ledger` section of the PRs, label, the steward's fold command |
+| `ledger.enabled`, `ledger.label`, `ledger.fold_command` | `false`, `"ledger"`, `""` | Ledger ([CONVENTIONS](CONVENTIONS.md) §Ledger): `### Ledger` section of the PRs (the entry), label the steward marks `<label>: done`, the steward's fold command |
 
 `.harness/config.json` is a project file (created once): a key added by a new version of the harness does not add
 itself to it; without it, the default applies.

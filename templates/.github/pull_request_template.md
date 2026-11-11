@@ -21,9 +21,9 @@ Claim: <!-- identifier of the active /claim of the issue -->
      says why in one line (METHODOLOGY.md §5). -->
 
 <!-- Doc impact (CONVENTIONS.md §Ledger): the doc files this change makes untrue, or "none (<reason>)". With a
-     ledger (.harness/config.json → ledger.enabled), this line goes in the "### Ledger" section instead, and the
-     section holds one block per entry, in the format of the project's script, with the `ledger` label; no
-     entry: no block, no label. Never edit the ledger files directly. -->
+     ledger (.harness/config.json → ledger.enabled), this line goes in the "### Ledger" section instead. The section
+     is the entry, labels are bookkeeping done by the steward: one block per entry, in the format of the project's
+     script; no entry: the line "None (<reason>)". No label to set. Never edit the ledger files directly. -->
 Docs: <!-- e.g. README.md, docs/USAGE.md — or: none (internal refactor) -->
 
 <!-- Author / reviewer model (must differ), with the identifier of each agent (ORCHESTRATION.md §7): -->
