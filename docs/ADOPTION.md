@@ -17,6 +17,7 @@ Why this mechanism (vendoring + plugin + reusable workflows) and its limits: [AD
 | `.harness/scripts/flow-metrics.py` | copy | Harness: flow dashboard (`flow-report.yml`, `/status-report`) |
 | `.harness/scripts/readme-progress.py` | copy | Harness: README progress table generated from the issues (`/readme-update`) |
 | `.harness/scripts/decisions-check.py` | copy | Harness: `docs/DECISIONS.md` has at most one decision in force per scope key (`docs-security.yml`, input `decisions`) |
+| `.harness/scripts/orch-state.py`, `.harness/templates/child-report.md` | copy | Harness: the orchestrator's State comment on its memory issue, and the report template a child posts on its PR ([ORCHESTRATION](ORCHESTRATION.md) §8); the script reads `decisions-check.py` next to it |
 | `.harness/scripts/doc-steward.py` | copy | Harness: doc steward's "anything to fold?" decision, docs PR body and weekly audit issues (`doc-steward.yml`) |
 | `.claude/settings.json` | merge | Project; the harness only **adds** its two hooks if they are missing |
 | `CLAUDE.md`, `AGENTS.md` | marked block | Project, except the block `<!-- harness:begin harness -->…<!-- harness:end harness -->` |
@@ -139,6 +140,7 @@ Other keys, read by the hooks and the skills (missing: default values):
 |---|---|---|
 | `protected_branches` | `["main", "master", "develop", "beta"]` | Branches that the `guard-git` hook protects |
 | `branch_types` | `["lot", "fix", "feat", "chore", "docs"]` | Branch types `<type>/<short-name>` offered by `/lot-start` and the hook |
+| `orchestration.memory_issue` | `null` | Number of the orchestrator's memory issue, where `orch-state.py` keeps the State comment ([ORCHESTRATION](ORCHESTRATION.md) §8); `null`: the script prints the State and writes nothing |
 | `labels.model_prefixes` | `["difficulty:"]` | Prefixes of the model-tier labels; `[]` = no such axis (tier deduced from the text and the routing) |
 | `labels.size_prefixes` | `[]` | Prefixes of the size labels when the project has a separate size axis (e.g. `["size:"]`); `[]` = no such axis |
 | `default_branch_check` | `true` | `false` silences the 🟠 warning (session start, `harness-sync.sh`, `pr-hygiene.yml`) printed when `integration_branch` is not the repository's default branch: GitHub runs `issues`, `issue_comment`, `pull_request_target` and `schedule` workflows from the default branch only |

@@ -42,6 +42,10 @@ copy      scripts/doc-links.py                        .harness/scripts/doc-links
 copy      scripts/doc-steward.py                      .harness/scripts/doc-steward.py
 # Operator decisions file: at most one decision in force per scope key (docs-security.yml; off when docs/DECISIONS.md is absent)
 copy      scripts/decisions-check.py                  .harness/scripts/decisions-check.py
+# Orchestrator State: one comment of the memory issue rewritten from the facts (ORCHESTRATION.md §8); reads the
+# decisions through decisions-check.py, next to it. The child report template goes on the child's PR.
+copy      scripts/orch-state.py                       .harness/scripts/orch-state.py
+copy      templates/comments/child-report.md          .harness/templates/child-report.md
 
 # Vendored hooks (git guardrail, session reminder) and their declaration
 copy      plugins/harness/scripts/guard-git.py        .harness/hooks/guard-git.py

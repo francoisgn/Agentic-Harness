@@ -1,6 +1,7 @@
 {
   "language": "en",
   "exclude": [],
+  "orchestration": { "memory_issue": null },
   "protected_branches": ["main", "master", "develop", "beta"],
   "integration_branch": "develop",
   "branch_model": "A",

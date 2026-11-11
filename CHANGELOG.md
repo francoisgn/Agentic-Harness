@@ -13,6 +13,15 @@ moving to this version.
   **Action**: none required; a project that wants the rule keeps the seeded `docs/DECISIONS.md` after the sync, one
   that does not deletes it (or `decisions: false`).
 
+- **Orchestrator memory: one State comment, rewritten by script; the thread is a log**
+  ([ORCHESTRATION](docs/ORCHESTRATION.md) §8): `scripts/orch-state.py` (vendored as `.harness/scripts/orch-state.py`)
+  rewrites the comment marked `<!-- harness:state -->` on the memory issue (`--issue` or `.harness/config.json` ›
+  `orchestration.memory_issue`): decisions in force by scope key, open PRs by stage with their head, children from
+  `/claim` comments and `Claim:` lines, decisions waiting with their age, counts per `status:` label; bounded to
+  6,000 characters, refuses a hand-edited State unless `--force`, prints it when it cannot write. Child reports go on
+  the child's PR in `.harness/templates/child-report.md` (`<!-- harness:report -->`, `Open questions`); resuming
+  starts from the State.
+
 - **What reviews are worth, readable without a metric**, and **lot size as a recommendation**
   ([FINOPS](docs/FINOPS.md) §2 and §5, [REVIEW-ROUNDS](docs/REVIEW-ROUNDS.md), [METHODOLOGY](docs/METHODOLOGY.md)
   §5 and §6):
