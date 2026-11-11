@@ -6,8 +6,10 @@ name: Doc steward (reusable)
 #     has entry blocks (no label needed; the `ledger` label is still read as a hint), or whose `Docs:` line names
 #     files. Nothing → the run ends there (one short Linux job). Otherwise the project's `ledger.fold_command` folds the ledger, `readme-progress.py` refreshes the README progress block, and a
 #     Claude agent updates the files the `Docs:` lines name (only when there are some). A last job, without any agent,
-#     opens or updates ONE draft docs PR from the branch `docs/steward` (rebuilt from the integration branch at every
-#     pass), never a push to a protected branch. Entries it cannot place are listed in the PR, never dropped. After
+#     opens ONE draft docs PR from the branch `docs/steward` (built from the integration branch), never a push to a
+#     protected branch. One fold at a time (`doc-steward.py fold-guard`): while a PR from that branch is open, the pass
+#     is refused with its link and nothing is pushed; merging it starts the next pass, which covers every merge since.
+#     Contested and unplaced entries are listed in two sections of the PR, never dropped. After
 #     that PR is merged, the next pass sets `ledger: done` (and drops `ledger` if present) on the PRs its `Folded:`
 #     line names: the only label the harness writes.
 #   - `audit` (weekly safety net): README standard, relative links, diagram renders and progress block are checked;
@@ -144,6 +146,8 @@ jobs:
           if [ "$rc" -ne 0 ]; then echo "::warning::Doc steward: nothing decided (see the log); no pass this time."; echo "fold=false" >>"$GITHUB_OUTPUT"; exit 0; fi
           { echo "fold=$(jq -r '.fold' "$RUNNER_TEMP/pending.json")"; echo "json=$(jq -c . "$RUNNER_TEMP/pending.json")"; } >>"$GITHUB_OUTPUT"
           jq -r '.mark_done[]' "$RUNNER_TEMP/pending.json" >"$RUNNER_TEMP/mark_done.txt"
+          OPEN=$(jq -r '.open_fold.url // empty' "$RUNNER_TEMP/pending.json")
+          if [ -n "$OPEN" ]; then echo "::notice::Doc steward: a fold PR is still open ($OPEN): no second fold; merging it starts the next pass."; fi
 
       - name: Mark the folded ledger entries done
         if: steps.pending.outputs.fold != '' && steps.config.outputs.ledger != ''
@@ -205,15 +209,17 @@ jobs:
           set -uo pipefail
           printf '%s' "$PENDING" >"$RUNNER_TEMP/pending.json"
           : >"$RUNNER_TEMP/fold.log"
-          STEWARD_LEDGER_PRS=$(jq -r '.ledger | map(tostring) | join(" ")' "$RUNNER_TEMP/pending.json")
+          # Merge order, oldest first: the first merged entry wins a contested place (CONVENTIONS.md §Ledger)
+          STEWARD_LEDGER_PRS=$(jq -r '(.ledger_order // .ledger) | map(tostring) | join(" ")' "$RUNNER_TEMP/pending.json")
           [ -n "$STEWARD_LEDGER_PRS" ] || exit 0
           CMD=$(jq -r '.ledger.fold_command // empty' .harness/config.json 2>/dev/null || true)
           if [ -z "$CMD" ]; then
             echo "No ledger.fold_command in .harness/config.json: entries left in place." | tee "$RUNNER_TEMP/fold.log"; exit 0
           fi
-          # Contract (CONVENTIONS.md §Ledger): the command may write the PR numbers it folded to $STEWARD_FOLDED;
-          # otherwise every pending entry counts as folded. A malformed entry is reported in its output, not dropped.
-          export STEWARD_LEDGER_PRS STEWARD_FOLDED="$RUNNER_TEMP/folded.txt"
+          # Contract (CONVENTIONS.md §Ledger): the command may write the PR numbers it folded to $STEWARD_FOLDED
+          # (otherwise every pending entry counts as folded) and one JSON line per contested place to
+          # $STEWARD_CONTESTED. A malformed entry is reported in its output, not dropped.
+          export STEWARD_LEDGER_PRS STEWARD_FOLDED="$RUNNER_TEMP/folded.txt" STEWARD_CONTESTED="$RUNNER_TEMP/contested.jsonl"
           bash -c "$CMD" >"$RUNNER_TEMP/fold.log" 2>&1 || echo "fold command failed (exit $?): entries left in place" >>"$RUNNER_TEMP/fold.log"
           cat "$RUNNER_TEMP/fold.log"
           git add -A -- . ':(exclude).harness' ':(exclude).github'
@@ -285,6 +291,7 @@ jobs:
           if [ -f .steward-unplaced.md ]; then cp .steward-unplaced.md "$OUT/unplaced.md"; fi
           cp "$RUNNER_TEMP/pending.json" "$RUNNER_TEMP/fold.log" "$OUT/"
           if [ -f "$RUNNER_TEMP/folded.txt" ]; then cp "$RUNNER_TEMP/folded.txt" "$OUT/"; fi
+          if [ -f "$RUNNER_TEMP/contested.jsonl" ]; then cp "$RUNNER_TEMP/contested.jsonl" "$OUT/"; fi
           # The agent's commit keeps Markdown files only; anything else it changed is reported, not published
           git add -A -- '*.md' ':(exclude).harness' ':(exclude).github' ':(exclude).steward-unplaced.md'
           git diff --cached --quiet || git -c core.hooksPath=/dev/null commit -q -m "Update the docs named by the merged PRs' Docs: lines"
@@ -295,10 +302,10 @@ jobs:
           git format-patch -q --binary -o "$OUT/patches" "$BASE_SHA..HEAD"
           if [ -n "$(ls -A "$OUT/patches")" ]; then echo "changed=true" >>"$GITHUB_OUTPUT"; exit 0; fi
           echo "changed=false" >>"$GITHUB_OUTPUT"
-          if [ -s "$OUT/unplaced.md" ] || grep -q 'left in place' "$OUT/fold.log"; then
+          if [ -s "$OUT/unplaced.md" ] || [ -s "$OUT/contested.jsonl" ] || grep -q 'left in place' "$OUT/fold.log"; then
             # No commit, so no PR to list them in: the run says it loudly instead of dropping them
             echo "::warning::Doc steward: nothing changed but entries were left in place (job summary)."
-            { echo "### Entries left in place"; cat "$OUT/fold.log" "$OUT/unplaced.md" 2>/dev/null; } >>"$GITHUB_STEP_SUMMARY"
+            { echo "### Entries left in place"; cat "$OUT/fold.log" "$OUT/unplaced.md" "$OUT/contested.jsonl" 2>/dev/null; } >>"$GITHUB_STEP_SUMMARY"
           else
             echo "::notice::Doc steward: nothing to change (docs already true); no PR."
           fi
@@ -331,7 +338,7 @@ jobs:
           name: doc-steward
           path: ${{ runner.temp }}/steward
 
-      - name: Open or update the draft docs PR
+      - name: Open the draft docs PR
         env:
           GH_TOKEN: ${{ github.token }}
           BASE: ${{ needs.decide.outputs.base }}
@@ -344,6 +351,11 @@ jobs:
           for p in $BASE $PROTECTED; do
             [ "$BRANCH" != "$p" ] || { echo "::error::$BRANCH is protected or is the base: the steward never pushes there."; exit 1; }
           done
+          # One fold at a time: a fold PR opened since the decision (another run, a session) wins; nothing is pushed
+          rc=0; python3 "$SCRIPT" fold-guard --repo "$GITHUB_REPOSITORY" --branch "$BRANCH" >"$RUNNER_TEMP/guard.txt" || rc=$?
+          tee -a "$GITHUB_STEP_SUMMARY" <"$RUNNER_TEMP/guard.txt"
+          if [ "$rc" -eq 1 ]; then echo "::notice::Doc steward: a fold PR is already open (job summary): nothing pushed."; exit 0; fi
+          if [ "$rc" -ne 0 ]; then echo "::error::Doc steward: could not check for an open fold PR: nothing pushed."; exit 1; fi
           BASE_SHA=$(git rev-parse HEAD)
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
@@ -364,14 +376,9 @@ jobs:
           git push -q --force-with-lease="refs/heads/$BRANCH:$OLD" "$URL" "HEAD:refs/heads/$BRANCH"
           FOLDED=(); [ -f "$IN/folded.txt" ] && FOLDED=(--folded "$IN/folded.txt")
           python3 "$SCRIPT" body --pending "$IN/pending.json" --fold-log "$IN/fold.log" --unplaced "$IN/unplaced.md" \
-            "${FOLDED[@]}" >"$RUNNER_TEMP/body.md"
-          N=$(gh pr list --repo "$GITHUB_REPOSITORY" --head "$BRANCH" --base "$BASE" --state open --json number --jq '.[0].number // empty')
-          if [ -n "$N" ]; then
-            gh pr edit "$N" --repo "$GITHUB_REPOSITORY" --body-file "$RUNNER_TEMP/body.md"; echo "Draft docs PR #$N updated." >>"$GITHUB_STEP_SUMMARY"
-          else
-            gh pr create --repo "$GITHUB_REPOSITORY" --draft --base "$BASE" --head "$BRANCH" --title "Docs upkeep (doc steward)" --body-file "$RUNNER_TEMP/body.md" \
-              | tee -a "$GITHUB_STEP_SUMMARY"
-          fi
+            --contested "$IN/contested.jsonl" "${FOLDED[@]}" >"$RUNNER_TEMP/body.md"
+          gh pr create --repo "$GITHUB_REPOSITORY" --draft --base "$BASE" --head "$BRANCH" --title "Docs upkeep (doc steward)" --body-file "$RUNNER_TEMP/body.md" \
+            | tee -a "$GITHUB_STEP_SUMMARY"
 
   audit:
     name: Doc steward · weekly audit

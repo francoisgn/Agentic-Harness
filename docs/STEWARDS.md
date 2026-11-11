@@ -44,12 +44,14 @@ Docs are kept true at three levels, from the cheapest to the widest:
   the entries the last pass did not fold. Nothing → the run ends after one short Linux job.
 - Otherwise: the project's `ledger.fold_command` folds the ledger, `readme-progress.py` rewrites the progress block,
   and the agent (`doc-steward`, read-only token) edits only the files the `Docs:` lines name. A job without an agent
-  then opens or updates **one** draft PR from `docs/steward`, rebuilt from the integration branch at every pass; it
-  never pushes to a protected branch, never touches `.github/` or `.harness/`, and does not overwrite a branch that
-  carries someone else's commits.
+  then opens **one** draft PR from `docs/steward`, built from the integration branch; it never pushes to a
+  protected branch, never touches `.github/` or `.harness/`, and does not overwrite a branch that carries someone
+  else's commits. One fold at a time (`doc-steward.py fold-guard`, [CONVENTIONS](CONVENTIONS.md) §Ledger): while that
+  PR is open, a pass is refused with its link and pushes nothing; merging it starts the next pass.
 - The PR body carries `Steward-Through: <time>` (the next pass starts there) and `Folded: #a #b` (after its merge,
-  the next pass marks these PRs `ledger: done`, the only label the harness writes). Entries it cannot place, and
-  malformed ones (quoted with the expected format), stay in their PR and are listed in the docs PR, never dropped. Several merges queue in one concurrency group: one pass covers them all.
+  the next pass marks these PRs `ledger: done`, the only label the harness writes). Contested entries (both texts)
+  and unplaced ones (malformed ones quoted with the expected format; they stay in their PR) are listed in two
+  sections of the docs PR, never dropped. Several merges queue in one concurrency group: one pass covers them all.
 - No `ANTHROPIC_API_KEY` or `CLAUDE_CODE_OAUTH_TOKEN`: skipped with a notice; never a required check. A merged fork
   PR has no secret: the next pass folds it. A pass that changes nothing opens no PR (and does not move the marker).
 
