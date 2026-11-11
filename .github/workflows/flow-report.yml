@@ -10,6 +10,10 @@ name: Flow dashboard (reusable)
 on:
   workflow_call:
     inputs:
+      ref:
+        description: Branch to check out the vendored scripts from (empty = the event's ref); the relay passes the integration branch
+        type: string
+        default: ""
       issue-title:
         type: string
         default: "Project dashboard"
@@ -60,6 +64,7 @@ jobs:
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
+          ref: ${{ inputs.ref }}
           persist-credentials: false
 
       - name: Compute

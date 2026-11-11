@@ -19,12 +19,14 @@
 # Project settings read from <target>/.harness/config.json (create it BEFORE the first sync for them to count):
 #   "exclude": ["pattern", ...]   destinations not to vendor (glob on the relative path, `*` crosses `/`);
 #                                 an excluded file that is already vendored and unmodified is removed.
-#   "integration_branch": "b"     warns (exit code unchanged) if b is not the default branch, because GitHub runs
-#                                 issue and schedule workflows from the default branch only;
-#   "default_branch_check": false silences that warning.
+#   "integration_branch": "b"     if b is not the default branch (GitHub runs issue and schedule workflows from the
+#                                 default branch only): a FIRST adoption (no lock yet) stops before writing (exit 4),
+#                                 unless .github/workflows/harness-relay.yml is on the default branch; later syncs warn;
+#   "default_branch_check": false never stops nor warns (says once, at adoption, what will not run).
 # ("language" in that file is the project's language for agents; it does not select the harness sources.)
 # Migration: a managed block still marked with the former id `cadre` gets its two marker lines rewritten to `harness`.
-# Exit codes: 0 = ok; 1 = --check found drift; 2 = usage or error; 3 = conflicts (files left as they are).
+# Exit codes: 0 = ok; 1 = --check found drift; 2 = usage or error; 3 = conflicts (files left as they are);
+# 4 = first adoption stopped, nothing written: the integration branch is not the default branch.
 # Bash 3.2 compatible (macOS); python3 only for the jsonmerge mode and to read .harness/config.json.
 set -euo pipefail
 
@@ -43,7 +45,7 @@ while [ $# -gt 0 ]; do
     --force) FORCE=1 ;;
     --skip-workflows) SKIP_WF=1 ;;
     --skip-seed) SKIP_SEED=1 ;;
-    -h|--help) sed -n '2,28p' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;;
+    -h|--help) sed -n '2,30p' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;;
     *) die "unknown option: $1" ;;
   esac
   shift
@@ -238,28 +240,63 @@ do_refbump() {
   put "$rel" "$WORK/bumped"
 }
 
-# Warns (never blocks) when "integration_branch" in .harness/config.json is not the repository's default branch:
-# GitHub runs issues, issue_comment, pull_request_target and schedule workflows from the default branch only.
-# "default_branch_check": false in the config silences it. Default branch unknown: says so, never "OK".
-default_branch_alert() {
-  local cfg="$1/.harness/config.json" integ ref def
-  [ -f "$cfg" ] && command -v python3 >/dev/null 2>&1 || return 0
-  integ="$(python3 -c '
+# Integration branch vs default branch. GitHub runs issues, issue_comment, pull_request_target and schedule workflows
+# from the default branch only. On a FIRST adoption (no lock yet) a mismatch stops the sync before anything is written,
+# unless the relay (templates/.github/workflows/harness-relay.yml) is already on the default branch, or the project
+# keeps two branches on purpose ("default_branch_check": false: then said once). Later syncs only warn.
+# Default branch unknown (no origin/HEAD): says "could not check", never "OK", never blocks.
+RELAY_REL=".github/workflows/harness-relay.yml"
+SILENT_EVENTS="issues, issue_comment, pull_request_target and schedule"
+# shellcheck disable=SC2016 # backticks are text
+SILENT_JOBS='issue hygiene and claims (`issue` job of harness.yml, the label reconcile), the daily dashboard (`flow`), the weekly settings, security and doc audit jobs, and any project workflow on those events'
+DB_INTEG="" DB_CHECK=true DB_DEFAULT=""
+if [ -f "$TARGET/.harness/config.json" ]; then
+  DB_STATE="$(python3 -c '
 import json, sys
-try:
-    c = json.load(open(sys.argv[1], encoding="utf-8"))
-except Exception:
-    sys.exit(0)
-if isinstance(c, dict) and c.get("default_branch_check") is not False and isinstance(c.get("integration_branch"), str):
+c = json.load(open(sys.argv[1], encoding="utf-8"))
+if isinstance(c, dict) and isinstance(c.get("integration_branch"), str):
     print(c["integration_branch"])
-' "$cfg" 2>/dev/null)" || return 0
-  [ -n "$integ" ] || return 0
-  ref="$(git -C "$1" symbolic-ref -q refs/remotes/origin/HEAD 2>/dev/null)" || ref=""
-  def="${ref#refs/remotes/origin/}"
-  if [ -z "$def" ]; then
-    echo "🟠 Could not check whether the integration branch \"$integ\" is the repository's default branch (no origin/HEAD: run \`git remote set-head origin -a\`)."
-  elif [ "$def" != "$integ" ]; then
-    echo "🟠 Integration branch \"$integ\" is not the default branch \"$def\": GitHub runs issues, issue_comment, pull_request_target and schedule workflows from the default branch only, so label hygiene, claims, the dashboard and the weekly jobs stay silent (to silence: \"default_branch_check\": false in .harness/config.json)."
+    print("false" if c.get("default_branch_check") is False else "true")
+' "$TARGET/.harness/config.json" 2>/dev/null)" || DB_STATE=""
+  DB_INTEG="$(printf '%s\n' "$DB_STATE" | sed -n 1p)"
+  DB_CHECK="$(printf '%s\n' "$DB_STATE" | sed -n 2p)"
+fi
+DB_DEFAULT="$(git -C "$TARGET" symbolic-ref -q refs/remotes/origin/HEAD 2>/dev/null)" || DB_DEFAULT=""
+DB_DEFAULT="${DB_DEFAULT#refs/remotes/origin/}"
+relay_on_default() { git -C "$TARGET" cat-file -e "refs/remotes/origin/$DB_DEFAULT:$RELAY_REL" 2>/dev/null; }
+branches_differ() { [ -n "$DB_INTEG" ] && [ -n "$DB_DEFAULT" ] && [ "$DB_DEFAULT" != "$DB_INTEG" ]; }
+FIRST_ADOPTION=0
+[ -f "$TARGET/$LOCK_REL" ] || FIRST_ADOPTION=1
+
+if [ "$FIRST_ADOPTION" = 1 ] && [ "$DB_CHECK" != false ] && branches_differ && ! relay_on_default; then
+  # shellcheck disable=SC2016 # backticks are text
+  {
+    printf '🔴 Adoption stopped, nothing written: integration branch "%s" is not the default branch "%s".\n' "$DB_INTEG" "$DB_DEFAULT"
+    printf '   GitHub runs %s workflows from the default branch only, so these would never run: %s.\n' "$SILENT_EVENTS" "$SILENT_JOBS"
+    printf '   Two ways out, then run the sync again (docs/ADOPTION.md, "Integration branch that is not the default branch"):\n'
+    printf '   1. make "%s" the default branch (Settings > General > Default branch), then `git remote set-head origin -a`;\n' "$DB_INTEG"
+    printf '   2. or install the relay: copy templates/.github/workflows/harness-relay.yml of the harness (%s) to %s on\n' "v$VERSION" "$RELAY_REL"
+    printf '      "%s" by a PR to that branch, with INTEGRATION_BRANCH: %s, then `git fetch origin`.\n' "$DB_DEFAULT" "$DB_INTEG"
+    printf '   Two branches kept on purpose, labels kept by hand: "default_branch_check": false in .harness/config.json.\n'
+  } >&2
+  exit 4
+fi
+
+default_branch_alert() {
+  [ -n "$DB_INTEG" ] || return 0
+  if [ "$DB_CHECK" = false ]; then
+    if [ "$FIRST_ADOPTION" = 1 ] && branches_differ && ! relay_on_default; then
+      printf '🟠 Two branches kept on purpose ("default_branch_check": false): integration branch "%s" is not the default branch "%s", so these will not run: %s (%s events). Keep the labels by hand; this is said once.\n' \
+        "$DB_INTEG" "$DB_DEFAULT" "$SILENT_JOBS" "$SILENT_EVENTS"
+    fi
+    return 0
+  fi
+  if [ -z "$DB_DEFAULT" ]; then
+    echo "🟠 Could not check whether the integration branch \"$DB_INTEG\" is the repository's default branch (no origin/HEAD: run \`git remote set-head origin -a\`)."
+  elif [ "$DB_DEFAULT" != "$DB_INTEG" ] && relay_on_default; then
+    echo "🟢 Integration branch \"$DB_INTEG\" is not the default branch \"$DB_DEFAULT\"; $RELAY_REL on \"$DB_DEFAULT\" relays the issue and schedule jobs (keep its references in step with harness.yml)."
+  elif [ "$DB_DEFAULT" != "$DB_INTEG" ]; then
+    echo "🟠 Integration branch \"$DB_INTEG\" is not the default branch \"$DB_DEFAULT\": GitHub runs $SILENT_EVENTS workflows from the default branch only, so label hygiene, claims, the dashboard and the weekly jobs stay silent (fix: make it the default branch, or install the relay $RELAY_REL on \"$DB_DEFAULT\", docs/ADOPTION.md; to silence: \"default_branch_check\": false in .harness/config.json)."
   fi
   return 0
 }
@@ -303,7 +340,7 @@ put ".harness/VERSION" "$WORK/version"
 } >"$WORK/lock"
 put "$LOCK_REL" "$WORK/lock"
 
-default_branch_alert "$TARGET"
+default_branch_alert
 [ "$SKIPPED" = 0 ] || printf '  (%s entry(ies) under .github/workflows/ skipped: --skip-workflows)\n' "$SKIPPED"
 if [ "$CONFLICTS" -gt 0 ]; then
   printf '🟠 %s conflict(s), affected files left as they are; %s change(s).\n' "$CONFLICTS" "$CHANGES"
