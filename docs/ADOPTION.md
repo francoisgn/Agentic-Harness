@@ -22,6 +22,7 @@ Why this mechanism (vendoring + plugin + reusable workflows) and its limits: [AD
 | `CLAUDE.md`, `AGENTS.md` | marked block | Project, except the block `<!-- harness:begin harness -->…<!-- harness:end harness -->` |
 | `.harness/config.json`, `.github/labels.local.json`, issue and PR templates, `docs/lots/TEMPLATE.md`, `docs/DECISIONS.md`, `.markdownlint-cli2.jsonc`, `.github/workflows/harness.yml`, `.github/workflows/harness-sync.yml` | seed | Project: created if missing, never rewritten (except the `@vX.Y.Z` references of `harness.yml`) |
 | `.harness/VERSION`, `.harness/lock` | generated | Version, harness commit, checksums of the copied files |
+| `.github/workflows/harness-relay.yml` | refbump only | Project, **on the default branch**, only when it is not the integration branch: never created by the sync, which only pins the references of a copy kept on the integration branch ([below](#integration-branch-that-is-not-the-default-branch)) |
 
 ## Adoption (once, from the Mac or a cloud session)
 
@@ -43,6 +44,8 @@ to the session; on the Mac: `gh auth login && gh auth setup-git`).
    ```
    Exit code 3 = conflicts: a harness file already exists in the project (e.g. a skill with the same name). Rename
    the project's one, or rerun with `--force` if replacing it is intended.
+   Exit code 4 = adoption stopped, nothing written: `integration_branch` of `.harness/config.json` is not the
+   repository's default branch ([below](#integration-branch-that-is-not-the-default-branch)).
 4. **Adapt** (project files):
    - `CLAUDE.md`: the harness block was added **at the end** of the file if it existed; move it to the top (markers
      included) and remove from the project part what now duplicates `ESSENTIALS.md` (generic workflow, comment
@@ -69,6 +72,37 @@ to the session; on the Mac: `gh auth login && gh auth setup-git`).
 7. **After the merge** (operator): run the "Harness" workflow by hand (`workflow_dispatch`) to create the labels;
    upload the social preview (Settings → General → Social preview);
    if this harness repository is private, check Actions access ([ADR 0001](adr/0001-distribution-mechanism.md)).
+
+### Integration branch that is not the default branch
+GitHub starts `issues`, `issue_comment`, `pull_request_target` and `schedule` workflows only from the copy on the
+**default branch** (LESSONS L50). When the project works on another branch, the `issue` and `flow` jobs of
+`harness.yml`, the weekly jobs and any project workflow on those events never run, and every label transition becomes
+manual. So on a **first adoption** (no `.harness/lock` yet) `harness-sync.sh` stops before writing anything (exit
+code 4), names what would never run and gives two ways out; then run the sync again:
+
+1. **Make the integration branch the default branch** (Settings → General → Default branch), then
+   `git remote set-head origin -a`. The simplest: nothing else to maintain.
+2. **Or install the relay** on the default branch, before the adoption PR:
+   - copy `templates/.github/workflows/harness-relay.yml` of the harness, at the tag you sync, to
+     `.github/workflows/harness-relay.yml` of the **default branch**, by a PR to that branch; set its
+     `INTEGRATION_BRANCH`, and copy the inputs of the `issue` and `flow` jobs of your `harness.yml` if you changed
+     them; pin its `@vX.Y.Z` references to that tag's commit (`@<sha> # vX.Y.Z`, as the sync does for `harness.yml`);
+   - `git fetch origin`: the sync sees the relay on `origin/<default branch>` and goes on (one 🟢 line).
+
+   The relay runs, from the default branch, issue hygiene (`issues`), the daily dashboard (`schedule`) and, once the
+   harness ships it (#62), the label reconcile (`issue_comment`, disabled until then). One job checks out the
+   integration branch without a token and runs nothing from it: it fails with a message and changes nothing if the
+   branch was deleted or renamed, or if its `.harness/config.json` names another branch. It never checks out a PR,
+   and a comment on a PR runs nothing. It needs a harness version whose `issue-hygiene.yml` and `flow-report.yml`
+   take the `ref` input (after 0.3.0). The day the integration branch becomes the default, it stops with a notice:
+   delete it.
+   **Updates**: the sync never writes to the default branch. Keep a copy of the relay on the integration branch too
+   (inert there): the sync pins its references with those of `harness.yml`, and you carry the file to the default
+   branch by a PR after each update.
+
+Two branches kept on purpose, labels kept by hand: `"default_branch_check": false` in `.harness/config.json`
+(created **before** the sync). The adoption then goes on and says once what will not run. On a project already
+adopted, a later sync never stops: it prints a 🟠 line.
 
 ### Optional: automatic update PR
 `harness-sync.yml` (created at adoption) looks at the latest tag every Monday and opens a draft PR. Settings:
@@ -141,7 +175,7 @@ Other keys, read by the hooks and the skills (missing: default values):
 | `branch_types` | `["lot", "fix", "feat", "chore", "docs"]` | Branch types `<type>/<short-name>` offered by `/lot-start` and the hook |
 | `labels.model_prefixes` | `["difficulty:"]` | Prefixes of the model-tier labels; `[]` = no such axis (tier deduced from the text and the routing) |
 | `labels.size_prefixes` | `[]` | Prefixes of the size labels when the project has a separate size axis (e.g. `["size:"]`); `[]` = no such axis |
-| `default_branch_check` | `true` | `false` silences the 🟠 warning (session start, `harness-sync.sh`, `pr-hygiene.yml`) printed when `integration_branch` is not the repository's default branch: GitHub runs `issues`, `issue_comment`, `pull_request_target` and `schedule` workflows from the default branch only |
+| `default_branch_check` | `true` | When `integration_branch` is not the repository's default branch (GitHub runs `issues`, `issue_comment`, `pull_request_target` and `schedule` workflows from the default branch only), a first adoption stops and later syncs, the session start and `pr-hygiene.yml` print a 🟠 warning ([above](#integration-branch-that-is-not-the-default-branch)); `false` does neither (the adoption says once what will not run) |
 | `ledger.enabled`, `ledger.label`, `ledger.fold_command` | `false`, `"ledger"`, `""` | Ledger ([CONVENTIONS](CONVENTIONS.md) §Ledger): `### Ledger` section of the PRs, label, the steward's fold command |
 
 `.harness/config.json` is a project file (created once): a key added by a new version of the harness does not add
@@ -152,7 +186,8 @@ itself to it; without it, the default applies.
    excluding what HFRnow already has in a better form: its issue forms (`.github/ISSUE_TEMPLATE/*`), its PR template
    (`.github/pull_request_template.md`), its lot template (`docs/lots/TEMPLATE.md`), `.markdownlint-cli2.jsonc`, and
    the harness workflows (`.github/workflows/harness*.yml`): `ezzz/HFRnow` does not belong to `francoisgn`, it cannot
-   call a reusable workflow of a private harness, and `issues` events only run from `master`.
+   call a reusable workflow of a private harness, and `issues` events only run from `master`. Add
+   `"default_branch_check": false`: two branches are kept on purpose, otherwise the first sync stops.
 2. Run the sync: `AGENTS.md` (HFRnow's entry point) receives the block at the end of the file, `CLAUDE.md` (which
    already imports `@AGENTS.md`) the block that imports `ESSENTIALS.md`; the harness's `.harness/docs/LESSONS.md`
    complements the project's `docs/agents/LESSONS.md`, which stays the reference (both are read at self-review;

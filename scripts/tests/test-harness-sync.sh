@@ -47,6 +47,37 @@ ok "first sync: block, docs, skills, hooks, JSON merge, refbump"
 [ "$(run --check)" = 0 ] || fail "--check after sync"
 ok "idempotence and --check"
 
+# The relay belongs on the default branch: the sync never creates it, but pins the references of a copy kept here.
+RELAY_TPL="$ROOT/templates/.github/workflows/harness-relay.yml"
+RELAY="$T/.github/workflows/harness-relay.yml"
+[ ! -e "$RELAY" ] || fail "the sync must not create the relay"
+[ -f "$RELAY_TPL" ] || fail "relay template missing"
+REFS="$(grep -c 'belayline-agentic-harness/\.github/workflows/[A-Za-z0-9._-]*@' "$RELAY_TPL")"
+[ "$REFS" -ge 2 ] || fail "relay: expected at least two harness references, found $REFS"
+sed -E 's|(belayline-agentic-harness/\.github/workflows/[A-Za-z0-9._-]+)@[^ ]+( # v[0-9.]+)?|\1@v0.0.1|' "$RELAY_TPL" >"$RELAY"
+[ "$(run)" = 0 ] || fail "sync with a relay copy: $(cat "$WORK/out")"
+[ "$(grep -c "belayline-agentic-harness/.github/workflows/.*@$PIN\$" "$RELAY")" = "$REFS" ] || fail "refbump of the relay ($PIN)"
+rm -f "$RELAY"
+[ "$(run --check)" = 0 ] || fail "--check after removing the relay copy"
+ok "relay: never created, references pinned when a copy is kept"
+
+# Security invariants of the relay (CI-BASELINE.md §2): events, permissions, no event data in run:, no persisted token.
+EVENTS="$(awk '/^on:/ { on = 1; next } on && /^[^ #]/ { on = 0 } on && /^  [a-z_]+:/ { sub(/^  /, ""); sub(/:.*/, ""); print }' "$RELAY_TPL" | LC_ALL=C sort | tr '\n' ' ')"
+[ "$EVENTS" = "issue_comment issues schedule workflow_dispatch " ] || fail "relay events: $EVENTS"
+grep -qx 'permissions: {}' "$RELAY_TPL" || fail "relay: top-level permissions must be {}"
+[ "$(grep -c 'uses: actions/checkout@' "$RELAY_TPL")" = "$(grep -c 'persist-credentials: false' "$RELAY_TPL")" ] \
+  || fail "relay: every checkout needs persist-credentials: false"
+grep -E '^ +uses: actions/' "$RELAY_TPL" | grep -vqE '@[0-9a-f]{40} # v' && fail "relay: actions must be pinned by SHA"
+awk '/^ +run: /{ r = 1; ind = match($0, /[^ ]/); if ($0 ~ /\$\{\{/) bad = 1; next }
+     r && NF && match($0, /[^ ]/) <= ind { r = 0 }
+     r && /\$\{\{/ { bad = 1 } END { exit bad }' "$RELAY_TPL" || fail "relay: \${{ }} inside a run: block"
+awk '/^ +runs-on:/ { n++ } /^ +timeout-minutes:/ { t++ } END { exit !(n > 0 && n == t) }' "$RELAY_TPL" \
+  || fail "relay: every job that runs on a runner needs timeout-minutes"
+grep -E '^ +ref:' "$RELAY_TPL" | grep -qvE 'env\.INTEGRATION_BRANCH|needs\.config\.outputs\.branch' \
+  && fail "relay: checks out something other than the integration branch"
+grep -qE 'head_ref|pull_request\.head|refs/pull' "$RELAY_TPL" && fail "relay: must never reference PR code"
+ok "relay: events, permissions, pinning, no event data in run:, no persisted token"
+
 printf '\nText added after the block.\n' >>"$T/CLAUDE.md"
 awk '{ print } $0 == "<!-- harness:begin harness -->" { print "LOCAL EDIT INSIDE THE BLOCK" }' "$T/CLAUDE.md" >"$WORK/edited" \
   && cp "$WORK/edited" "$T/CLAUDE.md"
@@ -111,30 +142,52 @@ printf '{ "integration_branch": "develop" }\n' >"$T3/.harness/config.json"
 printf '1.0.0\n' >"$T3/.harness/VERSION"
 dbsync() { "$SYNC" --source "$ROOT" --target "$T3" "$@" >"$WORK/out3" 2>&1; echo $?; }
 dbhook() { CLAUDE_PROJECT_DIR="$T3" bash "$SS" vendored >"$WORK/hook.out" 2>&1; cat "$WORK/hook.out"; }
-# Undeterminable (no origin/HEAD): "could not check", never "OK"; exit code unchanged.
+nothing_written() { [ ! -e "$T3/.harness/lock" ] && [ ! -e "$T3/CLAUDE.md" ] && [ ! -e "$T3/.claude" ] && [ ! -e "$T3/.github" ]; }
+# Undeterminable (no origin/HEAD): "could not check", never "OK", never blocks a first adoption.
 dbhook | grep -q 'Could not check' || fail "session-start: undeterminable default branch must say \"could not check\""
 BASE_RC="$(dbsync --check)"
+[ "$BASE_RC" = 1 ] || fail "first adoption, undeterminable default branch: --check must only report the drift ($BASE_RC)"
 grep -q 'Could not check' "$WORK/out3" || fail "sync: undeterminable default branch must say \"could not check\""
-# Mismatch.
+# Mismatch on a first adoption (no lock yet): stopped before writing, in every mode, with the two ways out.
 git -C "$T3" symbolic-ref refs/remotes/origin/HEAD refs/remotes/origin/main
 [ "$(dbhook | grep -c '🟠 Integration branch')" = 1 ] || fail "session-start: one warning line on mismatch"
 dbhook | grep 'Integration branch' | grep -q '"develop".*"main"' || fail "session-start: warning must name both branches"
 dbhook | grep 'Integration branch' | grep -q 'issue_comment' || fail "session-start: warning must name the silent workflows"
-[ "$(dbsync --check)" = "$BASE_RC" ] || fail "sync --check: the warning must not change the exit code"
-grep -q '🟠 Integration branch "develop"' "$WORK/out3" || fail "sync --check: mismatch warning missing"
+[ "$(dbsync)" = 4 ] || fail "first adoption on mismatch must stop with exit code 4: $(cat "$WORK/out3")"
+nothing_written || fail "a stopped first adoption must write nothing"
+grep -q '"develop".*"main"' "$WORK/out3" && grep -q 'issue_comment' "$WORK/out3" && grep -q 'schedule' "$WORK/out3" \
+  || fail "stopped adoption: must name both branches and the events that never run"
+grep -q 'default branch' "$WORK/out3" && grep -q 'harness-relay.yml' "$WORK/out3" \
+  || fail "stopped adoption: must give both ways out (default branch, relay)"
+[ "$(dbsync --dry-run)" = 4 ] && [ "$(dbsync --check)" = 4 ] && nothing_written || fail "--dry-run / --check must stop too"
+# Relay already on the default branch: the first adoption goes on, with no warning.
+RBLOB="$(git -C "$T3" hash-object -w "$ROOT/templates/.github/workflows/harness-relay.yml")"
+RWF="$(printf '100644 blob %s\tharness-relay.yml\n' "$RBLOB" | git -C "$T3" mktree)"
+RGH="$(printf '040000 tree %s\tworkflows\n' "$RWF" | git -C "$T3" mktree)"
+RROOT="$(printf '040000 tree %s\t.github\n' "$RGH" | git -C "$T3" mktree)"
+git -C "$T3" update-ref refs/remotes/origin/main "$(git -C "$T3" -c user.name=t -c user.email=t@t commit-tree "$RROOT" -m relay)"
+[ "$(dbsync --check)" = "$BASE_RC" ] || fail "relay on the default branch: adoption must not be stopped: $(cat "$WORK/out3")"
+grep -q 'harness-relay.yml' "$WORK/out3" && ! grep -q '🟠 Integration branch' "$WORK/out3" || fail "relay on the default branch: one note, no warning"
+git -C "$T3" update-ref -d refs/remotes/origin/main
+# Silenced by the project: the first adoption goes on and says once what will not run; later syncs say nothing.
+printf '{ "integration_branch": "develop", "default_branch_check": false }\n' >"$T3/.harness/config.json"
+[ "$(dbsync)" = 0 ] || fail "default_branch_check false: first adoption must go on: $(cat "$WORK/out3")"
+grep -q 'will not run' "$WORK/out3" && grep -q 'issue_comment' "$WORK/out3" || fail "silenced first adoption: must say once what will not run"
+[ -f "$T3/.harness/lock" ] || fail "silenced first adoption: lock not written"
+! dbhook | grep -qE 'Integration branch|Could not check' || fail "session-start: default_branch_check false must silence"
+dbsync --check >/dev/null; ! grep -qE 'Integration branch|Could not check|will not run' "$WORK/out3" || fail "sync: default_branch_check false must silence later syncs"
+# Later sync on an adopted project (lock present): a warning that names the relay, exit code unchanged.
+printf '{ "integration_branch": "develop" }\n' >"$T3/.harness/config.json"
+[ "$(dbsync --check)" = 0 ] || fail "later sync: the warning must not change the exit code: $(cat "$WORK/out3")"
+grep -q '🟠 Integration branch "develop"' "$WORK/out3" && grep -q 'harness-relay.yml' "$WORK/out3" || fail "later sync --check: mismatch warning missing"
 dbsync --dry-run >/dev/null; grep -q '🟠 Integration branch' "$WORK/out3" || fail "sync --dry-run: mismatch warning missing"
 # Match: nothing printed.
 git -C "$T3" symbolic-ref refs/remotes/origin/HEAD refs/remotes/origin/develop
 ! dbhook | grep -qE 'Integration branch|Could not check' || fail "session-start: must stay silent when the branches match"
 dbsync --check >/dev/null; ! grep -qE 'Integration branch|Could not check' "$WORK/out3" || fail "sync: must stay silent when the branches match"
-# Silenced by the project, in both mismatch and undeterminable cases.
-git -C "$T3" symbolic-ref refs/remotes/origin/HEAD refs/remotes/origin/main
-printf '{ "integration_branch": "develop", "default_branch_check": false }\n' >"$T3/.harness/config.json"
-! dbhook | grep -qE 'Integration branch|Could not check' || fail "session-start: default_branch_check false must silence"
-dbsync --check >/dev/null; ! grep -qE 'Integration branch|Could not check' "$WORK/out3" || fail "sync: default_branch_check false must silence"
 grep -q 'default_branch' "$ROOT/.github/workflows/pr-hygiene.yml" && grep -q '::warning::\|core.warning' "$ROOT/.github/workflows/pr-hygiene.yml" \
   || fail "pr-hygiene: default branch warning missing"
-ok "integration branch vs default branch: mismatch, match, undeterminable, silenced"
+ok "integration branch vs default branch: first adoption stopped, relay, silenced, later sync warns, match, undeterminable"
 
 # Hooks
 g() { printf '{"tool_input":{"command":%s},"cwd":"%s"}' "$(jq -Rn --arg c "$1" '$c')" "$T" | CLAUDE_PROJECT_DIR="$T" python3 "$GUARD" 2>/dev/null; echo $?; }

@@ -14,6 +14,10 @@ name: Issue hygiene (reusable)
 on:
   workflow_call:
     inputs:
+      ref:
+        description: Branch to read the label files from (empty = the event's ref); the relay passes the integration branch
+        type: string
+        default: ""
       labels-file:
         type: string
         default: .harness/labels.json
@@ -62,6 +66,7 @@ jobs:
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
+          ref: ${{ inputs.ref }}
           persist-credentials: false
       - uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
         env:
