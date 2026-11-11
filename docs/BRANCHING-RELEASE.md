@@ -59,6 +59,15 @@ hotfix/* (from master) ──PR──▶ master, then carried over master → be
   3. promotion (model A) or merge (model B);
   4. annotated tag `vX.Y.Z` on the production branch **after** the merge, by the operator (consequential action);
   5. release tracking issue (`type: chore`) closed, with the link to the tag and to the published build.
+- **The harness itself: `VERSION` tells the gap.** `master` never carries a consumer-visible change under an already
+  released number. `VERSION` (and `plugins/harness/.claude-plugin/plugin.json`) on `master` is the **next** version
+  with the pre-release mark `-dev` (`0.4.0-dev`), from the first merged change after a release; a change a project
+  need not act on still moves it (CHANGELOG: "Action: none"). The release PR removes the mark, renames
+  `## Unreleased` to `## X.Y.Z — date` and the operator tags `vX.Y.Z`; the next change sets the next `-dev`.
+  `ci.yml` and `scripts/local-check.sh` ("Valid JSON and consistent versions") fail on a non-empty `## Unreleased`
+  under a released number, or a `-dev` of a number that already has its CHANGELOG heading. A project sees its gap
+  with `harness-sync.sh --check` and at session start ("vendored X (commit) · harness now Y, N commits ahead"),
+  when a harness clone is at hand (`HARNESS_CLONE`, `../belayline`); never a network call.
 - Build number: incremented at each TestFlight / App Store upload, independent of the version.
 
 ## Deployment

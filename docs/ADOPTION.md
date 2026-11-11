@@ -148,7 +148,9 @@ In an adopted repository, prefer **not** to enable it (the skills would exist tw
   Read the harness's `CHANGELOG.md`, review `git diff`, one commit `Belayline: move to vX.Y.Z`, draft PR.
 - A modification of a harness file in the project is refused at the next sync: propose it to the harness (PR on
   `Belayline`), or keep it outside the harness (project file), never by editing the vendored copy.
-- `--check` in CI (optional): reports a vendored copy that is modified or behind `.harness/VERSION`.
+- `--check` in CI (optional): reports a vendored copy that is modified or behind `.harness/VERSION`, and, when the
+  harness clone is at hand, how many commits the harness is ahead of the vendored commit (the version number alone
+  does not tell: `X.Y.Z-dev` moves before the release); the session-start hook says the same.
 
 ## Per-project settings: language and exclusions
 `.harness/config.json` (created by the first sync; create it **before** the sync so that its settings apply from

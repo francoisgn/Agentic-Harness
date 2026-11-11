@@ -25,7 +25,7 @@ A contribution that adds a rule also says how to disable it.
 | A diagram | `docs/diagrams/<name>.json`, then `scripts/diagrams/render.py`; commit `.json`, `.svg`, `.excalidraw` |
 | A label | `templates/.github/labels.json` (unique name, axis); `docs/METHODOLOGY.md` |
 | A rule loaded in every session | `docs/ESSENTIALS.md`; keep it short |
-| A behaviour visible to a project | `CHANGELOG.md`, with an "Action" line if the project has to do something |
+| A behaviour visible to a project | `CHANGELOG.md`, with an "Action" line if the project has to do something; `VERSION` and `plugin.json` already carry the next `X.Y.Z-dev` (the first change after a release sets it; CI fails otherwise, [BRANCHING-RELEASE](docs/BRANCHING-RELEASE.md)) |
 
 ## Size limits
 
