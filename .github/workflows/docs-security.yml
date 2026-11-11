@@ -1,7 +1,7 @@
 name: Docs and security (reusable)
 
 # Free baseline, no third-party account (CI-BUDGET.md §Security), in ONE job: markdownlint (tables and anchors), README
-# at the harness standard, relative links and cross-file anchors in Markdown,
+# at the harness standard, relative links and cross-file anchors in Markdown, operator decisions file,
 # gitleaks (history), zizmor and actionlint (workflows). Each tool runs even if the previous one fails: a
 # single run gives every finding. Nothing runs on a draft.
 # Disable what the project already covers elsewhere (inputs), so as not to pay twice.
@@ -26,6 +26,10 @@ on:
         default: true
       doc-links:
         description: Relative links and cross-file anchors of the Markdown files resolve (doc-links.py); skipped if the script is not vendored
+        type: boolean
+        default: true
+      decisions:
+        description: docs/DECISIONS.md has at most one decision in force per scope key, a date and a source on every row (decisions-check.py); skipped if the file is absent or the script is not vendored
         type: boolean
         default: true
 
@@ -66,6 +70,13 @@ jobs:
         run: |
           if [ ! -f .harness/scripts/doc-links.py ]; then echo "::notice::doc-links.py not vendored: check skipped"; exit 0; fi
           python3 .harness/scripts/doc-links.py
+
+      - name: Operator decisions · one in force per scope key, date and source on every row
+        if: ${{ !cancelled() && inputs.decisions }}
+        run: |
+          if [ ! -f .harness/scripts/decisions-check.py ]; then echo "::notice::decisions-check.py not vendored: check skipped"; exit 0; fi
+          if [ ! -f docs/DECISIONS.md ]; then echo "::notice::docs/DECISIONS.md absent: check off"; exit 0; fi
+          python3 .harness/scripts/decisions-check.py
 
       - name: Secrets · gitleaks (history)
         if: ${{ !cancelled() && inputs.gitleaks }}

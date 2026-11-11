@@ -40,6 +40,8 @@ copy      scripts/diagrams/render.py                  .harness/scripts/diagrams-
 copy      scripts/doc-links.py                        .harness/scripts/doc-links.py
 # Doc steward: "anything to fold?" decision, docs PR body, weekly audit issues (doc-steward.yml, STEWARDS.md §2)
 copy      scripts/doc-steward.py                      .harness/scripts/doc-steward.py
+# Operator decisions file: at most one decision in force per scope key (docs-security.yml; off when docs/DECISIONS.md is absent)
+copy      scripts/decisions-check.py                  .harness/scripts/decisions-check.py
 
 # Vendored hooks (git guardrail, session reminder) and their declaration
 copy      plugins/harness/scripts/guard-git.py        .harness/hooks/guard-git.py
@@ -62,6 +64,7 @@ seed      templates/.github/ISSUE_TEMPLATE/feature.yml  .github/ISSUE_TEMPLATE/f
 seed      templates/.github/ISSUE_TEMPLATE/task.yml     .github/ISSUE_TEMPLATE/task.yml
 seed      templates/docs/lots/TEMPLATE.md             docs/lots/TEMPLATE.md
 seed      templates/docs/compliance/TEMPLATE.md       docs/compliance/TEMPLATE.md
+seed      templates/docs/DECISIONS.md                 docs/DECISIONS.md
 seed      templates/.markdownlint-cli2.jsonc          .markdownlint-cli2.jsonc
 # Local check = the CI (CI-BASELINE.md §3): a skeleton that says INCOMPLETE until /local-check fills in its steps
 seed      templates/scripts/local-check.sh            scripts/local-check.sh

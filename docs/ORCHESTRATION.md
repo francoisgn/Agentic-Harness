@@ -111,6 +111,12 @@ Before moving the PR to "Ready for review":
 - Permissions: a child inherits only pre-approved tools. Durable rules go in the versioned `.claude/settings.json`,
   not in a container's home directory.
 - A cloud session's GitHub access covers only the repositories attached to it (`add_repo` to add one).
+- **Operator decisions are read from `docs/DECISIONS.md`** (seeded; only rows `in force` bind), never reconstructed
+  from a thread. A decision received in a comment or in chat is recorded there in the agent's next commit, quoting the
+  source (link, date), and the agent says "recorded: not yet" until then. A decision that contradicts one in force
+  names it (that row becomes `replaced by <date>` or `lifted <date>`); `decisions-check.py` fails on two rows `in force`
+  for one scope key, or a row without date or source. No file, no rule. A child's prompt links the file instead of
+  copying the rules. Architecture decisions stay in `docs/adr/`.
 
 ## 5. Lots in parallel
 - One lot = one branch = **one worktree** (`git worktree add ../<project>-<lot> -b lot/<short-name> origin/<integration>`),
