@@ -163,7 +163,9 @@ class EngineTests(unittest.TestCase):
         self.assertEqual(self.run_main("--stamp", "d"), (0, f"✔ {self.tmp / 'd.svg'} (already stamped for this scene)\n"))
 
     def test_stamp_reproduces_the_committed_exports_byte_for_byte(self):
-        committed = [p for p in sorted((ROOT / "docs/diagrams").glob("*.svg")) if rd.STAMP.search(p.read_text("utf-8"))]
+        # Diagrams with a .json source; scene-only ones (no .json) are covered by SceneOnlyTests
+        committed = [p for p in sorted((ROOT / "docs/diagrams").glob("*.svg"))
+                     if rd.STAMP.search(p.read_text("utf-8")) and p.with_suffix(".json").is_file()]
         self.assertTrue(committed)
         for svg in committed:
             for ext in (".json", ".excalidraw"):
@@ -218,6 +220,62 @@ class EngineTests(unittest.TestCase):
         self.assertIsNone(re.search(r"\bnpm\b|\bnpx\b|\bnode\b|playwright|export-svg", text, re.I))
         self.assertEqual(sorted(p.name for p in (ROOT / "scripts/diagrams").iterdir() if p.name != "__pycache__"),
                          ["render.py"])
+
+
+
+class SceneOnlyTests(unittest.TestCase):
+    """A diagram drawn in Excalidraw: <name>.excalidraw is the source, <name>.svg its stamped export, no .json."""
+    NAME = "ai-stack"
+
+    def copy(self):
+        tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(tmp.cleanup)
+        d = pathlib.Path(tmp.name)
+        for ext in (".excalidraw", ".svg"):
+            shutil.copy(ROOT / "docs/diagrams" / f"{self.NAME}{ext}", d / f"{self.NAME}{ext}")
+        return d
+
+    def test_committed_scene_only_diagram_has_no_json_and_verifies(self):
+        self.assertFalse((ROOT / "docs/diagrams" / f"{self.NAME}.json").exists())
+        self.assertIsNone(rd.scene_only_gap(ROOT / "docs/diagrams", self.NAME, str))
+
+    def test_edited_scene_makes_the_export_stale(self):
+        d = self.copy()
+        scene = d / f"{self.NAME}.excalidraw"
+        scene.write_text(scene.read_text(encoding="utf-8").replace("AI product", "AI products", 1), encoding="utf-8")
+        self.assertIn("--stamp", rd.scene_only_gap(d, self.NAME, str))
+
+    def test_missing_or_unstamped_export_is_reported(self):
+        d = self.copy()
+        svg = d / f"{self.NAME}.svg"
+        svg.write_text(rd.ANY_STAMP.sub("", svg.read_text(encoding="utf-8"), count=1), encoding="utf-8")
+        self.assertIsNotNone(rd.scene_only_gap(d, self.NAME, str))
+        svg.unlink()
+        self.assertIsNotNone(rd.scene_only_gap(d, self.NAME, str))
+
+    def test_stamp_of_a_scene_only_export_gives_the_committed_file_back(self):
+        d = self.copy()
+        svg = d / f"{self.NAME}.svg"
+        committed = svg.read_text(encoding="utf-8")
+        svg.write_text(rd.ANY_STAMP.sub("", committed, count=1), encoding="utf-8")
+        with contextlib.redirect_stdout(io.StringIO()):
+            self.assertEqual(rd.run_stamp(d, self.NAME, str), [])
+        self.assertEqual(svg.read_text(encoding="utf-8"), committed)
+
+    def test_unreadable_files_are_reported_not_raised(self):
+        d = self.copy()
+        (d / f"{self.NAME}.svg").write_bytes(b"\xff\xfe not utf-8")
+        self.assertIn("cannot be read", rd.scene_only_gap(d, self.NAME, str))
+        (d / f"{self.NAME}.excalidraw").write_bytes(b"\xff\xfe")
+        self.assertTrue(rd.run_stamp(d, self.NAME, str))
+
+    def test_stamp_refuses_an_export_of_another_scene(self):
+        d = self.copy()
+        scene = d / f"{self.NAME}.excalidraw"
+        scene.write_text(scene.read_text(encoding="utf-8").replace("AI product", "AI products", 1), encoding="utf-8")
+        with contextlib.redirect_stdout(io.StringIO()):
+            problems = rd.run_stamp(d, self.NAME, str)
+        self.assertTrue(problems and "another scene" in problems[0])
 
 
 if __name__ == "__main__":

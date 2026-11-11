@@ -5,6 +5,8 @@ of four layers: where you talk to it, what decides and acts, where it acts, and 
 by whom. Each layer is a separate choice, with its own risks and its own contract. This guide takes the layers apart,
 one audience at a time.
 
+![The four layers of an AI product, one question each, with a typical answer: presentation (where do I talk to it), agent (what decides and acts), execution (where does it act), inference (which model answers); an agent on your behalf (OBO) is layers 2 and 3 and acts with your rights, on your machine or in a cloud; who sells and operates the inference sets the contract on your data; a chatbot is layers 1 and 4: it answers, with no action loop and at most a sandbox of its own](../diagrams/ai-stack.svg)
+
 | Part | For whom | Status |
 |---|---|---|
 | General public: chatbot, assistant, agent | anyone who uses a chat app | planned |

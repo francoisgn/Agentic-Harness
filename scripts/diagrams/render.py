@@ -20,6 +20,8 @@ Usage: render.py [--check] [--engine auto|builtin] [--stamp <name>] [--dir <dire
   --dir:    directory of the diagrams (default: docs/diagrams of the current repository, otherwise the harness's).
             Vendored into a project as .harness/scripts/diagrams-render.py (README-STANDARD.md §4).
 Changing a diagram: edit the .json (or the .excalidraw, then carry it over), run render.py again, commit all three.
+A scene-only diagram has no .json: it is drawn in Excalidraw, <name>.excalidraw is its source and <name>.svg its
+stamped Excalidraw export (--stamp). Nothing is rendered for it; --check verifies the SVG was exported from that scene.
 """
 import argparse
 import hashlib
@@ -299,8 +301,10 @@ def stamp(svg, scene):
             f"svg-sha256:{hashlib.sha256(body.encode('utf-8')).hexdigest()} -->{body[end:]}")
 
 
-def stamp_refusal(svg, source):
-    """Why `svg` cannot be stamped as the Excalidraw export of the scene `source` produces; None if it can."""
+def stamp_refusal(svg, source, scene=None):
+    """Why `svg` cannot be stamped as the Excalidraw export of the scene `source` produces (or of `scene`, the text
+    of a scene-only diagram); None if it can."""
+    scene = to_scene(source) if scene is None else scene
     if svg is None:
         return "not found: export it from Excalidraw and save it under this name first"
     try:
@@ -315,11 +319,27 @@ def stamp_refusal(svg, source):
         found = STAMP.search(svg)
         if not found:
             return "carries a malformed stamp"
-        if found.group(1) != scene_hash(to_scene(source)):
+        if found.group(1) != scene_hash(scene):
             return "already stamped for another scene: export it again from the current scene"
         if found.group(2) != body_hash(svg):
             return "stamped, then edited: export it again from the current scene"
     return None
+
+
+def scene_only_gap(ddir, name, shown):
+    """A scene-only diagram (<name>.excalidraw with no <name>.json: drawn in Excalidraw, the scene is the source):
+    its SVG must be the stamped Excalidraw export of that very scene. Returns the problem, or None."""
+    scene_path, svg_path = ddir / f"{name}.excalidraw", ddir / f"{name}.svg"
+    try:
+        scene = scene_path.read_text(encoding="utf-8")
+        svg = svg_path.read_text(encoding="utf-8") if svg_path.exists() else None
+    except (OSError, UnicodeDecodeError) as e:
+        return f"{shown(scene_path)} or its SVG cannot be read as text ({e})"
+    found = STAMP.search(svg) if svg else None
+    if found and found.group(1) == scene_hash(scene) and found.group(2) == body_hash(svg):
+        return None
+    return (f"{shown(svg_path)}: not the stamped Excalidraw export of {name}.excalidraw (scene-only diagram: export "
+            f"it from Excalidraw as {name}.svg, then run render.py --stamp {name})")
 
 
 def stale_export(path, name):
@@ -331,20 +351,26 @@ def stale_export(path, name):
 def run_stamp(ddir, name, shown):
     """--stamp: writes the stamp of docs/diagrams/<name>.svg, or refuses with the reason; nothing written then."""
     src_path, scene_path, svg_path = (ddir / f"{name}{ext}" for ext in (".json", ".excalidraw", ".svg"))
-    if not src_path.is_file():
+    if not src_path.is_file() and not scene_path.is_file():
         return [f"{name}: source {shown(src_path)} not found"]
-    source = json.loads(src_path.read_text(encoding="utf-8"))
-    bad = invalid(source)
-    if bad:
-        return [f"{name}: {b}" for b in bad]
-    scene = to_scene(source)
-    if not scene_path.is_file() or scene_path.read_text(encoding="utf-8") != scene:
-        return [f"{shown(scene_path)}: not up to date: run render.py first, then export from the new scene"]
+    if src_path.is_file():
+        source = json.loads(src_path.read_text(encoding="utf-8"))
+        bad = invalid(source)
+        if bad:
+            return [f"{name}: {b}" for b in bad]
+        scene = to_scene(source)
+        if not scene_path.is_file() or scene_path.read_text(encoding="utf-8") != scene:
+            return [f"{shown(scene_path)}: not up to date: run render.py first, then export from the new scene"]
+    else:   # scene-only diagram: the .excalidraw file is the source
+        try:
+            source, scene = None, scene_path.read_text(encoding="utf-8")
+        except (OSError, UnicodeDecodeError) as e:
+            return [f"{shown(scene_path)}: not a scene ({e})"]
     try:
         svg = svg_path.read_text(encoding="utf-8") if svg_path.exists() else None
     except (OSError, UnicodeDecodeError) as e:
         return [f"{shown(svg_path)}: not an SVG ({e})"]
-    refusal = stamp_refusal(svg, source)
+    refusal = stamp_refusal(svg, source, scene)
     if refusal:
         return [f"{shown(svg_path)}: {refusal}; nothing written"]
     if STAMP.search(svg):
@@ -371,10 +397,15 @@ def main():
         for p in problems:
             print(f"✘ {p}")
         return 1 if problems else 0
-    names = a.names or sorted(p.stem for p in ddir.glob("*.json"))
+    names = a.names or sorted({p.stem for p in ddir.glob("*.json")} | {p.stem for p in ddir.glob("*.excalidraw")})
     problems = []
     for name in names:
         if not (ddir / f"{name}.json").is_file():
+            if (ddir / f"{name}.excalidraw").is_file():   # scene-only: nothing to render, the export must match
+                gap = scene_only_gap(ddir, name, shown)
+                if gap:
+                    problems.append(gap)
+                continue
             problems.append(f"{name}: source {shown(ddir / (name + '.json'))} not found")
             continue
         source = json.loads((ddir / f"{name}.json").read_text(encoding="utf-8"))
