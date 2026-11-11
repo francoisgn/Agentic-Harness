@@ -5,6 +5,8 @@ moving to this version.
 
 ## Unreleased
 
+- **AI layers guide: a picture of the four layers** on its index page (`docs/diagrams/ai-stack.*`): one question per
+  layer, a typical answer, and which layers a chatbot and an agent on your behalf have (#76).
 - **Integration branch that is not the default branch: the first adoption stops, and a relay workflow**
   ([ADOPTION](docs/ADOPTION.md#integration-branch-that-is-not-the-default-branch), [CI-BASELINE](docs/CI-BASELINE.md)
   §6): on a first adoption (no `.harness/lock`), `harness-sync.sh` exits with code 4 before writing anything when

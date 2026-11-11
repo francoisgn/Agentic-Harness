@@ -1,0 +1,362 @@
+[
+ {
+  "type": "cameraUpdate",
+  "width": 1240,
+  "height": 800,
+  "x": 0,
+  "y": 0
+ },
+ {
+  "type": "text",
+  "id": "t",
+  "x": 40,
+  "y": 20,
+  "text": "The four layers of an AI product",
+  "fontSize": 32,
+  "strokeColor": "#1e1e1e"
+ },
+ {
+  "type": "text",
+  "id": "st",
+  "x": 40,
+  "y": 66,
+  "text": "one question per layer; each is a separate choice, with its own risks and its own contract",
+  "fontSize": 18,
+  "strokeColor": "#757575"
+ },
+ {
+  "type": "text",
+  "id": "hc",
+  "x": 830,
+  "y": 118,
+  "text": "Chatbot",
+  "fontSize": 20,
+  "strokeColor": "#1e1e1e"
+ },
+ {
+  "type": "text",
+  "id": "ha",
+  "x": 1000,
+  "y": 118,
+  "text": "Agent on your",
+  "fontSize": 20,
+  "strokeColor": "#1e1e1e"
+ },
+ {
+  "type": "text",
+  "id": "ha2",
+  "x": 1000,
+  "y": 142,
+  "text": "behalf (OBO)",
+  "fontSize": 20,
+  "strokeColor": "#1e1e1e"
+ },
+ {
+  "type": "rectangle",
+  "id": "l1",
+  "x": 40,
+  "y": 180,
+  "width": 330,
+  "height": 110,
+  "roundness": {
+   "type": 3
+  },
+  "backgroundColor": "#a5d8ff",
+  "fillStyle": "solid",
+  "strokeColor": "#1971c2",
+  "label": {
+   "text": "1. Presentation\nwhere do I talk to it?",
+   "fontSize": 20
+  }
+ },
+ {
+  "type": "rectangle",
+  "id": "d1",
+  "x": 390,
+  "y": 180,
+  "width": 400,
+  "height": 110,
+  "roundness": {
+   "type": 3
+  },
+  "backgroundColor": "#ffffff",
+  "fillStyle": "solid",
+  "strokeColor": "#1971c2",
+  "label": {
+   "text": "chat app, terminal, IDE extension,\nweb or desktop app, phone",
+   "fontSize": 17
+  }
+ },
+ {
+  "type": "rectangle",
+  "id": "c1",
+  "x": 820,
+  "y": 180,
+  "width": 180,
+  "height": 110,
+  "roundness": {
+   "type": 3
+  },
+  "backgroundColor": "#a5d8ff",
+  "fillStyle": "solid",
+  "strokeColor": "#1971c2",
+  "label": {
+   "text": "you type,\nit answers",
+   "fontSize": 17
+  }
+ },
+ {
+  "type": "rectangle",
+  "id": "a1",
+  "x": 1010,
+  "y": 180,
+  "width": 180,
+  "height": 110,
+  "roundness": {
+   "type": 3
+  },
+  "backgroundColor": "#a5d8ff",
+  "fillStyle": "solid",
+  "strokeColor": "#1971c2",
+  "label": {
+   "text": "you ask, watch,\napprove",
+   "fontSize": 17
+  }
+ },
+ {
+  "type": "rectangle",
+  "id": "l2",
+  "x": 40,
+  "y": 310,
+  "width": 330,
+  "height": 110,
+  "roundness": {
+   "type": 3
+  },
+  "backgroundColor": "#b2f2bb",
+  "fillStyle": "solid",
+  "strokeColor": "#2f9e44",
+  "label": {
+   "text": "2. Agent\nwhat decides and acts?",
+   "fontSize": 20
+  }
+ },
+ {
+  "type": "rectangle",
+  "id": "d2",
+  "x": 390,
+  "y": 310,
+  "width": 400,
+  "height": 110,
+  "roundness": {
+   "type": 3
+  },
+  "backgroundColor": "#ffffff",
+  "fillStyle": "solid",
+  "strokeColor": "#2f9e44",
+  "label": {
+   "text": "the harness: a loop where the model\nasks for an action, a tool does it",
+   "fontSize": 17
+  }
+ },
+ {
+  "type": "rectangle",
+  "id": "c2",
+  "x": 820,
+  "y": 310,
+  "width": 180,
+  "height": 110,
+  "roundness": {
+   "type": 3
+  },
+  "backgroundColor": "#f8f9fa",
+  "fillStyle": "solid",
+  "strokeColor": "#adb5bd",
+  "label": {
+   "text": "none",
+   "fontSize": 17
+  },
+  "strokeStyle": "dashed"
+ },
+ {
+  "type": "rectangle",
+  "id": "a2",
+  "x": 1010,
+  "y": 310,
+  "width": 180,
+  "height": 110,
+  "roundness": {
+   "type": 3
+  },
+  "backgroundColor": "#b2f2bb",
+  "fillStyle": "solid",
+  "strokeColor": "#2f9e44",
+  "label": {
+   "text": "decides the\nnext action",
+   "fontSize": 17
+  }
+ },
+ {
+  "type": "rectangle",
+  "id": "l3",
+  "x": 40,
+  "y": 440,
+  "width": 330,
+  "height": 110,
+  "roundness": {
+   "type": 3
+  },
+  "backgroundColor": "#ffec99",
+  "fillStyle": "solid",
+  "strokeColor": "#e8590c",
+  "label": {
+   "text": "3. Execution\nwhere does it act?",
+   "fontSize": 20
+  }
+ },
+ {
+  "type": "rectangle",
+  "id": "d3",
+  "x": 390,
+  "y": 440,
+  "width": 400,
+  "height": 110,
+  "roundness": {
+   "type": 3
+  },
+  "backgroundColor": "#ffffff",
+  "fillStyle": "solid",
+  "strokeColor": "#e8590c",
+  "label": {
+   "text": "your machine, or a vendor's cloud:\nit sets what the agent can touch",
+   "fontSize": 17
+  }
+ },
+ {
+  "type": "rectangle",
+  "id": "c3",
+  "x": 820,
+  "y": 440,
+  "width": 180,
+  "height": 110,
+  "roundness": {
+   "type": 3
+  },
+  "backgroundColor": "#f8f9fa",
+  "fillStyle": "solid",
+  "strokeColor": "#adb5bd",
+  "label": {
+   "text": "none",
+   "fontSize": 17
+  },
+  "strokeStyle": "dashed"
+ },
+ {
+  "type": "rectangle",
+  "id": "a3",
+  "x": 1010,
+  "y": 440,
+  "width": 180,
+  "height": 110,
+  "roundness": {
+   "type": 3
+  },
+  "backgroundColor": "#ffec99",
+  "fillStyle": "solid",
+  "strokeColor": "#e8590c",
+  "label": {
+   "text": "acts in your\nfiles, with\nyour rights",
+   "fontSize": 17
+  }
+ },
+ {
+  "type": "rectangle",
+  "id": "l4",
+  "x": 40,
+  "y": 570,
+  "width": 330,
+  "height": 110,
+  "roundness": {
+   "type": 3
+  },
+  "backgroundColor": "#eebefa",
+  "fillStyle": "solid",
+  "strokeColor": "#9c36b5",
+  "label": {
+   "text": "4. Inference\nwhich model answers?",
+   "fontSize": 20
+  }
+ },
+ {
+  "type": "rectangle",
+  "id": "d4",
+  "x": 390,
+  "y": 570,
+  "width": 400,
+  "height": 110,
+  "roundness": {
+   "type": 3
+  },
+  "backgroundColor": "#ffffff",
+  "fillStyle": "solid",
+  "strokeColor": "#9c36b5",
+  "label": {
+   "text": "model vendor, cloud platform or tool\nvendor: the seller sets the contract",
+   "fontSize": 17
+  }
+ },
+ {
+  "type": "rectangle",
+  "id": "c4",
+  "x": 820,
+  "y": 570,
+  "width": 180,
+  "height": 110,
+  "roundness": {
+   "type": 3
+  },
+  "backgroundColor": "#eebefa",
+  "fillStyle": "solid",
+  "strokeColor": "#9c36b5",
+  "label": {
+   "text": "the model\nanswers",
+   "fontSize": 17
+  }
+ },
+ {
+  "type": "rectangle",
+  "id": "a4",
+  "x": 1010,
+  "y": 570,
+  "width": 180,
+  "height": 110,
+  "roundness": {
+   "type": 3
+  },
+  "backgroundColor": "#eebefa",
+  "fillStyle": "solid",
+  "strokeColor": "#9c36b5",
+  "label": {
+   "text": "the model\nanswers",
+   "fontSize": 17
+  }
+ },
+ {
+  "type": "rectangle",
+  "id": "foot",
+  "x": 40,
+  "y": 710,
+  "width": 1150,
+  "height": 74,
+  "roundness": {
+   "type": 3
+  },
+  "backgroundColor": "#f1f3f5",
+  "fillStyle": "solid",
+  "strokeColor": "#495057",
+  "label": {
+   "text": "\"We use X\" says little until each layer is decided:\nwho sells and operates the inference sets the contract that governs your data",
+   "fontSize": 18
+  }
+ }
+]
