@@ -5,8 +5,11 @@ moving to this version.
 
 ## Unreleased
 
-- **AI layers guide: a picture of the four layers** on its index page (`docs/diagrams/ai-stack.*`): one question per
-  layer, a typical answer, and which layers a chatbot and an agent on your behalf have (#76).
+- **AI layers guide: a picture of the four layers** on its index page (`docs/diagrams/ai-stack.svg`), drawn in
+  Excalidraw from the scene of the coding-agent diagram, so both share one font, stroke and colour code (#76).
+  **Scene-only diagrams**: a diagram may have no `.json`; `<name>.excalidraw` is then the source and `<name>.svg`
+  its stamped Excalidraw export; `render.py --check` verifies the pair and `--stamp` stamps it
+  ([README-STANDARD](docs/README-STANDARD.md) §4).
 - **Integration branch that is not the default branch: the first adoption stops, and a relay workflow**
   ([ADOPTION](docs/ADOPTION.md#integration-branch-that-is-not-the-default-branch), [CI-BASELINE](docs/CI-BASELINE.md)
   §6): on a first adoption (no `.harness/lock`), `harness-sync.sh` exits with code 4 before writing anything when

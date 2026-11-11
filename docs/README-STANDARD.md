@@ -89,7 +89,12 @@ Two ways to produce the SVG, neither needs any tooling beyond Python:
   image. The rendering never overwrites an export: when the scene changes, `--check` and the rendering fail and say
   the two ways out (export and stamp again, or `--engine builtin <name>` to draw it).
 
-The three files are committed together. The diagram shows **what is delivered**; 5 to 9 boxes. Mermaid stays allowed
+- **Scene-only diagram** (drawn in Excalidraw, no `.json`): `<name>.excalidraw` is the source and `<name>.svg` its
+  stamped export; only those two files are committed. Nothing is rendered for it; `--check` verifies that the SVG
+  was exported from that very scene, so editing the scene means exporting and stamping again. To keep one look,
+  start from an existing scene of the project.
+
+With a `.json` source the three files are committed together; a scene-only diagram has two. The diagram shows **what is delivered**; 5 to 9 boxes. Mermaid stays allowed
 for a short flow in an internal doc; for the README, `"architecture": "any"` accepts it too.
 
 ## 5. Who maintains it, and when
