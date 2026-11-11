@@ -14,7 +14,9 @@ state.
 
 **Session start**: `git fetch`, switch to the integration branch; read `CLAUDE.md` (and `ESSENTIALS.md`); list your
 claimed issues and what moved on your PRs (reviews, CI, merges, comments) **before** starting anything new; then take a
-ready issue that nobody has claimed (not `needs: host` in the cloud).
+ready issue that nobody has claimed (not `needs: host` in the cloud). The orchestrator first brings the `status:` labels
+in line with the facts: `python3 .harness/scripts/issue-reconcile.py` (dry run, then `--apply`; offered by the
+session-start hook when vendored) and keeps its `summary:` line in its state; it runs it again after each merge.
 
 **Session end**: issues and PRs up to date (state, links, a "next" note on every open item), release what you will not
 finish, then report to the operator: what is done (with the link of every public action) and where the next session

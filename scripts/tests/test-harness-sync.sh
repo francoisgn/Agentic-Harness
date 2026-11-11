@@ -35,6 +35,7 @@ grep -q '@.harness/docs/ESSENTIALS.md' "$T/CLAUDE.md" || fail "ESSENTIALS import
   && cmp -s "$ROOT/LICENSE" "$T/.harness/LICENSE" \
   && [ -f "$T/.harness/scripts/repo-settings.py" ] && [ -f "$T/.github/repo-settings.json" ] \
   && [ -f "$T/.harness/scripts/readme-progress.py" ] && [ -f "$T/.harness/scripts/doc-steward.py" ] || fail "scripts, settings or licence missing"
+[ -f "$T/.harness/scripts/issue-reconcile.py" ] || fail "issue-reconcile.py not vendored next to readme-progress.py (it imports it)"
 [ -f "$T/docs/compliance/TEMPLATE.md" ] && [ -f "$T/.claude/agents/compliance-reviewer.md" ] || fail "spec template or generic reviewer missing"
 jq -e '.permissions.allow[0] == "Bash(swift test:*)" and (.hooks.PreToolUse | length) == 1' "$T/.claude/settings.json" >/dev/null \
   || fail "settings.json merge"
@@ -149,6 +150,9 @@ ok "guard-git"
 # Output captured first: grep -q closing the pipe early would make the hook die of SIGPIPE under pipefail.
 CLAUDE_PROJECT_DIR="$T" bash "$SS" vendored >"$WORK/ss.out" 2>&1
 grep -qF "$(cat "$ROOT/VERSION") (.harness/VERSION)" "$WORK/ss.out" || fail "session-start"
+grep -qF 'python3 .harness/scripts/issue-reconcile.py' "$WORK/ss.out" || fail "session-start: reconcile command not offered"
+CLAUDE_PROJECT_DIR="$T3" bash "$SS" vendored >"$WORK/ss.out" 2>&1
+! grep -qF 'issue-reconcile' "$WORK/ss.out" || fail "session-start: reconcile offered while the script is not vendored"
 CLAUDE_PROJECT_DIR="$T" bash "$SS" plugin >"$WORK/ss.out" 2>&1
 [ ! -s "$WORK/ss.out" ] || fail "session-start plugin should stay silent"
 ok "session-start"
