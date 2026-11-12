@@ -17,6 +17,10 @@ moving to this version.
   state, not a tag: a sync from a clone of `master` pins workflow references as `@<sha> # v0.4.0-dev`.
   **Action**: none.
 
+- **Factory guide, part 2: the CI choices of the harness, explained** ([`docs/factory/ci-choices.md`](docs/factory/ci-choices.md),
+  #83): each CI choice of [CI-BASELINE](docs/CI-BASELINE.md) and [CI-BUDGET](docs/CI-BUDGET.md) with what it does, why,
+  what it costs and what else is reasonable; the GitHub facts it rests on, sourced and dated; what we got wrong first
+  (#10 then #67, #12, #57); a diagram of the five tiers and when each runs (`docs/diagrams/ci-tiers.svg`). **Action**: none.
 - **Factory guide, part 1: the pace** ([`docs/factory/pace.md`](docs/factory/pace.md), #82, umbrella #80): why agent
   volume strains a factory sized for people, from Anthropic's own account of redesigning its source control (quoted
   from the primary page, figure shown by reference, notes in `docs/factory/sources/`) and from this repository's and
