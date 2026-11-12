@@ -267,3 +267,72 @@ Read 2026-11-12. GitLab pages carry "Tier" and "Add-on" lines at the top; they a
   not opened. A search summary (not verified) said Ultimate with Duo Enterprise or Amazon Q, SAST findings only, and
   that agentic SAST resolution became generally available in GitLab 18.11 on the Duo Agent Platform. Only the SAST
   page's "Agentic SAST Vulnerability Resolution: Ultimate" row is used on the page.
+
+## Independent tools
+
+Read 2026-11-12.
+
+### CodeRabbit
+
+- [CodeRabbit docs](https://docs.coderabbit.ai/): "CodeRabbit helps teams review, prioritize, understand, and secure
+  agent-generated changes." "Use CodeRabbit on GitHub, GitLab, Azure DevOps, and Bitbucket." IDE extension for "VS
+  Code, Cursor, Windsurf, and JetBrains IDEs" and "Pre-commit reviews from the command line." CodeRabbit Security
+  "Scan[s] repositories for code vulnerabilities, leaked secrets, and vulnerable dependencies." No pricing or data
+  retention statement on that page.
+- [Code review overview](https://docs.coderabbit.ai/guides/code-review-overview): "When a pull request is created,
+  CodeRabbit immediately begins analyzing the code changes". "For subsequent commits, CodeRabbit performs incremental
+  reviews focusing on the new changes". Commands `@coderabbitai pause`, `@coderabbitai resume`, `@coderabbitai
+  resolve`. "CodeRabbit runs third-party linters and security scanners during the review"; "Integration with 50+
+  open-source linters and security scanners." Drafts: not covered on that page (the harness's recommended
+  `auto_review.drafts: false` comes from `docs/REVIEW-ROUNDS.md`, not re-verified on CodeRabbit's configuration page).
+
+### SonarQube
+
+- [SonarQube product page](https://www.sonarsource.com/products/sonarqube/): "SonarQube is the platform that verifies
+  code, whether a developer or an AI agent wrote it, before it ships." "It checks every change for bugs,
+  vulnerabilities, and maintainability issues". Offers: SonarQube Cloud, SonarQube Server, "SonarQube Community Build
+  and the free tier of SonarQube Cloud let you start at no cost", Advanced Security ("advanced SAST and SCA").
+- AI features named there: "AI CodeFix uses large language models to suggest a fix for an issue SonarQube finds";
+  Sonar MCP ("Bring code quality and security into your AI and agentic workflows"); SonarQube CLI; Sonar Vortex
+  ("Gives AI coding agents the context and constraints they need when they write"); SonarQube Remediation Agent
+  ("Autonomously clears tech debt from your existing codebase by opening verified, ready-to-merge pull requests");
+  SonarQube Hunter Agent ("An AI-powered agent that runs a deep analysis of your SonarQube projects"); Gitar
+  ("Reviews, fixes, and verifies your PRs - automatically, until CI passes."). FAQ: "It checks AI-generated code the
+  same way it checks developer-written code". The product page does not give the edition or plan of each AI feature,
+  nor preview status: to verify in the docs per feature.
+- [Introduction to quality gates (SonarQube Cloud)](https://docs.sonarsource.com/sonarqube-cloud/standards/managing-quality-gates/introduction-to-quality-gates):
+  "quality gates use sets of conditions to measure checks against your code during analysis." Sonar way conditions
+  listed: no new bugs (reliability A), no new vulnerabilities (security A), maintainability A on new code, all new
+  security hotspots reviewed, new code coverage >= 80.0 %, duplication in new code <= 3.0 %. "It can be used to
+  block the merge of the pull request if the quality gate fails." "It can be used to fail your CI pipeline if the
+  quality gate fails."
+
+### Semgrep
+
+- [Semgrep docs](https://docs.semgrep.dev/): products Semgrep Code, Semgrep Supply Chain, Semgrep Secrets ("can detect
+  630+ types of credentials or keys"). "Deploy static application security testing (SAST), software composition
+  analysis (SCA), and secrets scans from one platform."
+- [semgrep/semgrep](https://github.com/semgrep/semgrep): Community Edition "The open-source program analysis engine at
+  the heart of everything"; it "can only analyze code within the boundaries of a single function or file." The
+  AppSec Platform "Includes both free and paid tiers", with cross-file, cross-function, data-flow reachability.
+  Repository licence "LGPL-2.1 license". Assistant (AI) listed as a platform component; plan not stated.
+
+### Trivy
+
+- [aquasecurity/trivy](https://github.com/aquasecurity/trivy): "Find vulnerabilities, misconfigurations, secrets, SBOM
+  in containers, Kubernetes, code repositories, clouds and more". Targets: container image, filesystem, git
+  repository (remote), virtual machine image, Kubernetes. Finds: SBOM, "Known vulnerabilities (CVEs)", "IaC issues
+  and misconfigurations", "Sensitive information and secrets", "Software licenses". "Apache-2.0 license".
+- [Trivy docs](https://trivy.dev/latest/docs/): same lists as navigation labels.
+
+### gitleaks
+
+- [gitleaks/gitleaks](https://github.com/gitleaks/gitleaks): "Gitleaks is a tool for detecting secrets like passwords,
+  API keys, and tokens in git repos"; "Gitleaks scans code, past or present, for secrets"; "can be implemented as a
+  pre-commit hook directly in your repo or as a GitHub action". "MIT license".
+
+### zizmor
+
+- [zizmor docs](https://docs.zizmor.sh/): "zizmor is a static analysis tool for your CI/CD." "It can find and fix
+  security issues in common CI/CD setups, including GitHub Actions, Dependabot, and pre-commit." Audit list, licence
+  and offline mode not on that page (not opened further).
