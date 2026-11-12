@@ -5,6 +5,12 @@ moving to this version.
 
 ## Unreleased
 
+- **Slow suites: timeouts, per-test limits, waits on events** ([CI-BUDGET §6](docs/CI-BUDGET.md#6-slow-suites-job-timeouts-test-time-limits-waits-on-events),
+  #100, from HFRnow #801): set `timeout-minutes` from measured green runs, on the job and on the step at risk; a time
+  limit per test so a hung test fails alone with its name, with the iOS switches (`xcodebuild` test timeouts, Swift
+  Testing `.timeLimit(_:)`) quoted from Apple's and Swift's pages read on 2026-11-12, and what they leave to verify;
+  waits on events, every one bounded; the slow class in its own job, with its cost; what is not allowed. Lessons L85
+  to L90. **Action**: none.
 - **AI stack diagram: the execution split** (`docs/diagrams/ai-stack.*`): three columns (chatbot, agent in a vendor's
   cloud, agent on your machine); the chatbot has none of your files, the cloud agent a copy of the repository and only
   what it was given, the local agent your files, tools, network and credentials (#88).

@@ -150,3 +150,64 @@ CI must cost per **ready lot**, not per commit:
   runs on ready PRs, the integration branch and every week, not on every push;
 - automatic review once per ready head ([REVIEW-SERVICE](REVIEW-SERVICE.md) §3);
 - beyond 6 CI-tested pushes on a PR, the loop stops ([FINOPS](FINOPS.md) §3).
+
+## 6. Slow suites: job timeouts, test time limits, waits on events
+
+A job timeout (invariant 4 of [CI-BASELINE](CI-BASELINE.md#2-the-six-invariants-of-every-workflow)) turns a hang into
+a red after N minutes. It does not say which test hung, and it does not stop a test that passes at 300 s on a good
+day. Seen in HFRnow #801 (2026-11-12): a macOS test job without `timeout-minutes` hung twice in one test step, once
+for more than 4 hours until cancelled by hand, once until GitHub cancelled it; its web-view tests took 90 to 330 s
+each and failed at the edge of their own waits. The rules below answer what was seen; the causes in that case were not
+established. LESSONS L85 to L90 point here.
+
+### Set `timeout-minutes` from measurements
+- Take the duration of the job's recent green runs (run history) and set its timeout to about **twice their p95**,
+  rounded up. A guess is either too short (red on a slow day) or too long (hours billed for a hang, ×10 on macOS, §1).
+- When one step is the risk (the test step of a simulator job), give **that step** its own `timeout-minutes` as well,
+  from the same measurement of that step: the other steps do not eat its budget, and the log shows which step stopped.
+- Measure again when the suite grows. A job often close to its timeout is a slow suite to fix (below), not a timeout
+  to raise.
+- GitHub, [workflow syntax](https://docs.github.com/en/actions/reference/workflows-and-actions/workflow-syntax#jobsjob_idtimeout-minutes)
+  (read 2026-11-12): a job's `timeout-minutes` has "Default: 360"; a step's is "The maximum number of minutes to run
+  the step before killing the process. Maximum: 360 for both GitHub-hosted and self-hosted runners", and "Fractional
+  values are not supported."
+
+### A time limit per test
+Every test that can hang has a **time limit of its own**, set in the test runner, so a hung test fails alone, with its
+name, and the next tests still run; the job timeout stays as the outer net. Set the limit from measured durations, as
+for the job, with room for the slowest runner. Most test runners have such a setting: use the one your runner
+documents, cite its page and the date you read it, and write "to verify" for what the page does not say.
+
+iOS switches, as the official pages state them on **2026-11-12** (Apple pages read through their JSON form,
+`https://developer.apple.com/tutorials/data/documentation/<path>.json`):
+
+| Switch | Source | What the source says | Limits, to verify |
+|---|---|---|---|
+| `xcodebuild -test-timeouts-enabled YES` | `man xcodebuild` ([text read here](https://keith.github.io/xcode-man-pages/xcodebuild.1.html)); Apple, [`executionTimeAllowance`](https://developer.apple.com/documentation/xctest/xctestcase/executiontimeallowance) | man: "Enable or disable test timeout behavior. This value takes precedence over the value specified in the test plan." Apple: "To use this setting, enable timeouts in your test plan or set the `-test-timeouts-enabled` option to `YES` when using `xcodebuild`." | The man page was read on a mirror that states no Xcode version: to verify with `man xcodebuild` on the CI's Xcode. Whether it applies to Swift Testing tests: to verify (neither page names Swift Testing) |
+| `xcodebuild -default-test-execution-time-allowance <seconds>` | `man xcodebuild` (same text) | "The default execution time an individual test is given to execute, if test timeouts are enabled." | The man page gives no default. Apple gives one for XCTest's `executionTimeAllowance`: "The default value is 600 seconds, or 10 minutes." Whether it applies to Swift Testing tests: to verify |
+| `xcodebuild -maximum-test-execution-time-allowance <seconds>` | `man xcodebuild`; Apple, `executionTimeAllowance` | man: "The maximum execution time an individual test is given to execute, regardless of the test's preferred allowance." Apple: "The test may run for less time than you specify if you customize the Maximum Test Execution Time Allowance setting in the test plan, or if you pass the `-maximum-test-execution-time-allowance` option to `xcodebuild`." | Whether it caps Swift Testing's `.timeLimit`: to verify (Swift Testing sends to "the documentation for the tool you use to run your tests", and that documentation does not name Swift Testing) |
+| XCTest `executionTimeAllowance` | Apple, [`executionTimeAllowance`](https://developer.apple.com/documentation/xctest/xctestcase/executiontimeallowance) | "The number of seconds, rounded up to the nearest minute, for a test to run before it fails with a timeout error." "If the duration of a test exceeds this value, it's marked as a failure and the next test runs." | Minute granularity; needs timeouts enabled (first row) |
+| Swift Testing `.timeLimit(_:)` (`TimeLimitTrait`) | Apple, [`timeLimit(_:)`](https://developer.apple.com/documentation/testing/trait/timelimit(_:)), [Limiting the running time of tests](https://developer.apple.com/documentation/testing/limitingexecutiontime), [`TimeLimitTrait.Duration`](https://developer.apple.com/documentation/testing/timelimittrait/duration); [swift-testing source](https://github.com/swiftlang/swift-testing/blob/main/Sources/Testing/Traits/TimeLimitTrait.swift) | "You express the duration in minutes, with a minimum duration of one minute." Past it, "the task in which it's running is" cancelled "and the test fails with an issue of kind" `timeLimitExceeded`. "If multiple time limit traits apply to a test, the testing library uses the shortest time limit." On a suite it applies to each test, on a parameterized test to each case. "A granularity of (by default) one minute is applied to tests." Available from Xcode 16 (Swift 6.0) | Minutes only: it catches a hang, not a test that is 30 s too slow (that is the waiting rule below). The runner can impose a shorter maximum; which `xcodebuild` option sets it for Swift Testing: to verify |
+
+### Waits on events, every one bounded
+- An async, UI or web-view test **waits on the event** it needs (delegate callback, navigation finished, message
+  handler called, an expectation fulfilled or a confirmation), with a bounded wait and a failure message that names
+  what never arrived ("navigation to /topic never finished"), not "timed out".
+- Never a fixed sleep, never a long polling budget: a sleep is too short on a slow runner and wasted on a fast one, and
+  a polling loop fails late and says nothing.
+- Every `await` in a test has a bound: the runner's time limit above at least, and for an external event a wait of its
+  own, shorter than that limit.
+
+### The slow class in its own job or test plan
+- Tests that need a simulator, a web view or the UI run in **their own job** (or their own test plan), in parallel with
+  the fast unit tests, both behind the cheap Linux job (`needs:`, §2). A red unit test shows in minutes, and the slow
+  job's timeout is sized for the slow class alone.
+- Optional: a warm-up step (boot the simulator) before the test step, so start-up time is not charged to the first
+  test's limit and the log shows it apart.
+- **Cost**: one more runner in parallel. Each job pays its own setup (checkout, then a build, or the transfer of the
+  products of `xcodebuild build-for-testing` to a `test-without-building` job) and its own rounding to the minute, ×10
+  on macOS (§1). Shorter wait for a verdict, more billed minutes: the project decides from its measurements.
+
+### Not allowed, whatever the pressure
+A slow or hung test is never made green by skipping, disabling, quarantining or deleting it, or by loosening its
+assertion. One rerun at most, then investigate (LESSONS L47); the fix is the wait, the code or the job layout above.
