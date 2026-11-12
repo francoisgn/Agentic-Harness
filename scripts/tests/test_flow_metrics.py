@@ -504,6 +504,13 @@ class CiHealthTests(unittest.TestCase):
         r = self.analyse(runs, {1: [cjob("tests", "failure")], 2: [cjob("tests", "success")]})
         self.assertEqual([i["job"] for i in r["ci_health"]["flaky"]["items"]], ["tests"])
 
+    def test_push_red_and_pull_request_green_on_the_same_sha_is_not_a_flake(self):
+        # The pull_request run tests the merge with the base, the push run the commit alone: not the same code
+        runs = [crun(1, conclusion="failure", event="push", created="2026-11-06T10:00:00Z"),
+                crun(2, event="pull_request", created="2026-11-06T11:00:00Z")]
+        r = self.analyse(runs, {1: [cjob("tests", "failure")], 2: [cjob("tests", "success")]})
+        self.assertEqual(r["ci_health"]["flaky"]["items"], [])
+
     def test_red_twice_is_not_a_flake(self):
         r = self.analyse([crun(1, conclusion="failure", attempt=2)],
                          {1: [cjob("tests", "failure", 1), cjob("tests", "failure", 2)]})

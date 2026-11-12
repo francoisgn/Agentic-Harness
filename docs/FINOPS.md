@@ -94,9 +94,29 @@ The dashboard (`flow-report.yml`, script `flow-metrics.py`) computes every day, 
 | **Problem PRs** (≥ 1 review finding: adversarial, AI, compliance, CodeRabbit, human), agents / humans | > 50 % from 3 PRs | Insufficient initial quality | Tighten `/lessons-check`, the spec (intent), or raise the `difficulty:` label |
 | Fix effort: commits after the 1st finding, time from 1st finding to merge | trend | Cost of the second pass | Compare by source and by model tier |
 | Merged PRs with no traced verdict | any | Blind measurement | Apply REVIEW-ROUNDS §Traceability |
+| **Passed only on re-run**: a job (by name) red then green on the same commit (`run_attempt` > 1, or another run of the same workflow, event and `head_sha`); cancelled or skipped is not red, a re-run after a cancel is not a flake | any (🟠) | Flaky test or job, hidden by re-runs | One `type: bug` issue per job name; never re-run until green ([REVIEW-ROUNDS](REVIEW-ROUNDS.md), CI playbook) |
+| **Red rate on the integration branch**: per job name, red / (red + green) executions of the push runs | > 20 % (🟠) | The base is red: every PR on that job inherits it | Fix the base first; no re-run of red PRs on the same job meanwhile (CI playbook) |
+| **Long job**: a job `in_progress` for longer than the threshold (its `timeout-minutes` is not in the API) | 60 min (🟠; 🔴 on the integration branch) | Hung step, missing `timeout-minutes` | Cancel by hand, then fix the step or the timeout ([CI-BASELINE](CI-BASELINE.md) §2) |
+| **Run queued with no job**: status `queued` and zero jobs for longer than the threshold (`pending` waits for its concurrency group and is left out) | 30 min (🟠) | GitHub-side stuck run | CI playbook: a real new event, report the run ids to GitHub Support |
 
-Overall status: 🔴 a loop or a stalled `priority: high` issue; 🟠 a stall, a bottleneck or too many problem PRs;
+Overall status: 🔴 a loop, a stalled `priority: high` issue, or a job stuck beyond its threshold on the integration
+branch (it blocks every PR behind it); 🟠 a stall, a bottleneck, too many problem PRs, or any other CI health signal;
 🟢 otherwise.
+
+**CI health** reads the Actions REST API only (workflow runs, `GET /actions/runs/{id}/jobs?filter=all`, workflows):
+no project artifact. Thresholds in `.harness/config.json` › `ci_health`, whole numbers, every key optional:
+`long_job_minutes` (60), `queued_no_job_minutes` (30), `red_rate_percent` (20), `max_job_requests` (50); the
+integration branch is `integration_branch`, else the default branch. An unknown key or a bad value is reported, not
+replaced by a default. The extra requests per report are bounded: at most 3 + `max_job_requests` (workflows, runs
+count, default branch, one job list per candidate run, stuck runs first, then re-runs, then the newest integration
+pushes); a candidate beyond the budget is counted as "could not check". No token, no network, an API error, a run list
+cut short (a filtered list stops at 1,000 runs) or an unreadable config: the signal says "could not check", never
+"nothing". Runs of a deleted workflow or without `head_sha` are counted in a "not classified" line. The dashboard
+never cancels, re-runs or deletes anything, and it does not open issues: it names the job and the action. (Opening the
+`type: bug` issue itself would be an opt-in input of `flow-report.yml`, one open issue per job name found by a marker
+`<!-- flaky: <workflow> / <job> -->` in its body; not built, the list is the default.)
+Per-test durations (`.xcresult`, JUnit) belong to the project: its own CI step can parse them and fail, or post them
+to the job summary; the dashboard does not read artifacts.
 The problem-PR ratio also feeds routing (§2 rule 3): a model tier whose PRs often come back with
 findings is under-assigned for that type of task. What the script does not
 see (tokens consumed per session) is read by hand in the provider's console and carried into the

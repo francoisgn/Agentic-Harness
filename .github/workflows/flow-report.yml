@@ -2,7 +2,9 @@ name: Flow dashboard (reusable)
 
 # Publishes the project state for everyone (non-technical people included) in ONE pinnable issue, updated in place:
 # progress per milestone, bottlenecks (`status: blocked`, `status: needs-decision`), stalled work, CI or review loops,
-# agent / human ratio, first-run quality (problem PRs, correction effort), CI cost (FINOPS.md §4, STEWARDS.md §4).
+# agent / human ratio, first-run quality (problem PRs, correction effort), CI cost (FINOPS.md §4, STEWARDS.md §4),
+# CI health (passed only on re-run, integration branch red rate, long job, run queued with no job): read-only, at most
+# 3 + `ci_health.max_job_requests` extra API requests; thresholds in .harness/config.json › ci_health.
 # Vendored script: .harness/scripts/flow-metrics.py.
 # Cost: one Linux job of under a minute per run; call it on `schedule` (daily) and by hand.
 # Opt-in `readme-progress`: also reports drift of the README progress block (readme-progress.py --check), never commits.

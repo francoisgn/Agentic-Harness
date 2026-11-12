@@ -222,7 +222,8 @@ def ci_candidates(runs, now, cfg, branch):
 
     stuck: `queued` older than `queued_no_job_minutes` (a `pending` run waits for its concurrency group, a `waiting`
     one for an approval: neither is stuck), or `in_progress` since longer than `long_job_minutes`.
-    flaky: completed runs re-run (`run_attempt` > 1), and completed runs sharing workflow and commit with a red one.
+    flaky: completed runs re-run (`run_attempt` > 1), and completed runs sharing workflow, event and commit with a red
+    one (a `pull_request` run tests the merge with the base, a `push` run the commit alone: not the same code).
     red: completed push runs on the integration branch (cancelled or skipped left out), newest first.
     """
     stuck, flaky, red, groups = [], [], [], {}
@@ -237,7 +238,7 @@ def ci_candidates(runs, now, cfg, branch):
             continue
         if (r.get("run_attempt") or 1) > 1:
             flaky.append(r["id"])
-        groups.setdefault((r["workflow_id"], r["head_sha"]), []).append(r)
+        groups.setdefault((r["workflow_id"], r.get("event"), r["head_sha"]), []).append(r)
         if branch and r.get("head_branch") == branch and r.get("event") == "push" and \
                 r.get("conclusion") not in ("cancelled", "skipped"):
             red.append(r)
@@ -348,7 +349,7 @@ def ci_health(data, now):
     for rid in cand["flaky"]:
         r = by_id[str(rid)]
         for j in jobs.get(str(rid), []):
-            seq.setdefault((r["workflow_id"], j.get("name")), {}).setdefault(r["head_sha"], []).append(
+            seq.setdefault((r["workflow_id"], j.get("name")), {}).setdefault((r.get("event"), r["head_sha"]), []).append(
                 (r.get("created_at") or "", j.get("run_attempt") or 1, r.get("html_url"), j.get("conclusion")))
     flaky = []
     for (wf, job), by_sha in seq.items():

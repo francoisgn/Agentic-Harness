@@ -79,6 +79,43 @@ reviews), has reviewed the head **and** an
 adversarial review APPROVED on that head, with settled findings listed in the PR and every unverified point
 verified or accepted (and the project's merge policy).
 
+## CI playbook: red base, stuck run
+
+The dashboard lists the CI health signals ([FINOPS](FINOPS.md) §4); it never cancels, re-runs or deletes. What the
+orchestrator does with them:
+
+- **Base red, same failure.** While the integration branch is red on a job, red PRs failing on that same job are not
+  re-run: each re-run costs minutes and proves nothing. Fix the base first (its own issue and PR), then re-run or
+  update the red PRs one after the other. A re-run that turns green is recorded, never silent: one `type: bug`
+  issue per job name (search for an open one first), linked from the PR. "Flaky" is not a cause (LESSONS L47).
+- **Run queued with no job.** Seen on 2026-11-11: runs `queued` with zero jobs; cancel and force-cancel answered 409,
+  delete was refused. A run `pending` waits for its concurrency group and is not this case. The way out:
+  1. Stop retrying the cancel; note the run ids.
+  2. Give the PR a real new event: update the branch from the base. Never an empty commit, never a close and reopen.
+  3. The review of the previous head holds only if `git show --remerge-diff <merge sha>` prints nothing (the merge
+     resolved no conflict and added no edit); otherwise re-review the delta (§Convergence).
+  4. Report the run ids, times and 409 answers to GitHub Support. A run can be deleted once it is more than two weeks
+     old; the dashboard lists it until then.
+- **Per-test durations** (`.xcresult`, JUnit) are the project's: a step of its own CI parses them and fails or writes
+  the job summary; the harness does not read result bundles.
+
+What was known on 2026-11-12 (read that day):
+- GitHub REST docs, [workflow runs](https://docs.github.com/en/rest/actions/workflow-runs): cancel and force-cancel
+  list "409 - Conflict" without saying when; force-cancel: "You should only use this endpoint to cancel a workflow run
+  when the workflow run is not responding to" a cancel. Nothing on runs with no job: **not found** in the docs.
+- [Deleting a workflow run](https://docs.github.com/en/actions/how-tos/manage-workflow-runs/delete-a-workflow-run):
+  "You can delete a workflow run that has been completed, or is more than two weeks old."
+- [githubstatus.com history](https://www.githubstatus.com/history), 2026-11-11: "Incident with Webhooks" 20:22–20:26
+  UTC ("We are investigating reports of degraded performance for Webhooks"), then from 20:48 UTC "Actions is
+  experiencing degraded availability", resolved 21:21 UTC ("The backlog of Actions jobs has been fully processed").
+  That the stuck runs come from it is not established.
+- Community reports of the same state, none with a public answer from GitHub:
+  [discussion 135366](https://github.com/orgs/community/discussions/135366) (since 2024-08, again 2026-08-26:
+  force-cancel 409 "Cannot cancel a workflow re-run that has not yet queued."),
+  [discussion 196717](https://github.com/orgs/community/discussions/196717) (2026-05 to 2026-11-12: delete 403 "Could
+  not delete the workflow run."; settled through a private Support ticket),
+  [actions/runner#3872](https://github.com/actions/runner/issues/3872) (open, no GitHub reply).
+
 ## Traceability: every verdict on the PR
 
 The harness measures the **problem-PR ratio** (at least one finding in adversarial review, AI review, compliance,
