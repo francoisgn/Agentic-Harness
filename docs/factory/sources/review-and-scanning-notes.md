@@ -123,3 +123,112 @@ read 2026-11-11.
 - "Some features are enabled for public repositories by default" (code scanning and secret scanning given as
   examples). Dependency graph and Dependabot alerts are included in all plans.
 - Billing model not described on this page (links to a billing page).
+
+### Features available on every plan
+
+Page: [GitHub security features](https://docs.github.com/en/code-security/getting-started/github-security-features),
+read 2026-11-12.
+
+- "The following security features are available for you to use, regardless of the GitHub plan you are on": dependency
+  graph, Dependabot alerts, Dependabot security updates ("choose whether to have pull requests generated automatically
+  to update these dependencies"), Dependabot version updates ("automatically raise pull requests to keep your
+  dependencies up-to-date"), push protection for users ("automatically protects you from accidentally committing
+  secrets to public repositories"), security advisories.
+- Secret scanning, listed under GitHub Secret Protection: "Available for public repositories by default."
+- Secret Protection and Code Security are for "accounts on GitHub Team and GitHub Enterprise Cloud".
+
+### Copilot code review
+
+Page: [GitHub Copilot code review](https://docs.github.com/en/copilot/concepts/agents/code-review), read 2026-11-11.
+
+- "Copilot reviews your pull requests, identifies issues, and suggests fixes you can apply in a couple of clicks."
+- Plans: automatic reviews on "the Copilot Pro, Copilot Pro+, and Copilot Max plans"; reviews for members without a
+  license: "available to organizations on Copilot Business and Copilot Enterprise plans"; "the Copilot Free plan,
+  which does not include Copilot code review."
+- Trigger: "By default, Copilot only reviews a pull request if you assign it to the pull request." "Repository owners
+  can configure Copilot to automatically review all pull requests in the repository". Rulesets and user settings
+  are two separate configurations, "not hierarchical". "Unless Copilot has been configured to review each push to a
+  pull request, it will only review a pull request once." Option "Review new pushes".
+- Billing: "Each time Copilot reviews a pull request or reviews code in your IDE, the interaction consumes AI
+  credits." Two cost components: AI credits and GitHub Actions minutes for agentic work. "Self-hosted runners do not
+  consume GitHub Actions minutes."
+- "By default, Copilot's reviews do not count toward required approvals for the pull request." (Can be enabled.)
+- Custom instructions: "short, natural-language statements that you write and store as one or more files in a
+  repository."
+- Preview: "Max review effort level is currently in public preview and subject to change." "Passing suggestions to
+  Copilot cloud agent is in public preview and subject to change." Azure DevOps support "(public preview)".
+- "Copilot is not guaranteed to spot all problems or issues in a pull request." Excludes dependency files, log files,
+  SVG files.
+- Related on the same page: GitHub Code Quality offers "Optional merge gating with rulesets, so pull requests with
+  unresolved rules-based findings" can be blocked (not researched further).
+
+### Copilot Autofix and agentic autofix
+
+Pages: [About autofix for code scanning](https://docs.github.com/en/code-security/concepts/code-scanning/autofix-for-code-scanning),
+[Managing access to agentic autofix](https://docs.github.com/en/code-security/how-tos/manage-security-alerts/manage-code-scanning-alerts/managing-access-to-agentic-autofix-for-code-scanning),
+[Application card: GitHub security and quality AI features](https://docs.github.com/en/code-security/code-scanning/managing-code-scanning-alerts/responsible-use-autofix-code-scanning),
+read 2026-11-11.
+
+- Two features, as named by the docs. "Use agentic autofix when you want Copilot to investigate and fix one or more
+  alerts for you, end to end." "Use Copilot Autofix when you want a single suggested code change for one alert that
+  you review and apply yourself."
+- Copilot Autofix: "available to all public repositories on GitHub.com", and to private or internal repositories with
+  GitHub Code Security. "Copilot Autofix suggested fixes don't consume AI credits." "Copilot Autofix is available for
+  CodeQL analysis and does not require a GitHub Copilot subscription." "allowed by default and enabled for every
+  repository using CodeQL". "Copilot Autofix uses a generative model that is non-deterministic." "You must always
+  review suggestions from Copilot Autofix and edit changes as needed before accepting them."
+- Agentic autofix: on an organization repository "an organization owner or security manager must enable it"; not for
+  repositories owned by Enterprise Managed Users. "Each agentic autofix agent session consumes AI credits and GitHub
+  Actions minutes." "Agentic Autofix works on a best-effort basis." "Copilot validates fixes by re-running CodeQL with
+  the code scanning query suite." It "can't confirm fixes for alerts from custom CodeQL queries, the
+  `security-extended` CodeQL query suite", nor for third-party tool alerts. After enabling, "users with write access
+  to the repository can assign code scanning alerts to Copilot." "If your organization used agentic autofix during
+  the public preview, you must enable it again." The docs pages read do not state GA; a GitHub changelog titled
+  "Agentic autofix for code scanning alerts general availability" (2026-10-15) appeared in search results, not opened.
+- Search summary (not verified on a page): only default-branch backlog alerts can be assigned; up to 25 alerts per
+  assignment from the backlog or a campaign.
+
+### Secret scanning and push protection
+
+Pages: [About secret scanning](https://docs.github.com/en/code-security/secret-scanning/introduction/about-secret-scanning),
+[About push protection](https://docs.github.com/en/code-security/secret-scanning/introduction/about-push-protection),
+read 2026-11-11.
+
+- "Secret scanning automatically detects credential leaks so you can secure them before they're exploited." "scans
+  your entire Git history on all branches of your repository", plus issues, pull request titles, descriptions and
+  comments, discussions, wikis, secret gists.
+- Public repositories: "Secret scanning runs automatically for free." Private and internal: "Available with GitHub
+  Secret Protection enabled on GitHub Team or GitHub Enterprise Cloud."
+- Push protection: "a secret scanning feature designed to prevent hardcoded credentials, such as secrets or tokens"
+  from being pushed. Surfaces: command line, commits in the GitHub UI, file uploads, REST API requests, GitHub MCP
+  server (public repositories only). Repository push protection "Requires GitHub Secret Protection to be enabled" and
+  "Is disabled by default." User push protection "Stops you from pushing secrets to public repositories on GitHub."
+  AI-detected secrets: public preview. "anyone with write access to the repository can bypass push protection by
+  specifying a bypass reason"; delegated bypass available.
+
+### Dependabot and dependency review
+
+Pages: [About Dependabot alerts](https://docs.github.com/en/code-security/dependabot/dependabot-alerts/about-dependabot-alerts),
+[About dependency review](https://docs.github.com/en/code-security/supply-chain-security/understanding-your-software-supply-chain/about-dependency-review),
+read 2026-11-11.
+
+- "Dependabot alerts help you find and fix vulnerable dependencies before they become security risks." Assigning
+  alerts (to an agent) needs Code Security or Advanced Security, "including for public repositories"; the agent
+  "opens a draft pull request with a proposed fix." "Dependabot doesn't scan archived repositories."
+- "Dependency review helps you understand dependency changes and the security impact of these changes at every pull
+  request." "By default, the dependency review action check will fail if it discovers any vulnerable packages." "The
+  action is available for all public repositories", and private repositories with Code Security or Advanced
+  Security. "Dependabot alerts will find vulnerabilities that are already in your dependencies."
+
+### Security campaigns
+
+Page: [About security campaigns](https://docs.github.com/en/code-security/concepts/security-at-scale/about-security-campaigns),
+read 2026-11-12.
+
+- "Security campaigns are a way to group alerts and share them with developers." Code scanning alerts: default branch
+  only. "Campaigns for secret scanning alerts are currently in public preview and are subject to change."
+- "For code scanning alerts, GitHub Copilot Autofix is automatically triggered to suggest a resolution." With agentic
+  autofix, "you can select up to 25 code scanning alerts in a security campaign and assign them to Copilot." "One
+  assignment starts one agent session and creates one pull request for the selected alerts."
+- Plans: listed under both Secret Protection and Code Security on the Advanced Security page. Search summary (not
+  verified on a page): limit of 10 active campaigns, 1000 alerts per campaign.
