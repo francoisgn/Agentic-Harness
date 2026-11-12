@@ -19,6 +19,7 @@ Why this mechanism (vendoring + plugin + reusable workflows) and its limits: [AD
 | `.harness/scripts/readme-progress.py` | copy | Harness: README progress table generated from the issues (`/readme-update`) |
 | `.harness/scripts/issue-reconcile.py` | copy | Harness: `status:` labels brought in line with issues, PRs and claims, no workflow needed (session start, after a merge, `issue-reconcile.yml`); imports `readme-progress.py` |
 | `.harness/scripts/decisions-check.py` | copy | Harness: `docs/DECISIONS.md` has at most one decision in force per scope key (`docs-security.yml`, input `decisions`) |
+| `.harness/scripts/job-timeout.py` | copy | Harness: every job of `.github/workflows/` that runs steps has `timeout-minutes` (`docs-security.yml`, input `job-timeout`; exceptions and ceiling in `.harness/config.json` › `job_timeout`) |
 | `.harness/scripts/orch-state.py`, `.harness/templates/child-report.md` | copy | Harness: the orchestrator's State comment on its memory issue, and the report template a child posts on its PR ([ORCHESTRATION](ORCHESTRATION.md) §8); the script needs `decisions-check.py` and `flow-metrics.py` next to it |
 | `.harness/scripts/doc-steward.py` | copy | Harness: doc steward's "anything to fold?" decision, the one-fold-at-a-time guard (`fold-guard`), the `note` helper, docs PR body and weekly audit issues (`doc-steward.yml`) |
 | `.claude/settings.json` | merge | Project; the harness only **adds** its two hooks if they are missing |

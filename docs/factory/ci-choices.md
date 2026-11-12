@@ -83,7 +83,7 @@ Each choice: what the harness does, why, what it costs, and what else is reasona
 
 | | |
 |---|---|
-| **Does** | Read-only rights at the top, write only on the job that needs it; actions pinned by full SHA, kept current by Dependabot; `concurrency` that cancels on PRs, never on a protected branch; `timeout-minutes` on every job; `persist-credentials: false` and no event `${{ … }}` inside `run:`; nothing on a draft and required checks that pass without a secret ([CI-BASELINE §2](../CI-BASELINE.md#2-the-six-invariants-of-every-workflow), [CI-BUDGET §3](../CI-BUDGET.md#3-security-baseline) "Workflow hygiene"). zizmor and actionlint check them in CI. |
+| **Does** | Read-only rights at the top, write only on the job that needs it; actions pinned by full SHA, kept current by Dependabot; `concurrency` that cancels on PRs, never on a protected branch; `timeout-minutes` on every job; `persist-credentials: false` and no event `${{ … }}` inside `run:`; nothing on a draft and required checks that pass without a secret ([CI-BASELINE §2](../CI-BASELINE.md#2-the-six-invariants-of-every-workflow), [CI-BUDGET §3](../CI-BUDGET.md#3-security-baseline) "Workflow hygiene"). zizmor, actionlint and `job-timeout.py` check them in CI, except `concurrency` and the two last rules, left to review. |
 | **Why** | A tag can move; a compromised workflow with read-only rights cannot write; event text pasted into a shell is an injection. A job without a timeout can hold a runner for 360 minutes (§1). Cancellation means a new push pays for one run, not two. |
 | **Costs** | Longer workflow files, Dependabot pull requests for SHA bumps, and two linters in tier 0. |
 | **Else** | Tags instead of SHAs for actions from publishers you trust, accepting that a tag can move. |

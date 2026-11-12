@@ -2,8 +2,8 @@ name: Docs and security (reusable)
 
 # Free baseline, no third-party account (CI-BUDGET.md §Security), in ONE job: markdownlint (tables and anchors), README
 # at the harness standard, relative links and cross-file anchors in Markdown, operator decisions file,
-# gitleaks (history), zizmor and actionlint (workflows). Each tool runs even if the previous one fails: a
-# single run gives every finding. Nothing runs on a draft.
+# gitleaks (history), zizmor, actionlint and timeout-minutes on every job (workflows). Each tool runs even if the
+# previous one fails: a single run gives every finding. Nothing runs on a draft.
 # Disable what the project already covers elsewhere (inputs), so as not to pay twice.
 on:
   workflow_call:
@@ -30,6 +30,10 @@ on:
         default: true
       decisions:
         description: docs/DECISIONS.md has at most one decision in force per scope key, a date and a source on every row (decisions-check.py); skipped if the file is absent or the script is not vendored
+        type: boolean
+        default: true
+      job-timeout:
+        description: Every job of .github/workflows that runs steps has timeout-minutes (job-timeout.py, CI-BASELINE.md §2); skipped if the script is not vendored
         type: boolean
         default: true
 
@@ -92,3 +96,9 @@ jobs:
       - name: Workflows · actionlint (+ shellcheck of run:)
         if: ${{ !cancelled() && inputs.actionlint }}
         run: docker run --rm -v "$PWD":/repo -w /repo rhysd/actionlint:1.7.7 -color
+
+      - name: Workflows · timeout-minutes on every job
+        if: ${{ !cancelled() && inputs.job-timeout }}
+        run: |
+          if [ ! -f .harness/scripts/job-timeout.py ]; then echo "::notice::job-timeout.py not vendored: check skipped"; exit 0; fi
+          python3 .harness/scripts/job-timeout.py

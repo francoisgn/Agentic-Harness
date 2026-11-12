@@ -83,6 +83,10 @@ jobs:
         # The templates reference the harness by tag; harness-sync.sh pins them by SHA in the consumer project (tested).
         run: pipx run zizmor==1.31.1 --offline --min-severity low .github/workflows
 
+      - name: Workflows · timeout-minutes on every job
+        if: ${{ !cancelled() }}
+        run: python3 scripts/job-timeout.py && python3 scripts/job-timeout.py --dir templates/.github/workflows
+
       - name: Markdown (tables, anchors)
         if: ${{ !cancelled() }}
         run: npx --yes markdownlint-cli2@0.18.1

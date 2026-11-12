@@ -176,6 +176,9 @@ CMD
 step "Workflows · zizmor" "pipx" ".github/workflows/*" <<'CMD'
 pipx run zizmor==1.31.1 --offline --min-severity low .github/workflows
 CMD
+step "Workflows · timeout-minutes on every job" "python3" ".github/workflows/* templates/.github/workflows/* scripts/job-timeout.py .harness/config.json" <<'CMD'
+python3 scripts/job-timeout.py && python3 scripts/job-timeout.py --dir templates/.github/workflows
+CMD
 step "Markdown (tables, anchors)" "npx" "*.md .markdownlint-cli2.jsonc" <<'CMD'
 npx --yes markdownlint-cli2@0.18.1
 CMD
