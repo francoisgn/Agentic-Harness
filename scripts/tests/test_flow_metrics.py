@@ -3,6 +3,7 @@
 Run: python3 -m unittest discover -s scripts/tests -p 'test_*.py'
 """
 import importlib.util
+import io
 import json
 import pathlib
 import subprocess
@@ -230,6 +231,7 @@ class CollectTests(unittest.TestCase):
         self.assertTrue(any("issues/7/comments" in c for c in calls))
         self.assertTrue(any("pulls/7/commits" in c for c in calls))
         self.assertEqual(data["pulls"][0]["reviews"], [])  # otherwise pagination of the whole history
+        self.assertEqual(data["runs_query"], [c for c in calls if "/actions/runs?" in c][0])  # CI health counts it
 
 
 def review(login, state, body="", at="2026-11-05T02:00:00Z"):
@@ -604,6 +606,16 @@ class CiHealthTests(unittest.TestCase):
         r = self.analyse([crun(1)], {}, runs_cut="1000 of 1500 runs listed")
         self.assertIn("1000 of 1500", r["ci_health"]["flaky"]["error"])
 
+    def test_timed_out_then_green_is_flagged(self):
+        r = self.analyse([crun(1, attempt=2)], {1: [cjob("tests", "timed_out", 1), cjob("tests", "success", 2)]})
+        self.assertEqual([i["job"] for i in r["ci_health"]["flaky"]["items"]], ["tests"])
+
+    def test_pending_run_waits_for_its_concurrency_group_and_is_not_stuck(self):
+        pending = crun(5, status="pending", conclusion=None, created="2026-11-07T08:00:00Z")
+        r = self.analyse([pending], {5: []})
+        self.assertEqual(r["ci_health"]["stuck"]["queued"], [])
+        self.assertEqual(r["status"], "🟢")
+
     def test_candidates_beyond_the_budget_are_counted_unchecked(self):
         runs = [crun(k, sha=f"s{k}", attempt=2) for k in range(1, 4)]
         r = self.analyse(runs, {1: [cjob("t")]}, unfetched={"2": "budget", "3": "budget"})
@@ -689,6 +701,34 @@ class CiHealthCollectTests(unittest.TestCase):
             path.write_text("{")
             with self.assertRaises(ValueError):
                 fm.load_ci_config(str(path))
+
+    def test_main_with_an_unreadable_config_still_reports_and_says_could_not_check(self):
+        with tempfile.TemporaryDirectory() as d:
+            path = pathlib.Path(d, "config.json")
+            path.write_text(json.dumps({"ci_health": {"long_job_minute": 5}}))
+            data = {"issues": [], "pulls": [], "runs": [crun(1)], "milestones": [], "runs_query": "x"}
+            out = io.StringIO()
+            with mock.patch.object(fm, "collect", return_value=data), \
+                    mock.patch.object(fm, "collect_ci_health", side_effect=AssertionError("no API call")), \
+                    mock.patch.object(sys, "stdout", out):
+                self.assertEqual(fm.main(["--repo", "o/r", "--now", NOW, "--config", str(path)]), 0)
+        section = out.getvalue().split("## CI health", 1)[1]
+        self.assertIn("could not check: config unreadable", section)
+        self.assertIn("long_job_minute", section)
+
+    def test_main_passes_config_and_runs_query_to_collect_ci_health(self):
+        with tempfile.TemporaryDirectory() as d:
+            path = pathlib.Path(d, "config.json")
+            path.write_text(json.dumps({"integration_branch": "dev", "ci_health": {"max_job_requests": 7}}))
+            data = {"issues": [], "pulls": [], "runs": [], "milestones": [], "runs_query": "repos/o/r/actions/runs?q"}
+            health = ci_data([], {}, branch="dev")
+            with mock.patch.object(fm, "collect", return_value=data), \
+                    mock.patch.object(fm, "collect_ci_health", return_value=health) as spy, \
+                    mock.patch.object(sys, "stdout", io.StringIO()):
+                fm.main(["--repo", "o/r", "--now", NOW, "--config", str(path)])
+        args, kwargs = spy.call_args
+        self.assertEqual((args[0], args[3]["max_job_requests"], args[4], kwargs["runs_query"]),
+                         ("o/r", 7, "dev", "repos/o/r/actions/runs?q"))
 
 
 if __name__ == "__main__":

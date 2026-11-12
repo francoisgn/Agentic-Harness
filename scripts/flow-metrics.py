@@ -8,8 +8,18 @@ Read-only; publishing the report (issue "Project dashboard") is the job of the f
 Usage:
   flow-metrics.py --repo owner/name [--format md|json] [--stall-hours 24] [--draft-stall-hours 120]
                   [--max-ci-runs 6] [--max-review-rounds 3] [--window-days 14] [--json-out f]
+                  [--config .harness/config.json]
   flow-metrics.py --input data.json --now 2026-11-07T12:00:00Z
 Standard library only (Python >= 3.9).
+
+CI health (FINOPS.md §4): jobs that passed only on a re-run, the red rate per job on the integration branch, jobs
+running too long and runs queued with zero jobs. Thresholds: `.harness/config.json` › `ci_health` (CI_DEFAULTS).
+Extra GET requests per report: at most 3 + `max_job_requests` (workflows, runs count, default branch when no
+`integration_branch` is set, one job list per candidate run). Never cancels, re-runs or deletes anything.
+API (REST 2022-11-28, read 2026-11-12): docs.github.com/en/rest/actions/workflow-runs (`run_attempt`, `head_sha`,
+`status`, `conclusion`; a filtered list returns "up to 1,000 results for each search"),
+docs.github.com/en/rest/actions/workflow-jobs (`filter=all` "returns all jobs for a workflow run, including from old
+executions of the workflow run"; `per_page` max 100), docs.github.com/en/rest/actions/workflows (`state`).
 """
 import argparse
 import calendar
@@ -152,6 +162,245 @@ def _hours(seconds):
     return seconds / 3600
 
 
+# --- CI health (FINOPS.md §4): passed only on re-run, integration branch red rate, long or stuck ---------------------
+# `.harness/config.json` › `ci_health`, whole numbers >= 0. A run's `timeout-minutes` is not in the API, hence a
+# threshold of our own for a long job. `max_job_requests` bounds the job lists read per report.
+CI_DEFAULTS = {"long_job_minutes": 60, "queued_no_job_minutes": 30, "red_rate_percent": 20, "max_job_requests": 50}
+RED = ("failure", "timed_out")   # a job that ran and did not pass; cancelled, skipped and neutral say nothing
+GREEN = ("success",)
+JOBS_PER_PAGE = 100
+# Runs created between the paginated listing and the count request are not a list cut short
+RUNS_RACE_SLACK = 5
+
+
+def load_ci_config(path):
+    """(ci_health thresholds, integration branch or None) from `.harness/config.json`.
+
+    A missing file means the defaults. An unreadable file, an unknown `ci_health` key, or a value that is not a whole
+    number >= 0 (`red_rate_percent` <= 100) raises ValueError: a typo never silently falls back to a default.
+    """
+    try:
+        with open(path, encoding="utf-8") as f:
+            data = json.load(f)
+    except FileNotFoundError:
+        return dict(CI_DEFAULTS), None
+    except (OSError, ValueError) as e:
+        raise ValueError(f"{path}: {e}") from None
+    if not isinstance(data, dict):
+        raise ValueError(f"{path}: a JSON object was expected")
+    section = data.get("ci_health", {})
+    if not isinstance(section, dict):
+        raise ValueError(f"{path}: `ci_health` must be an object")
+    unknown = sorted(set(section) - set(CI_DEFAULTS))
+    if unknown:
+        raise ValueError(f"{path}: unknown `ci_health` key(s) {', '.join(unknown)} (known: {', '.join(CI_DEFAULTS)})")
+    cfg = dict(CI_DEFAULTS)
+    for key, value in section.items():
+        if isinstance(value, bool) or not isinstance(value, int) or value < 0 or \
+                (key == "red_rate_percent" and value > 100):
+            raise ValueError(f"{path}: `ci_health.{key}` must be a whole number >= 0"
+                             + (" and <= 100" if key == "red_rate_percent" else ""))
+        cfg[key] = value
+    branch = data.get("integration_branch")
+    return cfg, branch if isinstance(branch, str) and branch else None
+
+
+def _minutes(now, stamp):
+    return (now - parse_time(stamp)) / 60 if stamp else 0.0
+
+
+def _classified(runs, workflows):
+    """(runs that can be classified, count of the others): a run of a deleted or unknown workflow, or without
+    `head_sha`, is left out of every CI health signal."""
+    known = {w.get("id") for w in workflows if w.get("state") != "deleted"}
+    kept = [r for r in runs if r.get("head_sha") and r.get("workflow_id") in known and r.get("id") is not None]
+    return kept, len(runs) - len(kept)
+
+
+def ci_candidates(runs, now, cfg, branch):
+    """Ids of the runs whose job list each signal needs, by priority: {"stuck", "flaky", "red"}.
+
+    stuck: `queued` older than `queued_no_job_minutes` (a `pending` run waits for its concurrency group, a `waiting`
+    one for an approval: neither is stuck), or `in_progress` since longer than `long_job_minutes`.
+    flaky: completed runs re-run (`run_attempt` > 1), and completed runs sharing workflow and commit with a red one.
+    red: completed push runs on the integration branch (cancelled or skipped left out), newest first.
+    """
+    stuck, flaky, red, groups = [], [], [], {}
+    for r in runs:
+        status = r.get("status")
+        if status == "queued" and _minutes(now, r.get("created_at")) > cfg["queued_no_job_minutes"]:
+            stuck.append(r["id"])
+        elif status == "in_progress" and \
+                _minutes(now, r.get("run_started_at") or r.get("created_at")) > cfg["long_job_minutes"]:
+            stuck.append(r["id"])
+        if status != "completed":
+            continue
+        if (r.get("run_attempt") or 1) > 1:
+            flaky.append(r["id"])
+        groups.setdefault((r["workflow_id"], r["head_sha"]), []).append(r)
+        if branch and r.get("head_branch") == branch and r.get("event") == "push" and \
+                r.get("conclusion") not in ("cancelled", "skipped"):
+            red.append(r)
+    for group in groups.values():
+        if len(group) > 1 and any(g.get("conclusion") in RED for g in group):
+            flaky += [g["id"] for g in group if g["id"] not in flaky]
+    red.sort(key=lambda r: r.get("created_at") or "", reverse=True)
+    return {"stuck": stuck, "flaky": flaky, "red": [r["id"] for r in red]}
+
+
+def _gh_get(path):
+    """One GET through `gh api` (no pagination): the JSON answer."""
+    out = subprocess.run(["gh", "api", path], capture_output=True, text=True, check=True).stdout
+    return json.loads(out)
+
+
+def _describe(error):
+    if isinstance(error, subprocess.CalledProcessError):
+        return f"gh api: {(error.stderr or '').strip() or error}"
+    return f"{type(error).__name__}: {error}"
+
+
+def collect_ci_health(repo, runs, now, cfg, branch, window_days, runs_query, get=None):
+    """Job lists the CI health signals need, read with at most 3 + `max_job_requests` GET requests.
+
+    `get(path) -> JSON` is injected by the tests (default: `gh api`). Read-only: nothing is cancelled, re-run or
+    deleted. Any error stops the reading and is recorded (`error`): the signals then say "could not check".
+    `window_days` is the window the runs were listed over (kept in the result for the reader).
+    """
+    get = get or _gh_get
+    out = {"integration_branch": branch, "workflows": [], "jobs": {}, "unfetched": {}, "error": None,
+           "runs_cut": None, "requests": 0, "thresholds": dict(cfg), "window_days": window_days}
+
+    def call(path):
+        out["requests"] += 1
+        answer = get(path)
+        if not isinstance(answer, dict):
+            raise ValueError(f"{path}: a JSON object was expected")
+        return answer
+
+    try:
+        listed = call(f"repos/{repo}/actions/workflows?per_page=100").get("workflows") or []
+        out["workflows"] = [{"id": w.get("id"), "name": w.get("name"), "state": w.get("state")} for w in listed]
+        # A filtered run list stops at 1,000 results (REST docs): compare with the count GitHub gives
+        total = call(re.sub(r"per_page=\d+", "per_page=1", runs_query)).get("total_count")
+        if isinstance(total, int) and total > len(runs) + RUNS_RACE_SLACK:
+            out["runs_cut"] = f"{len(runs)} of {total} runs listed"
+        if not branch:
+            out["integration_branch"] = call(f"repos/{repo}").get("default_branch")
+        kept, _ = _classified(runs, out["workflows"])
+        cand = ci_candidates(kept, now, cfg, out["integration_branch"])
+        wanted = list(dict.fromkeys(cand["stuck"] + cand["flaky"] + cand["red"]))
+        for k, rid in enumerate(wanted):
+            if k >= cfg["max_job_requests"]:
+                out["unfetched"][str(rid)] = "budget"
+                continue
+            page = call(f"repos/{repo}/actions/runs/{rid}/jobs?filter=all&per_page={JOBS_PER_PAGE}")
+            jobs = page.get("jobs")
+            if not isinstance(jobs, list):
+                raise ValueError(f"run {rid}: no job list in the answer")
+            count = page.get("total_count", len(jobs))
+            if isinstance(count, int) and count > len(jobs):
+                out["unfetched"][str(rid)] = f"{len(jobs)} of {count} jobs listed"
+                continue
+            out["jobs"][str(rid)] = [{key: j.get(key) for key in
+                                      ("name", "status", "conclusion", "run_attempt", "started_at", "html_url")}
+                                     for j in jobs]
+    except (subprocess.CalledProcessError, OSError, ValueError, AttributeError, TypeError) as e:
+        out["error"] = _describe(e)
+    return out
+
+
+def _red_then_green(events):
+    """True if a red execution is followed by a green one (events sorted in time order)."""
+    seen_red = False
+    for *_, conclusion in events:
+        if conclusion in RED:
+            seen_red = True
+        elif conclusion in GREEN and seen_red:
+            return True
+    return False
+
+
+def ci_health(data, now):
+    """The three CI health signals from `data["ci_health"]` (collect_ci_health) and `data["runs"]`."""
+    ci = data.get("ci_health")
+    if not isinstance(ci, dict):
+        ci = {"error": "no job data (the input has no `ci_health`)"}
+    cfg = {**CI_DEFAULTS, **(ci.get("thresholds") or {})}
+    branch = ci.get("integration_branch")
+    jobs = ci.get("jobs") or {}
+    workflows = ci.get("workflows") or []
+    errors = [e for e in (ci.get("error"),
+                          ci.get("runs_cut") and f"run list cut short ({ci['runs_cut']})") if e]
+    error = "; ".join(errors) or None
+    runs, not_classified = _classified(data.get("runs", []), workflows)
+    if not workflows:
+        not_classified = 0   # nothing could be classified: the error says why
+    cand = ci_candidates(runs, now, cfg, branch)
+    by_id = {str(r["id"]): r for r in runs}
+    names = {w.get("id"): w.get("name") for w in workflows}
+
+    def unchecked(ids):
+        return sum(1 for rid in ids if str(rid) not in jobs)
+
+    # Passed only on re-run: per (workflow, job name), the commits where a red execution was followed by a green one
+    seq = {}
+    for rid in cand["flaky"]:
+        r = by_id[str(rid)]
+        for j in jobs.get(str(rid), []):
+            seq.setdefault((r["workflow_id"], j.get("name")), {}).setdefault(r["head_sha"], []).append(
+                (r.get("created_at") or "", j.get("run_attempt") or 1, r.get("html_url"), j.get("conclusion")))
+    flaky = []
+    for (wf, job), by_sha in seq.items():
+        hits = [sorted(ev) for ev in by_sha.values() if _red_then_green(sorted(ev))]
+        if hits:
+            flaky.append({"workflow": names.get(wf) or str(wf), "job": job, "commits": len(hits),
+                          "url": hits[-1][-1][2]})
+    flaky.sort(key=lambda i: (-i["commits"], i["workflow"], i["job"] or ""))
+
+    # Integration branch red rate: per (workflow, job name), red / (red + green) executions over the push runs
+    counts, checked = {}, 0
+    for rid in cand["red"]:
+        if str(rid) not in jobs:
+            continue
+        checked += 1
+        r = by_id[str(rid)]
+        for j in jobs[str(rid)]:
+            c = j.get("conclusion")
+            if c in RED or c in GREEN:
+                t = counts.setdefault((names.get(r["workflow_id"]) or str(r["workflow_id"]), j.get("name")), [0, 0])
+                t[0] += c in RED
+                t[1] += 1
+    red = [{"workflow": wf, "job": job, "failures": f, "total": t, "percent": round(100 * f / t)}
+           for (wf, job), (f, t) in counts.items() if 100 * f > cfg["red_rate_percent"] * t]
+    red.sort(key=lambda i: (-i["percent"], i["workflow"], i["job"] or ""))
+
+    # Long or stuck: a job in progress over the threshold; a queued run with zero jobs over the threshold
+    queued, long_jobs = [], []
+    for rid in cand["stuck"]:
+        r, js = by_id[str(rid)], jobs.get(str(rid))
+        if js is None:
+            continue
+        common = {"run_id": r["id"], "workflow": names.get(r["workflow_id"]) or str(r["workflow_id"]),
+                  "branch": r.get("head_branch"), "url": r.get("html_url"),
+                  "integration": bool(branch) and r.get("head_branch") == branch and r.get("event") != "pull_request"}
+        if r.get("status") == "queued":
+            if not js:
+                queued.append({**common, "minutes": round(_minutes(now, r.get("created_at")))})
+            continue
+        for j in js:
+            if j.get("status") == "in_progress" and _minutes(now, j.get("started_at")) > cfg["long_job_minutes"]:
+                long_jobs.append({**common, "job": j.get("name"), "url": j.get("html_url") or r.get("html_url"),
+                                  "minutes": round(_minutes(now, j.get("started_at")))})
+
+    return {"integration_branch": branch, "not_classified": not_classified, "requests": ci.get("requests", 0),
+            "thresholds": cfg,
+            "flaky": {"items": flaky, "error": error, "unchecked": unchecked(cand["flaky"])},
+            "red": {"items": red, "error": error, "unchecked": unchecked(cand["red"]), "checked": checked,
+                    "candidates": len(cand["red"])},
+            "stuck": {"queued": queued, "long": long_jobs, "error": error, "unchecked": unchecked(cand["stuck"])}}
+
+
 def analyse(data, now, stall_hours=24, draft_stall_hours=120, max_ci_runs=6, max_review_rounds=3, window_days=14,
             max_problem_ratio=50):
     """Compute the report from {"issues", "pulls", "runs"} (shapes of the GitHub REST API)."""
@@ -254,9 +503,15 @@ def analyse(data, now, stall_hours=24, draft_stall_hours=120, max_ci_runs=6, max
     high_problem = (q["problem_ratio"] is not None and q["reviewed"] >= MIN_QUALITY_SAMPLE
                     and q["problem_ratio"] > max_problem_ratio)
 
-    if any(s["high_priority"] for s in stalled) or loops:
+    health = ci_health(data, now)
+    ci_amber = bool(health["flaky"]["items"] or health["red"]["items"] or health["stuck"]["queued"]
+                    or health["stuck"]["long"])
+    # A job stuck on the integration branch blocks every PR behind it: red. The rest is a signal to look at: amber.
+    ci_red = any(i["integration"] for i in health["stuck"]["long"])
+
+    if any(s["high_priority"] for s in stalled) or loops or ci_red:
         status = "🔴"
-    elif stalled or bottlenecks or high_problem or status_anomalies:
+    elif stalled or bottlenecks or high_problem or status_anomalies or ci_amber:
         status = "🟠"
     else:
         status = "🟢"
@@ -282,6 +537,7 @@ def analyse(data, now, stall_hours=24, draft_stall_hours=120, max_ci_runs=6, max
                # Every job is rounded up to the minute (CI-BUDGET.md §1): without the job details, lower bound per run.
                "billed_minutes_min": sum(max(1, math.ceil(d)) for d in durations),
                "failure_rate": round(100 * len(failures) / len(finished)) if finished else 0},
+        "ci_health": health,
         "thresholds": {"stall_hours": stall_hours, "draft_stall_hours": draft_stall_hours,
                        "max_ci_runs": max_ci_runs, "max_review_rounds": max_review_rounds, "window_days": window_days,
                        "max_problem_ratio": max_problem_ratio},
@@ -347,6 +603,7 @@ def render_markdown(r, repo):
         out += [f"| #{lp['number']} | {_cell(lp['title'])} | {lp['kind']} | {lp['count']} |" for lp in r["loops"]]
     else:
         out.append("- Nothing.")
+    out += render_ci_health(r["ci_health"])
     q = r["quality"]
     out += ["", "## First-pass quality", ""]
     if q["reviewed"]:
@@ -378,9 +635,67 @@ def render_markdown(r, repo):
     t = r["thresholds"]
     out += ["", f"_Thresholds: idle {t['stall_hours']} h (draft {t['draft_stall_hours']} h), "
                 f"CI loop > {t['max_ci_runs']} tested pushes, review loop > {t['max_review_rounds']} reviews, "
-                f"PRs with a problem > {t['max_problem_ratio']}% (from {MIN_QUALITY_SAMPLE} reviewed PRs). "
+                f"PRs with a problem > {t['max_problem_ratio']}% (from {MIN_QUALITY_SAMPLE} reviewed PRs), "
+                f"CI health: `.harness/config.json` › `ci_health` ({r['ci_health']['requests']} extra API requests). "
                 "How to read it: FINOPS.md §4 of Belayline._", ""]
     return "\n".join(out)
+
+
+def _signal_tail(signal, found):
+    """"Nothing" only when everything was checked; otherwise say what could not be checked, never "none"."""
+    lines = []
+    if signal["error"]:
+        lines.append(f"- could not check: {_cell(signal['error'])}.")
+    if signal["unchecked"]:
+        lines.append(f"- could not check {signal['unchecked']} run(s): request budget reached or job list cut short "
+                     "(`ci_health.max_job_requests`).")
+    if not found and not lines:
+        lines.append("- Nothing.")
+    return lines
+
+
+def render_ci_health(h):
+    """The "CI health" section: read-only signals, each with the playbook action (REVIEW-ROUNDS.md §CI playbook)."""
+    t = h["thresholds"]
+    branch = f"`{h['integration_branch']}`" if h["integration_branch"] else "the integration branch"
+    out = ["", "## CI health", "", "Read from the Actions API; the dashboard never cancels, re-runs or deletes "
+           "anything. What to do: REVIEW-ROUNDS.md, CI playbook.", "",
+           "### Passed only on re-run", ""]
+    flaky = h["flaky"]
+    if flaky["items"]:
+        out += ["| Job | Commits red then green | Last run |", "|---|---|---|"]
+        out += [f"| {_cell(i['workflow'])} / {_cell(i['job'])} | {i['commits']} | "
+                + (f"[run]({i['url']})" if i["url"] else "—") + " |" for i in flaky["items"]]
+        out += ["", "Flaky, not fixed: open one `type: bug` issue per job (search for an open one with the job name "
+                "first), never re-run until green."]
+    out += _signal_tail(flaky, flaky["items"])
+    red = h["red"]
+    out += ["", f"### Red rate on {branch} (push runs, above {t['red_rate_percent']}%)", ""]
+    if red["items"]:
+        out += ["| Job | Red (failures / runs) |", "|---|---|"]
+        out += [f"| {_cell(i['workflow'])} / {_cell(i['job'])} | {i['percent']}% ({i['failures']}/{i['total']}) |"
+                for i in red["items"]]
+        out += ["", "Base red: fix it first; do not re-run PRs that fail on the same job meanwhile."]
+    if red["candidates"]:
+        out.append(f"- Over {red['checked']} of {red['candidates']} push run(s).")
+    out += _signal_tail(red, red["items"])
+    stuck = h["stuck"]
+    out += ["", f"### Long or stuck (job over {t['long_job_minutes']} min, run queued with no job over "
+                f"{t['queued_no_job_minutes']} min)", ""]
+    if stuck["long"]:
+        out += ["| Job | Branch | Running for |", "|---|---|---|"]
+        out += [f"| {_cell(i['workflow'])} / {_cell(i['job'])}{' 🔴' if i['integration'] else ''} | "
+                f"{_cell(i['branch'] or '—')} | {i['minutes']} min |" for i in stuck["long"]]
+    if stuck["queued"]:
+        out += ["", f"{len(stuck['queued'])} run(s) queued with no job (cancel may answer 409: report the run ids "
+                "to GitHub Support; the PR moves on with a new event, see the playbook):", "",
+                "| Run | Workflow | Branch | Queued for |", "|---|---|---|---|"]
+        out += [f"| [{i['run_id']}]({i['url']}) | {_cell(i['workflow'])} | {_cell(i['branch'] or '—')} | "
+                f"{i['minutes']} min |" for i in stuck["queued"]]
+    out += _signal_tail(stuck, stuck["long"] or stuck["queued"])
+    if h["not_classified"]:
+        out += ["", f"- {h['not_classified']} run(s) not classified (deleted workflow or no commit sha)."]
+    return out
 
 
 def _gh(path):
@@ -409,8 +724,9 @@ def collect(repo, window_days):
             p["reviews"] = _gh(f"repos/{repo}/pulls/{p['number']}/reviews?per_page=100")
             p["comments"] = _gh(f"repos/{repo}/issues/{p['number']}/comments?per_page=100")
             p["commits"] = _gh(f"repos/{repo}/pulls/{p['number']}/commits?per_page=100")
-    runs = _gh(f"repos/{repo}/actions/runs?per_page=100&created=>={since[:10]}")
-    return {"issues": issues, "pulls": pulls, "runs": runs, "milestones": milestones}
+    runs_query = f"repos/{repo}/actions/runs?per_page=100&created=>={since[:10]}"
+    runs = _gh(runs_query)
+    return {"issues": issues, "pulls": pulls, "runs": runs, "milestones": milestones, "runs_query": runs_query}
 
 
 def main(argv=None):
@@ -428,13 +744,22 @@ def main(argv=None):
     ap.add_argument("--window-days", type=int, default=14)
     ap.add_argument("--max-problem-ratio", type=int, default=50,
                     help="%% of PRs with a problem above which the status turns 🟠")
+    ap.add_argument("--config", default=".harness/config.json",
+                    help="project settings: `ci_health` thresholds and `integration_branch` (missing file: defaults)")
     a = ap.parse_args(argv)
     if a.input:
         with open(a.input, encoding="utf-8") as f:
             data = json.load(f)
-    else:
-        data = collect(a.repo, a.window_days)
     now = parse_time(a.now) if a.now else time.time()
+    if not a.input:
+        data = collect(a.repo, a.window_days)
+        try:
+            cfg, branch = load_ci_config(a.config)
+        except ValueError as e:   # the rest of the dashboard still runs; the CI health says why it could not check
+            data["ci_health"] = {"error": f"config unreadable ({e})", "thresholds": dict(CI_DEFAULTS)}
+        else:
+            data["ci_health"] = collect_ci_health(a.repo, data["runs"], now, cfg, branch, a.window_days,
+                                                  runs_query=data["runs_query"])
     report = analyse(data, now, a.stall_hours, a.draft_stall_hours, a.max_ci_runs, a.max_review_rounds, a.window_days,
                      a.max_problem_ratio)
     if a.json_out:
