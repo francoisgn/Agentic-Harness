@@ -9,6 +9,15 @@ their work. Review, CI minutes, scanners and accounts then become the limit, not
 says what breaks, what the harness chose in response, and what else is reasonable. Each part is one page for one
 audience; the facts about outside products are sourced and dated in the parts, not here.
 
+![A hand-drawn cutaway of a motorway seen from above at an angle, with labels around it. Cars, the agents, drive on three lanes painted roadmap, improvement and nice-to-have. An on-ramp joins from the left: issue with intent, identity, spawn. A board at the roadside carries the signs set by a human: roadmap, milestones, intent of each lot. A toll gantry marked CI crosses the road, sized to the risk and run only when needed, with cars queuing before it. Past the toll, three trucks drive as a convoy: a lot by intent, one review, one CI. A drift exit leaves on the right: an argued brief, a human decides. A radar stands for automatic watching (dashboard, scanners, loop bounds), a police car for manual watching (adversarial review, human arbitration), cones for upkeep (stale pull requests, rebase, labels, docs). At the far end a gantry marked exit and merge: review, then merge into the main branch, big lots one by one. The cut shows three layers under the road: docs kept alive, tests and checks, rules and intent](../diagrams/factory-motorway.svg)
+
+**The picture to keep: a motorway.** Agents drive themselves, and that works only on a clean road. The signs (the
+roadmap, its milestones, the intent of each lot) are set by a human. The road slows where its ramps saturate
+(identity, spawning: parts 5 and 6), where tolls are too frequent or badly sized (CI: parts 2 and 4) and where the
+exit is too narrow (review and merge: parts 1 and 3). It needs automatic watching (radar), manual watching (police)
+and upkeep. The lanes, the drift exit and the convoy name what a large project needs; the harness does not ship
+them yet ([#102](https://github.com/francoisgn/belayline-agentic-harness/issues/102)).
+
 | Part | Question it answers | For whom | File | Status |
 |---|---|---|---|---|
 | 1. The pace | Why must the factory be rethought: what does the volume of pull requests break? | anyone who runs or pays for a factory | [`pace.md`](pace.md) ([#82](https://github.com/francoisgn/belayline-agentic-harness/issues/82)) | 🟢 available |
