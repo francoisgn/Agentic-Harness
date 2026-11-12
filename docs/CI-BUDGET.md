@@ -6,12 +6,20 @@ Sources: `ci.yml`, ADR 0005 (and its amendment of 5 November, #477), `CONTRIBUTI
 of HFRnow; practice proven on other projects (CI and security workflows, local CI script).
 
 ## 1. The two billing rules
-On a private repository, the free quota is 2,000 minutes per month, and:
-- **one macOS minute counts as 10**;
+
+> **Last checked: 2026-11-12**, on [GitHub Actions billing](https://docs.github.com/en/billing/concepts/product-billing/github-actions)
+> and [Actions runner pricing](https://docs.github.com/en/billing/reference/actions-runner-pricing). Prices and
+> plans change: re-read both pages before you budget.
+
+On a private repository, GitHub includes an amount of money per month, not a number of minutes ("The included
+compute usage is expressed as a monetary amount"): $12 on Free, $18 on Pro and Team, $300 on Enterprise Cloud. Each
+job is then priced per minute by runner: Linux 2-core $0.006, Windows 2-core $0.010, macOS $0.062. Two rules follow:
+
+- **one macOS minute costs about ten Linux minutes**;
 - **every job is rounded up to the next minute** (a 7 s job costs 1 min).
 
-A **public repository consumes no minutes** (standard runners, macOS included) and gets CodeQL and
-secret scanning for free: this is the strongest lever when the project can be public.
+A **public repository pays nothing for standard runners**, macOS included, and gets CodeQL and secret scanning for
+free: this is the strongest lever when the project can be public.
 
 ## 2. Rules 🟢
 

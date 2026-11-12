@@ -5,6 +5,9 @@ moving to this version.
 
 ## Unreleased
 
+- **CI budget, billing units** ([docs/CI-BUDGET.md](docs/CI-BUDGET.md) §1, #96): GitHub states the included usage in
+  dollars and a price per minute by runner; the two rules (macOS about ten times Linux, every job rounded up) are
+  unchanged. Sourced and dated.
 - **`timeout-minutes` on every job is now checked** ([CI-BASELINE](docs/CI-BASELINE.md#2-the-six-invariants-of-every-workflow)
   §2 invariant 4, #99): `job-timeout.py` (vendored as `.harness/scripts/job-timeout.py`, standard library only) lists
   each job of `.github/workflows/` that runs steps without `timeout-minutes` (exit 1), skips reusable-workflow calls,
