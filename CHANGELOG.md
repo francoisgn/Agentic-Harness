@@ -17,6 +17,11 @@ moving to this version.
   state, not a tag: a sync from a clone of `master` pins workflow references as `@<sha> # v0.4.0-dev`.
   **Action**: none.
 
+- **Factory guide, part 4: run only when needed** ([`docs/factory/run-when-needed.md`](docs/factory/run-when-needed.md),
+  #85): the seven sources of CI runs and how to cut each, the loops and their bounds, and the edge (local check,
+  platform builds on a Mac, larger and self-hosted runners) with GitHub's billing and its self-hosted security
+  warning quoted, read on 2026-11-12; diagram `docs/diagrams/run-where.svg`; research notes kept in
+  `docs/factory/sources/`. **Action**: none.
 - **Factory guide, part 2: the CI choices of the harness, explained** ([`docs/factory/ci-choices.md`](docs/factory/ci-choices.md),
   #83): each CI choice of [CI-BASELINE](docs/CI-BASELINE.md) and [CI-BUDGET](docs/CI-BUDGET.md) with what it does, why,
   what it costs and what else is reasonable; the GitHub facts it rests on, sourced and dated; what we got wrong first
