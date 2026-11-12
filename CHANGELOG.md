@@ -5,6 +5,13 @@ moving to this version.
 
 ## Unreleased
 
+- **`timeout-minutes` on every job is now checked** ([CI-BASELINE](docs/CI-BASELINE.md#2-the-six-invariants-of-every-workflow)
+  §2 invariant 4, #99): `job-timeout.py` (vendored as `.harness/scripts/job-timeout.py`, standard library only) lists
+  each job of `.github/workflows/` that runs steps without `timeout-minutes` (exit 1), skips reusable-workflow calls,
+  warns above a ceiling (default 120) and answers "could not check" (exit 2) on a layout it does not read (flow
+  mappings, anchors); exceptions with a reason in `.harness/config.json` › `job_timeout`. Runs in `ci.yml`,
+  `scripts/local-check.sh` and the docs job of `docs-security.yml` (input `job-timeout`, on by default). zizmor and
+  actionlint never checked this invariant. **Action**: see below.
 - **Community files**: a [code of conduct](CODE_OF_CONDUCT.md) and the repository's own pull request template
   (`.github/pull_request_template.md`, the one the harness gives projects) (#105).
 - **Factory guide: the motorway picture** (`docs/diagrams/factory-motorway.*`, shown in
@@ -307,6 +314,9 @@ The next sync also seeds `scripts/local-check.sh`, which reports INCOMPLETE unti
 After the sync, run `python3 .harness/scripts/diagrams-render.py` and commit the regenerated `docs/diagrams/*.excalidraw`
 (their texts move to Excalifont); until then `diagrams-render.py --check` reports them stale. A label it now reports
 as overflowing (Excalifont is wider): shorten it or widen its shape.
+After the sync, the `docs` job, if enabled, fails on every workflow job without `timeout-minutes`: add one sized to
+the job (`python3 .harness/scripts/job-timeout.py` lists them, file and line), or an exception with its reason in
+`.harness/config.json` › `job_timeout`, or `job-timeout: false`.
 
 ## 0.3.0 — 2026-11-09
 

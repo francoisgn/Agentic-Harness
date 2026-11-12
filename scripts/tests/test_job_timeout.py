@@ -95,6 +95,7 @@ jobs:
 """
         code, out = run({"harness.yml": text})
         self.assertEqual(code, 0, out)
+        self.assertIn("OK, 0 job(s) in 1 workflow(s)", out)
 
     def test_timeout_on_a_step_only_is_still_reported(self):
         text = """on: push
@@ -156,7 +157,9 @@ jobs:
     steps:
       - run: make
 """
-        self.assertEqual(run({"ci.yml": text})[0], 0)
+        code, out = run({"ci.yml": text})
+        self.assertEqual(code, 0, out)
+        self.assertIn("OK, 1 job(s)", out)
 
     def test_compact_sequence_at_job_key_level_is_understood(self):
         text = """on: push
@@ -168,7 +171,9 @@ jobs:
     - run: make
     - run: make test
 """
-        self.assertEqual(run({"ci.yml": text})[0], 0)
+        code, out = run({"ci.yml": text})
+        self.assertEqual(code, 0, out)
+        self.assertIn("OK, 1 job(s)", out)
 
     def test_flow_mapping_job_could_not_check(self):
         text = "on: push\njobs:\n  build: {runs-on: ubuntu-latest, steps: [{run: make}]}\n"
@@ -298,6 +303,7 @@ jobs:
                 with contextlib.redirect_stdout(out), contextlib.redirect_stderr(out):
                     code = jt.main(["--root", str(ROOT), "--dir", folder, "--config", "/nonexistent"])
                 self.assertEqual(code, 0, out.getvalue())
+                self.assertIn("job-timeout: OK", out.getvalue())
 
 
 if __name__ == "__main__":
