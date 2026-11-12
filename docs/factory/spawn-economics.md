@@ -5,6 +5,7 @@ the factory around them.
 
 > **Last checked: 2026-11-11.** The few product facts below cite the vendor page they come from, read on that date.
 > The harness's own choices point to the file that makes them. Re-check the vendor pages before you decide anything.
+> Research notes: [sources/spawn-economics-notes.md](sources/spawn-economics-notes.md).
 
 **TL;DR**
 
