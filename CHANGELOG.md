@@ -8,6 +8,11 @@ moving to this version.
 - **AI stack diagram: the execution split** (`docs/diagrams/ai-stack.*`): three columns (chatbot, agent in a vendor's
   cloud, agent on your machine); the chatbot has none of your files, the cloud agent a copy of the repository and only
   what it was given, the local agent your files, tools, network and credentials (#88).
+- **Factory guide, part 3: review and scanning** ([docs/factory/review-and-scanning.md](docs/factory/review-and-scanning.md),
+  #84): the nine review and scanning steps a change goes through, each provided by the platform, an independent tool
+  or your own agent, with the GitHub and GitLab features, plans and preview status as their documentation states
+  them on 2026-11-12, when each step runs in the harness, and the overlaps and loops to avoid at agent pace. Research
+  notes with every quote kept in `docs/factory/sources/`. **Action**: none.
 - **The version number tells the gap** ([BRANCHING-RELEASE](docs/BRANCHING-RELEASE.md#versions-and-tags),
   [CONTRIBUTING](CONTRIBUTING.md)): `VERSION` and the plugin manifest on `master` are the next version with a `-dev`
   mark (`0.4.0-dev`) until the release, which removes it. The "Valid JSON and consistent versions" step fails on a
@@ -31,6 +36,15 @@ moving to this version.
   from the primary page, figure shown by reference, notes in `docs/factory/sources/`) and from this repository's and
   the first consumer's numbers; one section per thing that breaks, each with the harness file that answers it, and
   where the harness has no answer. **Action**: none.
+- **Factory guide, part 6: the economics of spawning agents**
+  ([`docs/factory/spawn-economics.md`](docs/factory/spawn-economics.md), #87): what a spawn costs in the terms of
+  FINOPS (context at start, model tier, rounds), the taxes sized per human that every spawn pays, what the dashboard
+  measures and what it does not (token spend per lot), and the harness's rules of thumb with their files.
+- **Factory guide, part 5: identity and credentials for a fleet of agents** ([`docs/factory/identity.md`](docs/factory/identity.md),
+  #86): which credential an agent can hold on GitHub, GitLab, Jira and Confluence (reach, end, audit trail, cost, each
+  sourced and dated), how a cloud agent's proxy keeps the token out of the session, what the harness traces and that
+  it issues and revokes no credential, a decision table and a diagram; research notes in `docs/factory/sources/`.
+  **Action**: none.
 - **Factory guide: index page** ([`docs/factory/`](docs/factory/README.md)), the frame of a stream in parts on the
   software factory rethought for agents (#81, umbrella #80): the six parts with question, audience and status, and the
   six words every part uses. **Action**: none.
