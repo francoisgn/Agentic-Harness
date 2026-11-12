@@ -15,6 +15,12 @@ moving to this version.
   mappings, anchors); exceptions with a reason in `.harness/config.json` › `job_timeout`. Runs in `ci.yml`,
   `scripts/local-check.sh` and the docs job of `docs-security.yml` (input `job-timeout`, on by default). zizmor and
   actionlint never checked this invariant. **Action**: see below.
+- **Slow suites: timeouts, per-test limits, waits on events** ([CI-BUDGET §6](docs/CI-BUDGET.md#6-slow-suites-job-timeouts-test-time-limits-waits-on-events),
+  #100, from HFRnow #801): set `timeout-minutes` from measured green runs, on the job and on the step at risk; a time
+  limit per test so a hung test fails alone with its name, with the iOS switches (`xcodebuild` test timeouts, Swift
+  Testing `.timeLimit(_:)`) quoted from Apple's and Swift's pages read on 2026-11-12, and what they leave to verify;
+  waits on events, every one bounded; the slow class in its own job, with its cost; what is not allowed. Lessons L85
+  to L90. **Action**: none.
 - **Community files**: a [code of conduct](CODE_OF_CONDUCT.md) and the repository's own pull request template
   (`.github/pull_request_template.md`, the one the harness gives projects) (#105).
 - **Factory guide: the motorway picture** (`docs/diagrams/factory-motorway.*`, shown in
