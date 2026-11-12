@@ -21,6 +21,11 @@ moving to this version.
   #83): each CI choice of [CI-BASELINE](docs/CI-BASELINE.md) and [CI-BUDGET](docs/CI-BUDGET.md) with what it does, why,
   what it costs and what else is reasonable; the GitHub facts it rests on, sourced and dated; what we got wrong first
   (#10 then #67, #12, #57); a diagram of the five tiers and when each runs (`docs/diagrams/ci-tiers.svg`). **Action**: none.
+- **Factory guide, part 1: the pace** ([`docs/factory/pace.md`](docs/factory/pace.md), #82, umbrella #80): why agent
+  volume strains a factory sized for people, from Anthropic's own account of redesigning its source control (quoted
+  from the primary page, figure shown by reference, notes in `docs/factory/sources/`) and from this repository's and
+  the first consumer's numbers; one section per thing that breaks, each with the harness file that answers it, and
+  where the harness has no answer. **Action**: none.
 - **Factory guide, part 6: the economics of spawning agents**
   ([`docs/factory/spawn-economics.md`](docs/factory/spawn-economics.md), #87): what a spawn costs in the terms of
   FINOPS (context at start, model tier, rounds), the taxes sized per human that every spawn pays, what the dashboard
