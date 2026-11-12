@@ -106,3 +106,113 @@ Source: [Identifying audit log events performed by an access token](https://docs
   SSH keys.
 - "Searches using GitHub do not return Git events" (export the log); token data for Git events, SSH and deploy keys
   is in public preview.
+
+### More on the workflow token (`permissions`)
+
+Source: [Workflow syntax, `permissions`](https://docs.github.com/en/actions/reference/workflows-and-actions/workflow-syntax),
+read 2026-11-11 (first 100,000 characters of the page).
+
+- "If you specify the access for any of these permissions, all of those that are not specified are set to `none`."
+- "Fetch an OpenID Connect (OIDC) token. This requires `id-token: write`."
+- The starting permissions come from the enterprise, organisation or repository default; "If the default is set to
+  the restricted permissions at any of these levels then this will apply."
+- Workflows triggered by Dependabot "use a read-only `GITHUB_TOKEN` and cannot access secrets other than Dependabot
+  secrets."
+
+## GitLab
+
+### Personal access tokens
+
+Source: [Personal access tokens](https://docs.gitlab.com/user/profile/personal_access_tokens/), read 2026-11-11.
+
+- "attached to a user rather than a group or project"; permissions come from that user's account. Free, Premium,
+  Ultimate.
+- "If you do not enter a date, the expiry date is set to 365 days from today." "By default, the expiry date cannot
+  be more than 365 days from today." (400 days behind a feature flag, off by default.)
+- "By default, new access tokens must have an expiry date." "If an administrator turns off this requirement, new
+  tokens created without an expiry date never expire." Administrator maximum lifetime: Ultimate (GitLab 17.6+).
+- "Revoke a token to immediately invalidate it and prevent further use." "GitLab retains the token for audit
+  purposes." Blocking or deleting an enterprise user revokes their tokens.
+- For pipelines "CI/CD job tokens are recommended instead"; for project automation, project access tokens "with
+  minimal required permissions."
+
+### Project and group access tokens
+
+Sources: [Project access tokens](https://docs.gitlab.com/user/project/settings/project_access_tokens/),
+[Group access tokens](https://docs.gitlab.com/user/group/settings/group_access_tokens/), read 2026-11-11.
+
+- "When you create a project access token, GitLab creates a bot user and associates it with the token" (same for
+  group tokens). "Their contributions are associated with the bot user account"; a removed bot's contributions move
+  to a ghost user.
+- A project token cannot reach other projects nor create other tokens. A group token covers the group and its
+  projects. Permissions follow "the role and scope of the associated access token."
+- Bot users "do not count towards your license limit."
+- "On GitLab.com, project access tokens require a Premium or Ultimate subscription" (trial: one project token);
+  self-managed and Dedicated: any licence. Same for group tokens.
+- Expiry 365 days by default; reminders at 60, 30, 7 days. "By default, GitLab deletes a bot user and all of its
+  tokens 30 days after the last of those tokens is revoked or expires."
+
+### Service accounts
+
+Source: [Service accounts](https://docs.gitlab.com/user/profile/service_accounts/), read 2026-11-11.
+
+- "Service accounts are user accounts that represent non-human entities rather than individual people." Instance,
+  group or project level; created by an administrator, a group Owner or a project Maintainer/Owner (details differ
+  between GitLab.com and self-managed).
+- Free, Premium, Ultimate; Premium and Ultimate: unlimited; GitLab.com Free: up to 100 per top-level group.
+- "They do not use a seat"; "always marked as external users"; "They cannot sign in to GitLab through the UI."
+- "Service accounts authenticate with a personal access token." "If expiration dates are not required, the token is
+  created with no expiry date." Fine-grained token enforcement "does not apply to service account tokens."
+- Listed in membership lists "as service accounts, not as regular users."
+- Deleting one moves its contributions to a ghost user; revoking its tokens cuts access without deleting it.
+
+### CI/CD job token
+
+Source: [CI/CD job token](https://docs.gitlab.com/ci/jobs/ci_job_token/), read 2026-11-11.
+
+- Made available to the job as `CI_JOB_TOKEN`. "The token is valid only while the job is running."
+- "The token receives the same access level as the user that triggered the pipeline" (a push, a manual job, or the
+  owner of a scheduled pipeline).
+- "By default, the allowlist of any project only includes itself." Adding a group to the allowlist covers all its
+  projects and subgroups. Fine-grained permissions can limit the token to a set of REST endpoints.
+- An authentication log in the project shows which other projects authenticated with a job token (up to 5 minutes
+  delay).
+
+### Audit events for tokens
+
+Source: [Audit event types](https://docs.gitlab.com/user/compliance/audit_event_types/), read 2026-11-11.
+
+- `personal_access_token_created`, `personal_access_token_revoked`; `project_access_token_created` / `_deleted`;
+  `group_access_token_created` / `_deleted` (and `_creation_failed`, `_deletion_failed`); `service_account_created`
+  (no deletion event listed); `user_authenticated_using_job_token` (not saved to the database);
+  `secure_ci_job_token_*` events for allowlist changes; `api_request_access_with_scope` ("A subset of API requests
+  authenticated by a token with an audited scope").
+- Saving most events to the database: Premium and Ultimate; streaming: Ultimate.
+
+## Atlassian (Jira, Confluence)
+
+### API tokens of a person
+
+Source: [Manage API tokens for your Atlassian account](https://support.atlassian.com/atlassian-account/docs/manage-api-tokens-for-your-atlassian-account/),
+read 2026-11-11.
+
+- Used to "authenticate a script with an Atlassian cloud app"; "You generate the token from your Atlassian account,
+  then copy and paste it into a script." Main use: REST APIs "using HTTP basic authentication" with the account's
+  email and the token.
+- "The scope for an API token defines the levels of access to data in your Jira and Confluence apps." "We recommend
+  you create an API token with scopes because it's more secure." Tokens without scopes remain for apps that do not
+  support scoped tokens. Scoped tokens call `https://api.atlassian.com/ex/jira/{cloudId}` or `.../ex/confluence/{cloudId}`.
+- "By default we set tokens to expire in one year." "Token expiration is 1 to 365 days." Tokens created before
+  2024-12-15 were set to expire between 2026-03-14 and 2026-05-12.
+- "When you revoke a token it no longer works and we permanently remove it from your account."
+- The page does not say whether the token carries all the account's permissions, nor whether admins can see or revoke
+  a user's tokens.
+- Service accounts: "You must create a service account before you can create a token for the service account."
+
+### Service accounts (Data Center)
+
+Source: [Service accounts overview](https://confluence.atlassian.com/enterprise/service-accounts-overview-1627095923.html)
+(Data Center documentation), read 2026-11-11.
+
+- "A service account is a special type of Data Center account that isn't tied to a person." Credentials: "a client
+  ID and client secret", "OAuth 2.0 client credentials flow". Seats, attribution and audit: not on the page.
