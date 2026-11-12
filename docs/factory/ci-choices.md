@@ -38,7 +38,7 @@ CI, who are adopting the harness or judging it.
 
 [CI-BUDGET §1](../CI-BUDGET.md#1-the-two-billing-rules) states the billing rules as "2,000 minutes per month" and
 "one macOS minute counts as 10", from HFRnow's `ci.yml` and ADR 0005 (its Sources line). The page GitHub publishes
-today states the allowance in dollars, not minutes, and no longer speaks of multipliers. The ratio still holds through
+today states the allowance in dollars, not minutes, and does not speak of multipliers. The ratio still holds through
 the prices, and the rounding rule is unchanged.
 
 ## 2. The choices
