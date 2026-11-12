@@ -165,6 +165,8 @@ established. LESSONS L85 to L90 point here.
   rounded up. A guess is either too short (red on a slow day) or too long (hours billed for a hang, ×10 on macOS, §1).
 - When one step is the risk (the test step of a simulator job), give **that step** its own `timeout-minutes` as well,
   from the same measurement of that step: the other steps do not eat its budget, and the log shows which step stopped.
+- A red run can last longer than a green one: on iOS a failing test makes `xcodebuild test` run `simctl diagnose`
+  for up to 10 minutes (LESSONS L72). Leave that margin, or the timeout hides the test failure behind a cancellation.
 - Measure again when the suite grows. A job often close to its timeout is a slow suite to fix (below), not a timeout
   to raise.
 - GitHub, [workflow syntax](https://docs.github.com/en/actions/reference/workflows-and-actions/workflow-syntax#jobsjob_idtimeout-minutes)
