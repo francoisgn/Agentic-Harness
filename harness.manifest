@@ -46,6 +46,8 @@ copy      scripts/doc-links.py                        .harness/scripts/doc-links
 copy      scripts/doc-steward.py                      .harness/scripts/doc-steward.py
 # Operator decisions file: at most one decision in force per scope key (docs-security.yml; off when docs/DECISIONS.md is absent)
 copy      scripts/decisions-check.py                  .harness/scripts/decisions-check.py
+# Every workflow job that runs steps has timeout-minutes (docs-security.yml, CI-BASELINE.md §2 invariant 4)
+copy      scripts/job-timeout.py                      .harness/scripts/job-timeout.py
 # Orchestrator State: one comment of the memory issue rewritten from the facts (ORCHESTRATION.md §8); reads the
 # decisions through decisions-check.py and the verdicts through flow-metrics.py, next to it. The child report
 # template goes on the child's PR.

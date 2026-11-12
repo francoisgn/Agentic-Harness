@@ -75,8 +75,8 @@ and [Actions runner pricing](https://docs.github.com/en/billing/reference/action
 | Who is billed | The repository owner, not the person (or agent) who triggered the run |
 | Self-hosted runners | Free on GitHub's side (§4) |
 
-[CI-BUDGET](../CI-BUDGET.md) §1 still states the rule in minutes (2,000 per month, a macOS minute counts as 10). The
-ratio still holds; the unit is now money. Because of the rounding, ten 7-second jobs cost ten minutes, which is
+[CI-BUDGET](../CI-BUDGET.md) §1 gives the two rules that follow: macOS costs about ten times Linux, and every job
+is rounded up. Because of the rounding, ten 7-second jobs cost ten minutes, which is
 why the harness groups its Linux checks into one job ([CI-BASELINE](../CI-BASELINE.md) §5, item 3).
 
 ## 3. Loops

@@ -36,10 +36,8 @@ CI, who are adopting the harness or judging it.
 | On a pull request from a fork, no secret but `GITHUB_TOKEN` reaches the runner, and that token is read-only | [Events that trigger workflows](https://docs.github.com/en/actions/reference/workflows-and-actions/events-that-trigger-workflows) |
 | A job skipped by a condition reports "Success" to a required check; a workflow skipped by a path or branch filter leaves its checks "Pending" and blocks merging | [Troubleshooting required status checks](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/collaborating-on-repositories-with-code-quality-features/troubleshooting-required-status-checks) |
 
-[CI-BUDGET §1](../CI-BUDGET.md#1-the-two-billing-rules) states the billing rules as "2,000 minutes per month" and
-"one macOS minute counts as 10", from HFRnow's `ci.yml` and ADR 0005 (its Sources line). The page GitHub publishes
-today states the allowance in dollars, not minutes, and does not speak of multipliers. The ratio still holds through
-the prices, and the rounding rule is unchanged.
+[CI-BUDGET §1](../CI-BUDGET.md#1-the-two-billing-rules) states the same rules: an allowance in dollars, a price per
+minute by runner, macOS at about ten times Linux, each job rounded up to the next minute.
 
 ## 2. The choices
 
@@ -85,7 +83,7 @@ Each choice: what the harness does, why, what it costs, and what else is reasona
 
 | | |
 |---|---|
-| **Does** | Read-only rights at the top, write only on the job that needs it; actions pinned by full SHA, kept current by Dependabot; `concurrency` that cancels on PRs, never on a protected branch; `timeout-minutes` on every job; `persist-credentials: false` and no event `${{ … }}` inside `run:`; nothing on a draft and required checks that pass without a secret ([CI-BASELINE §2](../CI-BASELINE.md#2-the-six-invariants-of-every-workflow), [CI-BUDGET §3](../CI-BUDGET.md#3-security-baseline) "Workflow hygiene"). zizmor and actionlint check them in CI. |
+| **Does** | Read-only rights at the top, write only on the job that needs it; actions pinned by full SHA, kept current by Dependabot; `concurrency` that cancels on PRs, never on a protected branch; `timeout-minutes` on every job; `persist-credentials: false` and no event `${{ … }}` inside `run:`; nothing on a draft and required checks that pass without a secret ([CI-BASELINE §2](../CI-BASELINE.md#2-the-six-invariants-of-every-workflow), [CI-BUDGET §3](../CI-BUDGET.md#3-security-baseline) "Workflow hygiene"). zizmor, actionlint and `job-timeout.py` check them in CI, except `concurrency` and the two last rules, left to review. |
 | **Why** | A tag can move; a compromised workflow with read-only rights cannot write; event text pasted into a shell is an injection. A job without a timeout can hold a runner for 360 minutes (§1). Cancellation means a new push pays for one run, not two. |
 | **Costs** | Longer workflow files, Dependabot pull requests for SHA bumps, and two linters in tier 0. |
 | **Else** | Tags instead of SHAs for actions from publishers you trust, accepting that a tag can move. |
