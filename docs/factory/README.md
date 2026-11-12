@@ -11,12 +11,12 @@ audience; the facts about outside products are sourced and dated in the parts, n
 
 | Part | Question it answers | For whom | File | Status |
 |---|---|---|---|---|
-| 1. The pace | Why must the factory be rethought: what does the volume of pull requests break? | anyone who runs or pays for a factory | `pace.md` ([#82](https://github.com/francoisgn/belayline-agentic-harness/issues/82)) | planned |
-| 2. The CI choices of the harness | What does the harness run, when, and why was it chosen? | tech leads, CI owners | `ci-choices.md` ([#83](https://github.com/francoisgn/belayline-agentic-harness/issues/83)) | planned |
+| 1. The pace | Why must the factory be rethought: what does the volume of pull requests break? | anyone who runs or pays for a factory | [`pace.md`](pace.md) ([#82](https://github.com/francoisgn/belayline-agentic-harness/issues/82)) | 🟢 available |
+| 2. The CI choices of the harness | What does the harness run, when, and why was it chosen? | tech leads, CI owners | [`ci-choices.md`](ci-choices.md) ([#83](https://github.com/francoisgn/belayline-agentic-harness/issues/83)) | 🟢 available |
 | 3. Review and scanning | What does each of adversarial review, review services, SAST, SCA, secret scanning and AI-assisted scanning catch, and when should it run? | tech leads, security | `review-and-scanning.md` ([#84](https://github.com/francoisgn/belayline-agentic-harness/issues/84)) | planned |
 | 4. Run only when needed | Which triggers, loops and runners cost what, and when should work move to the edge? | CI owners, developers | `run-when-needed.md` ([#85](https://github.com/francoisgn/belayline-agentic-harness/issues/85)) | planned |
 | 5. Identity and credentials for a fleet of agents | Who does what, who can reach what, and whom do you stop when something goes wrong? | security, platform teams | [`identity.md`](identity.md) ([#86](https://github.com/francoisgn/belayline-agentic-harness/issues/86)) | 🟢 available |
-| 6. The economics of spawning | How do short context, the right model and the shared bottlenecks change the cost of each agent? | tech leads, whoever pays | `spawn-economics.md` ([#87](https://github.com/francoisgn/belayline-agentic-harness/issues/87)) | planned |
+| 6. The economics of spawning | How do short context, the right model and the shared bottlenecks change the cost of each agent? | tech leads, whoever pays | [`spawn-economics.md`](spawn-economics.md) ([#87](https://github.com/francoisgn/belayline-agentic-harness/issues/87)) | 🟢 available |
 
 The order is the reading order: part 1 gives the reason, parts 2 to 4 the pipeline, part 5 access, part 6 cost. Each
 part can be read alone.

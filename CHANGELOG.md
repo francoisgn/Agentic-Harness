@@ -5,6 +5,9 @@ moving to this version.
 
 ## Unreleased
 
+- **AI stack diagram: the execution split** (`docs/diagrams/ai-stack.*`): three columns (chatbot, agent in a vendor's
+  cloud, agent on your machine); the chatbot has none of your files, the cloud agent a copy of the repository and only
+  what it was given, the local agent your files, tools, network and credentials (#88).
 - **The version number tells the gap** ([BRANCHING-RELEASE](docs/BRANCHING-RELEASE.md#versions-and-tags),
   [CONTRIBUTING](CONTRIBUTING.md)): `VERSION` and the plugin manifest on `master` are the next version with a `-dev`
   mark (`0.4.0-dev`) until the release, which removes it. The "Valid JSON and consistent versions" step fails on a
@@ -14,6 +17,19 @@ moving to this version.
   state, not a tag: a sync from a clone of `master` pins workflow references as `@<sha> # v0.4.0-dev`.
   **Action**: none.
 
+- **Factory guide, part 2: the CI choices of the harness, explained** ([`docs/factory/ci-choices.md`](docs/factory/ci-choices.md),
+  #83): each CI choice of [CI-BASELINE](docs/CI-BASELINE.md) and [CI-BUDGET](docs/CI-BUDGET.md) with what it does, why,
+  what it costs and what else is reasonable; the GitHub facts it rests on, sourced and dated; what we got wrong first
+  (#10 then #67, #12, #57); a diagram of the five tiers and when each runs (`docs/diagrams/ci-tiers.svg`). **Action**: none.
+- **Factory guide, part 1: the pace** ([`docs/factory/pace.md`](docs/factory/pace.md), #82, umbrella #80): why agent
+  volume strains a factory sized for people, from Anthropic's own account of redesigning its source control (quoted
+  from the primary page, figure shown by reference, notes in `docs/factory/sources/`) and from this repository's and
+  the first consumer's numbers; one section per thing that breaks, each with the harness file that answers it, and
+  where the harness has no answer. **Action**: none.
+- **Factory guide, part 6: the economics of spawning agents**
+  ([`docs/factory/spawn-economics.md`](docs/factory/spawn-economics.md), #87): what a spawn costs in the terms of
+  FINOPS (context at start, model tier, rounds), the taxes sized per human that every spawn pays, what the dashboard
+  measures and what it does not (token spend per lot), and the harness's rules of thumb with their files.
 - **Factory guide, part 5: identity and credentials for a fleet of agents** ([`docs/factory/identity.md`](docs/factory/identity.md),
   #86): which credential an agent can hold on GitHub, GitLab, Jira and Confluence (reach, end, audit trail, cost, each
   sourced and dated), how a cloud agent's proxy keeps the token out of the session, what the harness traces and that
