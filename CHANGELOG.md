@@ -8,6 +8,11 @@ moving to this version.
 - **AI stack diagram: the execution split** (`docs/diagrams/ai-stack.*`): three columns (chatbot, agent in a vendor's
   cloud, agent on your machine); the chatbot has none of your files, the cloud agent a copy of the repository and only
   what it was given, the local agent your files, tools, network and credentials (#88).
+- **Factory guide, part 3: review and scanning** ([docs/factory/review-and-scanning.md](docs/factory/review-and-scanning.md),
+  #84): the nine review and scanning steps a change goes through, each provided by the platform, an independent tool
+  or your own agent, with the GitHub and GitLab features, plans and preview status as their documentation states
+  them on 2026-11-12, when each step runs in the harness, and the overlaps and loops to avoid at agent pace. Research
+  notes with every quote kept in `docs/factory/sources/`. **Action**: none.
 - **The version number tells the gap** ([BRANCHING-RELEASE](docs/BRANCHING-RELEASE.md#versions-and-tags),
   [CONTRIBUTING](CONTRIBUTING.md)): `VERSION` and the plugin manifest on `master` are the next version with a `-dev`
   mark (`0.4.0-dev`) until the release, which removes it. The "Valid JSON and consistent versions" step fails on a
