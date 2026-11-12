@@ -101,9 +101,9 @@ Not measured by the harness:
 - Time spent waiting on a permission prompt, rate-limit errors, seats in use, and credentials requested by hand.
   They show up only indirectly: as a stalled claim, or in a child's report.
 
-What else is reasonable: a team that buys inference through an API can tag each call with the lot id and sum the
-usage per lot; a team on a subscription can at least record the console's figure per week next to the dashboard's
-merged-PR count. Both are outside the harness today.
+What else is reasonable: a team whose provider reports usage per API key or per call can give each lot its own key
+or tag and sum the usage per lot; a team on a subscription can at least record the console's figure per week next to
+the dashboard's merged-PR count. Both are outside the harness today.
 
 ## 4. Rules of thumb
 

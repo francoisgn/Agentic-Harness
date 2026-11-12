@@ -14,6 +14,11 @@ moving to this version.
   state, not a tag: a sync from a clone of `master` pins workflow references as `@<sha> # v0.4.0-dev`.
   **Action**: none.
 
+- **Factory guide, part 6: the economics of spawning agents**
+  ([`docs/factory/spawn-economics.md`](docs/factory/spawn-economics.md), #87): what a spawn costs in the terms of
+  FINOPS (context at start, model tier, rounds), the taxes sized per human that every spawn pays, what the dashboard
+  measures and what it does not (token spend per lot), and the harness's rules of thumb with their files.
+  **Action**: none.
 - **Factory guide: index page** ([`docs/factory/`](docs/factory/README.md)), the frame of a stream in parts on the
   software factory rethought for agents (#81, umbrella #80): the six parts with question, audience and status, and the
   six words every part uses. **Action**: none.
