@@ -450,5 +450,246 @@ class RenderTests(unittest.TestCase):
             self.assertEqual(json.loads(dst.read_text())["status"], "🟠")
 
 
+
+# --- CI health (#101): passed only on re-run, integration branch red rate, long or stuck ---------------------------
+
+def crun(rid, sha="s1", workflow=1, name="CI", branch="feat/x", event="pull_request", status="completed",
+         conclusion="success", attempt=1, created="2026-11-06T10:00:00Z"):
+    """A workflow run as GET /repos/{o}/{r}/actions/runs returns it (the fields the CI health signals read)."""
+    return {"id": rid, "name": name, "workflow_id": workflow, "head_sha": sha, "head_branch": branch, "event": event,
+            "status": status, "conclusion": conclusion, "run_attempt": attempt, "created_at": created,
+            "run_started_at": created, "updated_at": created, "html_url": f"https://github.com/o/r/actions/runs/{rid}"}
+
+
+def cjob(name, conclusion="success", attempt=1, status="completed", started="2026-11-06T10:01:00Z"):
+    """A job as GET /repos/{o}/{r}/actions/runs/{id}/jobs?filter=all returns it."""
+    return {"name": name, "status": status, "conclusion": conclusion if status == "completed" else None,
+            "run_attempt": attempt, "started_at": started,
+            "completed_at": started if status == "completed" else None, "html_url": "https://github.com/o/r/job/1"}
+
+
+WORKFLOWS = {"total_count": 1, "workflows": [{"id": 1, "name": "CI", "state": "active"}]}
+CFG = dict(getattr(fm, "CI_DEFAULTS", {}))
+
+
+def ci_data(runs, jobs, workflows=WORKFLOWS, branch="develop", **extra):
+    """The `ci_health` part of the collected data, as collect_ci_health builds it."""
+    d = {"integration_branch": branch, "workflows": workflows["workflows"], "jobs": {str(k): v for k, v in jobs.items()},
+         "unfetched": {}, "error": None, "runs_cut": None, "requests": 0, "thresholds": dict(CFG)}
+    d.update(extra)
+    return d
+
+
+class CiHealthTests(unittest.TestCase):
+    def analyse(self, runs, jobs, **extra):
+        return fm.analyse({"issues": [], "pulls": [], "runs": runs, "ci_health": ci_data(runs, jobs, **extra)},
+                          now=fm.parse_time(NOW))
+
+    def test_red_then_green_on_a_rerun_of_the_same_run_is_flagged(self):
+        r = self.analyse([crun(1, attempt=2)], {1: [cjob("tests", "failure", 1), cjob("tests", "success", 2),
+                                                    cjob("lint", "success", 1), cjob("lint", "success", 2)]})
+        flaky = r["ci_health"]["flaky"]
+        self.assertEqual([(i["workflow"], i["job"], i["commits"]) for i in flaky["items"]], [("CI", "tests", 1)])
+        self.assertEqual(r["status"], "🟠")
+        md = fm.render_markdown(r, "o/r")
+        self.assertIn("## CI health", md)
+        self.assertIn("| CI / tests | 1 |", md)
+        self.assertIn("`type: bug`", md)
+
+    def test_red_then_green_in_another_run_of_the_same_commit_is_flagged(self):
+        runs = [crun(1, conclusion="failure", created="2026-11-06T10:00:00Z"),
+                crun(2, created="2026-11-06T11:00:00Z")]
+        r = self.analyse(runs, {1: [cjob("tests", "failure")], 2: [cjob("tests", "success")]})
+        self.assertEqual([i["job"] for i in r["ci_health"]["flaky"]["items"]], ["tests"])
+
+    def test_red_twice_is_not_a_flake(self):
+        r = self.analyse([crun(1, conclusion="failure", attempt=2)],
+                         {1: [cjob("tests", "failure", 1), cjob("tests", "failure", 2)]})
+        self.assertEqual(r["ci_health"]["flaky"]["items"], [])
+        self.assertEqual(r["status"], "🟢")
+
+    def test_green_then_red_is_not_passed_on_rerun(self):
+        r = self.analyse([crun(1, conclusion="failure", attempt=2)],
+                         {1: [cjob("tests", "success", 1), cjob("tests", "failure", 2)]})
+        self.assertEqual(r["ci_health"]["flaky"]["items"], [])
+
+    def test_cancelled_then_green_is_not_a_flake(self):
+        r = self.analyse([crun(1, attempt=2)], {1: [cjob("tests", "cancelled", 1), cjob("tests", "success", 2)]})
+        self.assertEqual(r["ci_health"]["flaky"]["items"], [])
+        self.assertEqual(r["status"], "🟢")
+
+    def test_queued_run_with_zero_jobs_older_than_threshold_is_flagged(self):
+        old = crun(5, status="queued", conclusion=None, created="2026-11-07T11:00:00Z")      # 60 min > 30
+        young = crun(6, status="queued", conclusion=None, created="2026-11-07T11:50:00Z")    # 10 min
+        r = self.analyse([old, young], {5: []})
+        items = r["ci_health"]["stuck"]["queued"]
+        self.assertEqual([(i["run_id"], i["minutes"]) for i in items], [(5, 60)])
+        self.assertEqual(r["ci_health"]["stuck"]["unchecked"], 0)   # the young one is no candidate
+        self.assertEqual(r["status"], "🟠")
+        self.assertIn("queued with no job", fm.render_markdown(r, "o/r"))
+
+    def test_queued_run_that_has_jobs_is_not_flagged(self):
+        r = self.analyse([crun(5, status="queued", conclusion=None, created="2026-11-07T11:00:00Z")],
+                         {5: [cjob("tests", status="queued")]})
+        self.assertEqual(r["ci_health"]["stuck"]["queued"], [])
+
+    def test_in_progress_job_over_threshold_is_flagged_and_red_on_the_integration_branch(self):
+        started = "2026-11-07T10:00:00Z"   # 120 min before NOW
+        feature = crun(7, status="in_progress", conclusion=None, created=started)
+        r = self.analyse([feature], {7: [cjob("tests", status="in_progress", started=started)]})
+        self.assertEqual([(i["job"], i["minutes"], i["integration"]) for i in r["ci_health"]["stuck"]["long"]],
+                         [("tests", 120, False)])
+        self.assertEqual(r["status"], "🟠")
+        base = crun(8, status="in_progress", conclusion=None, created=started, branch="develop", event="push")
+        r = self.analyse([base], {8: [cjob("tests", status="in_progress", started=started)]})
+        self.assertTrue(r["ci_health"]["stuck"]["long"][0]["integration"])
+        self.assertEqual(r["status"], "🔴")
+
+    def test_in_progress_job_under_threshold_is_not_flagged(self):
+        started = "2026-11-07T11:30:00Z"   # 30 min
+        r = self.analyse([crun(7, status="in_progress", conclusion=None, created="2026-11-07T10:00:00Z")],
+                         {7: [cjob("tests", status="in_progress", started=started)]})
+        self.assertEqual(r["ci_health"]["stuck"]["long"], [])
+        self.assertEqual(r["status"], "🟢")
+
+    def test_integration_branch_red_rate_above_threshold(self):
+        runs = [crun(10 + k, sha=f"b{k}", branch="develop", event="push",
+                     conclusion="failure" if k < 2 else "success", created=f"2026-11-06T1{k}:00:00Z")
+                for k in range(5)]
+        jobs = {10 + k: [cjob("tests", "failure" if k < 2 else "success"), cjob("lint")] for k in range(5)}
+        jobs[14].append(cjob("ui", "cancelled"))
+        r = self.analyse(runs, jobs)
+        red = r["ci_health"]["red"]
+        self.assertEqual([(i["job"], i["failures"], i["total"], i["percent"]) for i in red["items"]],
+                         [("tests", 2, 5, 40)])
+        self.assertEqual((red["checked"], red["candidates"]), (5, 5))
+        self.assertEqual(r["status"], "🟠")
+        self.assertIn("| CI / tests | 40% (2/5) |", fm.render_markdown(r, "o/r"))
+
+    def test_red_rate_ignores_pull_request_runs_and_low_rates(self):
+        runs = [crun(10 + k, sha=f"b{k}", branch="develop", event="push", created=f"2026-11-06T1{k}:00:00Z")
+                for k in range(6)] + [crun(30, sha="p", conclusion="failure")]
+        jobs = {10 + k: [cjob("tests", "failure" if k == 0 else "success")] for k in range(6)}
+        jobs[30] = [cjob("tests", "failure")]
+        self.assertEqual(self.analyse(runs, jobs)["ci_health"]["red"]["items"], [])   # 1/6 = 17 % ≤ 20 %
+
+    def test_runs_of_deleted_workflows_or_without_sha_are_not_classified(self):
+        wf = {"total_count": 2, "workflows": [{"id": 1, "name": "CI", "state": "active"},
+                                              {"id": 2, "name": "Old", "state": "deleted"}]}
+        runs = [crun(1, workflow=2, attempt=2), crun(2, sha=None, attempt=2), crun(3, workflow=9, attempt=2)]
+        r = self.analyse(runs, {k: [cjob("t", "failure", 1), cjob("t", "success", 2)] for k in (1, 2, 3)},
+                         workflows=wf)
+        self.assertEqual(r["ci_health"]["flaky"]["items"], [])
+        self.assertEqual(r["ci_health"]["not_classified"], 3)
+        self.assertIn("3 run(s) not classified", fm.render_markdown(r, "o/r"))
+
+    def test_api_error_says_could_not_check_never_none(self):
+        runs = [crun(1, attempt=2), crun(5, status="queued", conclusion=None, created="2026-11-07T11:00:00Z")]
+        r = self.analyse(runs, {}, error="gh api: HTTP 502")
+        h = r["ci_health"]
+        for signal in (h["flaky"], h["red"], h["stuck"]):
+            self.assertIn("HTTP 502", signal["error"])
+        md = fm.render_markdown(r, "o/r")
+        section = md.split("## CI health", 1)[1]
+        self.assertGreaterEqual(section.count("could not check"), 3)
+        self.assertNotIn("- None.", section)
+        self.assertEqual(r["status"], "🟢")   # unchecked is said, it does not raise the status
+
+    def test_input_without_job_data_says_could_not_check(self):
+        r = fm.analyse({"issues": [], "pulls": [], "runs": [crun(1)]}, now=fm.parse_time(NOW))
+        self.assertIn("could not check", fm.render_markdown(r, "o/r").split("## CI health", 1)[1])
+        self.assertEqual(r["status"], "🟢")
+
+    def test_runs_list_cut_short_says_could_not_check(self):
+        r = self.analyse([crun(1)], {}, runs_cut="1000 of 1500 runs listed")
+        self.assertIn("1000 of 1500", r["ci_health"]["flaky"]["error"])
+
+    def test_candidates_beyond_the_budget_are_counted_unchecked(self):
+        runs = [crun(k, sha=f"s{k}", attempt=2) for k in range(1, 4)]
+        r = self.analyse(runs, {1: [cjob("t")]}, unfetched={"2": "budget", "3": "budget"})
+        self.assertEqual(r["ci_health"]["flaky"]["unchecked"], 2)
+        self.assertIn("could not check 2 run(s)", fm.render_markdown(r, "o/r"))
+
+
+class CiHealthCollectTests(unittest.TestCase):
+    """collect_ci_health: bounded GET requests through the injected `get`, never a write."""
+
+    def fake(self, pages, calls):
+        def get(path):
+            calls.append(path)
+            for prefix, page in pages.items():
+                if path.startswith(prefix):
+                    if isinstance(page, Exception):
+                        raise page
+                    return page
+            return {"total_count": 0, "jobs": []}
+        return get
+
+    def collect(self, runs, pages, cfg=None, branch="develop"):
+        calls = []
+        pages = {"repos/o/r/actions/workflows": WORKFLOWS,
+                 "repos/o/r/actions/runs?": {"total_count": len(runs), "workflow_runs": []}, **pages}
+        out = fm.collect_ci_health("o/r", runs, fm.parse_time(NOW), dict(cfg or CFG), branch, 14,
+                                   runs_query="repos/o/r/actions/runs?per_page=100&created=>=2026-10-08",
+                                   get=self.fake(pages, calls))
+        return out, calls
+
+    def test_requests_are_bounded_by_the_budget_and_read_only(self):
+        runs = [crun(k, sha=f"s{k}", attempt=2) for k in range(1, 11)]
+        out, calls = self.collect(runs, {}, cfg={**CFG, "max_job_requests": 3})
+        job_calls = [c for c in calls if "/jobs" in c]
+        self.assertEqual(len(job_calls), 3)
+        self.assertEqual(out["requests"], 2 + 3)          # workflows + runs total + 3 job lists
+        self.assertEqual(sorted(out["unfetched"].values()), ["budget"] * 7)
+        self.assertTrue(all("filter=all" in c and "per_page=100" in c for c in job_calls), job_calls)
+        self.assertFalse([c for c in calls if any(w in c for w in ("cancel", "rerun", "delete"))])
+
+    def test_runs_that_need_no_job_list_cost_nothing(self):
+        runs = [crun(1), crun(2, status="queued", conclusion=None, created="2026-11-07T11:55:00Z")]
+        out, calls = self.collect(runs, {})
+        self.assertEqual([c for c in calls if "/jobs" in c], [])
+        self.assertEqual(out["requests"], 2)
+
+    def test_api_error_is_recorded_not_raised(self):
+        err = subprocess.CalledProcessError(1, ["gh"], stderr="gh: Server Error (HTTP 502)\n")
+        out, _ = self.collect([crun(1, attempt=2)], {"repos/o/r/actions/runs/1/jobs": err})
+        self.assertIn("HTTP 502", out["error"])
+        self.assertEqual(out["jobs"], {})
+
+    def test_missing_gh_or_token_is_recorded_not_raised(self):
+        out, _ = self.collect([crun(1)], {"repos/o/r/actions/workflows": FileNotFoundError("gh")})
+        self.assertIn("gh", out["error"])
+
+    def test_job_list_cut_short_is_unchecked(self):
+        page = {"total_count": 150, "jobs": [cjob("t")] * 100}
+        out, _ = self.collect([crun(1, attempt=2)], {"repos/o/r/actions/runs/1/jobs": page})
+        self.assertEqual(out["jobs"], {})
+        self.assertIn("100 of 150", out["unfetched"]["1"])
+
+    def test_runs_list_cut_short_is_recorded(self):
+        out, _ = self.collect([crun(1)], {"repos/o/r/actions/runs?": {"total_count": 1500, "workflow_runs": []}})
+        self.assertIn("1 of 1500", out["runs_cut"])
+
+    def test_integration_branch_falls_back_to_the_default_branch(self):
+        out, calls = self.collect([], {"repos/o/r": {"default_branch": "main"}}, branch=None)
+        self.assertEqual(out["integration_branch"], "main")
+
+    def test_config_defaults_and_overrides(self):
+        with tempfile.TemporaryDirectory() as d:
+            path = pathlib.Path(d, "config.json")
+            self.assertEqual(fm.load_ci_config(str(path)), (fm.CI_DEFAULTS, None))   # no file: defaults
+            path.write_text(json.dumps({"integration_branch": "dev", "ci_health": {"long_job_minutes": 90}}))
+            cfg, branch = fm.load_ci_config(str(path))
+            self.assertEqual((cfg["long_job_minutes"], cfg["queued_no_job_minutes"], branch), (90, 30, "dev"))
+            for bad in ({"ci_health": {"long_job_minute": 90}}, {"ci_health": {"red_rate_percent": -1}},
+                        {"ci_health": []}):
+                path.write_text(json.dumps(bad))
+                with self.assertRaises(ValueError, msg=bad):
+                    fm.load_ci_config(str(path))
+            path.write_text("{")
+            with self.assertRaises(ValueError):
+                fm.load_ci_config(str(path))
+
+
 if __name__ == "__main__":
     unittest.main()
