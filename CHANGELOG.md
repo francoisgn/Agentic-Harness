@@ -35,6 +35,10 @@ moving to this version.
   ([`docs/factory/spawn-economics.md`](docs/factory/spawn-economics.md), #87): what a spawn costs in the terms of
   FINOPS (context at start, model tier, rounds), the taxes sized per human that every spawn pays, what the dashboard
   measures and what it does not (token spend per lot), and the harness's rules of thumb with their files.
+- **Factory guide, part 5: identity and credentials for a fleet of agents** ([`docs/factory/identity.md`](docs/factory/identity.md),
+  #86): which credential an agent can hold on GitHub, GitLab, Jira and Confluence (reach, end, audit trail, cost, each
+  sourced and dated), how a cloud agent's proxy keeps the token out of the session, what the harness traces and that
+  it issues and revokes no credential, a decision table and a diagram; research notes in `docs/factory/sources/`.
   **Action**: none.
 - **Factory guide: index page** ([`docs/factory/`](docs/factory/README.md)), the frame of a stream in parts on the
   software factory rethought for agents (#81, umbrella #80): the six parts with question, audience and status, and the
