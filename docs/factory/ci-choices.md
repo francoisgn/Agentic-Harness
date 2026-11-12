@@ -36,10 +36,8 @@ CI, who are adopting the harness or judging it.
 | On a pull request from a fork, no secret but `GITHUB_TOKEN` reaches the runner, and that token is read-only | [Events that trigger workflows](https://docs.github.com/en/actions/reference/workflows-and-actions/events-that-trigger-workflows) |
 | A job skipped by a condition reports "Success" to a required check; a workflow skipped by a path or branch filter leaves its checks "Pending" and blocks merging | [Troubleshooting required status checks](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/collaborating-on-repositories-with-code-quality-features/troubleshooting-required-status-checks) |
 
-[CI-BUDGET §1](../CI-BUDGET.md#1-the-two-billing-rules) states the billing rules as "2,000 minutes per month" and
-"one macOS minute counts as 10", from HFRnow's `ci.yml` and ADR 0005 (its Sources line). The page GitHub publishes
-today states the allowance in dollars, not minutes, and does not speak of multipliers. The ratio still holds through
-the prices, and the rounding rule is unchanged.
+[CI-BUDGET §1](../CI-BUDGET.md#1-the-two-billing-rules) states the same rules: an allowance in dollars, a price per
+minute by runner, macOS at about ten times Linux, each job rounded up to the next minute.
 
 ## 2. The choices
 

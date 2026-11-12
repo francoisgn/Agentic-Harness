@@ -5,6 +5,9 @@ moving to this version.
 
 ## Unreleased
 
+- **CI budget, billing units** ([docs/CI-BUDGET.md](docs/CI-BUDGET.md) §1, #96): GitHub states the included usage in
+  dollars and a price per minute by runner; the two rules (macOS about ten times Linux, every job rounded up) are
+  unchanged. Sourced and dated.
 - **Community files**: a [code of conduct](CODE_OF_CONDUCT.md) and the repository's own pull request template
   (`.github/pull_request_template.md`, the one the harness gives projects) (#105).
 - **Factory guide: the motorway picture** (`docs/diagrams/factory-motorway.*`, shown in
