@@ -14,6 +14,11 @@ moving to this version.
   state, not a tag: a sync from a clone of `master` pins workflow references as `@<sha> # v0.4.0-dev`.
   **Action**: none.
 
+- **Factory guide, part 5: identity and credentials for a fleet of agents** ([`docs/factory/identity.md`](docs/factory/identity.md),
+  #86): which credential an agent can hold on GitHub, GitLab, Jira and Confluence (reach, end, audit trail, cost, each
+  sourced and dated), how a cloud agent's proxy keeps the token out of the session, what the harness traces and that
+  it issues and revokes no credential, a decision table and a diagram; research notes in `docs/factory/sources/`.
+  **Action**: none.
 - **Factory guide: index page** ([`docs/factory/`](docs/factory/README.md)), the frame of a stream in parts on the
   software factory rethought for agents (#81, umbrella #80): the six parts with question, audience and status, and the
   six words every part uses. **Action**: none.
