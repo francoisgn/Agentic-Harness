@@ -263,8 +263,7 @@ Read 2026-11-12. GitLab pages carry "Tier" and "Add-on" lines at the top; they a
   add-on "GitLab Duo Enterprise". Reviews run on manual request, when a non-draft merge request is created, and when a
   draft is marked ready; mentioning GitLab Duo starts Code Review Flow. New commits trigger a review only for Code
   Review Flow, with "Start a new review on push" turned on.
-- Vulnerability Resolution: own page [Vulnerability details](https://docs.gitlab.com/user/application_security/vulnerabilities/)
-  not opened. A search summary (not verified) said Ultimate with Duo Enterprise or Amazon Q, SAST findings only, and
+- Vulnerability Resolution: its own page (Vulnerability details, found by search) was not opened. A search summary (not verified) said Ultimate with Duo Enterprise or Amazon Q, SAST findings only, and
   that agentic SAST resolution became generally available in GitLab 18.11 on the Duo Agent Platform. Only the SAST
   page's "Agentic SAST Vulnerability Resolution: Ultimate" row is used on the page.
 
