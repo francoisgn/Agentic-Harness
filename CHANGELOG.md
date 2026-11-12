@@ -21,6 +21,11 @@ moving to this version.
   Testing `.timeLimit(_:)`) quoted from Apple's and Swift's pages read on 2026-11-12, and what they leave to verify;
   waits on events, every one bounded; the slow class in its own job, with its cost; what is not allowed. Lessons L85
   to L90. **Action**: none.
+- **Dashboard: CI health** ([FINOPS](docs/FINOPS.md) §4, `flow-metrics.py`, #101): jobs that passed only on a re-run
+  (red then green on the same commit), the red rate per job on the integration branch, jobs running too long (🔴 on
+  the integration branch) and runs `queued` with zero jobs, from the Actions API with at most 3 + `max_job_requests`
+  extra requests; "could not check" rather than "nothing" when the API fails. Thresholds in `.harness/config.json` ›
+  `ci_health`. Playbook for a red base and a stuck run in [REVIEW-ROUNDS](docs/REVIEW-ROUNDS.md), LESSONS L91–L92.
 - **Community files**: a [code of conduct](CODE_OF_CONDUCT.md) and the repository's own pull request template
   (`.github/pull_request_template.md`, the one the harness gives projects) (#105).
 - **Factory guide: the motorway picture** (`docs/diagrams/factory-motorway.*`, shown in
