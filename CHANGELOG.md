@@ -5,6 +5,8 @@ moving to this version.
 
 ## Unreleased
 
+- **Community files**: a [code of conduct](CODE_OF_CONDUCT.md) and the repository's own pull request template
+  (`.github/pull_request_template.md`, the one the harness gives projects) (#105).
 - **Factory guide: the motorway picture** (`docs/diagrams/factory-motorway.*`, shown in
   [docs/factory/README.md](docs/factory/README.md), #103): signs set by a human, on-ramp, lanes, toll, convoy, exit, a
   drift exit, and radar, police and upkeep beside the road; it says where the road slows.

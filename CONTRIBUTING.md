@@ -49,6 +49,10 @@ in the README or the skill list of `templates/CLAUDE.md.block` differ from `plug
 - A dependency (Python package, third-party action not pinned by SHA, mandatory third-party account).
 - The name of a person, a client or a private project; a secret, even a fake but plausible one.
 
+## Conduct
+
+Everyone, and every agent run here, follows the [code of conduct](CODE_OF_CONDUCT.md).
+
 ## Reporting a vulnerability
 
 Never in a public issue: use the **Security** tab › *Report a vulnerability* of the repository.
