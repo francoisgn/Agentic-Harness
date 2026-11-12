@@ -20,7 +20,7 @@ CI, who are adopting the harness or judging it.
   no secrets.
 - Each choice has a cost and a reasonable alternative. Both are given below.
 
-![The five CI tiers of the harness and when each runs: 0 hygiene (secrets, workflow lint, docs) on every ready PR, docs PRs included, about a minute on Linux; 1 quality (lint, tests) locally before every push, then on every ready PR with the same steps; 2 expensive (macOS, simulator, OS matrix) on a ready PR only, after tier 1 and only if its paths changed; 3 heavy security (SAST, dependency CVEs) on ready PRs, the integration branch and every week; 4 process (labels, links, dashboard) on issue and PR events and daily, from the default branch only. On a draft PR nothing costly runs, and required checks pass without a secret](../diagrams/ci-tiers.svg)
+![The five CI tiers of the harness and when each runs: 0 hygiene (secrets, workflows, docs) on every ready PR, docs PRs included, about a minute on Linux; 1 quality (lint, tests) locally before every push, then on every ready PR with the same steps; the local command replays tiers 0 and 1 before every push; 2 expensive (macOS, simulator, matrix) on a ready PR only, after tier 1 passes and only if its paths changed; 3 heavy security (SAST, dependency CVEs) on ready PRs, the integration branch and every week; tiers 2 and 3 never run on a draft, the move to Ready or a label starts them; 4 process (labels, links, dashboard) on issue and PR events and daily, the issue and daily runs from the default branch, a matter of seconds that also works by hand. Along the bottom: on a draft PR, push often and nothing costly runs; required checks never need a secret](../diagrams/ci-tiers.svg)
 
 ## 1. The GitHub facts the choices rest on
 
