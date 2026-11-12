@@ -216,3 +216,85 @@ Source: [Service accounts overview](https://confluence.atlassian.com/enterprise/
 
 - "A service account is a special type of Data Center account that isn't tied to a person." Credentials: "a client
   ID and client secret", "OAuth 2.0 client credentials flow". Seats, attribution and audit: not on the page.
+
+### Service accounts (Cloud): API tokens
+
+Source: [Manage API tokens for service accounts](https://support.atlassian.com/user-management/docs/manage-api-tokens-for-service-accounts/),
+read 2026-11-12.
+
+- Created in Atlassian Administration, Directory, Service accounts; "You must create a service account before you can
+  create a token for the service account."
+- "Scopes define the level of access a token grants to your Atlassian app data." "Once you create an API token, you
+  can't modify its scopes." Examples: `read:jira-work`, `write:jira-work`.
+- "we set API tokens to expire in one year by default"; "Token expiration can be between 1 and 365 days."
+- "When you revoke a token it no longer works and we permanently remove it from your account." "It takes up to 10
+  minutes for the token to be revoked."
+- "For each organization, you can create up to five service accounts for free"; more through Atlassian Guard.
+- Basic auth with the service account's email and the token in place of a password, or Bearer; calls go to
+  `api.atlassian.com` URLs.
+- Seats: not on the page.
+
+### Service accounts (Cloud): OAuth 2.0 credentials
+
+Source: [Create OAuth 2.0 credential for service accounts](https://support.atlassian.com/user-management/docs/create-oauth-2-0-credential-for-service-accounts/),
+read 2026-11-12.
+
+- "You must be on the centralized user management experience to use OAuth 2.0 credentials for service accounts."
+- "When you create an OAuth 2.0 credential, we generate a client_id and client_secret." "You can't recover them after
+  you create the credential."
+- "OAuth 2.0 credentials for service accounts use scopes by default." "You can only select scopes for Jira,
+  Confluence, Goals, and Projects."
+- Client credentials ("2-legged OAuth 2.0 flow (2LO)") at `https://auth.atlassian.com/oauth/token`; access token
+  "valid for 60 minutes" (`expires_in: 3600`); "you will need to manage token rotation."
+- "To revoke all OAuth 2.0 credentials for a service account, select Revoke credentials." Client secret lifetime: not
+  on the page.
+
+### OAuth 2.0 (3LO) apps
+
+Source: [OAuth 2.0 (3LO) apps](https://developer.atlassian.com/cloud/jira/platform/oauth-2-3lo-apps/), read
+2026-11-12.
+
+- "OAuth 2.0 (3LO) allows external applications and services to access Atlassian product APIs on a user's behalf."
+  The user grants access on a consent screen.
+- "the permissions held by the user an app is acting for always constrain the app, regardless of the app's scopes."
+- Rotating refresh tokens; expire after 90 days of inactivity by default; "Every new refresh token returned
+  invalidates the refresh token used to get the new access token."
+- "Organization admins and site administrators can see who authorized the app and when."
+- Audit attribution of API calls: not on the page.
+
+### Not verified
+
+- An Atlassian audit log entry per API call, and whether it names the token: not found in the pages read.
+- Seats for Atlassian Cloud service accounts: not on the pages read.
+
+## GitHub, issues and wikis
+
+Source: [Permissions required for fine-grained personal access tokens](https://docs.github.com/en/rest/authentication/permissions-required-for-fine-grained-personal-access-tokens),
+read 2026-11-12.
+
+- The page has repository permission sections "Issues" and "Pages"; it has no wiki permission section.
+- GitHub wikis: how a token reaches them was not verified.
+
+## Agent vendor: Claude Code cloud sessions
+
+Sources, read 2026-11-12:
+[Use Claude Code in the cloud](https://code.claude.com/docs/en/claude-code-on-the-web),
+[Configure cloud environments](https://code.claude.com/docs/en/cloud-environments).
+
+- Two ways to connect GitHub: the Claude GitHub App ("Any public repository, and private repositories that the
+  Claude GitHub App is installed on") or `/web-setup`, which sends "your local `gh` CLI token to your Claude
+  account" ("Any repository your `gh` token can access").
+- "In Anthropic-hosted environments, your GitHub credentials stay encrypted on Anthropic's servers and never enter a
+  session's VM. GitHub operations from the VM go through the GitHub proxy, which attaches the credential on the
+  server side."
+- GitHub proxy: "the git client inside the VM uses a scoped credential, which the proxy verifies and swaps for your
+  actual GitHub token"; API requests "go out with your real credentials substituted"; it "rejects branch deletions
+  and pushes of anything other than a branch, such as a tag. It doesn't limit which branches a push can update" (use
+  branch protection or rulesets); it "serves GitHub API requests for the repositories attached to the session"
+  (other repositories: 403); GraphQL is rejected.
+- Self-hosted environments: "your deployment supplies git credentials", including "per-session minted credentials".
+- Network secrets: "Anthropic's agent proxy adds the key to requests for the hosts you list, after each request leaves
+  the session's VM, so the key itself stays outside the VM." Not available in self-hosted environments.
+- Auto-fix replies to review threads "are posted using your GitHub account, so they appear under your username, but
+  each reply is labeled as coming from Claude Code."
+- Cloud sessions: Pro, Max, Ultra, Team, and Enterprise users with premium seats or Chat + Claude Code seats.
