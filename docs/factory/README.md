@@ -11,7 +11,7 @@ audience; the facts about outside products are sourced and dated in the parts, n
 
 | Part | Question it answers | For whom | File | Status |
 |---|---|---|---|---|
-| 1. The pace | Why must the factory be rethought: what does the volume of pull requests break? | anyone who runs or pays for a factory | `pace.md` ([#82](https://github.com/francoisgn/belayline-agentic-harness/issues/82)) | planned |
+| 1. The pace | Why must the factory be rethought: what does the volume of pull requests break? | anyone who runs or pays for a factory | [`pace.md`](pace.md) ([#82](https://github.com/francoisgn/belayline-agentic-harness/issues/82)) | 🟢 available |
 | 2. The CI choices of the harness | What does the harness run, when, and why was it chosen? | tech leads, CI owners | `ci-choices.md` ([#83](https://github.com/francoisgn/belayline-agentic-harness/issues/83)) | planned |
 | 3. Review and scanning | What does each of adversarial review, review services, SAST, SCA, secret scanning and AI-assisted scanning catch, and when should it run? | tech leads, security | `review-and-scanning.md` ([#84](https://github.com/francoisgn/belayline-agentic-harness/issues/84)) | planned |
 | 4. Run only when needed | Which triggers, loops and runners cost what, and when should work move to the edge? | CI owners, developers | `run-when-needed.md` ([#85](https://github.com/francoisgn/belayline-agentic-harness/issues/85)) | planned |

@@ -17,6 +17,11 @@ moving to this version.
   state, not a tag: a sync from a clone of `master` pins workflow references as `@<sha> # v0.4.0-dev`.
   **Action**: none.
 
+- **Factory guide, part 1: the pace** ([`docs/factory/pace.md`](docs/factory/pace.md), #82, umbrella #80): why agent
+  volume strains a factory sized for people, from Anthropic's own account of redesigning its source control (quoted
+  from the primary page, figure shown by reference, notes in `docs/factory/sources/`) and from this repository's and
+  the first consumer's numbers; one section per thing that breaks, each with the harness file that answers it, and
+  where the harness has no answer. **Action**: none.
 - **Factory guide: index page** ([`docs/factory/`](docs/factory/README.md)), the frame of a stream in parts on the
   software factory rethought for agents (#81, umbrella #80): the six parts with question, audience and status, and the
   six words every part uses. **Action**: none.
