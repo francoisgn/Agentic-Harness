@@ -232,3 +232,38 @@ read 2026-11-12.
   assignment starts one agent session and creates one pull request for the selected alerts."
 - Plans: listed under both Secret Protection and Code Security on the Advanced Security page. Search summary (not
   verified on a page): limit of 10 active campaigns, 1000 alerts per campaign.
+
+## GitLab
+
+Read 2026-11-12. GitLab pages carry "Tier" and "Add-on" lines at the top; they are quoted as written.
+
+- [Application security](https://docs.gitlab.com/user/application_security/): "Tier: Free, Premium, Ultimate";
+  scans "your project's source code, dependencies, libraries, and container images". No per-tier list on that page.
+- [SAST](https://docs.gitlab.com/user/application_security/sast/): "Tier: Free, Premium, Ultimate". Availability
+  table: "Basic scanning with open-source analyzers" in Free and Premium and in Ultimate; Ultimate only: "Cross-file,
+  cross-function scanning with GitLab Advanced SAST", "Vulnerability Management", "Agentic SAST Vulnerability
+  Resolution", "New findings in merge request reports", UI-based scanner configuration, ruleset customization.
+  "GitLab Duo false positive detection": Ultimate, with the GitLab Duo add-on.
+- [Dependency scanning](https://docs.gitlab.com/user/application_security/dependency_scanning/): "Tier: Ultimate".
+  "Dependency scanning identifies known security vulnerabilities in your project's dependencies".
+- [Secret detection](https://docs.gitlab.com/user/application_security/secret_detection/): "Tier: Free, Premium,
+  Ultimate"; methods "Secret push protection", "Pipeline secret detection", "Client-side secret detection" (no tier
+  per method on the page).
+- [Explain vulnerabilities with AI](https://docs.gitlab.com/user/application_security/analyze/duo/): Vulnerability
+  Explanation "Tier: Ultimate", "Add-on: GitLab Duo Enterprise, GitLab Duo with Amazon Q"; "Generally available in
+  GitLab 17.2". "GitLab Duo Vulnerability Explanation can help you with a vulnerability by using a large language
+  model". "GitLab Duo can also automatically analyze critical and high severity SAST vulnerabilities" (false positive
+  detection).
+- [GitLab Duo feature summary](https://docs.gitlab.com/user/gitlab_duo/feature_summary/): lists Code Review,
+  Vulnerability Explanation and Vulnerability Resolution as generally available with "Tier: Premium, Ultimate" and
+  "Add-on: GitLab Duo Pro or Enterprise". This conflicts with the feature page above (Ultimate, Duo Enterprise or
+  Amazon Q) for Vulnerability Explanation: the page uses the feature's own page and says "to verify".
+- [GitLab Duo in merge requests](https://docs.gitlab.com/user/project/merge_requests/duo_in_merge_requests/): two
+  review features. "Code Review Flow": required add-on "None. Uses GitLab Credits." "GitLab Duo Code Review": required
+  add-on "GitLab Duo Enterprise". Reviews run on manual request, when a non-draft merge request is created, and when a
+  draft is marked ready; mentioning GitLab Duo starts Code Review Flow. New commits trigger a review only for Code
+  Review Flow, with "Start a new review on push" turned on.
+- Vulnerability Resolution: own page [Vulnerability details](https://docs.gitlab.com/user/application_security/vulnerabilities/)
+  not opened. A search summary (not verified) said Ultimate with Duo Enterprise or Amazon Q, SAST findings only, and
+  that agentic SAST resolution became generally available in GitLab 18.11 on the Duo Agent Platform. Only the SAST
+  page's "Agentic SAST Vulnerability Resolution: Ultimate" row is used on the page.
