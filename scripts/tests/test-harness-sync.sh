@@ -45,6 +45,8 @@ jq -e '.permissions.allow[0] == "Bash(swift test:*)" and (.hooks.PreToolUse | le
 env -u GH_TOKEN -u GITHUB_TOKEN python3 "$T/.harness/scripts/orch-state.py" --root "$T" --print >"$WORK/state" 2>&1
 [ $? = 2 ] && grep -qF '<!-- harness:state -->' "$WORK/state" && ! grep -q 'unreadable' "$WORK/state" \
   && grep -qF '<!-- harness:report -->' "$T/.harness/templates/child-report.md" || fail "orch-state.py (decisions-check.py, flow-metrics.py next to it) or child report template"
+# The vendored timeout check passes on the seeded workflows (harness.yml only calls reusable workflows)
+python3 "$T/.harness/scripts/job-timeout.py" --root "$T" >"$WORK/timeout" 2>&1 || fail "job-timeout.py not vendored or failing on the seeded workflows: $(cat "$WORK/timeout")"
 PIN="$(git -C "$ROOT" rev-parse HEAD 2>/dev/null) # v$(cat "$ROOT/VERSION")"
 if [ -n "$(git -C "$ROOT" status --porcelain 2>/dev/null)" ] || ! git -C "$ROOT" rev-parse HEAD >/dev/null 2>&1; then PIN="v$(cat "$ROOT/VERSION")"; fi
 [ "$(grep -c "belayline-agentic-harness/.github/workflows/.*@$PIN\$" "$T/.github/workflows/harness.yml")" = 9 ] || fail "refbump ($PIN)"

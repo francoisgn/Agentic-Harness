@@ -21,7 +21,13 @@ and 2: up to the project, the harness imposes neither the tool nor the language.
 
 ## 2. The six invariants of every workflow
 
-Checked by zizmor, actionlint and review; none depends on the language.
+None depends on the language. What checks each one ([zizmor audits](https://docs.zizmor.sh/audits/), read on
+2026-11-12): 1 zizmor `excessive-permissions`; 2 zizmor `unpinned-uses` (every action pinned by SHA by default since
+zizmor 1.20.0) and `ref-version-mismatch`; 3 review only (zizmor's `concurrency-limits` runs only in its pedantic
+persona, which the harness does not use); 4 `job-timeout.py` (zizmor and actionlint do not check it; exceptions with
+a reason and the ceiling, default 120, in `.harness/config.json` › `job_timeout`); 5 zizmor `artipacked` and
+`template-injection`; 6 review. actionlint checks the workflow syntax and expressions; `docs-security.yml` runs all
+three tools.
 
 | # | Invariant | Why |
 |---|---|---|
@@ -53,7 +59,7 @@ the sync), and the skill `/local-check` fills in its steps from the project's wo
 | Finding | Where | What the baseline takes from it |
 |---|---|---|
 | 🔴 `issues`, `issue_comment`, `pull_request_target`, `schedule` workflows written but **never run**: they only start from the default branch, and the project works on another one | iOS client | The integration branch **is** the default branch, or these workflows also live on the default branch. And the state of an issue reads without a workflow: a label set by hand is worth a label set by a robot |
-| 🔴 macOS jobs without `timeout-minutes`; no dependency cache | iOS client | Invariant 4; cache at tier 2 |
+| 🔴 macOS jobs without `timeout-minutes`; no dependency cache | iOS client | Invariant 4 (how to size it, and what it does not catch: [CI-BUDGET §6](CI-BUDGET.md#6-slow-suites-job-timeouts-test-time-limits-waits-on-events)); cache at tier 2 |
 | 🔴 Actions by tag, write access given to the whole workflow, no timeout and no concurrency | configuration repository | Tier 0 and invariants 1 to 4: the repository "too small for CI" is the one with the widest rights |
 | 🔴 No secret scan, no CVE audit of dependencies | Rust project | Tiers 0 and 3 |
 | 🟠 Secrets inherited in bulk (`secrets: inherit`) by a shared workflow tracked on a branch | Rust project | A reusable workflow is pinned by SHA and receives its secrets by name |

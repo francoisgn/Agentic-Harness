@@ -5,11 +5,27 @@ moving to this version.
 
 ## Unreleased
 
+- **CI budget, billing units** ([docs/CI-BUDGET.md](docs/CI-BUDGET.md) §1, #96): GitHub states the included usage in
+  dollars and a price per minute by runner; the two rules (macOS about ten times Linux, every job rounded up) are
+  unchanged. Sourced and dated.
+- **`timeout-minutes` on every job is now checked** ([CI-BASELINE](docs/CI-BASELINE.md#2-the-six-invariants-of-every-workflow)
+  §2 invariant 4, #99): `job-timeout.py` (vendored as `.harness/scripts/job-timeout.py`, standard library only) lists
+  each job of `.github/workflows/` that runs steps without `timeout-minutes` (exit 1), skips reusable-workflow calls,
+  warns above a ceiling (default 120) and answers "could not check" (exit 2) on a layout it does not read (flow
+  mappings, anchors); exceptions with a reason in `.harness/config.json` › `job_timeout`. Runs in `ci.yml`,
+  `scripts/local-check.sh` and the docs job of `docs-security.yml` (input `job-timeout`, on by default). zizmor and
+  actionlint never checked this invariant. **Action**: see below.
+- **Slow suites: timeouts, per-test limits, waits on events** ([CI-BUDGET §6](docs/CI-BUDGET.md#6-slow-suites-job-timeouts-test-time-limits-waits-on-events),
+  #100, from HFRnow #801): set `timeout-minutes` from measured green runs, on the job and on the step at risk; a time
+  limit per test so a hung test fails alone with its name, with the iOS switches (`xcodebuild` test timeouts, Swift
+  Testing `.timeLimit(_:)`) quoted from Apple's and Swift's pages read on 2026-11-12, and what they leave to verify;
+  waits on events, every one bounded; the slow class in its own job, with its cost; what is not allowed. Lessons L85
+  to L90. **Action**: none.
 - **Dashboard: CI health** ([FINOPS](docs/FINOPS.md) §4, `flow-metrics.py`, #101): jobs that passed only on a re-run
   (red then green on the same commit), the red rate per job on the integration branch, jobs running too long (🔴 on
   the integration branch) and runs `queued` with zero jobs, from the Actions API with at most 3 + `max_job_requests`
   extra requests; "could not check" rather than "nothing" when the API fails. Thresholds in `.harness/config.json` ›
-  `ci_health`. Playbook for a red base and a stuck run in [REVIEW-ROUNDS](docs/REVIEW-ROUNDS.md), LESSONS L85–L86.
+  `ci_health`. Playbook for a red base and a stuck run in [REVIEW-ROUNDS](docs/REVIEW-ROUNDS.md), LESSONS L91–L92.
 - **Community files**: a [code of conduct](CODE_OF_CONDUCT.md) and the repository's own pull request template
   (`.github/pull_request_template.md`, the one the harness gives projects) (#105).
 - **Factory guide: the motorway picture** (`docs/diagrams/factory-motorway.*`, shown in
@@ -312,6 +328,9 @@ The next sync also seeds `scripts/local-check.sh`, which reports INCOMPLETE unti
 After the sync, run `python3 .harness/scripts/diagrams-render.py` and commit the regenerated `docs/diagrams/*.excalidraw`
 (their texts move to Excalifont); until then `diagrams-render.py --check` reports them stale. A label it now reports
 as overflowing (Excalifont is wider): shorten it or widen its shape.
+After the sync, the `docs` job, if enabled, fails on every workflow job without `timeout-minutes`: add one sized to
+the job (`python3 .harness/scripts/job-timeout.py` lists them, file and line), or an exception with its reason in
+`.harness/config.json` › `job_timeout`, or `job-timeout: false`.
 
 ## 0.3.0 — 2026-11-09
 

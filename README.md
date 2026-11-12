@@ -33,7 +33,7 @@ a stronger model. Each building block can be kept, replaced or extended.
 | Compliance forgotten or manual | Reviewers for GDPR, AI Act, NIS2, ISO 27001, SOC 2, TISAX, PCI, HDS, or your own, run only when the diff concerns them |
 | A stale README, with no diagram and no progress | README maintained at the end of each lot: badges, Excalidraw diagram, lot table, checked in CI (`/readme-update`) |
 | "Where are we?" | Daily dashboard: milestones, bottlenecks, stalled work, loops, **ratio of PRs with a problem**, cost |
-| The same mistakes from one project to the next | 84 sourced lessons, extended through "Lesson" issues |
+| The same mistakes from one project to the next | 92 sourced lessons, extended through "Lesson" issues |
 
 ## The cycle of a change
 
@@ -67,7 +67,7 @@ and can be taken without the rest.
 | You want to | Read | Or ask your agent |
 |---|---|---|
 | Understand the method in 5 minutes | [ESSENTIALS](docs/ESSENTIALS.md), then the three diagrams above | "Read `docs/ESSENTIALS.md` and tell me what my project is missing" |
-| Avoid mistakes already made | [LESSONS](docs/LESSONS.md): 84 lessons sorted by scope, each one sourced | "Review my diff against `docs/LESSONS.md`" (skill `/lessons-check`) |
+| Avoid mistakes already made | [LESSONS](docs/LESSONS.md): 92 lessons sorted by scope, each one sourced | "Review my diff against `docs/LESSONS.md`" (skill `/lessons-check`) |
 | Set up a lean, safe CI | [CI-BASELINE](docs/CI-BASELINE.md) (tiers, invariants), [CI-BUDGET](docs/CI-BUDGET.md) (costs, tools) | "Compare my workflows with the six invariants of `docs/CI-BASELINE.md`"; skill `/local-check` (one local command = the CI) |
 | A README that stays true | [README-STANDARD](docs/README-STANDARD.md) | `/readme-update`, or `python3 scripts/readme-check.py --root <project>` |
 | Have an agent's work reviewed | [REVIEW-ROUNDS](docs/REVIEW-ROUNDS.md), [ORCHESTRATION](docs/ORCHESTRATION.md) §3 | Agent `adversarial-reviewer`, skill `/review-round` |
